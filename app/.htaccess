@@ -1,0 +1,4 @@
+RewriteEngine on
+RewriteRule ^addresses/(.*)$ /addresses#$1 [L,R=302,NE]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^([^\.]+)$ $1.html [NC,L]
