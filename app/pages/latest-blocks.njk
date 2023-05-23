@@ -1,11 +1,5 @@
 {% extends "layout.njk" %}
 
-{% block styles %}
-	<!-- build:css styles/addresses.css -->
-	<link rel="stylesheet" href="styles/addresses.css">
-	<!-- endbuild -->
-{% endblock %}
-
 {% block navigation %}
 	{% import 'macros/nav-macro.njk' as nav %}
 	{{nav.active('latest-blocks')}}
