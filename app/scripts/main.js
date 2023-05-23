@@ -44,6 +44,28 @@ function walletAddressUrl(address) {
 	return newPage;
 }
 
+function getTransactionAddressUrl(txid) {
+	let newPage = transactionAddressUrl(txid);
+
+	return newPage;
+}
+
+function transactionAddressUrl(txid) {
+	let newPage = '';
+
+	if (IS_DEV_ENVIRONMENT) {
+		newPage = LOCALHOST + '/transactions#' + txid;
+	} else {
+		newPage = '/transactions/' + txid;
+	}
+
+	return newPage;
+}
+
+function goToTransactionUrl(txid) {
+	window.location.assign(transactionAddressUrl(txid));
+}
+
 function getHost() {
 	let host = window.location.host;
 	
@@ -65,16 +87,26 @@ function submitSearch(key) {
 }
 
 function searchAddress() {
-	let newAdddress = $('#searchInput').val();
+	let searchQuery = $('#searchInput').val();
 
-	if (newAdddress == '') return;
+	if (searchQuery == '') return;
 
-	goToWalletAddress(newAdddress);
+	switch ($('#searchType').val()) {
+		case '0':
+			goToWalletAddress(searchQuery);
+			break;
+		case '1':
+			goToTransactionUrl(searchQuery);
+			break;
+
+		default:
+			break;
+	}
 }
 
 //Format strings
 function formatErgValueString(value, maxDecimals = 4) {
-	return (value / 1000000000).toLocaleString('en-US', { maximumFractionDigits: maxDecimals, minimumFractionDigits: 1 }) + ' ERG';
+	return '<strong>' + (value / 1000000000).toLocaleString('en-US', { maximumFractionDigits: maxDecimals, minimumFractionDigits: 1 }) + '</strong> ERG';
 }
 
 function formatDateString(dateString) {
@@ -109,4 +141,18 @@ function formatAssetNameAndValueString(name, valueString) {
 
 function zeroPad (num, places) {
 	return String(num).padStart(places, '0');
+}
+
+//Utils
+function copyToClipboard(e, text) {
+	e.preventDefault();
+
+	if (navigator.clipboard != undefined) {
+		navigator.clipboard.writeText(text);
+		$('#toastBody').html('Copied to clipboard!');
+	} else {
+		$('#toastBody').html('Copy to clipboard failed.');
+	}
+
+	showToast();
 }

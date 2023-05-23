@@ -19,6 +19,10 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 
 		formattedResult += '<tr>';
 
+		//Tx
+		formattedResult += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionAddressUrl(item.id) + '"><i class="fas fa-link text-info"></i></a></td>';
+
+
 		//Timestamp
 		formattedResult += '<td><span class="d-lg-none"><strong>Time: </strong></span>' + formatDateString((isMempool) ? item.creationTimestamp : item.timestamp) + '</td>';
 
@@ -65,7 +69,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 				value = item.outputs[j].value;
 				
 				for (let k = 0; k < item.outputs[j].assets.length; k++) {
-					assets += '<br>' + formatAssetValueString(item.outputs[j].assets[k].amount, item.outputs[j].assets[k].decimals) + ' ' + item.outputs[j].assets[k].name + ' ';
+					assets += '<br><strong>' + formatAssetValueString(item.outputs[j].assets[k].amount, item.outputs[j].assets[k].decimals) + '</strong> ' + item.outputs[j].assets[k].name + ' ';
 				}
 
 				break;
@@ -221,9 +225,5 @@ function getAddressWithOffset(offset) {
 }
 
 function copyWalletAddress(e) {
-	e.preventDefault();
-
-	navigator.clipboard.writeText(walletAddress);
-
-	showToast();
+	copyToClipboard(e, walletAddress);
 }

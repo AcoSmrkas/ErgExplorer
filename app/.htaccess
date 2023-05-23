@@ -1,4 +1,6 @@
 RewriteEngine on
-RewriteRule ^addresses/(.*)$ /addresses#$1 [L,R=302,NE]
+RewriteRule ^addresses/(.*)$ /addresses#$1 [L,R=301,NE]
+RewriteRule ^transactions/(.*)$ /transactions#$1 [L,R=301,NE]
+RewriteRule ^blocks/(.*)$ /blocks#$1 [L,R=301,NE]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^([^\.]+)$ $1.html [NC,L]

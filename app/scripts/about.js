@@ -1,7 +1,3 @@
 function copyErgoWalletAddress(e) {
-	navigator.clipboard.writeText(DONATION_ADDRESS);
-
-	e.preventDefault();
-
-	showToast();
+	copyToClipboard(e, DONATION_ADDRESS);
 }

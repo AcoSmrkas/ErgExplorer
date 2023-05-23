@@ -46,7 +46,7 @@ a:hover {
 	color: $orange-color !important;
 }
 
-// Search form
+//Search form
 .form-control-lg {
 	background-color: #333;
 	color: #fff;
@@ -63,7 +63,47 @@ a:hover {
 	color: white !important;
 }
 
-// Loading
+select, option {
+	text-align: end;
+}
+
+@media only screen and (min-width: 0px) {
+	#searchInput {
+		min-width: 45%;
+	}
+}
+
+@media only screen and (min-width: 576px) {
+	#searchInput {
+		min-width: 65%;
+	}
+}
+
+@media only screen and (min-width: 768px) {
+	#searchInput {
+		min-width: 65%;
+	}
+}
+
+@media only screen and (min-width: 992px) {
+	#searchInput {
+		min-width: 75%;
+	}
+}
+
+@media only screen and (min-width: 1200px) {
+	#searchInput {
+		min-width: 80%;
+	}
+}
+
+@media only screen and (min-width: 1400px) {
+	#searchInput {
+		min-width: 83%;
+	}
+}
+
+//Loading
 #loadingImg {
 	width:150px;
 	height:150px;
@@ -125,6 +165,10 @@ a:hover {
 }
 
 //Other
+.main-heading {
+	margin-bottom: 10px;
+}
+
 .erg-span {
 	color: $orange-color;
 }
@@ -156,6 +200,10 @@ a:hover {
 
 #rightNav {
 	visibility: hidden;
+}
+
+.gray-color {
+	color: $gray-color;
 }
 
 .btn-primary {

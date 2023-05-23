@@ -1,4 +1,5 @@
 var totalCoinsTransferred = 0;
+var txId = '';
 
 $(function() {
 	printTransaction(getWalletAddressFromUrl());
@@ -6,7 +7,13 @@ $(function() {
 
 function printTransaction(txId) {
 	var jqxhr = $.get('https://api.ergoplatform.com/api/v1/transactions/' + txId, function(data) {
-		$('#txHeader').html('<p>' + data.id + '</p>');
+		txId = data.id;
+
+		//Id
+		$('#txHeader').html('<p><a href="Copy to clipboard!" onclick="copyTransactionAddress(event)">' + data.id + ' &#128203;</a></p>');
+
+		//Time
+		$('#txTime').html('<p>' + formatDateString(data.timestamp) + '</p>');
 
 		//Inputs
 		$('#txInputs').html(formatInputsOutputs(data.inputs));
@@ -45,10 +52,16 @@ function printTransaction(txId) {
 		//Tx scripts
 		$('#txScripts').html('Scripts');
 
+		//Raw input
+		$('#txRawInput').html(JSON.stringify(data.inputs, null, 4));
+
+		//Raw output
+		$('#txRawOutput').html(JSON.stringify(data.outputs, null, 4));
+
 		$('#txDataHolder').show();
     })
     .fail(function() {
-    	$('txLoadError').show();
+    	$('#txLoadError').show();
     	console.log('Transaction data fetch failed.');
     })
     .always(function() {
@@ -62,23 +75,36 @@ function formatInputsOutputs(data) {
 	for (let i = 0; i < data.length; i++) {
 		totalCoinsTransferred += data[i].value;
 
-		formattedData += '<tr>';
+		formattedData += '<div class="row div-cell">';
 		
 		//Address
-		formattedData += '<td><a href="' + getWalletAddressUrl(data[i].address) + '" >' + formatAddressString(data[i].address, 15) + '</a></td>';
+		formattedData += '<div class="col-9"><span><strong>Address: </strong></span><a href="' + getWalletAddressUrl(data[i].address) + '" >' + formatAddressString(data[i].address, 15) + '</a></div>';
+
+		//Status
+		formattedData += '<div class="col-3 d-flex justify-content-end">' + (data[i].spentTransactionId == null ? '<span class="text-danger">Unspent' : '<span class="text-success">Spent') + '</span></div>';
 
 		//Value
-		formattedData += '<td><p>' + formatErgValueString(data[i].value, 5) + '</p>';
-
+		formattedData += '<div style="padding-bottom:10px;" class="col-10"><span><strong>Value: </strong></span><span class="gray-color">' + formatErgValueString(data[i].value, 5) + '</span></div>';
+		
+		//Output transaction
+		if (data[i].outputTransactionId != undefined) {
+			formattedData += '<div class="col-2 d-flex justify-content-end"><a href="' + getTransactionAddressUrl(data[i].outputTransactionId) + '" >Output</a></div>';
+		}
+	
 		//Assets
 		if (data[i].assets.length > 0 ) {
+			formattedData += '<h5><strong>Tokens:</strong></h5>';
 			for (let j = 0; j < data[i].assets.length; j++) {
-				formattedData += '<p><strong>' + formatAddressString(data[i].assets[j].tokenId, 15) + '</strong>: ' + formatAssetValueString(data[i].assets[j].amount, data[i].assets[j].decimals) + '</p>';
+				formattedData += '<p><strong>' + (data[i].assets[j].name == '' ? formatAddressString(data[i].assets[j].tokenId, 15) : data[i].assets[j].name) + '</strong>: ' + formatAssetValueString(data[i].assets[j].amount, data[i].assets[j].decimals) + '</p>';
 			}
 		}
 
-		formattedData += '</td></tr>';
+		formattedData += '</div></div>';
 	}
 
 	return formattedData;
+}
+
+function copyTransactionAddress(e) {
+	copyToClipboard(e, txId);
 }
