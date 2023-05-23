@@ -1,107 +1,107 @@
 {% extends "layout.njk" %}
 
 {% block navigation %}
-    {% import 'macros/nav-macro.njk' as nav %}
-    {{nav.active('')}}
+		{% import 'macros/nav-macro.njk' as nav %}
+		{{nav.active('')}}
 {% endblock %}
 
 {% block content %}
-    <div id="txDataHolder" style="display: none;" class="col-md-12">
-      <div class="row w-100">
-        <div id="txHeader" class="col-md-12 div-cell">
-          
-        </div>
-      </div>
+		<div id="txDataHolder" style="display: none;" class="col-md-12">
+			<div class="row w-100">
+				<div id="txHeader" class="col-md-12 div-cell">
+					
+				</div>
+			</div>
 
-      <div class="row w-100">
-        <div class="col-md-6 div-cell">
-          <div class="row w-100">
-            <div class="col-md-6">
-              <p><strong>Size</strong></p>
-              <p><strong>Received time</strong></p>
-              <p><strong>Included in blocks</strong></p>
-              <p><strong>Confirmations</strong></p>
-            </div>
-            <div class="col-md-6">
-              <p id="txSize"></p>
-              <p id="txReceivedTime"></p>
-              <p id="txIncludedInBlocks"></p>
-              <p id="txConfirmations"></p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6 div-cell">
-          <div class="row w-100">
-            <div class="col-md-6">
-              <p><strong>Total coins transferred</strong></p>
-              <p><strong>Fees</strong></p>
-              <p><strong>Fees per byte</strong></p>
-              <p><strong>Scripts</strong></p>
-            </div>
-            <div class="col-md-6">
-              <p id="txTotalCoinsTransferred"></p>
-              <p id="txFees"></p>
-              <p id="txFeesPerByte"></p>
-              <p id="txScripts"></p>
-            </div>
-          </div>
-        </div>
-      </div>
+			<div class="row w-100">
+				<div class="col-md-6 div-cell">
+					<div class="row w-100">
+						<div class="col-md-6">
+							<p><strong>Size</strong></p>
+							<p><strong>Received time</strong></p>
+							<p><strong>Included in blocks</strong></p>
+							<p><strong>Confirmations</strong></p>
+						</div>
+						<div class="col-md-6">
+							<p id="txSize"></p>
+							<p id="txReceivedTime"></p>
+							<p id="txIncludedInBlocks"></p>
+							<p id="txConfirmations"></p>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-6 div-cell">
+					<div class="row w-100">
+						<div class="col-md-6">
+							<p><strong>Total coins transferred</strong></p>
+							<p><strong>Fees</strong></p>
+							<p><strong>Fees per byte</strong></p>
+							<p><strong>Scripts</strong></p>
+						</div>
+						<div class="col-md-6">
+							<p id="txTotalCoinsTransferred"></p>
+							<p id="txFees"></p>
+							<p id="txFeesPerByte"></p>
+							<p id="txScripts"></p>
+						</div>
+					</div>
+				</div>
+			</div>
 
-      <br>
+			<br>
 
-      <div class="row w-100">
-        <div class="col-md-6 div-cell">
-          <h3>Inputs</h3>
-          <table class="table table-dark table-striped table-hover">
-            <thead>
-              <tr>
-                <th scope="col">Address</th>
-                <th scope="col">Value</th>
-              </tr>
-            </thead>
-            <tbody id="txInputs">              
-            </tbody>
-          </table>
-        </div>
-        <div class="col-md-6 div-cell">
-          <h3>Outputs</h3>
-          <table class="table table-dark table-striped table-hover">
-            <thead>
-              <tr>
-                <th scope="col">Address</th>
-                <th scope="col">Value</th>
-              </tr>
-            </thead>
-            <tbody id="txOutputs">              
-            </tbody>
-          </table>
-        </div>
-      </div>
-      
-      <div id="txLoadError" style="display: none;" class="col-md-12">
-        <div class="row w-100">
-          <div class="col-md-12 div-cell">
-            <div style="display: none;">
-              <p>No results matching your query.</p>
-              <br>
-              <p><strong>NOTE:</strong> Erg Explorer is still in <strong>alpha</strong> phase. Plase report any issues you encounter in our <strong><a href="https://t.me/ErgExplorer" target="_new">Telegram group</a></strong>.</p>
-            </div>
-          </div>
-        </div>
-      </div>
+			<div class="row w-100">
+				<div class="col-md-6 div-cell">
+					<h3>Inputs</h3>
+					<table class="table table-dark table-striped table-hover">
+						<thead>
+							<tr>
+								<th scope="col">Address</th>
+								<th scope="col">Value</th>
+							</tr>
+						</thead>
+						<tbody id="txInputs">              
+						</tbody>
+					</table>
+				</div>
+				<div class="col-md-6 div-cell">
+					<h3>Outputs</h3>
+					<table class="table table-dark table-striped table-hover">
+						<thead>
+							<tr>
+								<th scope="col">Address</th>
+								<th scope="col">Value</th>
+							</tr>
+						</thead>
+						<tbody id="txOutputs">              
+						</tbody>
+					</table>
+				</div>
+			</div>
+			
+			<div id="txLoadError" style="display: none;" class="col-md-12">
+				<div class="row w-100">
+					<div class="col-md-12 div-cell">
+						<div style="display: none;">
+							<p>No results matching your query.</p>
+							<br>
+							<p><strong>NOTE:</strong> Erg Explorer is still in <strong>alpha</strong> phase. Plase report any issues you encounter in our <strong><a href="https://t.me/ErgExplorer" target="_new">Telegram group</a></strong>.</p>
+						</div>
+					</div>
+				</div>
+			</div>
 
-      <div id="txLoading"> 
-        <div id="txLoadingInner">
-          <img id="loadingImg" src="./images/logo.png">
-        </div>
-      </div>
-    </div>
+			<div id="txLoading"> 
+				<div id="txLoadingInner">
+					<img id="loadingImg" src="./images/logo.png">
+				</div>
+			</div>
+		</div>
 
-    <br>
+		<br>
 
 {% endblock %}
 
 {% block scripts %}
-    <script src="./scripts/transactions.js"></script>
+		<script src="./scripts/transactions.js"></script>
 {% endblock %}

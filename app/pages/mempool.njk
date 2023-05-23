@@ -1,36 +1,39 @@
 {% extends "layout.njk" %}
 
 {% block navigation %}
-    {% import 'macros/nav-macro.njk' as nav %}
-    {{nav.active('mempool')}}
+	{% import 'macros/nav-macro.njk' as nav %}
+	{{nav.active('mempool')}}
 {% endblock %}
 
 {% block content %}
-    <div class="col-md-12">
-      <div class="row w-100">
-        <div class="col-md-12">
-          <h2>Mempool</h2>
-        </div>
-      </div>
-      <br>
-      <div class="row w-100">
-        <table class="table table-dark table-striped">
-            <thead>
-              <tr>
-                <th scope="col">Id</th>
-                <th scope="col">Time</th>
-                <th scope="col">Inputs</th>
-                <th scope="col">Outputs</th>
-                <th scope="col">Size</th>
-              </tr>
-            </thead>
-            <tbody id="transactionsTableBody">              
-            </tbody>
-        </table>
-      </div>
-    </div>
+	<div class="col-md-12">
+		<div class="row w-100">
+			<div class="col-md-12">
+				<h2>Mempool</h2>
+			</div>
+		</div>
+	 
+		<br>
+
+		<div class="row w-100">
+			<table class="table table-dark table-striped">
+				<thead>
+					<tr>
+						<th scope="col">Id</th>
+						<th scope="col">Time</th>
+						<th scope="col">Inputs</th>
+						<th scope="col">Outputs</th>
+						<th scope="col">Size</th>
+					</tr>
+				</thead>
+			 
+				<tbody id="transactionsTableBody">              
+				</tbody>
+			</table>
+		</div>
+	</div>
 {% endblock %}
 
 {% block scripts %}
-    <script src="./scripts/mempool.js"></script>
+	<script src="./scripts/mempool.js?v=2"></script>
 {% endblock %}

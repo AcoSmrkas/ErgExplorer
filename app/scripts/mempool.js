@@ -12,19 +12,19 @@ function printMempool() {
     		formattedResult += '<tr>';
 
             //Id
-    		formattedResult += '<td>' + items[i].id + '</td>';
+    		formattedResult += '<td><span class="d-lg-none"><strong>Id: </strong></span>' + formatAddressString(items[i].id, 15) + '</td>';
 
             //Time
-    		formattedResult += '<td>' + formatDateString(items[i].creationTimestamp) + '</td>';
+    		formattedResult += '<td><span class="d-lg-none"><strong>Time: </strong></span>' + formatDateString(items[i].creationTimestamp) + '</td>';
 
             //Inputs
-    		formattedResult += '<td>' + items[i].inputs.length + '</td>';
+    		formattedResult += '<td><span class="d-lg-none"><strong>Inputs: </strong></span>' + items[i].inputs.length + '</td>';
 
             //Outputs
-    		formattedResult += '<td>' + items[i].outputs.length + '</td>';
+    		formattedResult += '<td><span class="d-lg-none"><strong>Outputs: </strong></span>' + items[i].outputs.length + '</td>';
 
             //Size
-    		formattedResult += '<td>' + formatKbSizeString(items[i].size) + '</td>';
+    		formattedResult += '<td><span class="d-lg-none"><strong>Size: </strong></span>' + formatKbSizeString(items[i].size) + '</td>';
 
 			formattedResult += '</tr>';	
 		}

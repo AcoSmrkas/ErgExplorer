@@ -12,25 +12,25 @@ function printLatestBlocks() {
     		formattedResult += '<tr>';
 
             //Height
-    		formattedResult += '<td>' + items[i].height + '</td>';
+    		formattedResult += '<td><span class="d-lg-none"><strong>Height: </strong></span>' + items[i].height + '</td>';
 
             //Time
-    		formattedResult += '<td>' + formatDateString(items[i].timestamp) + '</td>';
+    		formattedResult += '<td><span class="d-lg-none"><strong>Time: </strong></span>' + formatDateString(items[i].timestamp) + '</td>';
             
-            //TXs
-    		formattedResult += '<td>' + items[i].transactionsCount + '</td>';
+            //Transactions
+    		formattedResult += '<td><span class="d-lg-none"><strong>Transactions: </strong></span>' + items[i].transactionsCount + '</td>';
 
             //Mined by	
-    		formattedResult += '<td><a href="' + getWalletAddressUrl(items[i].miner.address) + '">' + items[i].miner.name + '</a></td>';	
+    		formattedResult += '<td><span class="d-lg-none"><strong>Mined by: </strong></span><a href="' + getWalletAddressUrl(items[i].miner.address) + '">' + items[i].miner.name + '</a></td>';	
 
             //Reward
-    		formattedResult += '<td>' + formatErgValueString(items[i].minerReward) + '</td>';
+    		formattedResult += '<td><span class="d-lg-none"><strong>Reward: </strong></span>' + formatErgValueString(items[i].minerReward) + '</td>';
             
             //Difficulty
-    		formattedResult += '<td>' + items[i].difficulty + '</td>';
+    		formattedResult += '<td><span class="d-lg-none"><strong>Difficulty: </strong></span>' + items[i].difficulty + '</td>';
 
             //Size
-    		formattedResult += '<td>' + formatDateString(items[i].size) + '</td>';
+    		formattedResult += '<td><span class="d-lg-none"><strong>Size: </strong></span>' + formatDateString(items[i].size) + '</td>';
 
 			formattedResult += '</tr>';	
 		}

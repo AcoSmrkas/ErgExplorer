@@ -1,28 +1,28 @@
 {% extends "layout.njk" %}
 
 {% block navigation %}
-    {% import 'macros/nav-macro.njk' as nav %}
-    {{nav.active('home')}}
+	{% import 'macros/nav-macro.njk' as nav %}
+	{{nav.active('home')}}
 {% endblock %}
 
 {% block content %}
-    <div class="row w-100">
-        <div class="col-md-1"></div>
-        <div class="col-md-3 m-1 div-cell">
-            <h1><span class="erg-span"><strong>ERGO</strong></span> Price:</h3>
-            <h2 class=""><span id="ergPrice"></span></h2>
-        </div>
-        <div class="col-md-7 m-1 div-cell">
-            <h1>Protocol info</h1>
-            <h5 class="">Version: <span id="ergVersion"></span></h2>
-            <h5 class="">Circulating Supply: <span id="ergSupply"></span></h2>
-            <h5 class="">Max Supply: <span>97,739,924 ERG</span></h2>
-            <h5 class="">Hash rate: <span id="ergHashRate"></span></h2>
-            <h5 class="">Tx Per day: <span id="ergTxAvg"></span></h2>
-        </div>
-    </div>
+	<div class="row w-100">
+		<div class="col-md-1"></div>
+		<div class="col-md-3 m-md-1 m-sm-0 div-cell">
+			<h1><span class="erg-span"><strong>ERGO</strong></span> Price:</h1`>
+			<h2 class=""><span id="ergPrice"></span></h2>
+		</div>
+		<div class="col-md-7 m-md-1 m-sm-0 div-cell">
+			<h1>Protocol info</h1>
+			<h5 class="">Version: <span id="ergVersion"></span></h2>
+			<h5 class="">Circulating Supply: <span id="ergSupply"></span></h2>
+			<h5 class="">Max Supply: <span>97,739,924 ERG</span></h2>
+			<h5 class="">Hash rate: <span id="ergHashRate"></span></h2>
+			<h5 class="">Tx Per day: <span id="ergTxAvg"></span></h2>
+		</div>
+	</div>
 {% endblock %}
 
 {% block scripts %}
-    <script src="./scripts/index.js"></script>
+	<script src="./scripts/index.js?v=2"></script>
 {% endblock %}
