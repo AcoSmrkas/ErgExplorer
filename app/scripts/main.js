@@ -176,4 +176,6 @@ function showQRcode(text) {
 
 	$('body').css('height', '100%');
 	$('body').css('overflow-y', 'hidden');
+
+	window.scrollTo(0, 0);
 }
