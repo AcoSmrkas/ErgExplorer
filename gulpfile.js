@@ -28,7 +28,7 @@ gulp.task('styles', () => {
 });
 
 gulp.task('scripts', () => {
-  return gulp.src('app/scripts/*.js')
+  return gulp.src('app/scripts/**/*.js')
     .pipe($.plumber())
     .pipe($.if(dev, $.sourcemaps.init()))
     .pipe($.babel())
@@ -46,7 +46,7 @@ function lint(files) {
 }
 
 gulp.task('lint', () => {
-  return lint('app/scripts/*.js')
+  return lint('app/scripts/**/*.js')
     .pipe(gulp.dest('app/scripts'));
 });
 gulp.task('lint:test', () => {
@@ -85,7 +85,7 @@ gulp.task('fonts', () => {
 });
 
 gulp.task('scripts-build', () => {
-  return gulp.src('app/scripts/*.js')
+  return gulp.src('app/scripts/**/*.js')
     .pipe(gulp.dest('dist/scripts'));
 });
 

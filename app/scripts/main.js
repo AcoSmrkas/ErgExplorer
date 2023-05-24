@@ -3,6 +3,8 @@ const DONATION_ADDRESS = '9hiaAS3pCydq12CS7xrTBBn2YTfdfSRCsXyQn9KZHVpVyEPk9zk';
 const LOCALHOST = 'http://localhost:9000';
 const IS_DEV_ENVIRONMENT = window.location.host == 'localhost:9000';
 
+var qrCode = null;
+
 $(function() {
 	$('#searchInput').val('');
 });
@@ -155,4 +157,23 @@ function copyToClipboard(e, text) {
 	}
 
 	showToast();
+}
+
+function showQRcode(text) {
+	if (qrCode == null) {
+		 qrCode = new QRCode(document.getElementById('qrcode'), {
+			text: text,
+			width: 256,
+			height: 256,
+			colorDark : '#000000',
+			colorLight : '#ffffff',
+			correctLevel : QRCode.CorrectLevel.H
+		});
+	}
+
+	$('#qrCodeBack').fadeIn();
+	$('#qrCodeBack').css('display', 'flex');
+
+	$('body').css('height', '100%');
+	$('body').css('overflow-y', 'hidden');
 }

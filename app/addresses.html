@@ -21,6 +21,10 @@
 		<!-- endbuild -->
 		
 		
+	<!-- build:css styles/addresses.css -->
+	<link rel="stylesheet" href="styles/addresses.css">
+	<!-- endbuild -->
+
 
 		<!-- SEO -->
 		<meta name="description" content="Erg Explorer is an independent tool for browsing the Ergo blockchain.">
@@ -105,7 +109,12 @@
 					<strong>Address:</strong> <a onclick="copyWalletAddress(event)" href="Copy to clipboard!" id="address"></a>
 				</p>
 				<p id="totalTransactions"></p>
+
+				<br>
+
+				<button id="showQRcodeBtn" type="button" class="btn btn-info">Show QR Code</button>
 				
+				<br>
 				<br>
 				
 				<p>
@@ -190,6 +199,12 @@
 		</div>
 	</div>
 
+	<div id="qrCodeBack">
+		<div id="qrCodeHolder">	
+			<div id="qrcode"></div>
+		</div>
+	</div>
+
 		</div>
 	
 		<!-- Footer -->
@@ -224,6 +239,7 @@
 		<script src="./scripts/main.js?v=2"></script>
 		
 	<script src="./scripts/addresses.js?v=2"></script>
+	<script src="./scripts/3rd-party/qrcode.min.js"></script>
 
 	</body>
 </html>

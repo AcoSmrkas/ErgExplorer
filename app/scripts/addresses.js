@@ -4,8 +4,12 @@ var tokensContentFull = '';
 var tokensContent = '';
 
 $(function() {
-      printAddressSummary(getWalletAddressFromUrl());
-      printTransactions(getWalletAddressFromUrl(), 0);
+    printAddressSummary(getWalletAddressFromUrl());
+    printTransactions(getWalletAddressFromUrl(), 0);
+
+    setupQrCode();
+
+	document.title = 'Erg Explorer - ' + address;
 });
 
 function getFormattedTransactionsString(transactionsJson, isMempool) {
@@ -149,8 +153,6 @@ function printTransactions(address, offset) {
 	var totalTransactions = 0;
 	let txJson = undefined;
 
-	document.title = 'Erg Explorer - ' + address;
-
     var jqxhr = $.get('https://api.ergoplatform.com/api/v1/mempool/transactions/byAddress/' + address, function(data) {
     		txJson = data;
     		totalTransactions += data.total;
@@ -226,4 +228,17 @@ function getAddressWithOffset(offset) {
 
 function copyWalletAddress(e) {
 	copyToClipboard(e, walletAddress);
+}
+
+function setupQrCode() {
+	$('#showQRcodeBtn').on('click', function () {
+		showQRcode(walletAddress);
+	});
+
+	$('#qrCodeBack').on('click', function () {
+		$('#qrCodeBack').fadeOut();
+
+		$('body').css('height', 'inherit');
+		$('body').css('overflow-y', 'auto');
+	});
 }

@@ -1,5 +1,11 @@
 {% extends "layout.njk" %}
 
+{% block styles %}
+	<!-- build:css styles/addresses.css -->
+	<link rel="stylesheet" href="styles/addresses.css">
+	<!-- endbuild -->
+{% endblock %}
+
 {% block navigation %}
 	{% import 'macros/nav-macro.njk' as nav %}
 	{{nav.active('')}}
@@ -16,7 +22,12 @@
 					<strong>Address:</strong> <a onclick="copyWalletAddress(event)" href="Copy to clipboard!" id="address"></a>
 				</p>
 				<p id="totalTransactions"></p>
+
+				<br>
+
+				<button id="showQRcodeBtn" type="button" class="btn btn-info">Show QR Code</button>
 				
+				<br>
 				<br>
 				
 				<p>
@@ -100,8 +111,15 @@
 			</div>
 		</div>
 	</div>
+
+	<div id="qrCodeBack">
+		<div id="qrCodeHolder">	
+			<div id="qrcode"></div>
+		</div>
+	</div>
 {% endblock %}
 
 {% block scripts %}
 	<script src="./scripts/addresses.js?v=2"></script>
+	<script src="./scripts/3rd-party/qrcode.min.js"></script>
 {% endblock %}
