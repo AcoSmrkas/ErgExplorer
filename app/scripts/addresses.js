@@ -5,7 +5,7 @@ var tokensContent = '';
 
 $(function() {
     printAddressSummary(getWalletAddressFromUrl());
-    printTransactions(getWalletAddressFromUrl(), 0);
+    printTransactions(getWalletAddressFromUrl(), getOffsetFromUrl());
 
     setupQrCode();
 
@@ -24,8 +24,11 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		formattedResult += '<tr>';
 
 		//Tx
-		formattedResult += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionAddressUrl(item.id) + '"><i class="fas fa-link text-info"></i></a></td>';
-
+		if (isMempool) {
+			formattedResult += '<td></td>';
+		} else {
+			formattedResult += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionAddressUrl(item.id) + '"><i class="fas fa-link text-info"></i></a></td>';
+		}
 
 		//Timestamp
 		formattedResult += '<td><span class="d-lg-none"><strong>Time: </strong></span>' + formatDateString((isMempool) ? item.creationTimestamp : item.timestamp) + '</td>';
@@ -73,7 +76,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 				value = item.outputs[j].value;
 				
 				for (let k = 0; k < item.outputs[j].assets.length; k++) {
-					assets += '<br><strong>' + formatAssetValueString(item.outputs[j].assets[k].amount, item.outputs[j].assets[k].decimals) + '</strong> ' + item.outputs[j].assets[k].name + ' ';
+					assets += '<br><strong>' + formatAssetValueString(item.outputs[j].assets[k].amount, item.outputs[j].assets[k].decimals) + '</strong> ' + (item.outputs[j].assets[k].name == '' ? formatAddressString(item.outputs[j].assets[k].tokenId, 15) : item.outputs[j].assets[k].name) + ' ';
 				}
 
 				break;
@@ -128,6 +131,23 @@ function printAddressSummary(address) {
     	$('#summaryError').show();
     	console.log('Address summary fetch failed.');
     });
+}
+
+function getOffsetFromUrl() {
+	let offset = window.location.href.split('#')[1].split('&')[1];
+
+	if (offset == undefined) {
+		offset = 0;
+	} else {
+		offset = offset.split('=')[1];
+
+		if (offset == undefined) {
+			console.log("Error getting offset from url.");
+			offset = 0;
+		}
+	}
+
+	return offset;
 }
 
 function getOfficialExplorereAddressUrl(address) {
