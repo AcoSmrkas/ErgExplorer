@@ -95,7 +95,7 @@ function formatInputsOutputs(data) {
 		if (data[i].assets.length > 0 ) {
 			formattedData += '<h5><strong>Tokens:</strong></h5>';
 			for (let j = 0; j < data[i].assets.length; j++) {
-				formattedData += '<p><strong>' + (data[i].assets[j].name == '' ? formatAddressString(data[i].assets[j].tokenId, 15) : data[i].assets[j].name) + '</strong>: ' + formatAssetValueString(data[i].assets[j].amount, data[i].assets[j].decimals) + '</p>';
+				formattedData += '<p><strong>' + getAssetTitle(data[i].assets[j]) + '</strong>: ' + formatAssetValueString(data[i].assets[j].amount, data[i].assets[j].decimals) + '</p>';
 			}
 		}
 

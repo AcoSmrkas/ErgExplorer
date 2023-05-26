@@ -141,6 +141,10 @@ function formatAssetNameAndValueString(name, valueString) {
 	return '<p><strong>' + name + '</strong>: ' + valueString + '</p>';
 }
 
+function getAssetTitle(asset) {
+	return ((asset.name == '' || asset.name == null) ? formatAddressString(asset.tokenId, 15) : asset.name);
+}
+
 function zeroPad (num, places) {
 	return String(num).padStart(places, '0');
 }

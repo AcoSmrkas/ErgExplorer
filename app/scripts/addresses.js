@@ -1,15 +1,25 @@
 const TX_PER_PAGE = 30;
 var walletAddress = undefined;
+var offset = 0;
+var mempoolData = undefined;
+var transactionsData = undefined;
 var tokensContentFull = '';
 var tokensContent = '';
+var mempoolRequestDone = false;
+var transactionsRequestDone = false;
+var formattedResult = '';
+var totalTransactions = 0;
 
 $(function() {
-    printAddressSummary(getWalletAddressFromUrl());
-    printTransactions(getWalletAddressFromUrl(), getOffsetFromUrl());
+	walletAddress = getWalletAddressFromUrl();
+	offset = getOffsetFromUrl();
+
+	document.title = 'Erg Explorer - ' + walletAddress;
+
+    printAddressSummary();
+    printTransactions();
 
     setupQrCode();
-
-	document.title = 'Erg Explorer - ' + address;
 });
 
 function getFormattedTransactionsString(transactionsJson, isMempool) {
@@ -76,7 +86,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 				value = item.outputs[j].value;
 				
 				for (let k = 0; k < item.outputs[j].assets.length; k++) {
-					assets += '<br><strong>' + formatAssetValueString(item.outputs[j].assets[k].amount, item.outputs[j].assets[k].decimals) + '</strong> ' + (item.outputs[j].assets[k].name == '' ? formatAddressString(item.outputs[j].assets[k].tokenId, 15) : item.outputs[j].assets[k].name) + ' ';
+					assets += '<br><strong>' + formatAssetValueString(item.outputs[j].assets[k].amount, item.outputs[j].assets[k].decimals) + '</strong> ' + getAssetTitle(item.outputs[j].assets[k]) + ' ';
 				}
 
 				break;
@@ -89,8 +99,8 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 	return formattedResult;
 }
 
-function printAddressSummary(address) {
-	var jqxhr = $.get('https://api.ergoplatform.com/api/v1/addresses/' + address + '/balance/total',
+function printAddressSummary() {
+	var jqxhr = $.get('https://api.ergoplatform.com/api/v1/addresses/' + walletAddress + '/balance/total',
 	function(data) {
 		$('#finalBalance').html('Final balance: <strong>' + formatErgValueString(data.confirmed.nanoErgs, 2) + '</strong>');
 
@@ -103,11 +113,11 @@ function printAddressSummary(address) {
 
 			let i = 0;
 			for (i = 0; i < data.confirmed.tokens.length; i++) {
-				tokensContentFull += formatAssetNameAndValueString(data.confirmed.tokens[i].name, formatAssetValueString(data.confirmed.tokens[i].amount, data.confirmed.tokens[i].decimals));
+				tokensContentFull += formatAssetNameAndValueString(getAssetTitle(data.confirmed.tokens[i]), formatAssetValueString(data.confirmed.tokens[i].amount, data.confirmed.tokens[i].decimals));
 
 				if (i > tokensToShow) continue;
 
-				tokensContent += formatAssetNameAndValueString(data.confirmed.tokens[i].name, formatAssetValueString(data.confirmed.tokens[i].amount, data.confirmed.tokens[i].decimals));
+				tokensContent += formatAssetNameAndValueString(getAssetTitle(data.confirmed.tokens[i]), formatAssetValueString(data.confirmed.tokens[i].amount, data.confirmed.tokens[i].decimals));
 
 				if (i == tokensToShow && data.confirmed.tokens.length > tokensToShow) {
 					tokensContent += '<p>...</p><p><strong><a href="#" onclick="showAllTokens(event)">Show all</a></strong></p>';
@@ -121,9 +131,9 @@ function printAddressSummary(address) {
 			$('#tokens').html(tokensContent);
 		}
 
-		$('#address').html(address + ' &#128203;');
-		$('#officialLink').html(getOfficialExplorereAddressUrl(address));
-		$('#officialLink').attr('href', getOfficialExplorereAddressUrl(address));
+		$('#address').html(walletAddress + ' &#128203;');
+		$('#officialLink').html(getOfficialExplorereAddressUrl(walletAddress));
+		$('#officialLink').attr('href', getOfficialExplorereAddressUrl(walletAddress));
 
 		$('#summaryOk').show();
     })
@@ -131,6 +141,63 @@ function printAddressSummary(address) {
     	$('#summaryError').show();
     	console.log('Address summary fetch failed.');
     });
+}
+
+function printTransactions() {
+	if (offset == 0) {
+		getMempoolData()
+	} else {
+		mempoolRequestDone = true;
+	}
+
+	getTransactionsData();
+}
+
+function getMempoolData() {
+	let jqxhr = $.get('https://api.ergoplatform.com/api/v1/mempool/transactions/byAddress/' + walletAddress, function(data) {
+    		mempoolData = data;
+
+   			totalTransactions += mempoolData.total;
+   			formattedResult += getFormattedTransactionsString(mempoolData, true);
+        })
+        .fail(function() {
+        	console.log('Mempool transactions fetch failed.');
+        })
+        .always(function() {
+        	mempoolRequestDone = true;
+        	onMempoolAndTransactionsDataFetched();
+        });
+}
+
+function getTransactionsData() {
+	var jqxhr = $.get('https://api.ergoplatform.com/api/v1/addresses/' + walletAddress + '/transactions?offset=' + offset + '&limit=30', function(data) {
+        	transactionsData = data;
+        	totalTransactions += transactionsData.total;
+
+        	formattedResult += getFormattedTransactionsString(transactionsData, false);
+
+			setupPagination(transactionsData.total / TX_PER_PAGE);
+        })
+        .fail(function() {
+            console.log('Transactions fetch failed.');
+        })
+        .always(function() {
+        	transactionsRequestDone = true;
+        	onMempoolAndTransactionsDataFetched();
+        });
+}
+
+function onMempoolAndTransactionsDataFetched() {
+	if (!mempoolRequestDone || !transactionsRequestDone) return;
+
+	$('#totalTransactions').html('<strong>Total transactions:</strong> ' + totalTransactions);
+
+	if (totalTransactions > 0) {
+		$('#transactionsTableBody').html(formattedResult);
+		$('#txView').show();
+	}
+
+	$('#txLoading').hide();
 }
 
 function getOffsetFromUrl() {
@@ -147,7 +214,7 @@ function getOffsetFromUrl() {
 		}
 	}
 
-	return offset;
+	return offset
 }
 
 function getOfficialExplorereAddressUrl(address) {
@@ -165,47 +232,6 @@ function hideAllTokens(e) {
 	window.scrollTo(0, 0);
 
 	e.preventDefault();
-}
-
-function printTransactions(address, offset) {
-	walletAddress = address;
-	let formattedResult = '';
-	var totalTransactions = 0;
-	let txJson = undefined;
-
-    var jqxhr = $.get('https://api.ergoplatform.com/api/v1/mempool/transactions/byAddress/' + address, function(data) {
-    		txJson = data;
-    		totalTransactions += data.total;
-        })
-        .fail(function() {
-        	console.log('Mempool transactions fetch failed.');
-        })
-        .always(function() {
-            formattedResult += getFormattedTransactionsString(txJson, true);
-
-            txJson = undefined;
-	        var jqxhr = $.get('https://api.ergoplatform.com/api/v1/addresses/' + address + '/transactions?offset=' + offset + '&limit=30', function(data) {
-	        	txJson = data;
-	        	totalTransactions += data.total;
-
-				setupPagination(totalTransactions / TX_PER_PAGE);
-
-	 			$('#totalTransactions').html('<strong>Total transactions:</strong> ' + totalTransactions);
-
-	 			if (totalTransactions > 0) {
-	 				$('#txView').show();
-	 			}
-	        })
-	        .fail(function() {
-                console.log('Transactions fetch failed.');
-	        })
-	        .always(function() {
-				formattedResult += getFormattedTransactionsString(txJson, false);
-
-				$('#transactionsTableBody').html(formattedResult);
-	 			$('#txLoading').hide();
-	        });
-        });
 }
 
 function setupPagination(numPages) {
