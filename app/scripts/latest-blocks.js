@@ -12,7 +12,7 @@ function printLatestBlocks() {
     		formattedResult += '<tr>';
 
             //Height
-    		formattedResult += '<td><span class="d-lg-none"><strong>Height: </strong></span>' + items[i].height + '</td>';
+    		formattedResult += '<td><span class="d-lg-none"><strong>Height: </strong></span><a href="' + blockUrl(items[i].id) + '">' + items[i].height + '</a></td>';
 
             //Time
     		formattedResult += '<td><span class="d-lg-none"><strong>Time: </strong></span>' + formatDateString(items[i].timestamp) + '</td>';

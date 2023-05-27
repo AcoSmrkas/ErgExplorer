@@ -3,7 +3,7 @@ $(function() {
 });
 
 function printMempool() {
-	var jqxhr = $.get('https://api.ergoplatform.com/transactions/unconfirmed?limit=30&sortBy=size&sortDirection=desc', function(data) {
+	var jqxhr = $.get('https://api.ergoplatform.com/transactions/unconfirmed?limit=500&sortBy=size&sortDirection=desc', function(data) {
 		let formattedResult = '';
 		let totalBlocks = data.total;
 		let items = data.items;

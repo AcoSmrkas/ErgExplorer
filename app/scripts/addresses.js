@@ -14,8 +14,8 @@ $(function() {
 	walletAddress = getWalletAddressFromUrl();
 	offset = getOffsetFromUrl();
 
-	document.title = 'Erg Explorer - ' + walletAddress;
-
+	setDocumentTitle(walletAddress);
+	
     printAddressSummary();
     printTransactions();
 

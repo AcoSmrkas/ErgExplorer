@@ -2,12 +2,15 @@ var totalCoinsTransferred = 0;
 var txId = '';
 
 $(function() {
-	printTransaction(getWalletAddressFromUrl());
+	txId = getWalletAddressFromUrl();
+
+	printTransaction();
+
+	setDocumentTitle(txId);
 });
 
-function printTransaction(txId) {
+function printTransaction() {
 	var jqxhr = $.get('https://api.ergoplatform.com/api/v1/transactions/' + txId, function(data) {
-		txId = data.id;
 
 		//Id
 		$('#txHeader').html('<p><a href="Copy to clipboard!" onclick="copyTransactionAddress(event)">' + data.id + ' &#128203;</a></p>');
@@ -21,7 +24,7 @@ function printTransaction(txId) {
 		//Outputs
 		$('#txOutputs').html(formatInputsOutputs(data.outputs));
 
-		//Summary
+		//Size
 		$('#txSize').html(formatKbSizeString(data.size));
 
 		//Date received
@@ -34,6 +37,10 @@ function printTransaction(txId) {
 		$('#txConfirmations').html(data.numConfirmations);
 
 		//Total coins transferred
+		for (let i = 0; i < data.outputs.length; i++) {
+			totalCoinsTransferred += data.outputs[i].value;
+		}
+
 		$('#txTotalCoinsTransferred').html(formatErgValueString(totalCoinsTransferred, 6));
 
 		//Fee
@@ -67,42 +74,6 @@ function printTransaction(txId) {
     .always(function() {
         $('#txLoading').hide();
     });
-}
-
-function formatInputsOutputs(data) {
-	let formattedData = '';
-
-	for (let i = 0; i < data.length; i++) {
-		totalCoinsTransferred += data[i].value;
-
-		formattedData += '<div class="row div-cell">';
-		
-		//Address
-		formattedData += '<div class="col-9"><span><strong>Address: </strong></span><a href="' + getWalletAddressUrl(data[i].address) + '" >' + formatAddressString(data[i].address, 15) + '</a></div>';
-
-		//Status
-		formattedData += '<div class="col-3 d-flex justify-content-end">' + (data[i].spentTransactionId == null ? '<span class="text-danger">Unspent' : '<span class="text-success">Spent') + '</span></div>';
-
-		//Value
-		formattedData += '<div style="padding-bottom:10px;" class="col-10"><span><strong>Value: </strong></span><span class="gray-color">' + formatErgValueString(data[i].value, 5) + '</span></div>';
-		
-		//Output transaction
-		if (data[i].outputTransactionId != undefined) {
-			formattedData += '<div class="col-2 d-flex justify-content-end"><a href="' + getTransactionAddressUrl(data[i].outputTransactionId) + '" >Output</a></div>';
-		}
-	
-		//Assets
-		if (data[i].assets.length > 0 ) {
-			formattedData += '<h5><strong>Tokens:</strong></h5>';
-			for (let j = 0; j < data[i].assets.length; j++) {
-				formattedData += '<p><strong>' + getAssetTitle(data[i].assets[j]) + '</strong>: ' + formatAssetValueString(data[i].assets[j].amount, data[i].assets[j].decimals) + '</p>';
-			}
-		}
-
-		formattedData += '</div></div>';
-	}
-
-	return formattedData;
 }
 
 function copyTransactionAddress(e) {

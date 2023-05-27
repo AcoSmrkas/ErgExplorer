@@ -1,0 +1,187 @@
+{% extends "layout.njk" %}
+
+{% block styles %}
+	<!-- build:css styles/blocks.css -->
+	<link rel="stylesheet" href="styles/blocks.css">
+	<!-- endbuild -->
+{% endblock %}
+
+{% block navigation %}
+	{% import 'macros/nav-macro.njk' as nav %}
+	{{nav.active('')}}
+{% endblock %}
+
+{% block content %}
+	<h2 class="main-heading p-2">Block</h2>
+
+	<div id="blockDataHolder" style="display: none;" class="col-md-12">
+		<div class="row w-100 div-cell">
+			<div id="blockHeader" class="col-9">
+			</div>
+			<div id="blockTime" class="col-3 d-flex justify-content-end">
+			</div>
+		</div>
+
+		<div class="row w-100">
+			<div id="blockDataLeft" class="col-lg-3 div-cell p-0">
+				<div class="row w-100 p-1">
+					<div class="col-5">
+						<p><strong>Height</strong></p>
+					</div>
+					<div class="col-7">
+						<p id="blockHeight"></p>
+					</div>
+				</div>				
+				<div class="row w-100 p-1">
+					<div class="col-5">
+						<p><strong>Bits</strong></p>
+					</div>
+					<div class="col-7">
+						<p id="blockBits"></p>
+					</div>
+				</div>
+				<div class="row w-100 p-1">
+					<div class="col-5">
+						<p><strong>Size</strong></p>
+					</div>
+					<div class="col-7">
+						<p id="blockSize"></p>
+					</div>
+				</div>				
+				<div class="row w-100 p-1">
+					<div class="col-5">
+						<p><strong>Difficulty</strong></p>
+					</div>
+					<div class="col-7">
+						<p id="blockDifficulty"></p>
+					</div>
+				</div>
+				<div class="row w-100 p-1">
+					<div class="col-5">
+						<p><strong>Version</strong></p>
+					</div>
+					<div class="col-7">
+						<p id="blockVersion"></p>
+					</div>
+				</div>
+				<div class="row w-100 p-1">
+					<div class="col-5">
+						<p><strong>Votes</strong></p>
+					</div>
+					<div class="col-7">
+						<p id="blockVotes"></p>
+					</div>
+				</div>
+			</div>
+
+			<div id="blockDataRight" class="col-lg-9 div-cell p-0">
+				<div class="row w-100 p-1">
+					<div class="col-lg-3 col-4">
+						<p><strong>Previous block</strong></p>
+					</div>
+					<div class="col-lg-9 col-8">
+						<p id="blockPrevious"></p>
+					</div>
+				</div>				
+				<div class="row w-100 p-1">
+					<div class="col-lg-3 col-4">
+						<p><strong>Extension Hash</strong></p>
+					</div>
+					<div class="col-lg-9 col-8">
+						<p id="blockExtHash"></p>
+					</div>
+				</div>
+				<div class="row w-100 p-1">
+					<div class="col-lg-3 col-4">
+						<p><strong>AD proofs root</strong></p>
+					</div>
+					<div class="col-lg-9 col-8">
+						<p id="blockAdProofs"></p>
+					</div>
+				</div>
+				<div class="row w-100 p-1">
+					<div class="col-lg-3 col-4">
+						<p><strong>Transactions root</strong></p>
+					</div>
+					<div class="col-lg-9 col-8">
+						<p id="blockTransactionsRoot"></p>
+					</div>
+				</div>
+				<div class="row w-100 p-1">
+					<div class="col-lg-3 col-4">
+						<p><strong>State root</strong></p>
+					</div>
+					<div class="col-lg-9 col-8">
+						<p id="blockStateRoot"></p>
+					</div>
+				</div>
+				<div class="row w-100 p-1">
+					<div class="col-lg-3 col-4">
+						<p><strong>PoW Solutions</strong></p>
+					</div>
+					<div class="col-lg-9 col-8">
+						<p id="blockPowSolutions"></p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<br>
+
+		<h3 class="p-2">Extension</h3>
+		<div id="blockExtension" class="row w-100 div-cell p-0">
+			<div class="row w-100 p-1">
+				<div class="col-3">
+					<p><strong>Header ID</strong></p>
+				</div>
+				<div id="blockHeaderId" class="col-9">
+						
+				</div>
+			</div>
+			<div class="row w-100 p-1">
+				<div class="col-3">			
+					<p><strong>Digest</strong></p>
+				</div>
+				<div id="blockDigest" class="col-9"></div>
+			</div>
+			<div class="row w-100 p-1">
+				<div class="col-3">		
+					<p><strong>Fields</strong></p>
+				</div>
+				<div id="blockFields" class="col-9"></div>
+			</div>
+		</div>
+
+		<br>
+
+		<h3 class="p-2">AD Proofs</h3>
+		<div id="adProofs" class="row w-100 div-cell"></div>
+	</div>
+
+	<br>
+
+	<h3 class="p-2">Transactions</h3>
+	<div id="blockTransactions"></div>
+
+	<div id="txLoadError" style="display: none;" class="col-md-12">
+		<div class="row w-100">
+			<div class="col-md-12 div-cell">
+				<p>No results matching your query.</p>
+				<br>
+				<p><strong>NOTE:</strong> Erg Explorer is still in <strong>alpha</strong> phase. Plase report any issues you encounter in our <strong><a href="https://t.me/ErgExplorer" target="_new">Telegram group</a></strong>.</p>
+			</div>
+		</div>
+	</div>
+
+	<div id="txLoading"> 
+		<div id="txLoadingInner">
+			<img id="loadingImg" src="./images/logo.png">
+		</div>
+	</div>
+
+	<br>
+{% endblock %}
+
+{% block scripts %}
+	<script src="./scripts/blocks.js"></script>
+{% endblock %}

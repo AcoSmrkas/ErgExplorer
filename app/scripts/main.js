@@ -9,6 +9,10 @@ $(function() {
 	$('#searchInput').val('');
 });
 
+function setDocumentTitle(text) {
+	document.title = 'Erg Explorer (Alpha) - ' + text;
+}
+
 function getWalletAddressUrl(address, offset = undefined) {
 	let newPage = walletAddressUrl(address);
 
@@ -68,6 +72,22 @@ function goToTransactionUrl(txid) {
 	window.location.assign(transactionAddressUrl(txid));
 }
 
+function blockUrl(blockId) {
+	let newPage = '';
+
+	if (IS_DEV_ENVIRONMENT) {
+		newPage = LOCALHOST + '/blocks#' + blockId;
+	} else {
+		newPage = '/blocks/' + blockId;
+	}
+
+	return newPage;
+}
+
+function goToBlockUrl(blockId) {
+	window.location.assign(blockUrl(blockId));	
+}
+
 function getHost() {
 	let host = window.location.host;
 	
@@ -99,6 +119,9 @@ function searchAddress() {
 			break;
 		case '1':
 			goToTransactionUrl(searchQuery);
+			break;
+		case '2':
+			goToBlockUrl(searchQuery);
 			break;
 
 		default:
@@ -182,4 +205,38 @@ function showQRcode(text) {
 	$('body').css('overflow-y', 'hidden');
 
 	window.scrollTo(0, 0);
+}
+
+function formatInputsOutputs(data) {
+	let formattedData = '';
+
+	for (let i = 0; i < data.length; i++) {
+		formattedData += '<div class="row div-cell">';
+		
+		//Address
+		formattedData += '<div class="col-9"><span><strong>Address: </strong></span><a href="' + getWalletAddressUrl(data[i].address) + '" >' + formatAddressString(data[i].address, 15) + '</a></div>';
+
+		//Status
+		formattedData += '<div class="col-3 d-flex justify-content-end">' + (data[i].spentTransactionId == null ? '<span class="text-danger">Unspent' : '<span class="text-success">Spent') + '</span></div>';
+
+		//Value
+		formattedData += '<div style="padding-bottom:10px;" class="col-10"><span><strong>Value: </strong></span><span class="gray-color">' + formatErgValueString(data[i].value, 5) + '</span></div>';
+		
+		//Output transaction
+		if (data[i].outputTransactionId != undefined) {
+			formattedData += '<div class="col-2 d-flex justify-content-end"><a href="' + getTransactionAddressUrl(data[i].outputTransactionId) + '" >Output</a></div>';
+		}
+	
+		//Assets
+		if (data[i].assets != undefined && data[i].assets.length > 0 ) {
+			formattedData += '<h5><strong>Tokens:</strong></h5>';
+			for (let j = 0; j < data[i].assets.length; j++) {
+				formattedData += '<p><strong>' + getAssetTitle(data[i].assets[j]) + '</strong>: ' + formatAssetValueString(data[i].assets[j].amount, data[i].assets[j].decimals) + '</p>';
+			}
+		}
+
+		formattedData += '</div>';
+	}
+
+	return formattedData;
 }

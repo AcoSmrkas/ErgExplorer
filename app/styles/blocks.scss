@@ -1,0 +1,11 @@
+#blockDataLeft > div:nth-child(odd), #blockDataRight > div:nth-child(odd), .block-tx-holder > div:nth-child(odd), #blockExtension > div:nth-child(odd) {
+	background-color: #454545;
+}
+
+#txInputs > div, #txOutputs > div {
+	border-radius: 0;
+}
+
+#adProofs {
+	overflow-wrap: anywhere;
+}
