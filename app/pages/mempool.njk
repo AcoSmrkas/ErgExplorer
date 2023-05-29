@@ -15,25 +15,46 @@
 	 
 		<br>
 
-		<div class="row w-100">
-			<table class="table table-dark table-striped">
-				<thead>
-					<tr>
-						<th scope="col">Id</th>
-						<th scope="col">Time</th>
-						<th scope="col">Inputs</th>
-						<th scope="col">Outputs</th>
-						<th scope="col">Size</th>
-					</tr>
-				</thead>
-			 
-				<tbody id="transactionsTableBody">              
-				</tbody>
-			</table>
+		<div id="mempoolHolder" style="display: none;">
+			<div class="row w-100">
+				<table class="table table-dark table-striped">
+					<thead>
+						<tr>
+							<th scope="col">Id</th>
+							<th scope="col">Time</th>
+							<th scope="col">Inputs</th>
+							<th scope="col">Outputs</th>
+							<th scope="col">Size</th>
+						</tr>
+					</thead>
+				 
+					<tbody id="transactionsTableBody">						
+					</tbody>
+				</table>
+			</div>
+
+			{% include "partials/pagination.njk" %}
+		</div>
+
+		<div id="loadError" style="display: none;" class="col-md-12">
+			<div class="row w-100">
+				<div class="col-md-12 div-cell">
+					<p>Failed to fetch mempool transactions.</p>
+					<br>
+					<p><strong>NOTE:</strong> Erg Explorer is still in <strong>alpha</strong> phase. Plase report any issues you encounter in our <strong><a href="https://t.me/ErgExplorer" target="_new">Telegram group</a></strong>.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="txLoading"> 
+		<div id="txLoadingInner">
+			<img id="loadingImg" src="./images/logo.png">
 		</div>
 	</div>
 {% endblock %}
 
 {% block scripts %}
+	<script src="./scripts/common/pagination.js"></script>
 	<script src="./scripts/mempool.js"></script>
 {% endblock %}

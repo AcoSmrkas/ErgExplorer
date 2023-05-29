@@ -15,24 +15,42 @@
 
 		<br>
 
-		<div class="row w-100">
-			<table class="table table-dark table-striped">
-				<thead>
-					<tr>    
-						<th scope="col">Height</th>
-						<th scope="col">Time</th>
-						<th scope="col">Transactions</th>
-						<th scope="col">Mined by</th>
-						<th scope="col">Reward</th>
-						<th scope="col">Difficulty</th>
-						<th scope="col">Size</th>
-					</tr>   
-				</thead>
+		<div id="blocksHolder" style="display: none;">
+			<div class="row w-100">
+				<table class="table table-dark table-striped">
+					<thead>
+						<tr>    
+							<th scope="col">Height</th>
+							<th scope="col">Time</th>
+							<th scope="col">Transactions</th>
+							<th scope="col">Mined by</th>
+							<th scope="col">Reward</th>
+							<th scope="col">Difficulty</th>
+							<th scope="col">Size</th>
+						</tr>   
+					</thead>
 
-				<tbody id="transactionsTableBody">          
-				</tbody>
-			</table>
+					<tbody id="transactionsTableBody">          
+					</tbody>
+				</table>
+		 	</div>
 	 	</div>
+
+		<div id="loadError" style="display: none;" class="col-md-12">
+			<div class="row w-100">
+				<div class="col-md-12 div-cell">
+					<p>Failed to fetch latest blocks.</p>
+					<br>
+					<p><strong>NOTE:</strong> Erg Explorer is still in <strong>alpha</strong> phase. Plase report any issues you encounter in our <strong><a href="https://t.me/ErgExplorer" target="_new">Telegram group</a></strong>.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="txLoading"> 
+		<div id="txLoadingInner">
+			<img id="loadingImg" src="./images/logo.png">
+		</div>
 	</div>
 {% endblock %}
 

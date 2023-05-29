@@ -36,8 +36,14 @@ function printLatestBlocks() {
 		}
 
 		$('#transactionsTableBody').html(formattedResult);
+        
+        $('#blocksHolder').show();
     })
     .fail(function() {
+        $('#loadError').show();
     	console.log('Latest blocks fetch failed.');
+    })
+    .always(function() {        
+        $('#txLoading').hide();
     });
 }

@@ -68,31 +68,7 @@
 				</tbody>
 			</table>
 
-			<nav aria-label="Page navigation">
-				<ul class="pagination justify-content-center">
-					<li id="firstPageHolder" class="page-item">
-						<a id="firstPage" class="page-link" href="#" aria-label="Previous">
-							<span aria-hidden="true">&laquo;</span>
-						</a>
-					</li>
-					<li id="previousPageHolder" class="page-item">
-						<a id ="previousPage" class="page-link" href="#" aria-label="Previous">
-							<span aria-hidden="true">&lsaquo;</span>
-						</a>
-					</li>
-					<li class="page-item"><a id="pageNum" class="page-link">1 of 1</a></li>
-					<li id="nextPageHolder" class="page-item">
-						<a id="nextPage" class="page-link" href="#" aria-label="Next">
-							<span aria-hidden="true">&rsaquo;</span>
-						</a>
-					</li>
-					<li id="lastPageHolder" class="page-item">
-						<a id="lastPage" class="page-link" href="#" aria-label="Next">
-							<span aria-hidden="true">&raquo;</span>
-						</a>
-					</li>
-				</ul>
-			</nav>
+			{% include "partials/pagination.njk" %}
 		</div>
 
 	  	<div id="summaryError" style="display: none;" class="col-md-12">
@@ -120,6 +96,7 @@
 {% endblock %}
 
 {% block scripts %}
-	<script src="./scripts/addresses.js?v=2"></script>
+	<script src="./scripts/common/pagination.js"></script>
+	<script src="./scripts/addresses.js"></script>
 	<script src="./scripts/3rd-party/qrcode.min.js"></script>
 {% endblock %}

@@ -1,6 +1,4 @@
-const TX_PER_PAGE = 30;
 var walletAddress = undefined;
-var offset = 0;
 var mempoolData = undefined;
 var transactionsData = undefined;
 var tokensContentFull = '';
@@ -11,8 +9,7 @@ var formattedResult = '';
 var totalTransactions = 0;
 
 $(function() {
-	walletAddress = getWalletAddressFromUrl();
-	offset = getOffsetFromUrl();
+	walletAddress = getWalletAddressFromUrl();	
 
 	setDocumentTitle(walletAddress);
 	
@@ -176,7 +173,7 @@ function getTransactionsData() {
 
         	formattedResult += getFormattedTransactionsString(transactionsData, false);
 
-			setupPagination(transactionsData.total / TX_PER_PAGE);
+			setupPagination(transactionsData.total);
         })
         .fail(function() {
             console.log('Transactions fetch failed.');
@@ -200,22 +197,7 @@ function onMempoolAndTransactionsDataFetched() {
 	$('#txLoading').hide();
 }
 
-function getOffsetFromUrl() {
-	let offset = window.location.href.split('#')[1].split('&')[1];
 
-	if (offset == undefined) {
-		offset = 0;
-	} else {
-		offset = offset.split('=')[1];
-
-		if (offset == undefined) {
-			console.log("Error getting offset from url.");
-			offset = 0;
-		}
-	}
-
-	return offset
-}
 
 function getOfficialExplorereAddressUrl(address) {
 	return 'https://explorer.ergoplatform.com/addresses/' + address;
@@ -232,44 +214,6 @@ function hideAllTokens(e) {
 	window.scrollTo(0, 0);
 
 	e.preventDefault();
-}
-
-function setupPagination(numPages) {
-	let currentPageNum = window.location.href.split('#')[1].split('&')[1];
-
-	if (currentPageNum == undefined) {
-		currentPageNum = 1;
-	} else {
-		currentPageNum = currentPageNum.split('=')[1];
-		currentPageNum = Math.ceil(currentPageNum);
-
-		if (currentPageNum == 0) {
-			currentPageNum = 1;
-		} else {
-			currentPageNum = currentPageNum / 30;
-			currentPageNum++;
-		}
-	}
-
-	$('#pageNum').html(currentPageNum + ' of ' + Math.ceil(numPages));
-	$('#firstPage').attr('href', getAddressWithOffset(0));
-	$('#previousPage').attr('href', getAddressWithOffset((currentPageNum - 2) * 30));
-	$('#nextPage').attr('href', getAddressWithOffset(currentPageNum * 30));
-	$('#lastPage').attr('href', getAddressWithOffset((Math.ceil(numPages) - 1) * 30));
-
-	if (currentPageNum <= 1) {
-		$('#firstPageHolder').addClass('disabled');
-		$('#previousPageHolder').addClass('disabled');
-	}
-
-	if (currentPageNum >= Math.ceil(numPages)) {
-		$('#nextPageHolder').addClass('disabled');
-		$('#lastPageHolder').addClass('disabled');
-	}
-}
-
-function getAddressWithOffset(offset) {
-	return 'addresses/' + walletAddress + '&offset=' + offset;
 }
 
 function copyWalletAddress(e) {
