@@ -15,7 +15,7 @@ function printIssuedTokens() {
     		formattedResult += '<tr>';
 
             //Id
-    		formattedResult += '<td><span class="d-lg-none"><strong>Id: </strong></span><a href="' + tokenUrl(items[i].id) + '">' + formatAddressString(items[i].id) + '</a></td>';
+    		formattedResult += '<td><span class="d-lg-none"><strong>Id: </strong></span><a href="' + getTokenUrl(items[i].id) + '">' + formatAddressString(items[i].id) + '</a></td>';
 
             //Time
     		formattedResult += '<td><span class="d-lg-none"><strong>Name: </strong></span>' + items[i].name + '</td>';

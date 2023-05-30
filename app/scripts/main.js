@@ -1,6 +1,5 @@
 const FEE_ADDRESS = '2iHkR7CWvD1R4j1yZg5bkeDRQavjAaVPeTDFGGLZduHyfWMuYpmhHocX8GJoaieTx78FntzJbCBVL6rf96ocJoZdmWBL2fci7NqWgAirppPQmZ7fN9V6z13Ay6brPriBKYqLp1bT2Fk4FkFLCfdPpe';
 const DONATION_ADDRESS = '9hiaAS3pCydq12CS7xrTBBn2YTfdfSRCsXyQn9KZHVpVyEPk9zk';
-const LOCALHOST = 'http://localhost:9000';
 const IS_DEV_ENVIRONMENT = window.location.host == 'localhost:9000';
 
 var qrCode = null;
@@ -20,21 +19,6 @@ function setDocumentTitle(text) {
 	document.title = 'Erg Explorer (Alpha) - ' + text;
 }
 
-function getWalletAddressUrl(address, offset = undefined) {
-	let newPage = walletAddressUrl(address);
-
-	if (offset != undefined) {
-		newPage += '&offset=' + offset;
-	}
-
-	return newPage;
-}
-
-function goToWalletAddress(address) {
-	window.location.assign(walletAddressUrl(address));
-}
-
-
 function getWalletAddressFromUrl() {
 	let addressFromUrl = undefined;
 
@@ -45,83 +29,36 @@ function getWalletAddressFromUrl() {
 	return addressFromUrl;
 }
 
-function walletAddressUrl(address) {
-	let newPage = '';
-
-	if (IS_DEV_ENVIRONMENT) {
-		newPage = LOCALHOST + '/addresses#' + address;
-	} else {
-		newPage = '/addresses/' + address;
-	}
-
-	return newPage;
+function getWalletAddressUrl(address) {
+	return getSearchQueryPage('addresses', address);
 }
 
-function getTransactionAddressUrl(txid) {
-	let newPage = transactionAddressUrl(txid);
-
-	return newPage;
+function goToWalletAddressUrl(address) {
+    window.location.assign(getWalletAddressUrl(address));
 }
 
-function transactionAddressUrl(txid) {
-	let newPage = '';
-
-	if (IS_DEV_ENVIRONMENT) {
-		newPage = LOCALHOST + '/transactions#' + txid;
-	} else {
-		newPage = '/transactions/' + txid;
-	}
-
-	return newPage;
+function getTransactionsUrl(txId) {
+	return getSearchQueryPage('transactions', txId);
 }
 
-function goToTransactionUrl(txid) {
-	window.location.assign(transactionAddressUrl(txid));
+function goToTransactionUrl(txId) {
+    window.location.assign(getSearchQueryPage('transactions', txId));
 }
 
-function blockUrl(blockId) {
-	let newPage = '';
-
-	if (IS_DEV_ENVIRONMENT) {
-		newPage = LOCALHOST + '/blocks#' + blockId;
-	} else {
-		newPage = '/blocks/' + blockId;
-	}
-
-	return newPage;
+function getBlockUrl(blockId) {
+	return getSearchQueryPage('blocks', blockId);
 }
 
 function goToBlockUrl(blockId) {
-	window.location.assign(blockUrl(blockId));	
+    window.location.assign(blockUrl(blockId));
 }
 
-function tokenUrl(tokenId) {
-	let newPage = '';
-
-	if (IS_DEV_ENVIRONMENT) {
-		newPage = LOCALHOST + '/token#' + tokenId;
-	} else {
-		newPage = '/token/' + tokenId;
-	}
-
-	return newPage;
+function getTokenUrl(tokenId) {
+	return getSearchQueryPage('token', tokenId);
 }
 
 function goToTokenUrl(tokenId) {
-	window.location.assign(tokenUrl(tokenId));
-}
-
-function getHost() {
-	let host = window.location.host;
-	
-	return host;
-}
-
-function showToast() {
-	const toastLiveExample = document.getElementById('liveToast')
-	const toast = new bootstrap.Toast(toastLiveExample)
-
-	toast.show()
+    window.location.assign(getSearchQueryPage('token', tokenId));
 }
 
 //Search box
@@ -131,6 +68,18 @@ function submitSearch(key) {
 	searchAddress();
 }
 
+function getSearchQueryPage(page, query) {
+	let newPage = '';
+
+	if (IS_DEV_ENVIRONMENT) {
+		newPage = '/' + page + '#' + query;
+	} else {
+		newPage = '/' + page + '/' + query;
+	}
+
+	return newPage;
+}
+
 function searchAddress() {
 	let searchQuery = $('#searchInput').val();
 
@@ -138,7 +87,7 @@ function searchAddress() {
 
 	switch ($('#searchType').val()) {
 		case '0':
-			goToWalletAddress(searchQuery);
+			goToWalletAddressUrl(searchQuery);
 			break;
 		case '1':
 			goToTransactionUrl(searchQuery);
@@ -254,7 +203,7 @@ function formatInputsOutputs(data) {
 		
 		//Output transaction
 		if (data[i].outputTransactionId != undefined) {
-			formattedData += '<div class="col-2 d-flex justify-content-end"><a href="' + getTransactionAddressUrl(data[i].outputTransactionId) + '" >Output</a></div>';
+			formattedData += '<div class="col-2 d-flex justify-content-end"><a href="' + getTransactionsUrl(data[i].outputTransactionId) + '" >Output</a></div>';
 		}
 	
 		//Assets
@@ -274,4 +223,11 @@ function formatInputsOutputs(data) {
 function showLoadError(message) {
 	$('#loadErrorMessage').html(message);
 	$('#loadError').show();
+}
+
+function showToast() {
+	const toastLiveExample = document.getElementById('liveToast')
+	const toast = new bootstrap.Toast(toastLiveExample)
+
+	toast.show()
 }

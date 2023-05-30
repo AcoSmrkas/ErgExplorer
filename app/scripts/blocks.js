@@ -37,7 +37,7 @@ function printBlockSummary() {
 	$('#blockHeight').html('<p>' + blockData.header.height + '</p>');
 
 	//Previous
-	$('#blockPrevious').html('<p><a href="' + blockUrl(blockData.header.parentId) + '">' + blockData.header.parentId + '</a></p>');
+	$('#blockPrevious').html('<p><a href="' + getBlockUrl(blockData.header.parentId) + '">' + blockData.header.parentId + '</a></p>');
 
 	//Difficulty
 	$('#blockDifficulty').html('<p>' + blockData.header.difficulty + '</p>');
@@ -96,7 +96,7 @@ function printBlockTransactions() {
 		let transactionData = blockTransactions[i];
 
 		//Header
-		formattedData += '<div class="row w-100 div-cell"><div class="col-9"><a href="' + getTransactionAddressUrl(transactionData.id) + '">' + transactionData.id + '</a></div><div id="txTime" class="col-3 d-flex justify-content-end">' + formatDateString(transactionData.timestamp) + '</div></div>';
+		formattedData += '<div class="row w-100 div-cell"><div class="col-9"><a href="' + getTransactionsUrl(transactionData.id) + '">' + transactionData.id + '</a></div><div id="txTime" class="col-3 d-flex justify-content-end">' + formatDateString(transactionData.timestamp) + '</div></div>';
 
 		formattedData += '<div class="row w-100"><div class="col-md-6 div-cell block-tx-holder">';
 
