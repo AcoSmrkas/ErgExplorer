@@ -50,7 +50,7 @@ function getBlockUrl(blockId) {
 }
 
 function goToBlockUrl(blockId) {
-    window.location.assign(blockUrl(blockId));
+    window.location.assign(getBlockUrl(blockId));
 }
 
 function getTokenUrl(tokenId) {
