@@ -89,7 +89,8 @@
 				<select id="searchType" class="form-select form-control form-control-lg" >
 				  <option value="0">Address</option>
 				  <option value="1">Transaction</option>
-				  <option value="2">Block</option>
+				  <option value="2">Token</option>
+				  <option value="3">Block</option>
 				</select>
 				<button onclick="searchAddress()" class="btn btn-lg btn-primary" type="button"><i class="fas fa-search"></i></button>
      		</div>
@@ -129,21 +130,21 @@
 	 	</div>
 
 		<div id="loadError" style="display: none;" class="col-md-12">
-			<div class="row w-100">
-				<div class="col-md-12 div-cell">
-					<p>Failed to fetch latest blocks.</p>
-					<br>
-					<p><strong>NOTE:</strong> Erg Explorer is still in <strong>alpha</strong> phase. Plase report any issues you encounter in our <strong><a href="https://t.me/ErgExplorer" target="_new">Telegram group</a></strong>.</p>
-				</div>
-			</div>
+	<div class="row w-100">
+		<div class="col-md-12 div-cell">
+			<p id="loadErrorMessage"></p>
+			<br>
+			<p><strong>NOTE:</strong> Erg Explorer is still in <strong>alpha</strong> phase. Plase report any issues you encounter in our <strong><a href="https://t.me/ErgExplorer" target="_new">Telegram group</a></strong>.</p>
 		</div>
+	</div>
+</div>
 	</div>
 
 	<div id="txLoading"> 
-		<div id="txLoadingInner">
-			<img id="loadingImg" src="./images/logo.png">
-		</div>
+	<div id="txLoadingInner">
+		<img id="loadingImg" src="./images/logo.png">
 	</div>
+</div>
 
 		</div>
 	
@@ -176,6 +177,7 @@
 			crossorigin="anonymous"></script>
 
 		<!-- Custom JavaScript -->
+		<script src="./scripts/common/params.js"></script>
 		<script src="./scripts/main.js"></script>
 		
 	<script src="./scripts/latest-blocks.js"></script>

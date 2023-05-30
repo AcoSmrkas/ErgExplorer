@@ -2,34 +2,16 @@ var ITEMS_PER_PAGE = 30;
 var offset = 0;
 
 $(function() {
-	offset = getOffsetFromUrl();
-});
+	offset = params['offset'];
 
-function getOffsetFromUrl() {
-	let offset = 0;
-	let hashArray = undefined;
-
-	let temp = window.location.href.split('#')[1];
-	if (temp != undefined && temp.includes('offset')) {
-		if (temp.split('&')[1] != undefined) {
-			temp = temp.split('&');
-		} else {
-			temp = [temp];
-		}
-
-		for (let i = 0; i < temp.length; i++) {
-			if (temp[i].includes('offset')) {
-				offset = temp[i].split('=')[1];
-			}
-		}
+	if (offset == undefined) {
+		offset = 0;
 	}
-
-	return offset
-}
+});
 
 function setupPagination(totalItems) {
 	let numPages = totalItems / ITEMS_PER_PAGE;
-	let currentPageNum = getOffsetFromUrl() / ITEMS_PER_PAGE + 1;
+	let currentPageNum = offset / ITEMS_PER_PAGE + 1;
 
 	if (currentPageNum == 0) {
 		currentPageNum = 1;
@@ -52,19 +34,8 @@ function setupPagination(totalItems) {
 	}
 }
 
-function getUrlWithOffset(offset) {
-	let currentHash = window.location.hash.substring(1);
-	let newHash = currentHash;
+function getUrlWithOffset(setOffset) {
+	params['offset'] = setOffset;
 
-	if (currentHash.includes('&offset')) {
-		newHash = currentHash.substring(0, currentHash.indexOf('&offset'));
-	} else if (currentHash.includes('offset')) {
-		newHash = currentHash.substring(0, currentHash.indexOf('offset'));
-	}
-
-	if (newHash != '') {
-		newHash += '&';
-	}
-
-	return window.location.pathname + '/' + newHash + 'offset=' + offset;
+	return getUrlWithParams(window.location.pathname.substring(1));
 }

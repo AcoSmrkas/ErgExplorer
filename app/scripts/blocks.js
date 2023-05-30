@@ -19,8 +19,7 @@ function printBlock() {
 		$('#blockDataHolder').show();
     })
     .fail(function() {
-    	$('#txLoadError').show();
-    	console.log('Block data fetch failed.');
+    	showLoadError('No results matching your query.');
     })
     .always(function() {
         $('#txLoading').hide();

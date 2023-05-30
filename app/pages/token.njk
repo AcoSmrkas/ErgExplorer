@@ -1,0 +1,81 @@
+{% extends "layout.njk" %}
+
+{% block styles %}
+	<!-- build:css styles/blocks.css -->
+		<link rel="stylesheet" href="styles/token.css">
+	<!-- endbuild -->
+{% endblock %}
+
+{% block navigation %}
+	{% import 'macros/nav-macro.njk' as nav %}
+	{{nav.active('')}}
+{% endblock %}
+
+{% block content %}
+	<h2 class="main-heading p-2">Token</h2>
+
+	<div id="tokenDataHolder" style="display: none;" class="col-md-12">
+		<div class="row w-100 div-cell">
+			<div id="tokenHeader" class="col">
+			</div>
+		</div>
+
+		<div class="row w-100">
+			<div id="tokenDataLeft" class="col-lg-4 div-cell p-0">
+				<div class="row w-100 p-1">
+					<div class="col-5">
+						<p><strong>Name</strong></p>
+					</div>
+					<div class="col-7">
+						<p id="tokenName"></p>
+					</div>
+				</div>				
+				<div class="row w-100 p-1">
+					<div class="col-5">
+						<p><strong>Emission amount</strong></p>
+					</div>
+					<div class="col-7">
+						<p id="tokenEmissionAmount"></p>
+					</div>
+				</div>
+				<div class="row w-100 p-1">
+					<div class="col-5">
+						<p><strong>Decimals</strong></p>
+					</div>
+					<div class="col-7">
+						<p id="tokenDecimals"></p>
+					</div>
+				</div>
+				<div class="row w-100 p-1">
+					<div class="col-5">
+						<p><strong>Type</strong></p>
+					</div>
+					<div class="col-7">
+						<p id="tokenType"></p>
+					</div>
+				</div>				
+			</div>
+
+			<div id="tokenDataRight" class="col-lg-8 div-cell p-0">
+				<div class="row w-100 p-1">
+					<div class="col-lg-2 col-2">
+						<p><strong>Description</strong></p>
+					</div>
+					<div class="col-lg-10 col-10">
+						<p id="tokenDescription"></p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	{% include "partials/error-message.njk" %}
+
+	{% include "partials/loading.njk" %}
+
+	<br>
+{% endblock %}
+
+{% block scripts %}
+	<script src="./scripts/token.js"></script>
+{% endblock %}

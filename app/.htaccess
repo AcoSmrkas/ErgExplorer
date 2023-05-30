@@ -4,5 +4,6 @@ RewriteRule ^transactions/(.*)$ /transactions#$1 [L,R=301,NE]
 RewriteRule ^blocks/(.*)$ /blocks#$1 [L,R=301,NE]
 RewriteRule ^mempool/(.*)$ /mempool#$1 [L,R=301,NE]
 RewriteRule ^issued-tokens/(.*)$ /issued-tokens#$1 [L,R=301,NE]
+RewriteRule ^token/(.*)$ /token#$1 [L,R=301,NE]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^([^\.]+)$ $1.html [NC,L]

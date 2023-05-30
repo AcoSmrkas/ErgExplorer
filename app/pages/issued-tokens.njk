@@ -1,5 +1,11 @@
 {% extends "layout.njk" %}
 
+{% block styles %}
+	<!-- build:css styles/issued-tokens.css -->
+	<link rel="stylesheet" href="styles/issued-tokens.css">
+	<!-- endbuild -->
+{% endblock %}
+
 {% block navigation %}
 	{% import 'macros/nav-macro.njk' as nav %}
 	{{nav.active('issued-tokens')}}
@@ -8,8 +14,14 @@
 {% block content %}
 	<div class="col-md-12">
 		<div class="row w-100">
-			<div class="col-md-12">
+			<div class="col-6">
 				<h2>Issued Tokens</h2>
+			</div>
+			<div class="col-6 d-flex justify-content-end">
+				<div id="nftSwitchHolder" class="form-check form-switch form-switch-lg">
+					<input onclick="onNftSwitchClick(event)" id="nftSwitch" class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+					<label class="form-check-label" for="flexSwitchCheckDefault">Hide NFTs</label>
+				</div>
 			</div>
 		</div>
 	 
@@ -37,21 +49,9 @@
 		</div>
 	</div>
 
-	<div id="loadError" style="display: none;" class="col-md-12">
-		<div class="row w-100">
-			<div class="col-md-12 div-cell">
-				<p>Failed to fetch issued tokens.</p>
-				<br>
-				<p><strong>NOTE:</strong> Erg Explorer is still in <strong>alpha</strong> phase. Plase report any issues you encounter in our <strong><a href="https://t.me/ErgExplorer" target="_new">Telegram group</a></strong>.</p>
-			</div>
-		</div>
-	</div>
+	{% include "partials/error-message.njk" %}
 
-	<div id="txLoading"> 
-		<div id="txLoadingInner">
-			<img id="loadingImg" src="./images/logo.png">
-		</div>
-	</div>
+	{% include "partials/loading.njk" %}
 {% endblock %}
 
 {% block scripts %}

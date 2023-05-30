@@ -40,8 +40,7 @@ function printLatestBlocks() {
         $('#blocksHolder').show();
     })
     .fail(function() {
-        $('#loadError').show();
-    	console.log('Latest blocks fetch failed.');
+        showLoadError('Failed to fetch latest blocks.');
     })
     .always(function() {        
         $('#txLoading').hide();

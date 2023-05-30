@@ -135,8 +135,7 @@ function printAddressSummary() {
 		$('#summaryOk').show();
     })
     .fail(function() {
-    	$('#summaryError').show();
-    	console.log('Address summary fetch failed.');
+    	showLoadError('No results matching your query.');
     });
 }
 
@@ -196,8 +195,6 @@ function onMempoolAndTransactionsDataFetched() {
 
 	$('#txLoading').hide();
 }
-
-
 
 function getOfficialExplorereAddressUrl(address) {
 	return 'https://explorer.ergoplatform.com/addresses/' + address;

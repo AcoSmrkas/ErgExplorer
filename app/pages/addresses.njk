@@ -71,21 +71,9 @@
 			{% include "partials/pagination.njk" %}
 		</div>
 
-	  	<div id="summaryError" style="display: none;" class="col-md-12">
-			<div class="row w-100">
-				<div class="col-md-12 div-cell">
-					<p>No results matching your query.</p>
-					<br>
-					<p><strong>NOTE:</strong> Erg Explorer is still in <strong>alpha</strong> phase. Plase report any issues you encounter in our <strong><a href="https://t.me/ErgExplorer" target="_new">Telegram group</a></strong>.</p>
-				</div>
-			</div>
-		</div>
-
-		<div id="txLoading"> 
-			<div id="txLoadingInner">
-				<img id="loadingImg" src="./images/logo.png">
-			</div>
-		</div>
+	  	{% include "partials/error-message.njk" %}
+		
+		{% include "partials/loading.njk" %}
 	</div>
 
 	<div id="qrCodeBack">

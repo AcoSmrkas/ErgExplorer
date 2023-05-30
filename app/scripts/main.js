@@ -9,6 +9,13 @@ $(function() {
 	$('#searchInput').val('');
 });
 
+window.addEventListener("hashchange", () => {
+		if (IS_DEV_ENVIRONMENT) {
+			window.location.reload();
+		}
+	}, false
+);
+
 function setDocumentTitle(text) {
 	document.title = 'Erg Explorer (Alpha) - ' + text;
 }
@@ -29,13 +36,13 @@ function goToWalletAddress(address) {
 
 
 function getWalletAddressFromUrl() {
-	let addressFromUrl = window.location.href.split('#')[1];
+	let addressFromUrl = undefined;
 
-	if (addressFromUrl.includes('offset')) {
-		return addressFromUrl.split('&')[0];
-	} else {
-		return addressFromUrl;
+	if (Object.keys(params)[0] = params[Object.keys(params)[0]]) {
+		addressFromUrl = Object.keys(params)[0];
 	}
+
+	return addressFromUrl;
 }
 
 function walletAddressUrl(address) {
@@ -88,6 +95,22 @@ function goToBlockUrl(blockId) {
 	window.location.assign(blockUrl(blockId));	
 }
 
+function tokenUrl(tokenId) {
+	let newPage = '';
+
+	if (IS_DEV_ENVIRONMENT) {
+		newPage = LOCALHOST + '/token#' + tokenId;
+	} else {
+		newPage = '/token/' + tokenId;
+	}
+
+	return newPage;
+}
+
+function goToTokenUrl(tokenId) {
+	window.location.assign(tokenUrl(tokenId));
+}
+
 function getHost() {
 	let host = window.location.host;
 	
@@ -121,6 +144,9 @@ function searchAddress() {
 			goToTransactionUrl(searchQuery);
 			break;
 		case '2':
+			goToTokenUrl(searchQuery);
+			break;
+		case '3':
 			goToBlockUrl(searchQuery);
 			break;
 
@@ -134,6 +160,10 @@ function formatErgValueString(value, maxDecimals = 4) {
 	return '<strong>' + (value / 1000000000).toLocaleString('en-US', { maximumFractionDigits: maxDecimals, minimumFractionDigits: 1 }) + '</strong> ERG';
 }
 
+function formatValue(value) {
+	return value.toLocaleString('en-US');
+}
+
 function formatDateString(dateString) {
 	const date = new Date(dateString);
 
@@ -144,7 +174,7 @@ function formatKbSizeString(size) {
 	return (size / 1000).toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 }) + ' kB';
 }
 
-function formatAddressString(address, length) {
+function formatAddressString(address, length = 15) {
 	return address.substring(0, length) + '...' + address.substring(address.length - 4);
 }
 
@@ -239,4 +269,9 @@ function formatInputsOutputs(data) {
 	}
 
 	return formattedData;
+}
+
+function showLoadError(message) {
+	$('#loadErrorMessage').html(message);
+	$('#loadError').show();
 }

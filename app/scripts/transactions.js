@@ -68,8 +68,7 @@ function printTransaction() {
 		$('#txDataHolder').show();
     })
     .fail(function() {
-    	$('#txLoadError').show();
-    	console.log('Transaction data fetch failed.');
+    	showLoadError('No results matching your query.');
     })
     .always(function() {
         $('#txLoading').hide();

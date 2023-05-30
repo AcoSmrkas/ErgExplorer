@@ -156,28 +156,17 @@
 
 		<h3 class="p-2">AD Proofs</h3>
 		<div id="adProofs" class="row w-100 div-cell"></div>
+
+		<br>
+
+		<h3 class="p-2">Transactions</h3>
+		<div id="blockTransactions"></div>
 	</div>
 
-	<br>
+	
+	{% include "partials/error-message.njk" %}
 
-	<h3 class="p-2">Transactions</h3>
-	<div id="blockTransactions"></div>
-
-	<div id="txLoadError" style="display: none;" class="col-md-12">
-		<div class="row w-100">
-			<div class="col-md-12 div-cell">
-				<p>No results matching your query.</p>
-				<br>
-				<p><strong>NOTE:</strong> Erg Explorer is still in <strong>alpha</strong> phase. Plase report any issues you encounter in our <strong><a href="https://t.me/ErgExplorer" target="_new">Telegram group</a></strong>.</p>
-			</div>
-		</div>
-	</div>
-
-	<div id="txLoading"> 
-		<div id="txLoadingInner">
-			<img id="loadingImg" src="./images/logo.png">
-		</div>
-	</div>
+	{% include "partials/loading.njk" %}
 
 	<br>
 {% endblock %}

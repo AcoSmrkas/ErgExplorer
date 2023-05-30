@@ -41,8 +41,7 @@ function printMempool() {
         $('#mempoolHolder').show();
     })
     .fail(function() {
-        $('#loadError').show();
-    	console.log('Latest blocks fetch failed.');
+        showLoadError('Failed to fetch mempool transactions.');
     }).always(function() {        
         $('#txLoading').hide();
     });
