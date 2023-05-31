@@ -30,7 +30,7 @@ function printLatestBlocks() {
     		formattedResult += '<td><span class="d-lg-none"><strong>Difficulty: </strong></span>' + items[i].difficulty + '</td>';
 
             //Size
-    		formattedResult += '<td><span class="d-lg-none"><strong>Size: </strong></span>' + formatDateString(items[i].size) + '</td>';
+    		formattedResult += '<td><span class="d-lg-none"><strong>Size: </strong></span>' + formatKbSizeString(items[i].size) + '</td>';
 
 			formattedResult += '</tr>';	
 		}

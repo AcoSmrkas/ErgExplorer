@@ -8,7 +8,7 @@ $(function() {
 	$('#searchInput').val('');
 });
 
-window.addEventListener("hashchange", () => {
+window.addEventListener('hashchange', () => {
 		if (IS_DEV_ENVIRONMENT) {
 			window.location.reload();
 		}
