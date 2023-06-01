@@ -1,7 +1,7 @@
 {% extends "layout.njk" %}
 
 {% block styles %}
-	<!-- build:css styles/blocks.css -->
+	<!-- build:css styles/token.css -->
 		<link rel="stylesheet" href="styles/token.css">
 	<!-- endbuild -->
 {% endblock %}
@@ -15,9 +15,8 @@
 	<h2 class="main-heading p-2">Token</h2>
 
 	<div id="tokenDataHolder" style="display: none;" class="col-md-12">
-		<div class="row w-100 div-cell">
-			<div id="tokenHeader" class="col">
-			</div>
+		<div class="row w-100 div-cell p-3">
+			<div id="tokenHeader" class="col"></div>
 		</div>
 
 		<div class="row w-100">
@@ -58,11 +57,49 @@
 
 			<div id="tokenDataRight" class="col-lg-8 div-cell p-0">
 				<div class="row w-100 p-1">
-					<div class="col-lg-2 col-2">
+					<div id="tokenDescriptionHolderLeft" class="col-xl-2 col-3">
 						<p><strong>Description</strong></p>
 					</div>
-					<div class="col-lg-10 col-10">
+					<div id="tokenDescriptionHolderRight" class="col-xl-10 col-9">
 						<p id="tokenDescription"></p>
+					</div>
+					<div id="tokenIcon" style="display: none;" class="p-3 justify-content-center justify-content-md-end"><img id="tokenIconImg" onload="onTokenIconLoaded()"></div>
+				</div>
+			</div>
+		</div>
+
+		<br>
+
+		<div id="nftHolder" style="display: none;">
+			<h3 class="p-2">NFT Info</h3>
+			<div class="div-cell row w-100 p-0">
+				<div id="nftPreviewImgHolder" class="col-md-3 p-0">
+					<img id="nftPreviewImg" onclick="showFullImgPreview()" style="display: none;" src="">
+					<audio id="nftPreviewAudio" style="display: none;" controls>
+						<source id="nftPreviewAudioSource" src="" type="audio/mpeg">
+					Your browser does not support the audio element.
+					</audio> 
+				</div>
+				<div id="nftInfoHolder" class="col-md-9 p-0">
+					<div class="row w-100 p-2">
+						<div class="col-md-3"><strong><p>Type</p></strong></div>
+						<div id="nftType" class="col"></div>
+					</div>
+					<div class="row w-100 p-2">
+						<div class="col-md-3"><strong><p>Creation height</p></strong></div>
+						<div id="nftCreationHeight" class="col"></div>
+					</div>
+					<div class="row w-100 p-2">
+						<div class="col-md-3"><strong><p>Mint address</p></strong></div>
+						<div id="nftMintedAddress" class="col"></div>
+					</div>
+					<div class="row w-100 p-2">
+						<div class="col-md-3"><strong><p>Mint transaction</p></strong></div>
+						<div id="nftMintedTransaction" class="col"></div>
+					</div>
+					<div class="row w-100 p-2">
+						<div class="col-md-3"><strong><p>Raw link</p></strong></div>
+						<div id="nftLink" class="col"></div>
 					</div>
 				</div>
 			</div>
@@ -74,8 +111,15 @@
 	{% include "partials/loading.njk" %}
 
 	<br>
+
+	<div id="nftImageFullBack" onclick="hideFullImgPreview()">
+		<div id="nftImageFullHolder">	
+			<img id="nftImageFull"></div>
+		</div>
+	</div>
 {% endblock %}
 
 {% block scripts %}
+	<script src="./scripts/common/nft.js?v=4"></script>
 	<script src="./scripts/token.js?v=4"></script>
 {% endblock %}

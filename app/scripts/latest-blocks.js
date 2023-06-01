@@ -3,7 +3,7 @@ $(function() {
 });
 
 function printLatestBlocks() {
-	var jqxhr = $.get('https://api.ergoplatform.com/blocks?limit=30&sortBy=height&sortDirection=desc', function(data) {
+	var jqxhr = $.get('https://api.ergoplatform.com/blocks?limit=' + ITEMS_PER_PAGE + '&sortBy=height&sortDirection=desc', function(data) {
 		let formattedResult = '';
 		let totalBlocks = data.total;
 		let items = data.items;

@@ -7,7 +7,7 @@ $(function() {
 });
 
 function printIssuedTokens() {
-	var jqxhr = $.get('https://api.ergoplatform.com/api/v1/tokens?limit=30&offset=' + offset + '&hideNfts=' + nftSwitchActive, function(data) {
+	var jqxhr = $.get('https://api.ergoplatform.com/api/v1/tokens?limit=' + ITEMS_PER_PAGE + '&offset=' + offset + '&hideNfts=' + nftSwitchActive, function(data) {
 		let formattedResult = '';
 		let items = data.items;
 

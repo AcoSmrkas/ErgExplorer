@@ -10,7 +10,7 @@ $(function() {
 });
 
 function printBlock() {
-	var jqxhr = $.get('https://api.ergoplatform.com/blocks//' + blockId, function(data) {
+	var jqxhr = $.get('https://api.ergoplatform.com/blocks/' + blockId, function(data) {
 		blockData = data.block;
 
 		printBlockSummary();

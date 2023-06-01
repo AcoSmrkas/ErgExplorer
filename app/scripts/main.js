@@ -107,6 +107,9 @@ function searchAddress() {
 //Format strings
 function formatErgValueString(value, maxDecimals = 4) {
 	return '<strong>' + (value / 1000000000).toLocaleString('en-US', { maximumFractionDigits: maxDecimals, minimumFractionDigits: 1 }) + '</strong> ERG';
+
+	// icon, looks fugly, will hold
+	// ' + '<img style="display: none;" onload="onTokenIconLoad(this)"  class="token-icon" src="https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/0000000000000000000000000000000000000000000000000000000000000000.svg"/>';
 }
 
 function formatValue(value) {
@@ -139,12 +142,18 @@ function formatAssetValueString(value, decimals) {
 	return (value / Math.pow(10, decimals)).toLocaleString('en-US', { maximumFractionDigits: 3, minimumFractionDigits: 2 });
 }
 
-function formatAssetNameAndValueString(name, valueString) {
+function formatAssetNameAndValueString(name, valueString, tokenId) {
 	return '<p><strong>' + name + '</strong>: ' + valueString + '</p>';
 }
 
-function getAssetTitle(asset) {
-	return ((asset.name == '' || asset.name == null) ? formatAddressString(asset.tokenId, 15) : asset.name);
+function getAssetTitle(asset, iconIsToTheLeft) {
+	let iconHtml = '<img style="display: none;" onload="onTokenIconLoad(this)"  class="token-icon" src="https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/' + asset.tokenId + '.svg"/>';
+
+	return '<a href="' + getTokenUrl(asset.tokenId) + '">' + (iconIsToTheLeft ? iconHtml + ' ' : '') + ((asset.name == '' || asset.name == null) ? formatAddressString(asset.tokenId, 15) : asset.name) + (iconIsToTheLeft ? '' : ' ' + iconHtml) + '</a>';
+}
+
+function onTokenIconLoad(element) {
+	$(element).show();
 }
 
 function zeroPad (num, places) {
@@ -152,6 +161,12 @@ function zeroPad (num, places) {
 }
 
 //Utils
+function uuidv4() {
+	return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+	(c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+	);
+}
+
 function copyToClipboard(e, text) {
 	e.preventDefault();
 
@@ -210,7 +225,7 @@ function formatInputsOutputs(data) {
 		if (data[i].assets != undefined && data[i].assets.length > 0 ) {
 			formattedData += '<h5><strong>Tokens:</strong></h5>';
 			for (let j = 0; j < data[i].assets.length; j++) {
-				formattedData += '<p><strong>' + getAssetTitle(data[i].assets[j]) + '</strong>: ' + formatAssetValueString(data[i].assets[j].amount, data[i].assets[j].decimals) + '</p>';
+				formattedData += '<p><strong>' + getAssetTitle(data[i].assets[j], true) + '</strong>: ' + formatAssetValueString(data[i].assets[j].amount, data[i].assets[j].decimals) + '</p>';
 			}
 		}
 
@@ -230,4 +245,20 @@ function showToast() {
 	const toast = new bootstrap.Toast(toastLiveExample)
 
 	toast.show()
+}
+
+function isJson(str) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+
+    return true;
+}
+
+function scrollToElement(element) {
+    $([document.documentElement, document.body]).animate({
+        scrollTop: $(element).offset().top
+    }, 200);
 }

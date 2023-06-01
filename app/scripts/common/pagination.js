@@ -7,6 +7,12 @@ $(function() {
 	if (offset == undefined) {
 		offset = 0;
 	}
+
+	let limit = params['limit'];
+
+	if (limit != undefined) {
+		ITEMS_PER_PAGE = limit;
+	}
 });
 
 function setupPagination(totalItems) {

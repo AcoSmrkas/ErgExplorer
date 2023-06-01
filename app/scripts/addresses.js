@@ -7,6 +7,8 @@ var mempoolRequestDone = false;
 var transactionsRequestDone = false;
 var formattedResult = '';
 var totalTransactions = 0;
+var valueFields = new Array();
+var valueFieldsFull = new Array();
 
 $(function() {
 	walletAddress = getWalletAddressFromUrl();	
@@ -25,10 +27,22 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 	}
 
 	let formattedResult = '';
+	let isWallet2Wallet = true;
 	for (let i = 0; i < transactionsJson.items.length; i++) {
 		const item = transactionsJson.items[i];
 
-		formattedResult += '<tr>';
+		formattedResult += '<tr>';		
+		isWallet2Wallet = item.inputs[0].address.substring(0, 1) == '9';
+
+		let isTxOut = false;
+		for (let j = 0; j < item.inputs.length; j++) {
+			if (item.inputs[j].address == walletAddress) {
+				isTxOut = true;
+				break;
+			}
+		}
+
+		let isSmart = isTxOut && !isWallet2Wallet && !isMempool;
 
 		//Tx
 		if (isMempool) {
@@ -44,23 +58,15 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		formattedResult += '<td><span class="d-lg-none"><strong>Block: </strong></span>' + ((isMempool) ? item.outputs[0].creationHeight : item.inclusionHeight) + '</td>';
 		
 		// In or Out tx.
-		let isTxOut = false;
-		for (let j = 0; j < item.inputs.length; j++) {
-			if (item.inputs[j].address == walletAddress) {
-				isTxOut = true;
-				break;
-			}
-		}
-
-		formattedResult += '<td class="' + ((isTxOut) ? 'text-danger' : 'text-success') + '">' + ((isTxOut) ? 'Out' : 'In') + '</td>';
+		formattedResult += '<td class="' + ((isTxOut) ? (isWallet2Wallet) ? 'text-danger' : 'text-info' : 'text-success') + '">' + ((isTxOut) ? (isWallet2Wallet) ? 'Out' : 'Smart' : 'In') + '</td>';
 		
 		//From
-		let fromAddress = ((isTxOut) ? walletAddress : item.inputs[0].address );
-		formattedResult += '<td><span class="d-lg-none"><strong>From: </strong></span><a href="' + getWalletAddressUrl(fromAddress) + '" >' + formatAddressString(fromAddress, 15) + '</a></td>';
+		let fromAddress = ((isTxOut) ? walletAddress : item.inputs[0].address);
+		formattedResult += '<td><span class="d-lg-none"><strong>From: </strong></span><a href="' + getWalletAddressUrl(fromAddress) + '" >' + formatAddressString(fromAddress, 10) + '</a></td>';
 		
 		//To
 		let toAddress = ((isTxOut) ? item.outputs[0].address : walletAddress);
-		formattedResult += '<td><span class="d-lg-none"><strong>To: </strong></span><a href="' + getWalletAddressUrl(toAddress) + '">' + formatAddressString(toAddress, 15) + '</a></td>';
+		formattedResult += '<td><span class="d-lg-none"><strong>To: </strong></span><a href="' + getWalletAddressUrl(toAddress) + '">' + formatAddressString(toAddress, 10) + '</a></td>';
 
 		//Status
 		formattedResult += '<td><span class="d-lg-none"><strong>Status: </strong></span><span class="' + ((isMempool) ? 'text-warning' : 'text-success' ) + '">' + ((isMempool) ? 'Pending' : 'Confirmed (' + item.numConfirmations + ')') + '</span></td>';
@@ -78,19 +84,36 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		//Value
 		let value = 0;
 		let assets = ' ';
+		let assetsFull = ' ';
+		let tokensToShow = 2;
+		let outputsAddress = (isSmart ? walletAddress : toAddress); 
 		for (let j = 0; j < item.outputs.length; j++) {
-			if (item.outputs[j].address == toAddress) {
+			if (item.outputs[j].address == outputsAddress) {
+
 				value = item.outputs[j].value;
 				
 				for (let k = 0; k < item.outputs[j].assets.length; k++) {
-					assets += '<br><strong>' + formatAssetValueString(item.outputs[j].assets[k].amount, item.outputs[j].assets[k].decimals) + '</strong> ' + getAssetTitle(item.outputs[j].assets[k]) + ' ';
+					assetsFull += '<br><strong>' + formatAssetValueString(item.outputs[j].assets[k].amount, item.outputs[j].assets[k].decimals) + '</strong> ' + getAssetTitle(item.outputs[j].assets[k], false) + ' ';
+
+					if (k > tokensToShow) continue;
+
+					assets += '<br><strong>' + formatAssetValueString(item.outputs[j].assets[k].amount, item.outputs[j].assets[k].decimals) + '</strong> ' + getAssetTitle(item.outputs[j].assets[k], false) + ' ';
+
+					if (k == tokensToShow && item.outputs[j].assets.length > tokensToShow + 1) {
+						assets += '<p>...</p><p><strong><a href="#" onclick="showFullValue(event, ' + i + ')">Show all</a></strong></p>';
+					}
 				}
+
+				assetsFull += '<p> </p><p><strong><a href="#" onclick="hideFullValue(event, ' + i + ')">Show less</a></strong></p>';
 
 				break;
 			}
 		}
 
-		formattedResult += '<td><span class="d-lg-none"><strong>Value: </strong></span>' + formatErgValueString(value, 5) + assets + '</td></tr>';
+		valueFields[i] = formatErgValueString(value, 5) + assets;
+		valueFieldsFull[i] = formatErgValueString(value, 5) + assetsFull;
+
+		formattedResult += '<td><span class="d-lg-none"><strong>Value: </strong></span><span id="txValue' + i + '">' + valueFields[i] + '</span></td></tr>';
 	}
 
 	return formattedResult;
@@ -110,18 +133,18 @@ function printAddressSummary() {
 
 			let i = 0;
 			for (i = 0; i < data.confirmed.tokens.length; i++) {
-				tokensContentFull += formatAssetNameAndValueString(getAssetTitle(data.confirmed.tokens[i]), formatAssetValueString(data.confirmed.tokens[i].amount, data.confirmed.tokens[i].decimals));
+				tokensContentFull += formatAssetNameAndValueString(getAssetTitle(data.confirmed.tokens[i], true), formatAssetValueString(data.confirmed.tokens[i].amount, data.confirmed.tokens[i].decimals), data.confirmed.tokens[i].tokenId);
 
 				if (i > tokensToShow) continue;
 
-				tokensContent += formatAssetNameAndValueString(getAssetTitle(data.confirmed.tokens[i]), formatAssetValueString(data.confirmed.tokens[i].amount, data.confirmed.tokens[i].decimals));
+				tokensContent += formatAssetNameAndValueString(getAssetTitle(data.confirmed.tokens[i], true), formatAssetValueString(data.confirmed.tokens[i].amount, data.confirmed.tokens[i].decimals), data.confirmed.tokens[i].tokenId);
 
-				if (i == tokensToShow && data.confirmed.tokens.length > tokensToShow) {
+				if (i == tokensToShow && data.confirmed.tokens.length > tokensToShow + 1) {
 					tokensContent += '<p>...</p><p><strong><a href="#" onclick="showAllTokens(event)">Show all</a></strong></p>';
 				}
 			}
 
-			if (i > tokensToShow && data.confirmed.tokens.length > tokensToShow) {
+			if (i > tokensToShow && data.confirmed.tokens.length > tokensToShow + 1) {
 				tokensContentFull += '<br><p><strong><a href="#" onclick="hideAllTokens(event)">Show less</a></strong></p>';
 			}
 
@@ -166,7 +189,7 @@ function getMempoolData() {
 }
 
 function getTransactionsData() {
-	var jqxhr = $.get('https://api.ergoplatform.com/api/v1/addresses/' + walletAddress + '/transactions?offset=' + offset + '&limit=30', function(data) {
+	var jqxhr = $.get('https://api.ergoplatform.com/api/v1/addresses/' + walletAddress + '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE, function(data) {
         	transactionsData = data;
         	totalTransactions += transactionsData.total;
 
@@ -209,6 +232,19 @@ function showAllTokens(e) {
 function hideAllTokens(e) {
 	$('#tokens').html(tokensContent);
 	window.scrollTo(0, 0);
+
+	e.preventDefault();
+}
+
+function showFullValue(e, index) {
+	$('#txValue' + index).html(valueFieldsFull[index]);
+
+	e.preventDefault();
+}
+
+function hideFullValue(e, index) {
+	$('#txValue' + index).html(valueFields[index]);
+	scrollToElement($('#txValue' + index));
 
 	e.preventDefault();
 }

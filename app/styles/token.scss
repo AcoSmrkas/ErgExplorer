@@ -1,7 +1,54 @@
-#tokenDataLeft > div:nth-child(odd) {
+#tokenDataLeft > div:nth-child(odd), #nftInfoHolder > div:nth-child(odd) {
 	background-color: #454545;
 }
 
 #tokenDescription {
 	overflow-wrap: anywhere;
+}
+
+#nftPreviewImgHolder > div {
+	text-align: center;
+}
+
+#nftPreviewImg {
+	width: auto;
+	max-height: 80vh;
+	max-width: 100%;
+}
+
+#tokenIcon {
+	text-align: right;
+}
+
+#tokenIconImg {
+	width: 100px;
+	height: 100px;
+}
+
+#nftImageFullBack {
+	position: absolute;
+	top: 0;
+	left: 0;
+	background-color: #00000099;
+	width: 100%;
+	height: 100%;
+	padding: 0;
+	margin: 0;
+	border: 0;
+	display: none;
+	justify-content: center;
+	align-items: center;
+	z-index: 1000;
+}
+
+#nftImageFull {
+	width: auto;
+	max-height: 80vh;
+	max-width: 100%;
+}
+
+#tokenDescriptionPre {
+	overflow-wrap: anywhere;
+	white-space: inherit;
+	margin: 0;
 }
