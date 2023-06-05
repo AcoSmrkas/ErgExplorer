@@ -10,7 +10,7 @@ $(function() {
 });
 
 function printTransaction() {
-	var jqxhr = $.get('https://api.ergoplatform.com/api/v1/transactions/' + txId, function(data) {
+	var jqxhr = $.get(API_HOST + 'transactions/' + txId, function(data) {
 
 		//Id
 		$('#txHeader').html('<p><a href="Copy to clipboard!" onclick="copyTransactionAddress(event)">' + data.id + ' &#128203;</a></p>');

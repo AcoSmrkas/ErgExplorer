@@ -1,5 +1,6 @@
 const FEE_ADDRESS = '2iHkR7CWvD1R4j1yZg5bkeDRQavjAaVPeTDFGGLZduHyfWMuYpmhHocX8GJoaieTx78FntzJbCBVL6rf96ocJoZdmWBL2fci7NqWgAirppPQmZ7fN9V6z13Ay6brPriBKYqLp1bT2Fk4FkFLCfdPpe';
 const DONATION_ADDRESS = '9hiaAS3pCydq12CS7xrTBBn2YTfdfSRCsXyQn9KZHVpVyEPk9zk';
+const API_HOST = 'https://api.ergoplatform.com/api/v1/';
 const IS_DEV_ENVIRONMENT = window.location.host == 'localhost:9000';
 
 var qrCode = null;
@@ -197,7 +198,6 @@ function formatNftDescription(description) {
 			result = result.substring(0, result.length - 5);
 		}
 
-		console.log(result.substring(0, 5));
 		while (result.substring(0, 5) == '\n<br>') {
 			result = result.substring(5);
 		}
@@ -207,10 +207,8 @@ function formatNftDescription(description) {
 		}
 
 		return result;
-		$('#tokenDescription').html('<pre id="tokenDescriptionPre">' + result + '</pre>');
 	} else {
 		return description;
-		$('#tokenDescription').html('<p>' + description + '</p>');
 	}
 }
 

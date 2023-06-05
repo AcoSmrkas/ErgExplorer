@@ -5,13 +5,12 @@ $(function() {
 	tokenId = getWalletAddressFromUrl();
 
 	printToken();
-	getNftInfo(tokenId, onGetNftInfoDone);
 
 	setDocumentTitle(tokenId);
 });
 
 function printToken() {
-	var jqxhr = $.get('https://api.ergoplatform.com/api/v1/tokens/' + tokenId, function(data) {
+	var jqxhr = $.get(API_HOST + 'tokens/' + tokenId, function(data) {
 		tokenData = data;
 
 		//Id
@@ -36,6 +35,8 @@ function printToken() {
 		$('#tokenIconImg').attr('src', 'https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/' + tokenData.id + '.svg');
 
 		$('#tokenDataHolder').show();
+
+		getNftInfo(data.boxId, onGetNftInfoDone);
     })
     .fail(function() {
     	showLoadError('No results matching your query.');
@@ -51,10 +52,22 @@ function onGetNftInfoDone(nftInfo, message) {
 	}
 
 	$('#nftType').html('<p>' + nftInfo.type + '</p>');
-	$('#nftLink').html('<p>' + nftInfo.rawLink + '</p>');
+	$('#nftHash').html('<p>' + nftInfo.hash + '</p>');
 	$('#nftMintedAddress').html('<p><a href="' + getWalletAddressUrl(nftInfo.data.address) + '">' + nftInfo.data.address + '</a></p>');
-	$('#nftMintedTransaction').html('<p><a href="' + getTransactionsUrl(nftInfo.data.txId) + '">' + nftInfo.data.txId + '</a></p>');
-	$('#nftCreationHeight').html('<p>' + nftInfo.data.creationHeight + '</p>');
+	$('#nftMintedTransaction').html('<p><a href="' + getTransactionsUrl(nftInfo.data.transactionId) + '">' + nftInfo.data.transactionId + '</a></p>');
+	$('#nftCreationHeight').html('<p><a href="' + getBlockUrl(nftInfo.data.blockId) + '">' + nftInfo.data.creationHeight + '</a></p>');
+
+	if (nftInfo.additionalLinks.length > 0) {
+		let formattedLinksHtml = '<p>Link 01: <a  target="_new" href="' + nftInfo.link + '">' + nftInfo.link + '</a></p>';
+
+		for (let i = 0; i < nftInfo.additionalLinks.length; i++) {
+			formattedLinksHtml += '<p>Link ' + i + 2 + ': <a  target="_new" href="' + nftInfo.additionalLinks[i] + '">' + nftInfo.additionalLinks[i] + '</a></p>'
+		}
+
+		$('#nftLink').html(formattedLinksHtml);
+	} else {
+		$('#nftLink').html('<p><a  target="_new" href="' + nftInfo.link + '">' + nftInfo.link + '</a></p>');
+	}
 
 	if (nftInfo.type == NFT_TYPE.Image) {
 		$('#nftPreviewImg').attr('src', nftInfo.link);
@@ -63,6 +76,7 @@ function onGetNftInfoDone(nftInfo, message) {
 	} else if (nftInfo.type == NFT_TYPE.Audio) {
 		$('#nftPreviewAudioSource').attr('src', nftInfo.link);
 		$('#nftPreviewAudio').show();
+		document.getElementById('nftPreviewAudio').load();
 	} else {
 		$('#nftPreviewImgHolder').hide();
 		$('#nftInfoHolder').removeClass('col-md-9');

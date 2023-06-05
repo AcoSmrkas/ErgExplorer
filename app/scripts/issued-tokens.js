@@ -13,9 +13,9 @@ function printIssuedTokens() {
     let apiUrl = '';
 
     if (query == undefined) {
-        apiUrl = 'https://api.ergoplatform.com/api/v1/tokens?limit=' + ITEMS_PER_PAGE + '&offset=' + offset + '&hideNfts=' + nftSwitchActive;
+        apiUrl = API_HOST + 'tokens?limit=' + ITEMS_PER_PAGE + '&offset=' + offset + '&hideNfts=' + nftSwitchActive;
     } else {
-        apiUrl = 'https://api.ergoplatform.com/api/v1/tokens/search?limit=' + ITEMS_PER_PAGE + '&offset=' + offset + '&query=' + query;
+        apiUrl = API_HOST + 'tokens/search?limit=' + ITEMS_PER_PAGE + '&offset=' + offset + '&query=' + query;
     }
 
 	var jqxhr = $.get(apiUrl, function(data) {

@@ -126,7 +126,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 }
 
 function printAddressSummary() {
-	var jqxhr = $.get('https://api.ergoplatform.com/api/v1/addresses/' + walletAddress + '/balance/total',
+	var jqxhr = $.get(API_HOST + 'addresses/' + walletAddress + '/balance/total',
 	function(data) {
 		$('#finalBalance').html('Final balance: <strong>' + formatErgValueString(data.confirmed.nanoErgs, 2) + '</strong>');
 
@@ -147,7 +147,7 @@ function printAddressSummary() {
 
 				tokensContentFull += tokensString;
 
-				getNftInfo(tokensArray[i].tokenId, onGotNftInfo);
+				getTokenInfo(tokensArray[i].tokenId);
 
 				if (i > tokensToShow) continue;
 
@@ -176,12 +176,27 @@ function printAddressSummary() {
     });
 }
 
+function getTokenInfo(tokenId) {
+	let boxId = localStorage.getItem('boxId-' + tokenId);
+
+	if (boxId != undefined) {
+		getNftInfo(boxId, onGotNftInfo);
+		return;
+	}
+
+	var jqxhr = $.get(API_HOST + 'tokens/' + tokenId,
+	function(data) {
+		if (data.boxId != undefined) {
+			localStorage.setItem('boxId-' + tokenId, data.boxId);
+			getNftInfo(data.boxId, onGotNftInfo);
+		}
+	});
+}
+
 function onGotNftInfo(nftInfo, message) {
 	if (nftInfo == null) {
 		return;
 	} 
-
-	console.log(nftInfo);
 
 	let imgSrc = '';
 	let formattedHtml = '';
@@ -252,7 +267,7 @@ function printTransactions() {
 }
 
 function getMempoolData() {
-	let jqxhr = $.get('https://api.ergoplatform.com/api/v1/mempool/transactions/byAddress/' + walletAddress, function(data) {
+	let jqxhr = $.get(API_HOST + 'mempool/transactions/byAddress/' + walletAddress, function(data) {
     		mempoolData = data;
 
    			totalTransactions += mempoolData.total;
@@ -268,7 +283,7 @@ function getMempoolData() {
 }
 
 function getTransactionsData() {
-	var jqxhr = $.get('https://api.ergoplatform.com/api/v1/addresses/' + walletAddress + '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE, function(data) {
+	var jqxhr = $.get(API_HOST + 'addresses/' + walletAddress + '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE, function(data) {
         	transactionsData = data;
         	totalTransactions += transactionsData.total;
 

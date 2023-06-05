@@ -8,42 +8,51 @@ const NFT_TYPE = {
 }
 
 class NftInfo {
-	constructor(name, description, type, rawLink, link, data) {
+	constructor(name, description, type, hash, link, additionalLinks, data) {
 		this.name = name;
 		this.description = description;
 		this.type = type;
-		this.rawLink = rawLink;
+		this.hash = hash;
 		this.link = link;
+		this.additionalLinks = additionalLinks;
 		this.data = data;
 	}
 }
 
-function getNftInfo(tokenId, callback) {
-	var jqxhr = $.get('https://api.ergoplatform.com/api/v0/assets/' + tokenId + '/issuingBox', function(data) {
+function getNftInfo(boxId, callback) {
+	var jqxhr = $.get(API_HOST + 'boxes/' + boxId, function(data) {
 
-		let nftData = data[0];
+		let nftData = data;
 
-		if (data[0] == undefined) {
+		if (data == undefined) {
 			callback(null, 'Data is undefined.');
 		}
 
-		let name = hex2a(nftData.additionalRegisters.R4);
-		let description = hex2a(nftData.additionalRegisters.R5).substring(3);
-		let typeString = nftData.additionalRegisters.R7;
-		let hash = hex2a(nftData.additionalRegisters.R8);
-		let link = hex2a(nftData.additionalRegisters.R9);
-		let convertedLink = undefined;
+		let name = hex2a(nftData.additionalRegisters.R4.renderedValue);
+		let description = hex2a(nftData.additionalRegisters.R5.renderedValue);
+		let typeString = (nftData.additionalRegisters.R7 == undefined ? undefined : nftData.additionalRegisters.R7.serializedValue);
+		let hash = (nftData.additionalRegisters.R8 == undefined ? undefined : nftData.additionalRegisters.R8.renderedValue);
+		let tempLink = (nftData.additionalRegisters.R9 == undefined ? undefined : nftData.additionalRegisters.R9.renderedValue.split(','));
 
-		if (link != undefined) {
-			if (link.includes('ipfs://')) {
-				convertedLink = link.substring(link.indexOf('ipfs://')).replace('ipfs://', 'https://cloudflare-ipfs.com/ipfs/');
-			} else if (link.includes('https://')) {
-				convertedLink = link.substring(link.indexOf('https://'));
-			} else if (link.includes('http://')) {
-				convertedLink = link.substring(link.indexOf('http://'));
+		let additionalLinks = new Array();
+		if (tempLink.length > 1) {
+			link = tempLink[0].substr(1);
+
+			for (let i = 1; i < tempLink.length; i++) {
+				if (i == tempLink.length - 1) {
+					tempLink[i] = tempLink[i].substr(0, tempLink[i].length - 1);
+				}
+
+				additionalLinks[i - 1] = formatLink(tempLink[i]);
 			}
 		} else {
+			link = tempLink[0];
+		}
+
+		if (link == undefined) {
 			link = 'None';
+		} else {
+			link = formatLink(link);
 		}
 
 		let type = undefined;
@@ -70,7 +79,7 @@ function getNftInfo(tokenId, callback) {
 				break;
 		}
 
-		let nft = new NftInfo(name, description, type, link, convertedLink, nftData);
+		let nft = new NftInfo(name, description, type, hash, link, additionalLinks, nftData);
 
 		if (type == undefined) {
 			nft = null;
@@ -81,6 +90,16 @@ function getNftInfo(tokenId, callback) {
     .fail(function() {
     	callback(null, 'Failed to fetch NFT data.');
     });
+}
+
+function formatLink(link) {
+	link = hex2a(link);
+
+	if (link.includes('ipfs://')) {
+		link = link.replace('ipfs://', 'https://cloudflare-ipfs.com/ipfs/');
+	}
+
+	return link;
 }
 
 function hex2a(hexx) {

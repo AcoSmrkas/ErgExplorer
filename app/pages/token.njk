@@ -75,10 +75,7 @@
 			<div class="div-cell row w-100 p-0">
 				<div id="nftPreviewImgHolder" class="col-md-3 p-0">
 					<img id="nftPreviewImg" onclick="showFullImgPreview()" style="display: none;" src="">
-					<audio id="nftPreviewAudio" style="display: none;" controls>
-						<source id="nftPreviewAudioSource" src="" type="audio/mpeg">
-					Your browser does not support the audio element.
-					</audio> 
+					<audio style="display: none;" id="nftPreviewAudio" controls="" name="media"><source id="nftPreviewAudioSource" src="" type="audio/mpeg"></video>
 				</div>
 				<div id="nftInfoHolder" class="col-md-9 p-0">
 					<div class="row w-100 p-2">
@@ -100,6 +97,10 @@
 					<div class="row w-100 p-2">
 						<div class="col-md-3"><strong><p>Raw link</p></strong></div>
 						<div id="nftLink" class="col"></div>
+					</div>
+					<div class="row w-100 p-2">
+						<div class="col-md-3"><strong><p>SHA-256 hash</p></strong></div>
+						<div id="nftHash" class="col"></div>
 					</div>
 				</div>
 			</div>
