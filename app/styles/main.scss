@@ -294,3 +294,17 @@ select, option {
 	line-height: 25px;
 	padding-bottom: 3px;
 }
+
+.tokenDescriptionPre {
+	overflow-wrap: anywhere;
+	white-space: inherit;
+	margin: 0;
+}
+
+.stripedHolder > div:nth-child(odd) {
+	background-color: #454545;
+}
+
+.stripedHolderEven > div:nth-child(even) {
+	background-color: #454545;
+}

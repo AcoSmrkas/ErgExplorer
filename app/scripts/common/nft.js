@@ -8,7 +8,8 @@ const NFT_TYPE = {
 }
 
 class NftInfo {
-	constructor(description, type, rawLink, link, data) {
+	constructor(name, description, type, rawLink, link, data) {
+		this.name = name;
 		this.description = description;
 		this.type = type;
 		this.rawLink = rawLink;
@@ -23,9 +24,10 @@ function getNftInfo(tokenId, callback) {
 		let nftData = data[0];
 
 		if (data[0] == undefined) {
-			return;
+			callback(null, 'Data is undefined.');
 		}
 
+		let name = hex2a(nftData.additionalRegisters.R4);
 		let description = hex2a(nftData.additionalRegisters.R5).substring(3);
 		let typeString = nftData.additionalRegisters.R7;
 		let hash = hex2a(nftData.additionalRegisters.R8);
@@ -33,7 +35,13 @@ function getNftInfo(tokenId, callback) {
 		let convertedLink = undefined;
 
 		if (link != undefined) {
-			convertedLink = link.substring(link.indexOf('ipfs://')).replace('ipfs://', 'https://cloudflare-ipfs.com/ipfs/');	
+			if (link.includes('ipfs://')) {
+				convertedLink = link.substring(link.indexOf('ipfs://')).replace('ipfs://', 'https://cloudflare-ipfs.com/ipfs/');
+			} else if (link.includes('https://')) {
+				convertedLink = link.substring(link.indexOf('https://'));
+			} else if (link.includes('http://')) {
+				convertedLink = link.substring(link.indexOf('http://'));
+			}
 		} else {
 			link = 'None';
 		}
@@ -62,7 +70,11 @@ function getNftInfo(tokenId, callback) {
 				break;
 		}
 
-		let nft = new NftInfo(description, type, link, convertedLink, nftData);
+		let nft = new NftInfo(name, description, type, link, convertedLink, nftData);
+
+		if (type == undefined) {
+			nft = null;
+		}
 
 		callback(nft, null);
     })

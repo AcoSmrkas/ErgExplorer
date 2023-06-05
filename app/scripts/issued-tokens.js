@@ -1,13 +1,24 @@
 const NFT_SWITCH_PARAM = 'hideNfts';
 var nftSwitchActive = false;
+var query = '';
 
 $(function() {
+    query = params['query'];
+
     setupNftSwitch();
     printIssuedTokens();
 });
 
 function printIssuedTokens() {
-	var jqxhr = $.get('https://api.ergoplatform.com/api/v1/tokens?limit=' + ITEMS_PER_PAGE + '&offset=' + offset + '&hideNfts=' + nftSwitchActive, function(data) {
+    let apiUrl = '';
+
+    if (query == undefined) {
+        apiUrl = 'https://api.ergoplatform.com/api/v1/tokens?limit=' + ITEMS_PER_PAGE + '&offset=' + offset + '&hideNfts=' + nftSwitchActive;
+    } else {
+        apiUrl = 'https://api.ergoplatform.com/api/v1/tokens/search?limit=' + ITEMS_PER_PAGE + '&offset=' + offset + '&query=' + query;
+    }
+
+	var jqxhr = $.get(apiUrl, function(data) {
 		let formattedResult = '';
 		let items = data.items;
 
@@ -17,17 +28,17 @@ function printIssuedTokens() {
             //Id
     		formattedResult += '<td><span class="d-lg-none"><strong>Id: </strong></span><a href="' + getTokenUrl(items[i].id) + '">' + formatAddressString(items[i].id) + '</a></td>';
 
-            //Time
+            //Name
     		formattedResult += '<td><span class="d-lg-none"><strong>Name: </strong></span>' + items[i].name + '</td>';
 
-            //Inputs
+            //Emission amount
     		formattedResult += '<td><span class="d-lg-none"><strong>Amount: </strong></span>' + formatValue(items[i].emissionAmount) + '</td>';
 
-            //Outputs
+            //Decimals
     		formattedResult += '<td><span class="d-lg-none"><strong>Decimals: </strong></span>' + items[i].decimals + '</td>';
 
-            //Size
-    		formattedResult += '<td><span class="d-lg-none"><strong>Description: </strong></span>' + items[i].description + '</td>';
+            //Description
+    		formattedResult += '<td><pre class="tokenDescriptionPre">' + formatNftDescription(items[i].description) + '</pre></td>';
 
 			formattedResult += '</tr>';	
 		}
@@ -61,6 +72,10 @@ function setupNftSwitch() {
 function onNftSwitchClick(event) {
     params[NFT_SWITCH_PARAM] = $('#nftSwitch').prop('checked');
     params['offset'] = 0;
+
+    if (params[NFT_SWITCH_PARAM]) {
+        delete(params['query']);
+    }
 
     window.location.assign(getCurrentUrlWithParams());
 }

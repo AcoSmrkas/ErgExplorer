@@ -16,12 +16,83 @@
 			<h1>Protocol info</h1>
 			<h5 class="">Version: <span id="ergVersion"></span></h2>
 			<h5 class="">Circulating Supply: <span id="ergSupply"></span></h2>
-			<h5 class="">Max Supply: <span>97,739,924 ERG</span></h2>
+			<h5 class="">Max Supply: <span id="ergTotal"></span></h2>
 			<h5 class="">Hash rate: <span id="ergHashRate"></span></h2>
 			<h5 class="">Tx Per day: <span id="ergTxAvg"></span></h2>
 		</div>
 		<div class="col-md-1"></div>
 	</div>
+	<div class="row w-100 p-0">		
+		<div class="col-md-1"><br></div>
+		<div class="col-md-10 m-0 div-cell p-0">
+			<div class="row w-100 p-0">	
+				<div id="statsHolderLeft" class="col-md-6 p-0 ">
+					<h2 class="p-3 m-0">24h Stats</h2>
+					<h3 class="p-3">Block summary</h3>
+					<div class="col-12 div-cell stripedHolder p-0">
+					<div class="row w-100 p-1">
+						<div class="col-6"><strong>Blocks mined</strong></div>
+						<div id="statsBlocksMined" class="col"></div>
+					</div>
+					<div class="row w-100 p-1">
+						<div class="col-6"><strong>Average mining time</strong></div>
+						<div id="statsAverageMiningTime" class="col"></div>
+					</div>
+					<div class="row w-100 p-1">
+						<div class="col-6"><strong>Coins mined</strong></div>
+						<div id="statsCoinsMined" class="col"></div>
+					</div>
+					<h3 class="p-3">Transactions summary</h3>
+					<div class="row w-100 p-1">
+						<div class="col-6"><strong>Number of Transactions</strong></div>
+						<div id="statsNumberOfTransactions" class="col"></div>
+					</div>
+					<div class="row w-100 p-1">
+						<div class="col-6"><strong>Total Transaction Fees</strong></div>
+						<div id="statsTotalTransactionFees" class="col"></div>
+					</div>
+					<div class="row w-100 p-1">
+						<div class="col-6"><strong>Total Output Volume</strong></div>
+						<div id="statsTotalOutputVolume" class="col"></div>
+					</div>
+					</div>
+				</div>
+				<div id="statsHolderRight" class="col-md-6 p-0">
+					<h2 class="p-3 m-0"> </h2>
+					<h3 class="p-3">Mining cost</h3>
+					<div class="col-12 div-cell stripedHolder p-0">
+					<div class="row w-100 p-1">
+						<div class="col-6"><strong>Total Miners Revenue</strong></div>
+						<div id="statsTotalMinersRevenue" class="col"></div>
+					</div>
+					<div class="row w-100 p-1">
+						<div class="col-6"><strong>% Earned From Transaction Fees</strong></div>
+						<div id="statsEarnedFromTransactionFees" class="col"></div>
+					</div>
+					<div class="row w-100 p-1">
+						<div class="col-6"><strong>% Of Transaction Volume</strong></div>
+						<div id="statsOfTransactionVolume" class="col"></div>
+					</div>
+					<div class="row w-100 p-1">
+						<div class="col-6"><strong>Cost per Transaction</strong></div>
+						<div id="statsCostPerTransaction" class="col"></div>
+					</div>
+					<div class="row w-100 p-1">
+						<div class="col-6"><strong>Difficulty</strong></div>
+						<div id="statsDifficulty" class="col"></div>
+					</div>
+					<div class="row w-100 p-1">
+						<div class="col-6"><strong>Hash Rate</strong></div>
+						<div id="statsHashRate" class="col"></div>
+					</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-1"></div>
+	</div>
+
+	<br>
 {% endblock %}
 
 {% block scripts %}

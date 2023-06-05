@@ -30,15 +30,7 @@ function printToken() {
 		$('#tokenType').html('<p>' + tokenData.type + '</p>');
 
 		//Description
-		if (isJson(tokenData.description)) {
-			const jsonString = JSON.stringify(JSON.parse(tokenData.description), null, '<br>');
-			let result = jsonString.replace(/[{}"]/g, '').replace('<br>', '');
-			result = result.replaceAll(',\n', '');
-
-			$('#tokenDescription').html('<pre id="tokenDescriptionPre">' + result + '</pre>');
-		} else {
-			$('#tokenDescription').html('<p>' + tokenData.description + '</p>');
-		}
+		$('#tokenDescription').html('<pre class="tokenDescriptionPre">' + formatNftDescription(tokenData.description) + '</pre>');
 
 		//Icon
 		$('#tokenIconImg').attr('src', 'https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/' + tokenData.id + '.svg');
@@ -71,7 +63,7 @@ function onGetNftInfoDone(nftInfo, message) {
 	} else if (nftInfo.type == NFT_TYPE.Audio) {
 		$('#nftPreviewAudioSource').attr('src', nftInfo.link);
 		$('#nftPreviewAudio').show();
-	} else if (nftInfo.type == NFT_TYPE.ArtCollection) {
+	} else {
 		$('#nftPreviewImgHolder').hide();
 		$('#nftInfoHolder').removeClass('col-md-9');
 		$('#nftInfoHolder').addClass('col-12');

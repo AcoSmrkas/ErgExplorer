@@ -9,6 +9,7 @@ var formattedResult = '';
 var totalTransactions = 0;
 var valueFields = new Array();
 var valueFieldsFull = new Array();
+var nftsCount = 0;
 
 $(function() {
 	walletAddress = getWalletAddressFromUrl();	
@@ -42,7 +43,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 			}
 		}
 
-		let isSmart = isTxOut && !isWallet2Wallet && !isMempool;
+		let isSmart = isTxOut && !isWallet2Wallet;
 
 		//Tx
 		if (isMempool) {
@@ -86,20 +87,25 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		let assets = ' ';
 		let assetsFull = ' ';
 		let tokensToShow = 2;
-		let outputsAddress = (isSmart ? walletAddress : toAddress); 
+		let outputsAddress = (isSmart ? walletAddress : toAddress);
 		for (let j = 0; j < item.outputs.length; j++) {
 			if (item.outputs[j].address == outputsAddress) {
 
 				value = item.outputs[j].value;
 				
-				for (let k = 0; k < item.outputs[j].assets.length; k++) {
-					assetsFull += '<br><strong>' + formatAssetValueString(item.outputs[j].assets[k].amount, item.outputs[j].assets[k].decimals) + '</strong> ' + getAssetTitle(item.outputs[j].assets[k], false) + ' ';
+				//Sort
+				let tokensArray = sortTokens(item.outputs[j].assets);
+				
+				for (let k = 0; k < tokensArray.length; k++) {
+					let assetsString = '<br><strong>' + formatAssetValueString(tokensArray[k].amount, tokensArray[k].decimals) + '</strong> ' + getAssetTitle(tokensArray[k], false) + ' ';
 
+					assetsFull += assetsString;
+					
 					if (k > tokensToShow) continue;
 
-					assets += '<br><strong>' + formatAssetValueString(item.outputs[j].assets[k].amount, item.outputs[j].assets[k].decimals) + '</strong> ' + getAssetTitle(item.outputs[j].assets[k], false) + ' ';
+					assets += assetsString;
 
-					if (k == tokensToShow && item.outputs[j].assets.length > tokensToShow + 1) {
+					if (k == tokensToShow && tokensArray.length > tokensToShow + 1) {
 						assets += '<p>...</p><p><strong><a href="#" onclick="showFullValue(event, ' + i + ')">Show all</a></strong></p>';
 					}
 				}
@@ -131,20 +137,28 @@ function printAddressSummary() {
 			tokensContent = '';
 			tokensContentFull = '';
 
+			//Sort
+			let tokensArray = sortTokens(data.confirmed.tokens);
+
+			//Format output
 			let i = 0;
-			for (i = 0; i < data.confirmed.tokens.length; i++) {
-				tokensContentFull += formatAssetNameAndValueString(getAssetTitle(data.confirmed.tokens[i], true), formatAssetValueString(data.confirmed.tokens[i].amount, data.confirmed.tokens[i].decimals), data.confirmed.tokens[i].tokenId);
+			for (i = 0; i < tokensArray.length; i++) {
+				let tokensString = formatAssetNameAndValueString(getAssetTitle(tokensArray[i], true), formatAssetValueString(tokensArray[i].amount, tokensArray[i].decimals), tokensArray[i].tokenId);
+
+				tokensContentFull += tokensString;
+
+				getNftInfo(tokensArray[i].tokenId, onGotNftInfo);
 
 				if (i > tokensToShow) continue;
 
-				tokensContent += formatAssetNameAndValueString(getAssetTitle(data.confirmed.tokens[i], true), formatAssetValueString(data.confirmed.tokens[i].amount, data.confirmed.tokens[i].decimals), data.confirmed.tokens[i].tokenId);
+				tokensContent += tokensString;
 
-				if (i == tokensToShow && data.confirmed.tokens.length > tokensToShow + 1) {
+				if (i == tokensToShow && tokensArray.length > tokensToShow + 1) {
 					tokensContent += '<p>...</p><p><strong><a href="#" onclick="showAllTokens(event)">Show all</a></strong></p>';
 				}
 			}
 
-			if (i > tokensToShow && data.confirmed.tokens.length > tokensToShow + 1) {
+			if (i > tokensToShow && tokensArray.length > tokensToShow + 1) {
 				tokensContentFull += '<br><p><strong><a href="#" onclick="hideAllTokens(event)">Show less</a></strong></p>';
 			}
 
@@ -160,6 +174,71 @@ function printAddressSummary() {
     .fail(function() {
     	showLoadError('No results matching your query.');
     });
+}
+
+function onGotNftInfo(nftInfo, message) {
+	if (nftInfo == null) {
+		return;
+	} 
+
+	console.log(nftInfo);
+
+	let imgSrc = '';
+	let formattedHtml = '';
+	let nftHolderId = '';
+	let nftContentHolderId = '';
+
+	switch (nftInfo.type) {
+		case NFT_TYPE.Image:
+			imgSrc = nftInfo.link;
+			nftHolderId = '#nftImagesHolder';
+			nftContentHolderId = '#nftImagesContentHolder';
+			break;
+		case NFT_TYPE.Audio:
+			imgSrc = './images/nft-audio.png';
+			nftHolderId = '#nftAudioHolder';
+			nftContentHolderId = '#nftAudioContentHolder';
+			break;
+		case NFT_TYPE.Video:
+			imgSrc = './images/nft-video.png';
+			nftHolderId = '#nftVideoHolder';
+			nftContentHolderId = '#nftVideoContentHolder';
+			break;
+		case NFT_TYPE.ArtCollection:
+			imgSrc = './images/nft-artcollection.png';;
+			nftHolderId = '#nftArtCollectionHolder';
+			nftContentHolderId = '#nftArtCollectionContentHolder';
+			break;
+		case NFT_TYPE.FileAttachment:
+			imgSrc = './images/nft-file.png';
+			nftHolderId = '#nftFileHolder';
+			nftContentHolderId = '#nftFileContentHolder';
+			break;
+		case NFT_TYPE.MembershipToken:
+			imgSrc = './images/nft-membership.png';
+			nftHolderId = '#nftMembershipHolder';
+			nftContentHolderId = '#nftMembershipContentHolder';
+			break;
+	}
+
+	formattedHtml = $(nftContentHolderId).html() + '<a href="' + getTokenUrl(nftInfo.data.assets[0].tokenId) + '"><div class="card m-1" style="width: 100px;"><img src="' + imgSrc + '" class="card-img-top' + ((nftInfo.type == NFT_TYPE.Image) ? '' : ' p-4') + '"><div class="card-body p-2"><p class="card-text">' + nftInfo.name + '</p></div></div></a>';
+
+	$(nftContentHolderId).html(formattedHtml);
+	$(nftHolderId).show();
+	$('#nftsHolder').show();
+
+	nftsCount++;
+	$('#nftsTitle').html('NFTs (+' + nftsCount + ')');
+}
+
+function showNfts(e) {
+	$('#nftsShowAll').show();
+	$('#showAllNftsAction').hide();
+	$('#nftsTitle').html('<strong>NFTs</strong>');
+
+	scrollToElement($('#nftsTitle'));
+
+	e.preventDefault();
 }
 
 function printTransactions() {

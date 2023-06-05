@@ -1,6 +1,7 @@
 $(function() {	
     getErgPrice();
     getProtocolInfo();
+    getStats();
 });
 
 function getProtocolInfo() {
@@ -11,7 +12,8 @@ function getProtocolInfo() {
 	  	let data = JSON.parse(this.response);
 
 	    $('#ergVersion').html(data.version);
-	    $('#ergSupply').html(formatErgValueString(data.supply));
+	    $('#ergSupply').html(formatErgValueString(data.supply, 0));
+	    $('#ergTotal').html(formatErgValueString(97739924000000000, 0));
 	    $('#ergHashRate').html(formatHashRateString(data.hashRate));
 	    $('#ergTxAvg').html(data.transactionAverage);
 	  }
@@ -23,6 +25,52 @@ function getProtocolInfo() {
 	xhr.withCredentials = false;
 
 	xhr.send();
+}
+
+function getStats() {
+	var jqxhr = $.get('https://api.ergoplatform.com/stats', function(data) {
+		
+		//Blocks summary
+		//Blocks mined
+		$('#statsBlocksMined').html('<p>' + data.blockSummary.total + '</p>');
+
+		//Average mining time
+		$('#statsAverageMiningTime').html('<p>' + millisToMinutesAndSeconds(data.blockSummary.averageMiningTime) + '</p>');
+
+		//Coins mined
+		$('#statsCoinsMined').html('<p>' + formatErgValueString(data.blockSummary.totalCoins, 0) + '</p>');
+
+		//Transactions summary
+		//Number of transactions
+		$('#statsNumberOfTransactions').html('<p>' + data.transactionsSummary.total + '</p>');
+
+		//Total transaction fees
+		$('#statsTotalTransactionFees').html('<p>' + formatErgValueString(data.transactionsSummary.totalFee) + '</p>');
+
+		//Total output volume
+		$('#statsTotalOutputVolume').html('<p>' + formatErgValueString(data.transactionsSummary.totalOutput) + '</p>');
+
+		//Mining cost
+		//Blocks mined
+		$('#statsTotalMinersRevenue').html('<p>' + formatErgValueString(data.miningCost.totalMinersRevenue) + '</p>');
+
+		//Average mining time
+		$('#statsEarnedFromTransactionFees').html('<p>' + data.miningCost.percentEarnedTransactionsFees + '%</p>');
+
+		//Coins mined
+		$('#statsOfTransactionVolume').html('<p>' + data.miningCost.percentTransactionVolume + '%</p>');
+
+		//Number of transactions
+		$('#statsCostPerTransaction').html('<p>' + formatErgValueString(data.miningCost.costPerTransaction) + '</p>');
+
+		//Total transaction fees
+		$('#statsDifficulty').html('<p>' + data.miningCost.difficulty + '</p>');
+
+		//Total output volume
+		$('#statsHashRate').html('<p>' + formatHashRateString(data.miningCost.hashRate) + '</p>');
+
+		$('#statsHolder').show();
+    });;
 }
 
 function getErgPrice() {
