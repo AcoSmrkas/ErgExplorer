@@ -140,7 +140,9 @@ function formatErgValueString(value, maxDecimals = 4) {
 		minimumFractionDigits= maxDecimals;
 	}
 
-	return '<strong>' + (value / 1000000000).toLocaleString('en-US', { maximumFractionDigits: maxDecimals, minimumFractionDigits: minimumFractionDigits }) + '</strong> ERG';
+	let ergValue = value / 1000000000;
+
+	return '<strong title="' + ergValue + '">' + ergValue.toLocaleString('en-US', { maximumFractionDigits: maxDecimals, minimumFractionDigits: minimumFractionDigits }) + '</strong> ERG';
 
 	// icon, looks fugly, will hold
 	// ' + '<img style="display: none;" onload="onTokenIconLoad(this)"  class="token-icon" src="https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/0000000000000000000000000000000000000000000000000000000000000000.svg"/>';
@@ -168,8 +170,8 @@ function formatDollarValueString(value) {
 	return '$' + value.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 1 });
 }
 
-function formatValue(value, decimals) {
-	return '<span title="' + value.toLocaleString('en-US', { maximumFractionDigits: 4, minimumFractionDigits: 2 }) + '">' + nFormatter(value, decimals) + '</span>';
+function formatValue(value, digits) {
+	return '<span title="' + value.toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: 2 }) + '">' + nFormatter(value, digits) + '</span>';
 }
 
 function formatAssetValueString(value, decimals, digits = 2) {
@@ -256,8 +258,8 @@ function showQRcode(text) {
 	if (qrCode == null) {
 		 qrCode = new QRCode(document.getElementById('qrcode'), {
 			text: text,
-			width: 256,
-			height: 256,
+			width: 400,
+			height: 400,
 			colorDark : '#000000',
 			colorLight : '#ffffff',
 			correctLevel : QRCode.CorrectLevel.H
@@ -297,7 +299,7 @@ function formatInputsOutputs(data) {
 		if (data[i].assets != undefined && data[i].assets.length > 0 ) {
 			formattedData += '<h5><strong>Tokens:</strong></h5>';
 			for (let j = 0; j < data[i].assets.length; j++) {
-				formattedData += '<p><strong>' + getAssetTitle(data[i].assets[j], true) + '</strong>: ' + formatAssetValueString(data[i].assets[j].amount, data[i].assets[j].decimals) + '</p>';
+				formattedData += '<p><strong>' + getAssetTitle(data[i].assets[j], true) + '</strong>: ' + formatAssetValueString(data[i].assets[j].amount, data[i].assets[j].decimals, 4) + '</p>';
 			}
 		}
 

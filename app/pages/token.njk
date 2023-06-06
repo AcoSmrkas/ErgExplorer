@@ -73,11 +73,12 @@
 		<div id="nftHolder" style="display: none;">
 			<h3 class="p-2">NFT Info</h3>
 			<div class="div-cell row w-100 p-0">
-				<div id="nftPreviewImgHolder" class="col-md-3 p-0">
+				<div id="nftPreviewImgHolder" class="col-lg-3 p-0">
 					<img id="nftPreviewImg" onclick="showFullImgPreview()" style="display: none;" src="">
-					<audio style="display: none;" id="nftPreviewAudio" controls="" name="media"><source id="nftPreviewAudioSource" src="" type="audio/mpeg"></video>
+					<audio style="display: none;" id="nftPreviewAudio" controls crossorigin name="media"><source id="nftPreviewAudioSource" src="" type="audio/mp3"></audio>
+					<video style="display: none;" id="nftPreviewVideo" controls crossorigin allowfullscreen name="media"><source id="nftPreviewVideoSource" src="" type="video/mp4"></video>
 				</div>
-				<div id="nftInfoHolder" class="col-md-9 p-0">
+				<div id="nftInfoHolder" class="col-lg-9 p-0">
 					<div class="row w-100 p-2">
 						<div class="col-md-3"><strong><p>Type</p></strong></div>
 						<div id="nftType" class="col"></div>
@@ -89,6 +90,10 @@
 					<div class="row w-100 p-2">
 						<div class="col-md-3"><strong><p>Mint address</p></strong></div>
 						<div id="nftMintedAddress" class="col"></div>
+					</div>					
+					<div class="row w-100 p-2">
+						<div class="col-md-3"><strong><p>Current address</p></strong></div>
+						<div id="nftCurrentAddress" class="col"></div>
 					</div>
 					<div class="row w-100 p-2">
 						<div class="col-md-3"><strong><p>Mint transaction</p></strong></div>

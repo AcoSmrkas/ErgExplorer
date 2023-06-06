@@ -19,23 +19,26 @@ class NftInfo {
 	}
 }
 
-function getNftInfo(boxId, callback) {
-	var jqxhr = $.get(API_HOST + 'boxes/' + boxId, function(data) {
+//https://api.ergoplatform.com/api/v1/boxes/byTokenId
+function getNftInfo(tokenId, callback) {
+	var jqxhr = $.get(API_HOST + 'boxes/byTokenId/' + tokenId, function(data) {
 
-		let nftData = data;
+		let nftData = data.items[0];
 
 		if (data == undefined) {
 			callback(null, 'Data is undefined.');
 		}
 
-		let name = hex2a(nftData.additionalRegisters.R4.renderedValue);
-		let description = hex2a(nftData.additionalRegisters.R5.renderedValue);
+		let name = (nftData.additionalRegisters.R4 == undefined ? undefined : hex2a(nftData.additionalRegisters.R4.renderedValue));
+		let description = (nftData.additionalRegisters.R5 == undefined ? undefined : hex2a(nftData.additionalRegisters.R5.renderedValue));
 		let typeString = (nftData.additionalRegisters.R7 == undefined ? undefined : nftData.additionalRegisters.R7.serializedValue);
 		let hash = (nftData.additionalRegisters.R8 == undefined ? undefined : nftData.additionalRegisters.R8.renderedValue);
 		let tempLink = (nftData.additionalRegisters.R9 == undefined ? undefined : nftData.additionalRegisters.R9.renderedValue.split(','));
 
 		let additionalLinks = new Array();
-		if (tempLink.length > 1) {
+		if (tempLink == undefined) {
+			link = undefined;
+		} else if (tempLink.length > 1) {
 			link = tempLink[0].substr(1);
 
 			for (let i = 1; i < tempLink.length; i++) {
@@ -79,7 +82,7 @@ function getNftInfo(boxId, callback) {
 				break;
 		}
 
-		let nft = new NftInfo(name, description, type, hash, link, additionalLinks, nftData);
+		let nft = new NftInfo(name, description, type, hash, link, additionalLinks, data.items);
 
 		if (type == undefined) {
 			nft = null;

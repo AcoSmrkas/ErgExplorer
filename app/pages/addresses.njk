@@ -18,9 +18,7 @@
 		<div id="summaryOk" style="display: none;" class="row w-100">
 			<div class="col-md-7 col-sm-12 div-cell">
 				<h4><strong>Summary</strong></h4>
-				<p>
-					<strong>Address:</strong> <a onclick="copyWalletAddress(event)" href="Copy to clipboard!" id="address"></a>
-				</p>
+				<p><strong>Address:</strong> <a onclick="copyWalletAddress(event)" href="Copy to clipboard!" id="address"></a></p>
 				<p id="totalTransactions"></p>
 
 				<br>
@@ -38,7 +36,8 @@
 				<div id="nftsHolder" style="display: none;">
 					<br>
 
-					<h4 style="display:inline-block;" id="nftsTitle"><strong>NFTs</strong></h4> <a id="showAllNftsAction" style="display:inline-block;" href="#" onclick="showNfts(event)">Show</a>
+					<h4 style="display:inline-block;" id="nftsTitle"><strong>NFTs</strong></h4><a id="showAllNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="showNfts(event)">Show</a>
+					<a id="hideAllNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="hideNfts(event)">Hide</a>
 					<div id="nftsShowAll" style="display: none;">
 						<div id="nftImagesHolder" class="row w-100 p-0" style="display: none;">
 							<h5 class="p-2">Image</h5>

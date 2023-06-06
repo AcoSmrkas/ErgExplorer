@@ -22,6 +22,61 @@ $(function() {
     setupQrCode();
 });
 
+function printAddressSummary() {
+	var jqxhr = $.get(API_HOST + 'addresses/' + walletAddress + '/balance/total',
+	function(data) {
+		$('#finalBalance').html('Final balance: <strong>' + formatErgValueString(data.confirmed.nanoErgs, 2) + '</strong>');
+
+		if (data.confirmed.tokens.length > 0) {
+			$('#tokensHolder').show();
+
+			let tokensToShow = 2;
+			tokensContent = '';
+			tokensContentFull = '';
+
+			//Sort
+			let tokensArray = sortTokens(data.confirmed.tokens);
+
+			//Format output
+			let i = 0;
+			for (i = 0; i < tokensArray.length; i++) {
+				let tokensString = formatAssetNameAndValueString(getAssetTitle(tokensArray[i], true), formatAssetValueString(tokensArray[i].amount, tokensArray[i].decimals, 4), tokensArray[i].tokenId);
+
+				tokensContentFull += tokensString;
+
+				getNftInfo(tokensArray[i].tokenId, onGotNftInfo);
+
+				if (i > tokensToShow) continue;
+
+				tokensContent += tokensString;
+
+				if (i == tokensToShow && tokensArray.length > tokensToShow + 1) {
+					tokensContent += '<p>...</p><p><strong><a href="#" onclick="showAllTokens(event)">Show all</a></strong></p>';
+				}
+			}
+
+			if (i > tokensToShow && tokensArray.length > tokensToShow + 1) {
+				tokensContentFull += '<br><p><strong><a href="#" onclick="hideAllTokens(event)">Hide</a></strong></p>';
+			}
+
+			$('#tokens').html(tokensContent);
+		}
+
+		let walletAddressString = walletAddress;
+		if (walletAddressString.length > 70) {
+			walletAddressString = formatAddressString(walletAddressString, 60);
+		}
+		$('#address').html(walletAddressString + ' &#128203;');
+		$('#officialLink').html(getOfficialExplorereAddressUrl(walletAddressString));
+		$('#officialLink').attr('href', getOfficialExplorereAddressUrl(walletAddress));
+
+		$('#summaryOk').show();
+    })
+    .fail(function() {
+    	showLoadError('No results matching your query.');
+    });
+}
+
 function getFormattedTransactionsString(transactionsJson, isMempool) {
 	if (transactionsJson == undefined || transactionsJson == '' || transactionsJson.total == 0) {
 		return '';
@@ -56,7 +111,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		formattedResult += '<td><span class="d-lg-none"><strong>Time: </strong></span>' + formatDateString((isMempool) ? item.creationTimestamp : item.timestamp) + '</td>';
 
 		//Block nr.
-		formattedResult += '<td><span class="d-lg-none"><strong>Block: </strong></span>' + ((isMempool) ? item.outputs[0].creationHeight : item.inclusionHeight) + '</td>';
+		formattedResult += '<td><span class="d-lg-none"><strong>Block: </strong></span>' + ((isMempool) ? item.outputs[0].creationHeight : '<a href="' + getBlockUrl(item.blockId) + '">' + item.inclusionHeight + '</a>') + '</td>';
 		
 		// In or Out tx.
 		formattedResult += '<td class="' + ((isTxOut) ? (isWallet2Wallet) ? 'text-danger' : 'text-info' : 'text-success') + '">' + ((isTxOut) ? (isWallet2Wallet) ? 'Out' : 'Smart' : 'In') + '</td>';
@@ -97,7 +152,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 				let tokensArray = sortTokens(item.outputs[j].assets);
 				
 				for (let k = 0; k < tokensArray.length; k++) {
-					let assetsString = '<br><strong>' + formatAssetValueString(tokensArray[k].amount, tokensArray[k].decimals) + '</strong> ' + getAssetTitle(tokensArray[k], false) + ' ';
+					let assetsString = '<br><strong>' + formatAssetValueString(tokensArray[k].amount, tokensArray[k].decimals, 4) + '</strong> ' + getAssetTitle(tokensArray[k], false) + ' ';
 
 					assetsFull += assetsString;
 					
@@ -110,7 +165,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 					}
 				}
 
-				assetsFull += '<p> </p><p><strong><a href="#" onclick="hideFullValue(event, ' + i + ')">Show less</a></strong></p>';
+				assetsFull += '<p> </p><p><strong><a href="#" onclick="hideFullValue(event, ' + i + ')">Hide</a></strong></p>';
 
 				break;
 			}
@@ -123,74 +178,6 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 	}
 
 	return formattedResult;
-}
-
-function printAddressSummary() {
-	var jqxhr = $.get(API_HOST + 'addresses/' + walletAddress + '/balance/total',
-	function(data) {
-		$('#finalBalance').html('Final balance: <strong>' + formatErgValueString(data.confirmed.nanoErgs, 2) + '</strong>');
-
-		if (data.confirmed.tokens.length > 0) {
-			$('#tokensHolder').show();
-
-			let tokensToShow = 2;
-			tokensContent = '';
-			tokensContentFull = '';
-
-			//Sort
-			let tokensArray = sortTokens(data.confirmed.tokens);
-
-			//Format output
-			let i = 0;
-			for (i = 0; i < tokensArray.length; i++) {
-				let tokensString = formatAssetNameAndValueString(getAssetTitle(tokensArray[i], true), formatAssetValueString(tokensArray[i].amount, tokensArray[i].decimals), tokensArray[i].tokenId);
-
-				tokensContentFull += tokensString;
-
-				getTokenInfo(tokensArray[i].tokenId);
-
-				if (i > tokensToShow) continue;
-
-				tokensContent += tokensString;
-
-				if (i == tokensToShow && tokensArray.length > tokensToShow + 1) {
-					tokensContent += '<p>...</p><p><strong><a href="#" onclick="showAllTokens(event)">Show all</a></strong></p>';
-				}
-			}
-
-			if (i > tokensToShow && tokensArray.length > tokensToShow + 1) {
-				tokensContentFull += '<br><p><strong><a href="#" onclick="hideAllTokens(event)">Show less</a></strong></p>';
-			}
-
-			$('#tokens').html(tokensContent);
-		}
-
-		$('#address').html(walletAddress + ' &#128203;');
-		$('#officialLink').html(getOfficialExplorereAddressUrl(walletAddress));
-		$('#officialLink').attr('href', getOfficialExplorereAddressUrl(walletAddress));
-
-		$('#summaryOk').show();
-    })
-    .fail(function() {
-    	showLoadError('No results matching your query.');
-    });
-}
-
-function getTokenInfo(tokenId) {
-	let boxId = localStorage.getItem('boxId-' + tokenId);
-
-	if (boxId != undefined) {
-		getNftInfo(boxId, onGotNftInfo);
-		return;
-	}
-
-	var jqxhr = $.get(API_HOST + 'tokens/' + tokenId,
-	function(data) {
-		if (data.boxId != undefined) {
-			localStorage.setItem('boxId-' + tokenId, data.boxId);
-			getNftInfo(data.boxId, onGotNftInfo);
-		}
-	});
 }
 
 function onGotNftInfo(nftInfo, message) {
@@ -236,20 +223,33 @@ function onGotNftInfo(nftInfo, message) {
 			break;
 	}
 
-	formattedHtml = $(nftContentHolderId).html() + '<a href="' + getTokenUrl(nftInfo.data.assets[0].tokenId) + '"><div class="card m-1" style="width: 100px;"><img src="' + imgSrc + '" class="card-img-top' + ((nftInfo.type == NFT_TYPE.Image) ? '' : ' p-4') + '"><div class="card-body p-2"><p class="card-text">' + nftInfo.name + '</p></div></div></a>';
+	formattedHtml = $(nftContentHolderId).html() + '<a href="' + getTokenUrl(nftInfo.data[0].assets[0].tokenId) + '"><div class="card m-1" style="width: 100px;"><div class="cardImgHolder"><img src="' + imgSrc + '" class="card-img-top' + ((nftInfo.type == NFT_TYPE.Image) ? '' : ' p-4') + '"></div><div class="card-body p-2"><p class="card-text">' + nftInfo.name + '</p></div></div></a>';
 
 	$(nftContentHolderId).html(formattedHtml);
 	$(nftHolderId).show();
 	$('#nftsHolder').show();
 
 	nftsCount++;
-	$('#nftsTitle').html('NFTs (+' + nftsCount + ')');
+	$('#nftsTitle').html('NFTs (+' + nftsCount + ') ');
+	$('#hideAllNftsAction').hide();
 }
 
 function showNfts(e) {
 	$('#nftsShowAll').show();
 	$('#showAllNftsAction').hide();
+	$('#hideAllNftsAction').show();
 	$('#nftsTitle').html('<strong>NFTs</strong>');
+
+	scrollToElement($('#nftsTitle'));
+
+	e.preventDefault();
+}
+
+function hideNfts(e) {
+	$('#nftsShowAll').hide();
+	$('#showAllNftsAction').show();
+	$('#hideAllNftsAction').hide();
+	$('#nftsTitle').html('NFTs (+' + nftsCount + ') ');
 
 	scrollToElement($('#nftsTitle'));
 
@@ -319,13 +319,14 @@ function getOfficialExplorereAddressUrl(address) {
 
 function showAllTokens(e) {
 	$('#tokens').html(tokensContentFull);
+	scrollToElement($('#tokensHolder'));
 
 	e.preventDefault();
 }
 
 function hideAllTokens(e) {
 	$('#tokens').html(tokensContent);
-	window.scrollTo(0, 0);
+	scrollToElement($('#tokensHolder'));
 
 	e.preventDefault();
 }

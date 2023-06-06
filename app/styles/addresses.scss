@@ -20,8 +20,8 @@
 	position: relative;
 	display: flex;
 	margin: auto;
-	width: 276px;
-	height: 276px;
+	width: 420px;
+	height: 420px;
 	background-color: white;
 	justify-content: center;
 	align-items: center;
@@ -29,10 +29,27 @@
 
 .card {
 	display: inline-block;
+	max-width: 97px;
 }
 
-.card > img {
-	width: 100%;
+.cardImgHolder {
+	position: relative;
+	min-height: 95px;
+	min-width: 95px;
+	background-color: #000;
+	border-radius: inherit;
+	text-align: center;
+}
+
+.cardImgHolder > img {
+	width: auto;
+	height: auto;
+	max-width: 100%;
+	max-height: 100%;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
 }
 
 .card-text {

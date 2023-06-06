@@ -1,3 +1,11 @@
+audio {
+	width: 100%;
+}
+
+video {
+	width: 100%;
+}
+
 #tokenDataLeft > div:nth-child(odd), #nftInfoHolder > div:nth-child(odd) {
 	background-color: #454545;
 }
@@ -6,14 +14,23 @@
 	overflow-wrap: anywhere;
 }
 
-#nftPreviewImgHolder > div {
+#nftPreviewImgHolder {
+	position: relative;
 	text-align: center;
+	min-height: 200px;
+	background-color: #000;
 }
 
 #nftPreviewImg {
 	width: auto;
-	max-height: 80vh;
+	height: auto;
 	max-width: 100%;
+	max-height: 100%;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	cursor: pointer;
 }
 
 #tokenIcon {
