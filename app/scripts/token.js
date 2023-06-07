@@ -86,6 +86,8 @@ function onGetNftInfoDone(nftInfo, message) {
 
 		$('#nftPreviewImgHolder').removeClass('col-lg-3');
 		$('#nftInfoHolder').removeClass('col-lg-9');
+		$('#nftPreviewImgHolder').css('min-height', '0');
+		$('#nftPreviewImgHolder').css('height', '40px');
 	} else if (nftInfo.type == NFT_TYPE.Video) {
 		$('#nftPreviewVideoSource').attr('src', nftInfo.link);
 		$('#nftPreviewVideo').show();
@@ -96,10 +98,12 @@ function onGetNftInfoDone(nftInfo, message) {
 
 		$('#nftPreviewImgHolder').addClass('col-xl-5');
 		$('#nftInfoHolder').addClass('col-xl-7');
+		$('#nftPreviewImgHolder').css('min-height', '0');
 	} else {
 		$('#nftPreviewImgHolder').hide();
 		$('#nftInfoHolder').removeClass('col-lg-9');
 		$('#nftInfoHolder').addClass('col-12');
+		$('#nftPreviewImgHolder').css('min-height', '0');
 	}
 
 	$('#nftHolder').show();
