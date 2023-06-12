@@ -14,14 +14,22 @@
 {% block content %}
 	<div class="col-md-12">
 		<div class="row w-100">
-			<div class="col-6">
+			<div class="col-md-6 col-lg-8">
 				<h2>Issued Tokens</h2>
 			</div>
-			<div class="col-6 d-flex justify-content-end">
-				<div id="nftSwitchHolder" class="form-check form-switch form-switch-lg">
-					<input onclick="onNftSwitchClick(event)" id="nftSwitch" class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
-					<label class="form-check-label" for="flexSwitchCheckDefault">Hide NFTs</label>
-				</div>
+			<div class="col-md-6 col-lg-4 d-flex justify-content-end">
+				<label for="tokenType" class="form-label">Filter: </label>
+				<select id="tokenType" class="form-select form-control form-control-lg" onchange="onTokenTypeChanged()">
+					<option value="all">All</option>
+					<option value="token">Token</option>
+					<option value="nft">NFT</option>
+					<option value="image">Image</option>
+					<option value="audio">Audio</option>
+					<option value="video">Video</option>
+					<option value="artcollection">Art collection</option>
+					<option value="file">File</option>
+					<option value="membership">Membership token</option>
+				</select>
 			</div>
 		</div>
 	 
@@ -34,8 +42,8 @@
 						<tr>
 							<th scope="col">Id</th>
 							<th scope="col">Name</th>
+							<th style="min-width:69px" scope="col">Type</th>
 							<th scope="col">Amount</th>
-							<th scope="col">Decimals</th>
 							<th scope="col">Description</th>
 						</tr>
 					</thead>
@@ -56,5 +64,6 @@
 
 {% block scripts %}
 	<script src="./scripts/common/pagination.js?v=5"></script>
+	<script src="./scripts/common/nft.js?.v=5"></script>
 	<script src="./scripts/issued-tokens.js?v=5"></script>
 {% endblock %}

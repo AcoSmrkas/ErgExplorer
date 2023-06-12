@@ -4,64 +4,62 @@ var tokenId = '';
 $(function() {
 	tokenId = getWalletAddressFromUrl();
 
-	printToken();
+	getNftInfo(tokenId, onGetNftInfoDone);
 
 	setDocumentTitle(tokenId);
 });
 
-function printToken() {
-	var jqxhr = $.get(API_HOST + 'tokens/' + tokenId, function(data) {
-		tokenData = data;
-
-		//Id
-		$('#tokenHeader').html('<p><a href="Copy to clipboard!" onclick="copyTokenAddress(event)">' + tokenData.id + ' &#128203;</a></p>');
-
-		//Name
-		$('#tokenName').html('<p>' + tokenData.name + '</p>');
-
-		//Emission amount
-		$('#tokenEmissionAmount').html('<p>' + formatValue(tokenData.emissionAmount) + '</p>');
-
-		//Decimals
-		$('#tokenDecimals').html('<p>' + tokenData.decimals + '</p>');
-
-		//Type
-		$('#tokenType').html('<p>' + tokenData.type + '</p>');
-
-		//Description
-		$('#tokenDescription').html('<pre class="tokenDescriptionPre">' + formatNftDescription(tokenData.description) + '</pre>');
-
-		//Icon
-		$('#tokenIconImg').attr('src', 'https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/' + tokenData.id + '.svg');
-
-		$('#tokenDataHolder').show();
-
-		getNftInfo(tokenId, onGetNftInfoDone);
-    })
-    .fail(function() {
-    	showLoadError('No results matching your query.');
-    })
-    .always(function() {
-        $('#txLoading').hide();
-    });
-}
-
 function onGetNftInfoDone(nftInfo, message) {
-	if (nftInfo == null || nftInfo.type == undefined) {
+	$('#txLoading').hide();
+
+	if (nftInfo == null) {
+    	showLoadError('No results matching your query.');
+    	return;
+	}
+
+	let tokenData = nftInfo.data;
+
+	//Id
+	$('#tokenHeader').html('<p><a href="Copy to clipboard!" onclick="copyTokenAddress(event)">' + tokenData.id + ' &#128203;</a></p>');
+
+	//Name
+	$('#tokenName').html('<p>' + tokenData.name + '</p>');
+
+	//Emission amount
+	$('#tokenEmissionAmount').html('<p>' + formatValue(tokenData.emissionAmount) + '</p>');
+
+	//Decimals
+	$('#tokenDecimals').html('<p>' + tokenData.decimals + '</p>');
+
+	//Type
+	$('#tokenType').html('<p>' + tokenData.type + '</p>');
+
+	//Description
+	$('#tokenDescription').html('<pre class="tokenDescriptionPre">' + formatNftDescription(tokenData.description) + '</pre>');
+
+	//Icon
+	$('#tokenIconImg').attr('src', 'https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/' + tokenData.id + '.svg');
+
+	$('#tokenDataHolder').show();
+
+	if (!nftInfo.isNft) {
 		return;
 	}
 
 	$('#nftType').html('<p>' + nftInfo.type + '</p>');
 	$('#nftHash').html('<p>' + nftInfo.hash + '</p>');
-	$('#nftMintedAddress').html('<p><a href="' + getWalletAddressUrl(nftInfo.data[0].address) + '">' + nftInfo.data[0].address + '</a></p>');
+	$('#nftMintedAddress').html('<p><a href="' + getWalletAddressUrl(tokenData.address) + '">' + tokenData.address + '</a></p>');
 
-	let currentAddress = nftInfo.data[1].address;
+	/*
+	let currentAddress = tokenData[tokenData.length - 1].address;
 	if (currentAddress.length > 70) {
 		currentAddress = formatAddressString(currentAddress, 60);
 	}
-	$('#nftCurrentAddress').html('<p><a href="' + getWalletAddressUrl(nftInfo.data[1].address) + '">' + currentAddress + '</a></p>');
-	$('#nftMintedTransaction').html('<p><a href="' + getTransactionsUrl(nftInfo.data[0].transactionId) + '">' + nftInfo.data[0].transactionId + '</a></p>');
-	$('#nftCreationHeight').html('<p><a href="' + getBlockUrl(nftInfo.data[0].blockId) + '">' + nftInfo.data[0].creationHeight + '</a></p>');
+	$('#nftCurrentAddress').html('<p><a href="' + getWalletAddressUrl(tokenData[tokenData.length - 1].address) + '">' + currentAddress + '</a></p>');
+	*/
+
+	$('#nftMintedTransaction').html('<p><a href="' + getTransactionsUrl(tokenData.transactionId) + '">' + tokenData.transactionId + '</a></p>');
+	$('#nftCreationHeight').html('<p><a href="' + getBlockUrl(tokenData.blockId) + '">' + tokenData.creationHeight + '</a></p>');
 
 	if (nftInfo.additionalLinks.length > 0) {
 		let formattedLinksHtml = '<p>Link 01: <a  target="_new" href="' + nftInfo.link + '">' + nftInfo.link + '</a></p>';

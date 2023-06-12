@@ -1,55 +1,82 @@
-const NFT_SWITCH_PARAM = 'hideNfts';
-var nftSwitchActive = false;
+const TOKEN_TYPE_PARAM = 'type';
+var tokenType = 'all';
 var query = '';
+var setup = true;
 
 $(function() {
     query = params['query'];
+    if (query == undefined) {
+        query = '';
+    }
 
-    setupNftSwitch();
+    setupTypeSelect();
     printIssuedTokens();
 });
 
 function printIssuedTokens() {
-    let apiUrl = '';
-
-    if (query == undefined) {
-        apiUrl = API_HOST + 'tokens?limit=' + ITEMS_PER_PAGE + '&offset=' + offset + '&hideNfts=' + nftSwitchActive;
-    } else {
-        apiUrl = API_HOST + 'tokens/search?limit=' + ITEMS_PER_PAGE + '&offset=' + offset + '&query=' + query;
-    }
-
-	var jqxhr = $.get(apiUrl, function(data) {
+	var jqxhr = $.get(ERGEXPLORER_API_HOST + 'tokens/search?limit=' + ITEMS_PER_PAGE + '&offset=' + offset + '&query=' + query + '&type=' + tokenType, function(data) {
+        
 		let formattedResult = '';
 		let items = data.items;
 
-		for (let i = 0; i < items.length; i++) {
-    		formattedResult += '<tr>';
+        if (items.length == 0) {
+            formattedResult = '<tr><td colspan="5">No results matching your query.</td></tr>';
+        } else {
+    		for (let i = 0; i < items.length; i++) {
+                let tokenData = processNftData(items[i]);
 
-            //Id
-    		formattedResult += '<td><span class="d-lg-none"><strong>Id: </strong></span><a href="' + getTokenUrl(items[i].id) + '">' + formatAddressString(items[i].id) + '</a></td>';
+        		formattedResult += '<tr>';
 
-            //Name
-    		formattedResult += '<td><span class="d-lg-none"><strong>Name: </strong></span>' + items[i].name + '</td>';
+                //Id
+        		formattedResult += '<td><span class="d-lg-none"><strong>Id: </strong></span><a href="' + getTokenUrl(tokenData.data.id) + '">' + formatAddressString(tokenData.data.id) + '</a></td>';
 
-            //Emission amount
-    		formattedResult += '<td><span class="d-lg-none"><strong>Amount: </strong></span>' + formatValue(items[i].emissionAmount) + '</td>';
+                //Name
+        		formattedResult += '<td><span class="d-lg-none"><strong>Name: </strong></span>' + tokenData.data.name + '</td>';
 
-            //Decimals
-    		formattedResult += '<td><span class="d-lg-none"><strong>Decimals: </strong></span>' + items[i].decimals + '</td>';
+                //Type
+                let type = 'Token';
+                if (tokenData.type != undefined) {
+                    switch (tokenData.type) {
+                        case NFT_TYPE.Image:
+                        type = 'NFT <img class="token-icon" src="./images/nft-image.png"/>';
+                        break;
+                        case NFT_TYPE.Audio:
+                        type = 'NFT <img class="token-icon" src="./images/nft-audio.png"/>';
+                        break;
+                        case NFT_TYPE.Video:
+                        type = 'NFT <img class="token-icon" src="./images/nft-video.png"/>';
+                        break;
+                        case NFT_TYPE.ArtCollection:
+                        type = 'NFT <img class="token-icon" src="./images/nft-artcollection.png"/>';
+                        break;
+                        case NFT_TYPE.FileAttachment:
+                        type = 'NFT <img class="token-icon" src="./images/nft-file.png"/>';
+                        break;
+                        case NFT_TYPE.MembershipToken:
+                        type = 'NFT <img class="token-icon" src="./images/nft-membership.png"/>';
+                        break;
+                    }
+                }
 
-            //Description
-    		formattedResult += '<td><pre class="tokenDescriptionPre">' + formatNftDescription(items[i].description) + '</pre></td>';
+                formattedResult += '<td><span class="d-lg-none"><strong>Type: </strong></span>' + type + '</td>';
 
-			formattedResult += '</tr>';	
-		}
+                //Emission amount
+        		formattedResult += '<td><span class="d-lg-none"><strong>Amount: </strong></span>' + formatValue(tokenData.data.emissionAmount) + '</td>';
 
-        setupPagination(data.total);
+                //Description
+        		formattedResult += '<td><pre class="tokenDescriptionPre">' + formatNftDescription(tokenData.data.description) + '</pre></td>';
+
+    			formattedResult += '</tr>';	
+    		}
+
+            setupPagination(data.total);
+        }
 
 		$('#issuedTokensTableBody').html(formattedResult);
 
         $('#issuedTokensHolder').show();
     })
-    .fail(function() {
+    .fail(function(data) {
         showLoadError('Failed to fetch issued tokens.');
     })
     .always(function() {        
@@ -57,25 +84,26 @@ function printIssuedTokens() {
     });
 }
 
-function setupNftSwitch() {
-    nftSwitchActive = params[NFT_SWITCH_PARAM];
-
-    if (nftSwitchActive == 'true') {
-        $('#nftSwitch').prop('checked', true);
-        nftSwitchActive = true;
-    } else {
-        $('#nftSwitch').prop('checked', false);
-        nftSwitchActive = false;
+function onTokenTypeChanged() {
+    if (setup) {
+        return;
     }
-}
 
-function onNftSwitchClick(event) {
-    params[NFT_SWITCH_PARAM] = $('#nftSwitch').prop('checked');
+    tokenType = $('#tokenType').val();
+
+    params[TOKEN_TYPE_PARAM] = tokenType;
     params['offset'] = 0;
 
-    if (params[NFT_SWITCH_PARAM]) {
-        delete(params['query']);
+    window.location.assign(getCurrentUrlWithParams());
+}
+
+function setupTypeSelect() {
+    tokenType = params[TOKEN_TYPE_PARAM];
+
+    if (tokenType == undefined) {
+        tokenType = 'all';
     }
 
-    window.location.assign(getCurrentUrlWithParams());
+    $('#tokenType').val(tokenType);
+    setup = false;
 }

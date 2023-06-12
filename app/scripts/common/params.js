@@ -27,13 +27,16 @@ function readParams() {
 	getUrlWithParams();
 }
 
-function getUrlWithParams(page) {
+function getUrlWithParams(page, includeId = true) {
 	let separator = (IS_DEV_ENVIRONMENT) ? '#' : '/';
 	let address = '/' + page + separator;
 
 	Object.keys(params).forEach((param) => {
     	if (params[param] == param) {
-    		address += param + '&';
+    		if (includeId) {
+	    		address += param + '&';
+	    	}
+    	
     		return;
     	}
 

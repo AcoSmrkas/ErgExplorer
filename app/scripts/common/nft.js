@@ -8,9 +8,7 @@ const NFT_TYPE = {
 }
 
 class NftInfo {
-	constructor(name, description, type, hash, link, additionalLinks, data) {
-		this.name = name;
-		this.description = description;
+	constructor(type, hash, link, additionalLinks, data) {
 		this.type = type;
 		this.hash = hash;
 		this.link = link;
@@ -19,73 +17,41 @@ class NftInfo {
 	}
 }
 
+function getNftsInfo(tokenIds, callback) {
+	var jqxhr = $.post(ERGEXPLORER_API_HOST + 'tokens/byId',
+		{
+			onlyNft: true,
+			ids: tokenIds
+		}, function(data) {
+			if (data.total > 0) {
+				let items = data.items;
+
+				for (let i = items.length - 1; i >= 0; i--) {
+					let nft = null;
+
+					nft = processNftData(data.items[i]);
+
+					callback(nft, null);
+				}
+			}
+		})
+		.fail(function() {
+			callback(null, 'Failed to fetch NFTs data.');
+		});
+}
+
 //https://api.ergoplatform.com/api/v1/boxes/byTokenId
 function getNftInfo(tokenId, callback) {
-	var jqxhr = $.get(API_HOST + 'boxes/byTokenId/' + tokenId, function(data) {
+	var jqxhr = $.post(ERGEXPLORER_API_HOST + 'tokens/byId',
+		{
+			onlyNft: true,
+			ids: [tokenId]
+		}, function(data) {
+		
+		let nft = null;
 
-		let nftData = data.items[0];
-
-		if (data == undefined) {
-			callback(null, 'Data is undefined.');
-		}
-
-		let name = (nftData.additionalRegisters.R4 == undefined ? undefined : hex2a(nftData.additionalRegisters.R4.renderedValue));
-		let description = (nftData.additionalRegisters.R5 == undefined ? undefined : hex2a(nftData.additionalRegisters.R5.renderedValue));
-		let typeString = (nftData.additionalRegisters.R7 == undefined ? undefined : nftData.additionalRegisters.R7.serializedValue);
-		let hash = (nftData.additionalRegisters.R8 == undefined ? undefined : nftData.additionalRegisters.R8.renderedValue);
-		let tempLink = (nftData.additionalRegisters.R9 == undefined ? undefined : nftData.additionalRegisters.R9.renderedValue.split(','));
-
-		let additionalLinks = new Array();
-		if (tempLink == undefined) {
-			link = undefined;
-		} else if (tempLink.length > 1) {
-			link = tempLink[0].substr(1);
-
-			for (let i = 1; i < tempLink.length; i++) {
-				if (i == tempLink.length - 1) {
-					tempLink[i] = tempLink[i].substr(0, tempLink[i].length - 1);
-				}
-
-				additionalLinks[i - 1] = formatLink(tempLink[i]);
-			}
-		} else {
-			link = tempLink[0];
-		}
-
-		if (link == undefined) {
-			link = 'None';
-		} else {
-			link = formatLink(link);
-		}
-
-		let type = undefined;
-		switch (typeString) {
-			case '0e020101':
-				type = NFT_TYPE.Image;
-				break;
-			case '0e020102':
-				type = NFT_TYPE.Audio;
-				break;
-			case '0e020103':
-				type = NFT_TYPE.Video;
-				break;
-			case '0e020104':
-				type = NFT_TYPE.ArtCollection;
-				break;
-			case '0e02010F':
-				type = NFT_TYPE.FileAttachment;
-				break;
-			case '0e020201':
-				type = NFT_TYPE.MembershipToken;
-				break;
-			default:
-				break;
-		}
-
-		let nft = new NftInfo(name, description, type, hash, link, additionalLinks, data.items);
-
-		if (type == undefined) {
-			nft = null;
+		if (data.total > 0) {
+			nft = processNftData(data.items[0]);
 		}
 
 		callback(nft, null);
@@ -95,11 +61,80 @@ function getNftInfo(tokenId, callback) {
     });
 }
 
+function processNftData(nftData) {
+	if (nftData == undefined) {
+		return null;
+	}
+
+	let typeString = (nftData.additionalRegisters.R7 == undefined || nftData.additionalRegisters.R7.serializedValue == null ? undefined : nftData.additionalRegisters.R7.serializedValue);
+	let hash = (nftData.additionalRegisters.R8 == undefined || nftData.additionalRegisters.R8.renderedValue == null ? undefined : nftData.additionalRegisters.R8.renderedValue);
+	let tempLink = (nftData.additionalRegisters.R9 == undefined || nftData.additionalRegisters.R9.renderedValue == null ? undefined : nftData.additionalRegisters.R9.renderedValue.split(','));
+
+	let additionalLinks = new Array();
+	if (tempLink == undefined) {
+		link = undefined;
+	} else if (tempLink.length > 1) {
+		link = tempLink[0].substr(1);
+
+		for (let i = 1; i < tempLink.length; i++) {
+			if (i == tempLink.length - 1) {
+				tempLink[i] = tempLink[i].substr(0, tempLink[i].length - 1);
+			}
+
+			additionalLinks[i - 1] = formatLink(tempLink[i]);
+		}
+	} else {
+		link = tempLink[0];
+	}
+
+	if (link == undefined) {
+		link = 'None';
+	} else {
+		link = formatLink(link);
+	}
+
+	let type = getNftType(typeString);
+
+	let nft = new NftInfo(type, hash, link, additionalLinks, nftData);
+
+	nft.isNft = type != undefined;
+
+	return nft;
+}
+
+function getNftType(typeString) {
+	switch (typeString) {
+		case '0e020101':
+			return NFT_TYPE.Image;
+			break;
+		case '0e020102':
+			return NFT_TYPE.Audio;
+			break;
+		case '0e020103':
+			return NFT_TYPE.Video;
+			break;
+		case '0e020104':
+			return NFT_TYPE.ArtCollection;
+			break;
+		case '0e02010F':
+			return NFT_TYPE.FileAttachment;
+			break;
+		case '0e020201':
+			return NFT_TYPE.MembershipToken;
+			break;
+		default:
+			return undefined;
+			break;
+	}
+}
+
 function formatLink(link) {
 	link = hex2a(link);
 
 	if (link.includes('ipfs://')) {
 		link = link.replace('ipfs://', 'https://cloudflare-ipfs.com/ipfs/');
+	} else if (link.includes('https://ipfs.infura.io')) {
+		link = link.replace('https://ipfs.infura.io', 'https://cloudflare-ipfs.com');
 	}
 
 	return link;

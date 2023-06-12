@@ -1,6 +1,9 @@
 const FEE_ADDRESS = '2iHkR7CWvD1R4j1yZg5bkeDRQavjAaVPeTDFGGLZduHyfWMuYpmhHocX8GJoaieTx78FntzJbCBVL6rf96ocJoZdmWBL2fci7NqWgAirppPQmZ7fN9V6z13Ay6brPriBKYqLp1bT2Fk4FkFLCfdPpe';
 const DONATION_ADDRESS = '9hiaAS3pCydq12CS7xrTBBn2YTfdfSRCsXyQn9KZHVpVyEPk9zk';
-const API_HOST = 'https://api.ergoplatform.com/api/v1/';
+//https://api.ergoplatform.com/api/v1/
+//https://api.ergo.aap.cornell.edu/api/v1/
+const API_HOST = 'https://api.ergo.aap.cornell.edu/api/v1/';
+const ERGEXPLORER_API_HOST = 'https://api.ergexplorer.com/';
 const IS_DEV_ENVIRONMENT = window.location.host == 'localhost:9000';
 
 var qrCode = null;
@@ -69,13 +72,16 @@ function goToTokenUrl(tokenId) {
 }
 
 function getIssuedTokensSearchUrl(query) {
-	let url = '';
-
-	if (IS_DEV_ENVIRONMENT) {
-		url = '/issued-tokens#query=' + query;
+	if (query.trim() == '') {
+		delete(params['query']);
 	} else {
-		url = '/issued-tokens/query=' + query;
+		params['query'] = query;
 	}
+
+	delete(params['offset']);
+	delete(params['limit']);
+
+	let url = getUrlWithParams('issued-tokens', false);
 
 	return url;
 }
@@ -105,12 +111,13 @@ function getSearchQueryPage(page, query) {
 
 function searchAddress() {
 	let searchQuery = $('#searchInput').val().trim();
+	let searchType = $('#searchType').val();
 
-	if (searchQuery == '') return;
+	if (searchType != '2' && searchQuery == '') return;
 
 	localStorage.setItem('searchType', $('#searchType').val());
 
-	switch ($('#searchType').val()) {
+	switch (searchType) {
 		case '0':
 			goToWalletAddressUrl(searchQuery);
 			break;
@@ -135,12 +142,16 @@ function searchAddress() {
 
 //Format strings
 function formatErgValueString(value, maxDecimals = 4) {
-	let minimumFractionDigits = 2;
-	if (maxDecimals < minimumFractionDigits) {
-		minimumFractionDigits= maxDecimals;
-	}
+    let ergValue = value / 1000000000;
 
-	let ergValue = value / 1000000000;
+    if (ergValue > 10) {
+            maxDecimals = 2;
+    }
+
+    let minimumFractionDigits = 2;
+    if (maxDecimals < minimumFractionDigits) {
+            minimumFractionDigits= maxDecimals;
+    }
 
 	return '<strong title="' + ergValue + '">' + ergValue.toLocaleString('en-US', { maximumFractionDigits: maxDecimals, minimumFractionDigits: minimumFractionDigits }) + '</strong> ERG';
 
@@ -191,6 +202,10 @@ function formatNftDescription(description) {
 		do {
 			result = result.replaceAll('<br><br>', '<br>');
 		} while (result.includes('<br><br>'));
+
+		do {
+			result = result.replaceAll('<br>\n<br>', '<br>');
+		} while (result.includes('<br>\n<br>'));
 
 		while (result.substring(result.length - 4) == '<br>') {
 			result = result.substring(0, result.length - 4);
@@ -353,6 +368,10 @@ function nFormatter(num, digits) {
 		{ value: 1e15, symbol: 'P' },
 		{ value: 1e18, symbol: 'E' }
 	];
+
+	if (num > 10) {
+		digits = 2;
+	}
 
 	let minimumFractionDigits = 2;
 	if (digits < minimumFractionDigits) {

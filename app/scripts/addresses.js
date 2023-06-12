@@ -39,12 +39,13 @@ function printAddressSummary() {
 
 			//Format output
 			let i = 0;
+			let nftSearchTokens = [];
 			for (i = 0; i < tokensArray.length; i++) {
 				let tokensString = formatAssetNameAndValueString(getAssetTitle(tokensArray[i], true), formatAssetValueString(tokensArray[i].amount, tokensArray[i].decimals, 4), tokensArray[i].tokenId);
 
 				tokensContentFull += tokensString;
 
-				getNftInfo(tokensArray[i].tokenId, onGotNftInfo);
+				nftSearchTokens[i] = tokensArray[i].tokenId;
 
 				if (i > tokensToShow) continue;
 
@@ -58,6 +59,8 @@ function printAddressSummary() {
 			if (i > tokensToShow && tokensArray.length > tokensToShow + 1) {
 				tokensContentFull += '<br><p><strong><a href="#" onclick="hideAllTokens(event)">Hide</a></strong></p>';
 			}
+
+			getNftsInfo(nftSearchTokens, onGotNftInfo);
 
 			$('#tokens').html(tokensContent);
 		}
@@ -88,7 +91,9 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		const item = transactionsJson.items[i];
 
 		formattedResult += '<tr>';		
-		isWallet2Wallet = item.inputs[0].address.substring(0, 1) == '9';
+		isWallet2Wallet = item.outputs[0].address.substring(0, 1) == '9';
+
+		//isWallet2Wallet = item.inputs[0].address.substring(0, 1) == '9';
 
 		let isTxOut = false;
 		for (let j = 0; j < item.inputs.length; j++) {
@@ -181,9 +186,9 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 }
 
 function onGotNftInfo(nftInfo, message) {
-	if (nftInfo == null) {
+	if (nftInfo == null || !nftInfo.isNft) {
 		return;
-	} 
+	}
 
 	let imgSrc = '';
 	let formattedHtml = '';
@@ -223,7 +228,7 @@ function onGotNftInfo(nftInfo, message) {
 			break;
 	}
 
-	formattedHtml = $(nftContentHolderId).html() + '<a href="' + getTokenUrl(nftInfo.data[0].assets[0].tokenId) + '"><div class="card m-1" style="width: 100px;"><div class="cardImgHolder"><img src="' + imgSrc + '" class="card-img-top' + ((nftInfo.type == NFT_TYPE.Image) ? '' : ' p-4') + '"></div><div class="card-body p-2"><p class="card-text">' + nftInfo.name + '</p></div></div></a>';
+	formattedHtml = $(nftContentHolderId).html() + '<a href="' + getTokenUrl(nftInfo.data.id) + '"><div class="card m-1" style="width: 100px;"><div class="cardImgHolder"><img src="' + imgSrc + '" class="card-img-top' + ((nftInfo.type == NFT_TYPE.Image) ? '' : ' p-4') + '"></div><div class="card-body p-2"><p class="card-text">' + nftInfo.data.name + '</p></div></div></a>';
 
 	$(nftContentHolderId).html(formattedHtml);
 	$(nftHolderId).show();
