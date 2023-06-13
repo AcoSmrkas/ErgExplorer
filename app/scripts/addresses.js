@@ -10,6 +10,7 @@ var totalTransactions = 0;
 var valueFields = new Array();
 var valueFieldsFull = new Array();
 var nftsCount = 0;
+var mempoolIndexOffset = 0;
 
 $(function() {
 	walletAddress = getWalletAddressFromUrl();	
@@ -166,20 +167,24 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 					assets += assetsString;
 
 					if (k == tokensToShow && tokensArray.length > tokensToShow + 1) {
-						assets += '<p>...</p><p><strong><a href="#" onclick="showFullValue(event, ' + i + ')">Show all</a></strong></p>';
+						assets += '<p>...</p><p><strong><a href="#" onclick="showFullValue(event, ' + (i + mempoolIndexOffset) + ')">Show all</a></strong></p>';
 					}
 				}
 
-				assetsFull += '<p> </p><p><strong><a href="#" onclick="hideFullValue(event, ' + i + ')">Hide</a></strong></p>';
+				assetsFull += '<p> </p><p><strong><a href="#" onclick="hideFullValue(event, ' + (i + mempoolIndexOffset) + ')">Hide</a></strong></p>';
 
 				break;
 			}
 		}
 
-		valueFields[i] = formatErgValueString(value, 5) + assets;
-		valueFieldsFull[i] = formatErgValueString(value, 5) + assetsFull;
+		valueFields[i + mempoolIndexOffset] = formatErgValueString(value, 5) + assets;
+		valueFieldsFull[i + mempoolIndexOffset] = formatErgValueString(value, 5) + assetsFull;
 
-		formattedResult += '<td><span class="d-lg-none"><strong>Value: </strong></span><span id="txValue' + i + '">' + valueFields[i] + '</span></td></tr>';
+		formattedResult += '<td><span class="d-lg-none"><strong>Value: </strong></span><span id="txValue' + (i + mempoolIndexOffset) + '">' + valueFields[i + mempoolIndexOffset] + '</span></td></tr>';
+	}
+
+	if (isMempool) {
+		mempoolIndexOffset = transactionsJson.items.length;
 	}
 
 	return formattedResult;
@@ -272,7 +277,7 @@ function printTransactions() {
 }
 
 function getMempoolData() {
-	let jqxhr = $.get(API_HOST + 'mempool/transactions/byAddress/' + walletAddress, function(data) {
+	let jqxhr = $.get(API_HOST_2 + 'mempool/transactions/byAddress/' + walletAddress, function(data) {
     		mempoolData = data;
 
    			totalTransactions += mempoolData.total;

@@ -7,6 +7,8 @@ $(function() {
 	printBlock();
 
 	setDocumentTitle(blockId);
+
+    $('#searchType').val('3');
 });
 
 function printBlock() {

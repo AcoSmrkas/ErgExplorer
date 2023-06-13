@@ -1,5 +1,7 @@
 $(function() {  
     printMempool();
+
+    $('#searchType').val('0');
 });
 
 function printMempool() {

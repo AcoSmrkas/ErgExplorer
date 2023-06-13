@@ -11,6 +11,8 @@ $(function() {
 
     setupTypeSelect();
     printIssuedTokens();
+
+    $('#searchType').val('2');
 });
 
 function printIssuedTokens() {
@@ -34,26 +36,26 @@ function printIssuedTokens() {
         		formattedResult += '<td><span class="d-lg-none"><strong>Name: </strong></span>' + tokenData.data.name + '</td>';
 
                 //Type
-                let type = 'Token';
+                let type = '<span class="text-info">Token</span>';
                 if (tokenData.type != undefined) {
                     switch (tokenData.type) {
                         case NFT_TYPE.Image:
-                        type = 'NFT <img class="token-icon" src="./images/nft-image.png"/>';
+                        type = '<span class="text-warning">NFT </span><img class="token-icon" src="./images/nft-image.png"/>';
                         break;
                         case NFT_TYPE.Audio:
-                        type = 'NFT <img class="token-icon" src="./images/nft-audio.png"/>';
+                        type = '<span class="text-warning">NFT </span><img class="token-icon" src="./images/nft-audio.png"/>';
                         break;
                         case NFT_TYPE.Video:
-                        type = 'NFT <img class="token-icon" src="./images/nft-video.png"/>';
+                        type = '<span class="text-warning">NFT </span><img class="token-icon" src="./images/nft-video.png"/>';
                         break;
                         case NFT_TYPE.ArtCollection:
-                        type = 'NFT <img class="token-icon" src="./images/nft-artcollection.png"/>';
+                        type = '<span class="text-warning">NFT </span><img class="token-icon" src="./images/nft-artcollection.png"/>';
                         break;
                         case NFT_TYPE.FileAttachment:
-                        type = 'NFT <img class="token-icon" src="./images/nft-file.png"/>';
+                        type = '<span class="text-warning">NFT </span><img class="token-icon" src="./images/nft-file.png"/>';
                         break;
                         case NFT_TYPE.MembershipToken:
-                        type = 'NFT <img class="token-icon" src="./images/nft-membership.png"/>';
+                        type = '<span class="text-warning">NFT </span><img class="token-icon" src="./images/nft-membership.png"/>';
                         break;
                     }
                 }

@@ -7,6 +7,8 @@ $(function() {
 	printTransaction();
 
 	setDocumentTitle(txId);
+
+    $('#searchType').val('1');
 });
 
 function printTransaction() {

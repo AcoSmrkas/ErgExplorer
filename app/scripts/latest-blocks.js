@@ -1,5 +1,7 @@
 $(function() {  
     printLatestBlocks();
+
+    $('#searchType').val('3');
 });
 
 function printLatestBlocks() {

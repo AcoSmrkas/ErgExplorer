@@ -1,5 +1,6 @@
 var tokenData = undefined;
 var tokenId = '';
+var nftType = undefined;
 
 $(function() {
 	tokenId = getWalletAddressFromUrl();
@@ -46,8 +47,19 @@ function onGetNftInfoDone(nftInfo, message) {
 		return;
 	}
 
+	nftType = nftInfo.type;
+
+	//NFT type
 	$('#nftType').html('<p>' + nftInfo.type + '</p>');
+	
+	//SHA256 hash
 	$('#nftHash').html('<p>' + nftInfo.hash + '</p>');
+	if (nftInfo.type == NFT_TYPE.ArtCollection) {
+		$('#nftHashHolder').hide();
+	}
+
+
+	//Mint address
 	$('#nftMintedAddress').html('<p><a href="' + getWalletAddressUrl(tokenData.address) + '">' + tokenData.address + '</a></p>');
 
 	/*
@@ -80,12 +92,16 @@ function onGetNftInfoDone(nftInfo, message) {
 	} else if (nftInfo.type == NFT_TYPE.Audio) {
 		$('#nftPreviewAudioSource').attr('src', nftInfo.link);
 		$('#nftPreviewAudio').show();
-		document.getElementById('nftPreviewAudio').load();
+		document.getElementById('nftAudio').load();
 
+		$('#nftPreviewImgHolder').hide();
 		$('#nftPreviewImgHolder').removeClass('col-lg-3');
 		$('#nftInfoHolder').removeClass('col-lg-9');
-		$('#nftPreviewImgHolder').css('min-height', '0');
-		$('#nftPreviewImgHolder').css('height', '40px');
+
+		if (nftInfo.additionalLinks.length > 0) {
+			$('#nftPreviewImg').attr('src', nftInfo.additionalLinks[0]);
+		$('#nftImageFull').attr('src', nftInfo.additionalLinks[0]);
+		}
 	} else if (nftInfo.type == NFT_TYPE.Video) {
 		$('#nftPreviewVideoSource').attr('src', nftInfo.link);
 		$('#nftPreviewVideo').show();
@@ -139,4 +155,18 @@ function hideFullImgPreview() {
 	$('body').css('overflow-y', 'auto');
 
 	scrollToElement($('#nftPreviewImg'));
+}
+
+function onNftImageLoad() {
+	if (nftType != NFT_TYPE.Audio) {
+		return;
+	}
+
+	$('#nftPreviewImgHolder').show();
+	$('#nftPreviewImg').show();
+	$('#nftPreviewImgHolder').removeClass('col-lg-3');
+	$('#nftInfoHolder').removeClass('col-lg-9');
+
+	$('#nftPreviewImgHolder').addClass('col-lg-4');
+	$('#nftInfoHolder').addClass('col-lg-8');
 }

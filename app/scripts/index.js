@@ -2,6 +2,8 @@ $(function() {
     getErgPrice();
     getProtocolInfo();
     getStats();
+
+    $('#searchType').val('0');
 });
 
 function getProtocolInfo() {

@@ -3,6 +3,7 @@ const DONATION_ADDRESS = '9hiaAS3pCydq12CS7xrTBBn2YTfdfSRCsXyQn9KZHVpVyEPk9zk';
 //https://api.ergoplatform.com/api/v1/
 //https://api.ergo.aap.cornell.edu/api/v1/
 const API_HOST = 'https://api.ergo.aap.cornell.edu/api/v1/';
+const API_HOST_2 = 'https://api.ergoplatform.com/api/v1/';
 const ERGEXPLORER_API_HOST = 'https://api.ergexplorer.com/';
 const IS_DEV_ENVIRONMENT = window.location.host == 'localhost:9000';
 
@@ -10,12 +11,6 @@ var qrCode = null;
 
 $(function() {
 	$('#searchInput').val('');
-
-	let searchType = localStorage.getItem('searchType');
-
-	if (searchType != undefined) {
-		$('#searchType').val(searchType);
-	}
 });
 
 window.addEventListener('hashchange', () => {
@@ -115,8 +110,6 @@ function searchAddress() {
 
 	if (searchType != '2' && searchQuery == '') return;
 
-	localStorage.setItem('searchType', $('#searchType').val());
-
 	switch (searchType) {
 		case '0':
 			goToWalletAddressUrl(searchQuery);
@@ -213,6 +206,13 @@ function formatNftDescription(description) {
 
 		while (result.substring(result.length - 5) == '<br>\n') {
 			result = result.substring(0, result.length - 5);
+		}
+		while (result.substring(result.length - 2) == '\n]') {
+			result = result.substring(0, result.length - 2);
+		}
+
+		while (result.substring(0, 2) == '[\n') {
+			result = result.substring(2);
 		}
 
 		while (result.substring(0, 5) == '\n<br>') {
@@ -356,6 +356,10 @@ function millisToMinutesAndSeconds(millis) {
 	var minutes = Math.floor(millis / 60000);
 	var seconds = ((millis % 60000) / 1000).toFixed(0);
 	return minutes + ' min ' + (seconds < 10 ? '0' : '') + seconds + ' sec';
+}
+
+function clamp (num, min, max) {
+	return Math.min(Math.max(num, min), max);
 }
 
 function nFormatter(num, digits) {
