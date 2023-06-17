@@ -4,7 +4,23 @@ $gray-color: #AAAAAA;
 
 //Global properties
 body {
-	padding-bottom: 30px;  
+	padding-bottom: 30px;
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+@font-face {
+	font-family: "DejaVu";
+	src: url('../fonts/DejaVuSansMono.ttf');
+}
+
+pre {
+	font-family: 'DejaVu';
+}
+
+footer {
+  margin-top: auto;
 }
 
 h2 {
@@ -33,6 +49,14 @@ a:hover {
 	color: $orange-color;
 }
 
+.text-white {
+	color: #EEE !important;	
+}
+
+.text-light {
+	color: #999 !important;	
+}
+
 //Links
 .page-link {
 	color: $gray-color;
@@ -45,6 +69,36 @@ a:hover {
 .active {
 	color: $orange-color !important;
 }
+
+//Checkboxes
+.checkbox-lg .form-check-input{
+ top: .8rem;
+ scale: 1.4;
+ margin-right: 0.7rem;
+ }
+
+.checkbox-lg .form-check-label {
+ padding-top: 13px;
+ }
+
+.checkbox-xl .form-check-input {
+ top: 1.2rem;
+ scale: 1.7;
+ margin-right: 0.8rem;
+ }
+
+.checkbox-xl .form-check-label {
+ padding-top: 19px;
+ }
+
+ .form-check-input:checked {
+ 	background: $orange-color;
+ }
+
+  .form-check-input:focus {
+ 	box-shadow: none;
+ 	border: 1px solid $orange-color;
+ }
 
 //Search form
 .form-control-lg {
@@ -307,4 +361,8 @@ select, option {
 
 .stripedHolderEven > div:nth-child(even) {
 	background-color: #454545;
+}
+
+.pre-ascii {
+	line-height: 1;
 }

@@ -1,6 +1,8 @@
 const TOKEN_TYPE_PARAM = 'type';
+const UTILITY_TOKEN_PATAM = 'hideUtility';
 var tokenType = 'all';
 var query = '';
+var hideUtility = false;
 var setup = true;
 
 $(function() {
@@ -10,13 +12,17 @@ $(function() {
     }
 
     setupTypeSelect();
+    setupToggleUtilityTokens();
     printIssuedTokens();
 
     $('#searchType').val('2');
+    $('#searchInput').val(query);
+
+    setup = false;
 });
 
 function printIssuedTokens() {
-	var jqxhr = $.get(ERGEXPLORER_API_HOST + 'tokens/search?limit=' + ITEMS_PER_PAGE + '&offset=' + offset + '&query=' + query + '&type=' + tokenType, function(data) {
+	var jqxhr = $.get(ERGEXPLORER_API_HOST + 'tokens/search?limit=' + ITEMS_PER_PAGE + '&offset=' + offset + '&query=' + query + '&type=' + tokenType + '&hideUtility=' + hideUtility, function(data) {
         
 		let formattedResult = '';
 		let items = data.items;
@@ -60,13 +66,19 @@ function printIssuedTokens() {
                     }
                 }
 
+                if (tokenData.data.isBurned == 't') {
+                    type = '<span class="text-danger">Burned</span>';
+                }
+
                 formattedResult += '<td><span class="d-lg-none"><strong>Type: </strong></span>' + type + '</td>';
 
                 //Emission amount
         		formattedResult += '<td><span class="d-lg-none"><strong>Amount: </strong></span>' + formatValue(tokenData.data.emissionAmount) + '</td>';
 
                 //Description
-        		formattedResult += '<td><pre class="tokenDescriptionPre">' + formatNftDescription(tokenData.data.description) + '</pre></td>';
+                let asciiArt = isAsciiArt(tokenData.data.description);
+
+        		formattedResult += '<td><pre class="tokenDescriptionPre' + (asciiArt ? ' pre-ascii' : '') + '">' + formatNftDescription(tokenData.data.description) + '</pre></td>';
 
     			formattedResult += '</tr>';	
     		}
@@ -99,6 +111,32 @@ function onTokenTypeChanged() {
     window.location.assign(getCurrentUrlWithParams());
 }
 
+function setupToggleUtilityTokens() {
+    hideUtility = params[UTILITY_TOKEN_PATAM];
+
+    if (hideUtility == undefined) {
+        hideUtility = 'false';
+        $('#toggleUtility').prop('checked', '');
+    } else {
+        hideUtility = 'true';
+        $('#toggleUtility').prop('checked', 'checked');
+    }
+}
+
+function onToggleUtilityTokens() {
+    let toggleUtility = $('#toggleUtility').prop('checked');
+    
+    if (toggleUtility == true) {
+        params[UTILITY_TOKEN_PATAM] = 'true';
+    } else {  
+        delete(params[UTILITY_TOKEN_PATAM]);
+    }
+
+    params['offset'] = 0;
+
+    window.location.assign(getCurrentUrlWithParams());
+}
+
 function setupTypeSelect() {
     tokenType = params[TOKEN_TYPE_PARAM];
 
@@ -107,5 +145,4 @@ function setupTypeSelect() {
     }
 
     $('#tokenType').val(tokenType);
-    setup = false;
 }

@@ -1,3 +1,7 @@
+//https://nftstorage.link
+//https://cloudflare-ipfs.com
+//https://gateway.ipfs.io
+const IPFS_PROVIDER_HOST = 'https://gateway.ipfs.io';
 const NFT_TYPE = {
 	Image: 'Image',
 	Audio: 'Audio',
@@ -132,9 +136,9 @@ function formatLink(link) {
 	link = hex2a(link);
 
 	if (link.includes('ipfs://')) {
-		link = link.replace('ipfs://', 'https://cloudflare-ipfs.com/ipfs/');
+		link = link.replace('ipfs://', IPFS_PROVIDER_HOST + '/ipfs/');
 	} else if (link.includes('https://ipfs.infura.io')) {
-		link = link.replace('https://ipfs.infura.io', 'https://cloudflare-ipfs.com');
+		link = link.replace('https://ipfs.infura.io', IPFS_PROVIDER_HOST);
 	}
 
 	return link;

@@ -14,10 +14,18 @@
 {% block content %}
 	<div class="col-md-12">
 		<div class="row w-100">
-			<div class="col-md-6 col-lg-8">
+			<div class="col-sm-12 col-md-12 col-lg-4">
 				<h2>Issued Tokens</h2>
 			</div>
-			<div class="col-md-6 col-lg-4 d-flex justify-content-end">
+			<div class="col-sm-12 col-md-6 col-lg-4 d-flex justify-content-end justify-content-md-start justify-content-lg-end">
+				<div class="form-check form-check-reverse checkbox-xl p-0">
+				  <input style="margin-top: 14px;margin-right:5px;" class="form-check-input" onchange="onToggleUtilityTokens()" type="checkbox" id="toggleUtility">
+				  <label style="padding:0;margin-right:20px;" class="form-check-label" for="toggleUtility">
+				    Hide utility tokens:
+				  </label>
+				</div>
+			</div>
+			<div class="col-sm-12 col-md-6 col-lg-4 d-flex justify-content-end">
 				<label for="tokenType" class="form-label">Filter: </label>
 				<select id="tokenType" class="form-select form-control form-control-lg" onchange="onTokenTypeChanged()">
 					<option value="all">All</option>

@@ -11,14 +11,16 @@ var valueFields = new Array();
 var valueFieldsFull = new Array();
 var nftsCount = 0;
 var mempoolIndexOffset = 0;
+var prices = new Array();
+var gotPrices = false;
+var tokensArray;
 
 $(function() {
 	walletAddress = getWalletAddressFromUrl();	
 
 	setDocumentTitle(walletAddress);
 	
-    printAddressSummary();
-    printTransactions();
+    getPriceData();
 
     setupQrCode();
 });
@@ -26,7 +28,12 @@ $(function() {
 function printAddressSummary() {
 	var jqxhr = $.get(API_HOST + 'addresses/' + walletAddress + '/balance/total',
 	function(data) {
-		$('#finalBalance').html('Final balance: <strong>' + formatErgValueString(data.confirmed.nanoErgs, 2) + '</strong>');
+		$('#finalErgBalance').html('<strong class="erg-span">ERG</strong><span class="text-light"> balance:</span> <strong>' + formatErgValueString(data.confirmed.nanoErgs, 2) + '</strong>');
+		
+		let ergDollarValue = getAssetValue(data.confirmed.nanoErgs, 9) * prices['ERG'];
+		if (gotPrices) {
+			$('#finalErgBalance').html($('#finalErgBalance').html() + ' ($' + formatValue(ergDollarValue, 2) + ')');
+		}
 
 		if (data.confirmed.tokens.length > 0) {
 			$('#tokensHolder').show();
@@ -36,13 +43,23 @@ function printAddressSummary() {
 			tokensContentFull = '';
 
 			//Sort
-			let tokensArray = sortTokens(data.confirmed.tokens);
+			tokensArray = sortTokens(data.confirmed.tokens);
 
 			//Format output
 			let i = 0;
 			let nftSearchTokens = [];
+			let totalAssetsValue = 0;
 			for (i = 0; i < tokensArray.length; i++) {
-				let tokensString = formatAssetNameAndValueString(getAssetTitle(tokensArray[i], true), formatAssetValueString(tokensArray[i].amount, tokensArray[i].decimals, 4), tokensArray[i].tokenId);
+
+				let tokensPrice = 0;
+				let tokensPriceString = '';
+				if (gotPrices && prices[tokensArray[i].tokenId] != undefined) {
+					tokensPrice = getAssetValue(tokensArray[i].amount, tokensArray[i].decimals) * prices[tokensArray[i].tokenId];
+					tokensPriceString = formatValue(tokensPrice, 2);
+					totalAssetsValue += tokensPrice;
+				}
+
+				let tokensString = formatAssetNameAndValueString(getAssetTitle(tokensArray[i], true), formatAssetValueString(tokensArray[i].amount, tokensArray[i].decimals, 4) + (tokensPrice == 0 ? '' : '<span class="text-light"> ($' + tokensPriceString + ')</span>'), tokensArray[i].tokenId);
 
 				tokensContentFull += tokensString;
 
@@ -59,6 +76,14 @@ function printAddressSummary() {
 
 			if (i > tokensToShow && tokensArray.length > tokensToShow + 1) {
 				tokensContentFull += '<br><p><strong><a href="#" onclick="hideAllTokens(event)">Hide</a></strong></p>';
+			}
+
+			if (totalAssetsValue > 0) {
+				$('#finalAssetsBalance').html('<span class="text-light">Tokens balance:</span> $' + formatValue(totalAssetsValue, 2) + '');
+				$('#finalAssetsBalance').show();
+
+				$('#finalBalance').html('<span class="text-light">Final balance:</span> $' + formatValue(ergDollarValue + totalAssetsValue, 2) + '');
+				$('#finalBalance').show();
 			}
 
 			getNftsInfo(nftSearchTokens, onGotNftInfo);
@@ -94,8 +119,6 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		formattedResult += '<tr>';		
 		isWallet2Wallet = item.outputs[0].address.substring(0, 1) == '9';
 
-		//isWallet2Wallet = item.inputs[0].address.substring(0, 1) == '9';
-
 		let isTxOut = false;
 		for (let j = 0; j < item.inputs.length; j++) {
 			if (item.inputs[j].address == walletAddress) {
@@ -104,7 +127,24 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 			}
 		}
 
-		let isSmart = isTxOut && !isWallet2Wallet;
+		let fromAddress = ((isTxOut) ? walletAddress : item.inputs[0].address);
+		let toAddress = ((isTxOut) ? item.outputs[0].address : walletAddress);
+		let isSmart = isTxOut && !isWallet2Wallet;		
+		let outputsAddress = (isSmart ? walletAddress : toAddress);
+		let ownAddressCount = 0;
+		let smartOut = false;
+		if (isSmart) {
+			for (let j = 0; j < item.outputs.length; j++) {
+				if (item.outputs[j].address == walletAddress) {
+					ownAddressCount++;
+				}
+			}
+
+			if (ownAddressCount == 1) {
+				outputsAddress = toAddress;
+				smartOut = true;
+			}			
+		}
 
 		//Tx
 		if (isMempool) {
@@ -120,14 +160,14 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		formattedResult += '<td><span class="d-lg-none"><strong>Block: </strong></span>' + ((isMempool) ? item.outputs[0].creationHeight : '<a href="' + getBlockUrl(item.blockId) + '">' + item.inclusionHeight + '</a>') + '</td>';
 		
 		// In or Out tx.
-		formattedResult += '<td class="' + ((isTxOut) ? (isWallet2Wallet) ? 'text-danger' : 'text-info' : 'text-success') + '">' + ((isTxOut) ? (isWallet2Wallet) ? 'Out' : 'Smart' : 'In') + '</td>';
+		let smartInOutString = (smartOut ? 'Out' : 'In');
+
+		formattedResult += '<td class="' + ((isTxOut) ? (isWallet2Wallet) ? 'text-danger' : 'text-info' : 'text-success') + '">' + ((isTxOut) ? (isWallet2Wallet) ? 'Out' : 'Smart ' + smartInOutString : 'In') + '</td>';
 		
 		//From
-		let fromAddress = ((isTxOut) ? walletAddress : item.inputs[0].address);
 		formattedResult += '<td><span class="d-lg-none"><strong>From: </strong></span><a href="' + getWalletAddressUrl(fromAddress) + '" >' + formatAddressString(fromAddress, 10) + '</a></td>';
 		
 		//To
-		let toAddress = ((isTxOut) ? item.outputs[0].address : walletAddress);
 		formattedResult += '<td><span class="d-lg-none"><strong>To: </strong></span><a href="' + getWalletAddressUrl(toAddress) + '">' + formatAddressString(toAddress, 10) + '</a></td>';
 
 		//Status
@@ -148,7 +188,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		let assets = ' ';
 		let assetsFull = ' ';
 		let tokensToShow = 2;
-		let outputsAddress = (isSmart ? walletAddress : toAddress);
+
 		for (let j = 0; j < item.outputs.length; j++) {
 			if (item.outputs[j].address == outputsAddress) {
 
@@ -158,7 +198,12 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 				let tokensArray = sortTokens(item.outputs[j].assets);
 				
 				for (let k = 0; k < tokensArray.length; k++) {
-					let assetsString = '<br><strong>' + formatAssetValueString(tokensArray[k].amount, tokensArray[k].decimals, 4) + '</strong> ' + getAssetTitle(tokensArray[k], false) + ' ';
+					let assetPrice = -1;
+					if (gotPrices && prices[tokensArray[k].tokenId] != undefined) {
+						assetPrice = formatValue(getAssetValue(tokensArray[k].amount, tokensArray[k].decimals) * prices[tokensArray[k].tokenId], 2);
+					}
+
+					let assetsString = '<br><strong><span class="text-white">' + formatAssetValueString(tokensArray[k].amount, tokensArray[k].decimals, 4) + '</span></strong> ' + getAssetTitle(tokensArray[k], false) + (assetPrice == -1 ? '' : ' <span class="text-light">($' + assetPrice +')</span>');
 
 					assetsFull += assetsString;
 					
@@ -177,8 +222,13 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 			}
 		}
 
-		valueFields[i + mempoolIndexOffset] = formatErgValueString(value, 5) + assets;
-		valueFieldsFull[i + mempoolIndexOffset] = formatErgValueString(value, 5) + assetsFull;
+		let ergDollarValue = -1
+		if (gotPrices) {
+			ergDollarValue = formatValue(getAssetValue(value, 9) * prices['ERG'], 5);
+		}
+
+		valueFields[i + mempoolIndexOffset] = formatErgValueString(value, 5) + (ergDollarValue == -1 ? '' : ' <span class="text-light">($' + ergDollarValue + ')</span>') + assets;
+		valueFieldsFull[i + mempoolIndexOffset] = formatErgValueString(value, 5) + (ergDollarValue == -1 ? '' : ' <span class="text-light">($' + ergDollarValue + ')</span>') + assetsFull;
 
 		formattedResult += '<td><span class="d-lg-none"><strong>Value: </strong></span><span id="txValue' + (i + mempoolIndexOffset) + '">' + valueFields[i + mempoolIndexOffset] + '</span></td></tr>';
 	}
@@ -368,5 +418,31 @@ function setupQrCode() {
 
 		$('body').css('height', 'inherit');
 		$('body').css('overflow-y', 'auto');
+	});
+}
+
+function getPriceData() {
+	//	https://api.spectrum.fi/v1/price-tracking/markets
+	var jqxhr = $.get('https://api.spectrum.fi/v1/price-tracking/markets',
+	function(data) {
+		for (let i = 0; i < data.length; i++) {
+			if (data[i]['baseSymbol'] == 'ERG' && data[i]['quoteSymbol'] == 'SigUSD') {
+				prices['ERG'] = data[i]['lastPrice'];
+				break;
+			}
+		}
+
+		for (let i = 0; i < data.length; i++) {
+			if (data[i]['baseSymbol'] == 'ERG') {
+				if (prices[data[i]['quoteId']] != undefined) continue;
+
+				prices[data[i]['quoteId']] = prices['ERG'] / data[i]['lastPrice'];
+			}
+		}
+
+		gotPrices = true;
+	}).always(function () {
+	    printAddressSummary();
+		printTransactions();
 	});
 }

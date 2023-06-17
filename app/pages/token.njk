@@ -52,7 +52,15 @@
 					<div class="col-7">
 						<p id="tokenType"></p>
 					</div>
-				</div>				
+				</div>	
+				<div style="display: none;" id="tokenBurned" class="row w-100 p-1">
+					<div class="col-5">
+						<p><strong>Status</strong></p>
+					</div>
+					<div class="col-7">
+						<p class="text-danger">Burned</p>
+					</div>
+				</div>
 			</div>
 
 			<div id="tokenDataRight" class="col-lg-8 div-cell p-0">
@@ -74,7 +82,7 @@
 			<h3 class="p-2">NFT Info</h3>
 			<div class="div-cell row w-100 p-0">
 				<div class="col-12 p-0" style="display: none;" id="nftPreviewAudio">
-					<audio id="nftAudio" controls crossorigin name="media"><source id="nftPreviewAudioSource" src="" type="audio/mp3"></audio>
+					<audio id="nftAudio" controls crossorigin loop name="media"><source id="nftPreviewAudioSource" src="" type="audio/mp3"></audio>
 				</div>
 				<div id="nftPreviewImgHolder" class="col-lg-3 p-0">
 					<img id="nftPreviewImg" onclick="showFullImgPreview()" style="display: none;" onload="onNftImageLoad()" src="">
@@ -86,30 +94,38 @@
 						<div id="nftType" class="col"></div>
 					</div>
 					<div class="row w-100 p-2">
-						<div class="col-md-3"><strong><p>Creation height</p></strong></div>
+						<div class="col-md-3"><strong><p>Mint block</p></strong></div>
 						<div id="nftCreationHeight" class="col"></div>
 					</div>
 					<div class="row w-100 p-2">
 						<div class="col-md-3"><strong><p>Mint address</p></strong></div>
 						<div id="nftMintedAddress" class="col"></div>
-					</div>			
-					<!--		
-					<div class="row w-100 p-2">
-						<div class="col-md-3"><strong><p>Current address</p></strong></div>
-						<div id="nftCurrentAddress" class="col"></div>
 					</div>
-					-->
+					<!--
+					<div id="nftMintedWalletHolder" style="display: none;" class="row w-100 p-2">
+						<div class="col-md-3"><strong><p>Mint wallet</p></strong></div>
+						<div id="nftMintedWallet" class="col"></div>
+					</div>
+					-->	
 					<div class="row w-100 p-2">
 						<div class="col-md-3"><strong><p>Mint transaction</p></strong></div>
 						<div id="nftMintedTransaction" class="col"></div>
+					</div>		
+					<div id="nftCurrentAddressHolder" style="display: none;" class="row w-100 p-2">
+						<div class="col-md-3"><strong><p>Current address</p></strong></div>
+						<div id="nftCurrentAddress" class="col"></div>
 					</div>
 					<div class="row w-100 p-2">
-						<div class="col-md-3"><strong><p>Raw link</p></strong></div>
+						<div class="col-md-3"><strong><p>URL</p></strong></div>
 						<div id="nftLink" class="col"></div>
 					</div>
 					<div id="nftHashHolder" class="row w-100 p-2">
 						<div class="col-md-3"><strong><p>SHA-256 hash</p></strong></div>
 						<div id="nftHash" class="col"></div>
+					</div>
+					<div class="row w-100 p-2">
+						<div class="col-md-3"><strong><p>Marketplace</p></strong></div>
+						<div id="nftAuction" class="col"></div>
 					</div>
 				</div>
 			</div>

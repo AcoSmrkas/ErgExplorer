@@ -4,13 +4,19 @@ const DONATION_ADDRESS = '9hiaAS3pCydq12CS7xrTBBn2YTfdfSRCsXyQn9KZHVpVyEPk9zk';
 //https://api.ergo.aap.cornell.edu/api/v1/
 const API_HOST = 'https://api.ergo.aap.cornell.edu/api/v1/';
 const API_HOST_2 = 'https://api.ergoplatform.com/api/v1/';
-const ERGEXPLORER_API_HOST = 'https://api.ergexplorer.com/';
+//https://api.ergexplorer.com/
+//https://localhost/ergexplorer-api/
+var ERGEXPLORER_API_HOST = 'https://api.ergexplorer.com/';
 const IS_DEV_ENVIRONMENT = window.location.host == 'localhost:9000';
 
 var qrCode = null;
 
 $(function() {
 	$('#searchInput').val('');
+
+	if (IS_DEV_ENVIRONMENT) {
+		ERGEXPLORER_API_HOST = 'https://localhost/ergexplorer-api/'
+	}
 });
 
 window.addEventListener('hashchange', () => {
@@ -146,7 +152,7 @@ function formatErgValueString(value, maxDecimals = 4) {
             minimumFractionDigits= maxDecimals;
     }
 
-	return '<strong title="' + ergValue + '">' + ergValue.toLocaleString('en-US', { maximumFractionDigits: maxDecimals, minimumFractionDigits: minimumFractionDigits }) + '</strong> ERG';
+	return '<strong title="' + ergValue + '"><span class="text-white">' + ergValue.toLocaleString('en-US', { maximumFractionDigits: maxDecimals, minimumFractionDigits: minimumFractionDigits }) + '</span></strong> ERG';
 
 	// icon, looks fugly, will hold
 	// ' + '<img style="display: none;" onload="onTokenIconLoad(this)"  class="token-icon" src="https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/0000000000000000000000000000000000000000000000000000000000000000.svg"/>';
@@ -183,10 +189,14 @@ function formatAssetValueString(value, decimals, digits = 2) {
 }
 
 function formatAssetNameAndValueString(name, valueString, tokenId) {
-	return '<p><strong>' + name + '</strong>: ' + valueString + '</p>';
+	return '<p><strong>' + name + '</strong>: <span class="text-white">' + valueString + '</span></p>';
 }
 
 function formatNftDescription(description) {
+	if (description == null) {
+		return description;
+	}
+
 	if (isJson(description)) {
 		const jsonString = JSON.stringify(JSON.parse(description), null, '<br>');
 		let result = jsonString.replace(/[{}"]/g, '');
@@ -225,6 +235,8 @@ function formatNftDescription(description) {
 
 		return result;
 	} else {
+		description = description.replaceAll('\n', '<br>');
+
 		return description;
 	}
 }
@@ -239,6 +251,10 @@ function getAssetTitle(asset, iconIsToTheLeft) {
 	let iconHtml = '<img style="display: none;" onload="onTokenIconLoad(this)"  class="token-icon" src="' + imgSrc + '"/>';
 
 	return '<a href="' + getTokenUrl(asset.tokenId) + '">' + (iconIsToTheLeft ? iconHtml + ' ' : '') + ((asset.name == '' || asset.name == null) ? formatAddressString(asset.tokenId, 15) : asset.name) + (iconIsToTheLeft ? '' : ' ' + iconHtml) + '</a>';
+}
+
+function getAssetValue(amount, decimals) {
+	return amount / Math.pow(10, decimals);
 }
 
 function onTokenIconLoad(element) {
@@ -314,7 +330,7 @@ function formatInputsOutputs(data) {
 		if (data[i].assets != undefined && data[i].assets.length > 0 ) {
 			formattedData += '<h5><strong>Tokens:</strong></h5>';
 			for (let j = 0; j < data[i].assets.length; j++) {
-				formattedData += '<p><strong>' + getAssetTitle(data[i].assets[j], true) + '</strong>: ' + formatAssetValueString(data[i].assets[j].amount, data[i].assets[j].decimals, 4) + '</p>';
+				formattedData += '<p><strong>' + getAssetTitle(data[i].assets[j], true) + '</strong>: <span class="text-white">' + formatAssetValueString(data[i].assets[j].amount, data[i].assets[j].decimals, 4) + '</span></p>';
 			}
 		}
 
@@ -408,4 +424,8 @@ function sortTokens(tokens) {
 	}
 
 	return tokensArray
+}
+
+function isAsciiArt(string) {
+	return (string != null && string.includes('▉'));
 }

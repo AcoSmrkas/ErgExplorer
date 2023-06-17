@@ -29,14 +29,26 @@ function onGetNftInfoDone(nftInfo, message) {
 	//Emission amount
 	$('#tokenEmissionAmount').html('<p>' + formatValue(tokenData.emissionAmount) + '</p>');
 
+	if (tokenData.emissionAmount == 1) {
+		getCurrentAddress();
+	}
+
 	//Decimals
 	$('#tokenDecimals').html('<p>' + tokenData.decimals + '</p>');
 
 	//Type
 	$('#tokenType').html('<p>' + tokenData.type + '</p>');
 
+	//Burned
+	let isBurned = tokenData.isBurned == 't';
+	if (isBurned) {
+		$('#tokenBurned').show();
+	}
+
 	//Description
-	$('#tokenDescription').html('<pre class="tokenDescriptionPre">' + formatNftDescription(tokenData.description) + '</pre>');
+	let asciiArt = isAsciiArt(tokenData.description);
+
+	$('#tokenDescription').html('<pre class="tokenDescriptionPre' + (asciiArt ? ' pre-ascii' : '') + '">' + formatNftDescription(tokenData.description) + '</pre>');
 
 	//Icon
 	$('#tokenIconImg').attr('src', 'https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/' + tokenData.id + '.svg');
@@ -60,35 +72,47 @@ function onGetNftInfoDone(nftInfo, message) {
 
 
 	//Mint address
-	$('#nftMintedAddress').html('<p><a href="' + getWalletAddressUrl(tokenData.address) + '">' + tokenData.address + '</a></p>');
-
-	/*
-	let currentAddress = tokenData[tokenData.length - 1].address;
-	if (currentAddress.length > 70) {
-		currentAddress = formatAddressString(currentAddress, 60);
+	let mintAddress = tokenData.address;
+	if (tokenData.mintWallet != null) {
+		mintAddress = tokenData.mintWallet;
 	}
-	$('#nftCurrentAddress').html('<p><a href="' + getWalletAddressUrl(tokenData[tokenData.length - 1].address) + '">' + currentAddress + '</a></p>');
-	*/
+
+	$('#nftMintedAddress').html('<p><a href="' + getWalletAddressUrl(mintAddress) + '">' + mintAddress + '</a></p>');
 
 	$('#nftMintedTransaction').html('<p><a href="' + getTransactionsUrl(tokenData.transactionId) + '">' + tokenData.transactionId + '</a></p>');
 	$('#nftCreationHeight').html('<p><a href="' + getBlockUrl(tokenData.blockId) + '">' + tokenData.creationHeight + '</a></p>');
 
+	let linkString = nftInfo.link;
+	if (linkString.length > 100) {
+		linkString = formatAddressString(linkString, 95);
+	}
 	if (nftInfo.additionalLinks.length > 0) {
-		let formattedLinksHtml = '<p>Link 01: <a  target="_new" href="' + nftInfo.link + '">' + nftInfo.link + '</a></p>';
+
+		let formattedLinksHtml = '<p>Link 01: <a  target="_new" href="' + nftInfo.link + '">' + linkString + '</a></p>';
 
 		for (let i = 0; i < nftInfo.additionalLinks.length; i++) {
-			formattedLinksHtml += '<p>Link ' + i + 2 + ': <a  target="_new" href="' + nftInfo.additionalLinks[i] + '">' + nftInfo.additionalLinks[i] + '</a></p>'
+			linkString = nftInfo.additionalLinks[i];
+			if (linkString.length > 100) {
+				linkString = formatAddressString(linkString, 95);
+			}
+
+			formattedLinksHtml += '<p>Link ' + i + 2 + ': <a  target="_new" href="' + nftInfo.additionalLinks[i] + '">' + linkString + '</a></p>'
 		}
 
 		$('#nftLink').html(formattedLinksHtml);
 	} else {
-		$('#nftLink').html('<p><a  target="_new" href="' + nftInfo.link + '">' + nftInfo.link + '</a></p>');
+		$('#nftLink').html('<p><a  target="_new" href="' + nftInfo.link + '">' + linkString + '</a></p>');
 	}
 
 	if (nftInfo.type == NFT_TYPE.Image) {
 		$('#nftPreviewImg').attr('src', nftInfo.link);
 		$('#nftImageFull').attr('src', nftInfo.link);
 		$('#nftPreviewImg').show();
+
+		if (nftInfo.link.substr(0, 19) == 'data:image/svg+xml;') {
+			$('#nftPreviewImg').css('width', '200px');
+			$('#nftImageFull').css('width', '400px');
+		}
 	} else if (nftInfo.type == NFT_TYPE.Audio) {
 		$('#nftPreviewAudioSource').attr('src', nftInfo.link);
 		$('#nftPreviewAudio').show();
@@ -120,7 +144,31 @@ function onGetNftInfoDone(nftInfo, message) {
 		$('#nftPreviewImgHolder').css('min-height', '0');
 	}
 
+	$('#nftAuction').html('<p>See on <a  target="_new" href="https://www.skyharbor.io/token/' + tokenData.id + '">SkyHarbor.io</a></p><p>See on <a  target="_new" href="https://ergoauctions.org/artwork/' + tokenData.id + '">Ergoauctions.org</a></p>');
+
 	$('#nftHolder').show();
+}
+
+function getCurrentAddress() {
+	var jqxhr = $.get(API_HOST + 'boxes/byTokenId/' + tokenId, function(data) {
+		if (data.total == 0) {
+			return;
+		}
+
+		let txOFfset = data.total - 1;
+
+		var jqxhr = $.get(API_HOST + 'boxes/byTokenId/' + tokenId + '?offset=' + txOFfset, function(data) {
+			let currentAddress = data.items[0].address;
+			$('#nftCurrentAddress').html('<p><a href="' + getWalletAddressUrl(currentAddress) + '">' + currentAddress + '</a></p>');
+			$('#nftCurrentAddressHolder').show();
+		})
+		.fail(function() {
+			console.log('Failed to fetch current address (2).');
+		});
+	})
+	.fail(function() {
+		console.log('Failed to fetch current address. (1)');
+	});
 }
 
 function onTokenIconLoaded() {
