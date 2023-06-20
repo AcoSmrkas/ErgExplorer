@@ -18,10 +18,11 @@
 			<h5 class="">Circulating Supply: <span id="ergSupply"></span></h2>
 			<h5 class="">Max Supply: <span id="ergTotal"></span></h2>
 			<h5 class="">Hash rate: <span id="ergHashRate"></span></h2>
-			<h5 class="">Tx Per day: <span id="ergTxAvg"></span></h2>
+			<h5 class="">TXs Per day: <span id="ergTxAvg"></span></h2>
 		</div>
 		<div class="col-md-1"></div>
 	</div>
+	<br>
 	<div class="row w-100 p-0">		
 		<div class="col-md-1"><br></div>
 		<div class="col-md-10 m-0 div-cell p-0">
@@ -96,5 +97,6 @@
 {% endblock %}
 
 {% block scripts %}
-	<script src="./scripts/index.js?v=6?v=2"></script>
+	<script src="./scripts/common/prices.js?v=7"></script>
+	<script src="./scripts/index.js?v=7"></script>
 {% endblock %}

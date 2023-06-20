@@ -7,6 +7,7 @@ const API_HOST_2 = 'https://api.ergoplatform.com/api/v1/';
 //https://api.ergexplorer.com/
 //https://localhost/ergexplorer-api/
 var ERGEXPLORER_API_HOST = 'https://api.ergexplorer.com/';
+const ERG_DECIMALS = 9;
 const IS_DEV_ENVIRONMENT = window.location.host == 'localhost:9000';
 
 var qrCode = null;
@@ -16,6 +17,10 @@ $(function() {
 
 	if (IS_DEV_ENVIRONMENT) {
 		ERGEXPLORER_API_HOST = 'https://localhost/ergexplorer-api/'
+	}
+
+	if (window.location.host == 'dev.ergexplorer.com') {
+		ERGEXPLORER_API_HOST = 'https://devapi.ergexplorer.com/';
 	}
 });
 
@@ -176,20 +181,44 @@ function formatHashRateString(value) {
 	return (value / 1000000000000).toLocaleString('en-US') + ' TH/s'
 }
 
-function formatDollarValueString(value) {
-	return '$' + value.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 1 });
-}
-
 function formatValue(value, digits) {
 	return '<span title="' + value.toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: 2 }) + '">' + nFormatter(value, digits) + '</span>';
 }
 
 function formatAssetValueString(value, decimals, digits = 2) {
-	return formatValue(value / Math.pow(10, decimals), digits);
+	return formatValue(getAssetValue(value, decimals), digits);
 }
 
 function formatAssetNameAndValueString(name, valueString, tokenId) {
 	return '<p><strong>' + name + '</strong>: <span class="text-white">' + valueString + '</span></p>';
+}
+
+function formatAssetDollarPriceString(tokenAmount, tokenDecimals, tokenId) {
+	if (gotPrices == undefined || !gotPrices) {
+		return '';
+	}
+
+	return formatDollarPriceString(formatAssetDollarPrice(tokenAmount, tokenDecimals, tokenId));
+}
+
+function formatDollarPriceString(value, digits = 5) {
+	if (gotPrices == undefined || !gotPrices) {
+		return '';
+	}
+
+	if (value >= 0.1) {
+		digits = 2;
+	}
+
+	return '($' + formatValue(value, digits) + ')';
+}
+
+function formatAssetDollarPrice(tokenAmount, tokenDecimals, tokenId) {
+	if (gotPrices == undefined || !gotPrices || prices[tokenId] == undefined) {
+		return -1;
+	}
+
+	return getAssetValue(tokenAmount, tokenDecimals) * prices[tokenId];
 }
 
 function formatNftDescription(description) {
@@ -198,51 +227,53 @@ function formatNftDescription(description) {
 	}
 
 	if (isJson(description)) {
-		const jsonString = JSON.stringify(JSON.parse(description), null, '<br>');
-		let result = jsonString.replace(/[{}"]/g, '');
-		result = result.replaceAll(',\n', '');
-
-		do {
-			result = result.replaceAll('<br><br>', '<br>');
-		} while (result.includes('<br><br>'));
-
-		do {
-			result = result.replaceAll('<br>\n<br>', '<br>');
-		} while (result.includes('<br>\n<br>'));
-
-		while (result.substring(result.length - 4) == '<br>') {
-			result = result.substring(0, result.length - 4);
-		}
-
-		while (result.substring(result.length - 5) == '<br>\n') {
-			result = result.substring(0, result.length - 5);
-		}
-		while (result.substring(result.length - 2) == '\n]') {
-			result = result.substring(0, result.length - 2);
-		}
-
-		while (result.substring(0, 2) == '[\n') {
-			result = result.substring(2);
-		}
-
-		while (result.substring(0, 5) == '\n<br>') {
-			result = result.substring(5);
-		}
-
-		while (result.substring(0, 4) == '<br>') {
-			result = result.substring(4);
-		}
+		let jsonObject = JSON.parse(description);
+		let result = '';
+		result = parseNftJson(jsonObject, result, 0);
 
 		return result;
 	} else {
 		description = description.replaceAll('\n', '<br>');
+		description = description.replaceAll('<br><br>','<br>');
 
 		return description;
 	}
 }
 
+function parseNftJson(jsonObject, result, indent) {
+	let keys = Object.keys(jsonObject);
+	let values = Object.values(jsonObject);
+
+	for (let i = 0; i < keys.length; i++) {
+		if (typeof values[i] === 'object') {
+			result += formatNftDescriptonJson(keys[i], '', indent) + '<br>';
+			result = parseNftJson(values[i], result, indent + 1);
+		} else {
+			result += formatNftDescriptonJson(keys[i], values[i], indent); 
+		}
+
+		if (i < keys.length - 1) {
+			result += '<br>';
+		}
+	}
+
+	return result
+}
+
+function formatNftDescriptonJson(key, value, indent) {
+	let tab = '';
+	for (let i = 0; i < indent; i++) {
+		tab += '    ';
+	}
+
+	return tab + '<strong>' + key + '</strong>: ' + value;
+}
+
 function getAssetTitle(asset, iconIsToTheLeft) {
-	let imgSrc = 'https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/' + asset.tokenId + '.svg';
+	let imgSrc = '';
+	if (hasIcon(asset.tokenId)) {
+		imgSrc = getIcon(asset.tokenId);
+	}
 
 	if (asset.tokenId == 'ba553573f83c61be880d79db0f4068177fa75ab7c250ce3543f7e7aeb471a9d2') {
 		imgSrc = 'https://cloudflare-ipfs.com/ipfs/bafybeifjq7aaleq2eg4o4vhqsg2zjow6pkbb3upb7vpz6g24r777ikh5ua';
@@ -319,7 +350,7 @@ function formatInputsOutputs(data) {
 		formattedData += '<div class="col-3 d-flex justify-content-end">' + (data[i].spentTransactionId == null ? '<span class="text-danger">Unspent' : '<span class="text-success">Spent') + '</span></div>';
 
 		//Value
-		formattedData += '<div style="padding-bottom:10px;" class="col-10"><span><strong>Value: </strong></span><span class="gray-color">' + formatErgValueString(data[i].value, 5) + '</span></div>';
+		formattedData += '<div style="padding-bottom:10px;" class="col-10"><span><strong>Value: </strong></span><span class="">' + formatErgValueString(data[i].value, 5) + ' <span class="text-light">' + formatAssetDollarPriceString(data[i].value, ERG_DECIMALS, 'ERG') + '</span></span></div>';
 		
 		//Output transaction
 		if (data[i].outputTransactionId != undefined) {
@@ -330,7 +361,9 @@ function formatInputsOutputs(data) {
 		if (data[i].assets != undefined && data[i].assets.length > 0 ) {
 			formattedData += '<h5><strong>Tokens:</strong></h5>';
 			for (let j = 0; j < data[i].assets.length; j++) {
-				formattedData += '<p><strong>' + getAssetTitle(data[i].assets[j], true) + '</strong>: <span class="text-white">' + formatAssetValueString(data[i].assets[j].amount, data[i].assets[j].decimals, 4) + '</span></p>';
+				let asset = data[i].assets[j];
+				let assetPrice = formatAssetDollarPrice(asset.amount, asset.decimals, asset.tokenId);
+				formattedData += '<p><strong>' + getAssetTitle(asset, true) + '</strong>: <span class="text-white">' + formatAssetValueString(asset.amount, asset.decimals, 4) + ' ' + (assetPrice == -1 ? '' : '<span class="text-light">' + formatDollarPriceString(assetPrice) + '</span>') + '</span></p>';
 			}
 		}
 

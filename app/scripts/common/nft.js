@@ -21,10 +21,10 @@ class NftInfo {
 	}
 }
 
-function getNftsInfo(tokenIds, callback) {
+function getNftsInfo(tokenIds, callback, onlyNft = true) {
 	var jqxhr = $.post(ERGEXPLORER_API_HOST + 'tokens/byId',
 		{
-			onlyNft: true,
+			onlyNft: onlyNft,
 			ids: tokenIds
 		}, function(data) {
 			if (data.total > 0) {
@@ -44,7 +44,6 @@ function getNftsInfo(tokenIds, callback) {
 		});
 }
 
-//https://api.ergoplatform.com/api/v1/boxes/byTokenId
 function getNftInfo(tokenId, callback) {
 	var jqxhr = $.post(ERGEXPLORER_API_HOST + 'tokens/byId',
 		{
@@ -59,6 +58,29 @@ function getNftInfo(tokenId, callback) {
 		}
 
 		callback(nft, null);
+    })
+    .fail(function() {
+    	callback(null, 'Failed to fetch NFT data.');
+    });
+}
+
+function getIssuedNfts(address, callback) {
+	var jqxhr = $.get(ERGEXPLORER_API_HOST + 'tokens/byIssuedAddress',
+		{
+			onlyNft: true,
+			address: address
+		}, function(data) {
+		if (data.total > 0) {
+			let items = data.items;
+
+			for (let i = items.length - 1; i >= 0; i--) {
+				let nft = null;
+
+				nft = processNftData(data.items[i]);
+
+				callback(nft, null);
+			}
+		}
     })
     .fail(function() {
     	callback(null, 'Failed to fetch NFT data.');

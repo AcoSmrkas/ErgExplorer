@@ -130,6 +130,30 @@
 				</div>
 			</div>
 		</div>
+
+		<div id="tokenHolder" style="display: none;">
+			<h3 class="p-2">Info</h3>
+			<div class="div-cell row w-100 p-0">
+				<div id="nftInfoHolder" class="col-lg-12 p-0">
+					<div class="row w-100 p-2">
+						<div class="col-md-3"><strong><p>Type</p></strong></div>
+						<div id="nftType" class="col"></div>
+					</div>
+					<div class="row w-100 p-2">
+						<div class="col-md-3"><strong><p>Mint block</p></strong></div>
+						<div id="nftCreationHeight" class="col"></div>
+					</div>
+					<div class="row w-100 p-2">
+						<div class="col-md-3"><strong><p>Mint address</p></strong></div>
+						<div id="nftMintedAddress" class="col"></div>
+					</div>
+					<div class="row w-100 p-2">
+						<div class="col-md-3"><strong><p>Mint transaction</p></strong></div>
+						<div id="nftMintedTransaction" class="col"></div>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 
 	{% include "partials/error-message.njk" %}
@@ -146,6 +170,6 @@
 {% endblock %}
 
 {% block scripts %}
-	<script src="./scripts/common/nft.js?v=6"></script>
-	<script src="./scripts/token.js?v=6"></script>
+	<script src="./scripts/common/nft.js?v=7"></script>
+	<script src="./scripts/token.js?v=7"></script>
 {% endblock %}

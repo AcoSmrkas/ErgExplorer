@@ -10,9 +10,8 @@ var totalTransactions = 0;
 var valueFields = new Array();
 var valueFieldsFull = new Array();
 var nftsCount = 0;
+var issuedNftsCount = 0;
 var mempoolIndexOffset = 0;
-var prices = new Array();
-var gotPrices = false;
 var tokensArray;
 
 $(function() {
@@ -20,19 +19,25 @@ $(function() {
 
 	setDocumentTitle(walletAddress);
 	
-    getPriceData();
+    getPrices(onGotPrices);
+    getIssuedNfts(walletAddress, onGotIssuedNftInfo, false);
 
     setupQrCode();
 });
 
+function onGotPrices() {
+    printAddressSummary();
+	printTransactions();
+}
+
 function printAddressSummary() {
 	var jqxhr = $.get(API_HOST + 'addresses/' + walletAddress + '/balance/total',
 	function(data) {
-		$('#finalErgBalance').html('<strong class="erg-span">ERG</strong><span class="text-light"> balance:</span> <strong>' + formatErgValueString(data.confirmed.nanoErgs, 2) + '</strong>');
+		$('#finalErgBalance').html('<strong class="erg-span">ERG</strong><span class="gray-color"> balance:</span> <strong>' + formatErgValueString(data.confirmed.nanoErgs, 2) + '</strong>');
 		
-		let ergDollarValue = getAssetValue(data.confirmed.nanoErgs, 9) * prices['ERG'];
+		let ergDollarValue = formatAssetDollarPrice(data.confirmed.nanoErgs, ERG_DECIMALS, 'ERG');
 		if (gotPrices) {
-			$('#finalErgBalance').html($('#finalErgBalance').html() + ' ($' + formatValue(ergDollarValue, 2) + ')');
+			$('#finalErgBalance').html($('#finalErgBalance').html() + ' ' + formatDollarPriceString(ergDollarValue, 2));
 		}
 
 		if (data.confirmed.tokens.length > 0) {
@@ -54,12 +59,12 @@ function printAddressSummary() {
 				let tokensPrice = 0;
 				let tokensPriceString = '';
 				if (gotPrices && prices[tokensArray[i].tokenId] != undefined) {
-					tokensPrice = getAssetValue(tokensArray[i].amount, tokensArray[i].decimals) * prices[tokensArray[i].tokenId];
-					tokensPriceString = formatValue(tokensPrice, 2);
+					tokensPrice = formatAssetDollarPrice(tokensArray[i].amount, tokensArray[i].decimals, tokensArray[i].tokenId);
+					tokensPriceString = formatDollarPriceString(tokensPrice);
 					totalAssetsValue += tokensPrice;
 				}
 
-				let tokensString = formatAssetNameAndValueString(getAssetTitle(tokensArray[i], true), formatAssetValueString(tokensArray[i].amount, tokensArray[i].decimals, 4) + (tokensPrice == 0 ? '' : '<span class="text-light"> ($' + tokensPriceString + ')</span>'), tokensArray[i].tokenId);
+				let tokensString = formatAssetNameAndValueString(getAssetTitle(tokensArray[i], true), formatAssetValueString(tokensArray[i].amount, tokensArray[i].decimals, 4) + (tokensPrice == 0 ? '' : '<span class="text-light"> ' + tokensPriceString + '</span>'), tokensArray[i].tokenId);
 
 				tokensContentFull += tokensString;
 
@@ -79,10 +84,10 @@ function printAddressSummary() {
 			}
 
 			if (totalAssetsValue > 0) {
-				$('#finalAssetsBalance').html('<span class="text-light">Tokens balance:</span> $' + formatValue(totalAssetsValue, 2) + '');
+				$('#finalAssetsBalance').html('<span class="gray-color">Tokens balance:</span> $' + formatValue(totalAssetsValue, 2) + '');
 				$('#finalAssetsBalance').show();
 
-				$('#finalBalance').html('<span class="text-light">Final balance:</span> $' + formatValue(ergDollarValue + totalAssetsValue, 2) + '');
+				$('#finalBalance').html('<span class="gray-color">Final balance:</span> $' + formatValue(ergDollarValue + totalAssetsValue, 2) + '');
 				$('#finalBalance').show();
 			}
 
@@ -98,6 +103,7 @@ function printAddressSummary() {
 		$('#address').html(walletAddressString + ' &#128203;');
 		$('#officialLink').html(getOfficialExplorereAddressUrl(walletAddressString));
 		$('#officialLink').attr('href', getOfficialExplorereAddressUrl(walletAddress));
+		$('#officialLink').show();
 
 		$('#summaryOk').show();
     })
@@ -171,7 +177,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		formattedResult += '<td><span class="d-lg-none"><strong>To: </strong></span><a href="' + getWalletAddressUrl(toAddress) + '">' + formatAddressString(toAddress, 10) + '</a></td>';
 
 		//Status
-		formattedResult += '<td><span class="d-lg-none"><strong>Status: </strong></span><span class="' + ((isMempool) ? 'text-warning' : 'text-success' ) + '">' + ((isMempool) ? 'Pending' : 'Confirmed (' + item.numConfirmations + ')') + '</span></td>';
+		formattedResult += '<td><span class="d-lg-none"><strong>Status: </strong></span><span class="' + ((isMempool) ? 'text-warning' : 'text-success' ) + '">' + ((isMempool) ? 'Pending' : 'Confirmed (' + nFormatter(item.numConfirmations) + ')') + '</span></td>';
 		
 		//Fee
 		let fee = 0;
@@ -200,10 +206,10 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 				for (let k = 0; k < tokensArray.length; k++) {
 					let assetPrice = -1;
 					if (gotPrices && prices[tokensArray[k].tokenId] != undefined) {
-						assetPrice = formatValue(getAssetValue(tokensArray[k].amount, tokensArray[k].decimals) * prices[tokensArray[k].tokenId], 2);
+						assetPrice = formatAssetDollarPriceString(tokensArray[k].amount, tokensArray[k].decimals, tokensArray[k].tokenId);
 					}
 
-					let assetsString = '<br><strong><span class="text-white">' + formatAssetValueString(tokensArray[k].amount, tokensArray[k].decimals, 4) + '</span></strong> ' + getAssetTitle(tokensArray[k], false) + (assetPrice == -1 ? '' : ' <span class="text-light">($' + assetPrice +')</span>');
+					let assetsString = '<br><strong><span class="text-white">' + formatAssetValueString(tokensArray[k].amount, tokensArray[k].decimals, 4) + '</span></strong> ' + getAssetTitle(tokensArray[k], false) + (assetPrice == -1 ? '' : ' <span class="text-light">' + assetPrice +'</span>');
 
 					assetsFull += assetsString;
 					
@@ -224,11 +230,11 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 
 		let ergDollarValue = -1
 		if (gotPrices) {
-			ergDollarValue = formatValue(getAssetValue(value, 9) * prices['ERG'], 5);
+			ergDollarValue = formatAssetDollarPrice(value, ERG_DECIMALS, 'ERG');
 		}
 
-		valueFields[i + mempoolIndexOffset] = formatErgValueString(value, 5) + (ergDollarValue == -1 ? '' : ' <span class="text-light">($' + ergDollarValue + ')</span>') + assets;
-		valueFieldsFull[i + mempoolIndexOffset] = formatErgValueString(value, 5) + (ergDollarValue == -1 ? '' : ' <span class="text-light">($' + ergDollarValue + ')</span>') + assetsFull;
+		valueFields[i + mempoolIndexOffset] = formatErgValueString(value, 5) + (ergDollarValue == -1 ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>') + assets;
+		valueFieldsFull[i + mempoolIndexOffset] = formatErgValueString(value, 5) + (ergDollarValue == -1 ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>') + assetsFull;
 
 		formattedResult += '<td><span class="d-lg-none"><strong>Value: </strong></span><span id="txValue' + (i + mempoolIndexOffset) + '">' + valueFields[i + mempoolIndexOffset] + '</span></td></tr>';
 	}
@@ -290,7 +296,7 @@ function onGotNftInfo(nftInfo, message) {
 	$('#nftsHolder').show();
 
 	nftsCount++;
-	$('#nftsTitle').html('NFTs (+' + nftsCount + ') ');
+	$('#nftsTitle').html('<strong>Owned NFTs</strong> (+' + nftsCount + ') ');
 	$('#hideAllNftsAction').hide();
 }
 
@@ -298,7 +304,7 @@ function showNfts(e) {
 	$('#nftsShowAll').show();
 	$('#showAllNftsAction').hide();
 	$('#hideAllNftsAction').show();
-	$('#nftsTitle').html('<strong>NFTs</strong>');
+	$('#nftsTitle').html('<strong>Owned NFTs</strong>');
 
 	scrollToElement($('#nftsTitle'));
 
@@ -309,7 +315,7 @@ function hideNfts(e) {
 	$('#nftsShowAll').hide();
 	$('#showAllNftsAction').show();
 	$('#hideAllNftsAction').hide();
-	$('#nftsTitle').html('NFTs (+' + nftsCount + ') ');
+	$('#nftsTitle').html('<strong>Owned NFTs</strong> (+' + nftsCount + ') ');
 
 	scrollToElement($('#nftsTitle'));
 
@@ -421,28 +427,84 @@ function setupQrCode() {
 	});
 }
 
-function getPriceData() {
-	//	https://api.spectrum.fi/v1/price-tracking/markets
-	var jqxhr = $.get('https://api.spectrum.fi/v1/price-tracking/markets',
-	function(data) {
-		for (let i = 0; i < data.length; i++) {
-			if (data[i]['baseSymbol'] == 'ERG' && data[i]['quoteSymbol'] == 'SigUSD') {
-				prices['ERG'] = data[i]['lastPrice'];
+
+
+function onGotIssuedNftInfo(nftInfo, message) {
+	let formattedHtml = '';
+	let nftHolderId = '';
+	let nftContentHolderId = '';
+
+	if (nftInfo.isNft) {
+		let imgSrc = '';
+
+		switch (nftInfo.type) {
+			case NFT_TYPE.Image:
+				imgSrc = nftInfo.link;
+				nftHolderId = '#issuedNftImagesHolder';
+				nftContentHolderId = '#issuedNftImagesContentHolder';
 				break;
-			}
+			case NFT_TYPE.Audio:
+				imgSrc = './images/nft-audio.png';
+				nftHolderId = '#issuedNftAudioHolder';
+				nftContentHolderId = '#issuedNftAudioContentHolder';
+				break;
+			case NFT_TYPE.Video:
+				imgSrc = './images/nft-video.png';
+				nftHolderId = '#issuedNftVideoHolder';
+				nftContentHolderId = '#issuedNftVideoContentHolder';
+				break;
+			case NFT_TYPE.ArtCollection:
+				imgSrc = './images/nft-artcollection.png';;
+				nftHolderId = '#issuedNftArtCollectionHolder';
+				nftContentHolderId = '#issuedNftArtCollectionContentHolder';
+				break;
+			case NFT_TYPE.FileAttachment:
+				imgSrc = './images/nft-file.png';
+				nftHolderId = '#issuedNftFileHolder';
+				nftContentHolderId = '#issuedNftFileContentHolder';
+				break;
+			case NFT_TYPE.MembershipToken:
+				imgSrc = './images/nft-membership.png';
+				nftHolderId = '#issuedNftMembershipHolder';
+				nftContentHolderId = '#issuedNftMembershipContentHolder';
+				break;
 		}
 
-		for (let i = 0; i < data.length; i++) {
-			if (data[i]['baseSymbol'] == 'ERG') {
-				if (prices[data[i]['quoteId']] != undefined) continue;
+		formattedHtml = $(nftContentHolderId).html() + '<a href="' + getTokenUrl(nftInfo.data.id) + '"><div class="card m-1" style="width: 100px;"><div class="cardImgHolder"><img src="' + imgSrc + '" class="card-img-top' + ((nftInfo.type == NFT_TYPE.Image) ? '' : ' p-4') + '"></div><div class="card-body p-2"><p class="card-text">' + nftInfo.data.name + (nftInfo.data.isBurned == 't' ? ' (<span class="text-danger">Burned</span>)' : '') + '</p></div></div></a>';
+	} else {
+		nftHolderId = '#issuedTokenHolder';
+		nftContentHolderId = '#issuedTokenContentHolder';
 
-				prices[data[i]['quoteId']] = prices['ERG'] / data[i]['lastPrice'];
-			}
-		}
+		formattedHtml = $(nftContentHolderId).html() + '<p><a href="' + getTokenUrl(nftInfo.data.id) + '">' + nftInfo.data.name + ' - ' + formatAddressString(nftInfo.data.id) + '</a>' + (nftInfo.data.isBurned == 't' ? ' (<span class="text-danger">Burned</span>)' : '') + '</p>';
+	}
 
-		gotPrices = true;
-	}).always(function () {
-	    printAddressSummary();
-		printTransactions();
-	});
+	$(nftContentHolderId).html(formattedHtml);
+	$(nftHolderId).show();
+	$('#issuedNftsHolder').show();
+
+	issuedNftsCount++;
+	$('#issuedNftsTitle').html('<strong>Issued Assets</strong> (+' + issuedNftsCount + ') ');
+	$('#hideIssuedNftsAction').hide();
+}
+
+function showIssuedNfts(e) {
+	$('#nftsShowIssued').show();
+	$('#showIssuedNftsAction').hide();
+	$('#hideIssuedNftsAction').show();
+	$('#issuedNftsTitle').html('<strong>Issued Assets</strong>');
+
+	scrollToElement($('#issuedNftsTitle'));
+
+	e.preventDefault();
+}
+
+function hideIssuedNfts(e) {
+	$('#nftsShowIssued').hide();
+	$('#showIssuedNftsAction').show();
+	$('#hideIssuedNftsAction').hide();
+	$('#issuedNftsTitle').html('<strong>Issued Assets</strong> (+' + issuedNftsCount + ') ');
+
+	scrollToElement($('#issuedNftsTitle'));
+
+	e.preventDefault();
 }

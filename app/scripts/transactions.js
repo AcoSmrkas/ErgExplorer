@@ -4,7 +4,7 @@ var txId = '';
 $(function() {
 	txId = getWalletAddressFromUrl();
 
-	printTransaction();
+	getPrices(printTransaction);
 
 	setDocumentTitle(txId);
 
@@ -43,7 +43,7 @@ function printTransaction() {
 			totalCoinsTransferred += data.outputs[i].value;
 		}
 
-		$('#txTotalCoinsTransferred').html(formatErgValueString(totalCoinsTransferred, 6));
+		$('#txTotalCoinsTransferred').html(formatErgValueString(totalCoinsTransferred, 6) + ' ' + formatAssetDollarPriceString(totalCoinsTransferred, ERG_DECIMALS, 'ERG'));
 
 		//Fee
 		let fee = 0;
@@ -53,7 +53,7 @@ function printTransaction() {
 			}
 		}
 
-		$('#txFees').html(formatErgValueString(fee, 5));
+		$('#txFees').html(formatErgValueString(fee, 5) + ' ' + formatAssetDollarPriceString(fee, ERG_DECIMALS, 'ERG'));
 		
 		//Fees per byte
 		$('#txFeesPerByte').html(formatErgValueString(fee / (data.size), 9));

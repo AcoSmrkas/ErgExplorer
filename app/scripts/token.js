@@ -31,6 +31,8 @@ function onGetNftInfoDone(nftInfo, message) {
 
 	if (tokenData.emissionAmount == 1) {
 		getCurrentAddress();
+	} else {
+		$('#nftCurrentAddressHolder').remove();
 	}
 
 	//Decimals
@@ -43,6 +45,8 @@ function onGetNftInfoDone(nftInfo, message) {
 	let isBurned = tokenData.isBurned == 't';
 	if (isBurned) {
 		$('#tokenBurned').show();
+	} else {
+		checkIfBurned();
 	}
 
 	//Description
@@ -55,98 +59,113 @@ function onGetNftInfoDone(nftInfo, message) {
 
 	$('#tokenDataHolder').show();
 
-	if (!nftInfo.isNft) {
-		return;
-	}
+	if (nftInfo.isNft) {
+		$('#tokenHolder').remove();
 
-	nftType = nftInfo.type;
+		nftType = nftInfo.type;
 
-	//NFT type
-	$('#nftType').html('<p>' + nftInfo.type + '</p>');
-	
-	//SHA256 hash
-	$('#nftHash').html('<p>' + nftInfo.hash + '</p>');
-	if (nftInfo.type == NFT_TYPE.ArtCollection) {
-		$('#nftHashHolder').hide();
-	}
+		//NFT type
+		$('#nftType').html('<p>' + nftInfo.type + '</p>');
+		
+		//SHA256 hash
+		$('#nftHash').html('<p>' + nftInfo.hash + '</p>');
+		if (nftInfo.type == NFT_TYPE.ArtCollection) {
+			$('#nftHashHolder').hide();
+		}
 
+		//Mint address
+		let mintAddress = tokenData.address;
+		if (tokenData.mintWallet != null) {
+			mintAddress = tokenData.mintWallet;
+		}
 
-	//Mint address
-	let mintAddress = tokenData.address;
-	if (tokenData.mintWallet != null) {
-		mintAddress = tokenData.mintWallet;
-	}
+		$('#nftMintedAddress').html('<p><a href="' + getWalletAddressUrl(mintAddress) + '">' + mintAddress + '</a></p>');
 
-	$('#nftMintedAddress').html('<p><a href="' + getWalletAddressUrl(mintAddress) + '">' + mintAddress + '</a></p>');
+		$('#nftMintedTransaction').html('<p><a href="' + getTransactionsUrl(tokenData.transactionId) + '">' + tokenData.transactionId + '</a></p>');
+		$('#nftCreationHeight').html('<p><a href="' + getBlockUrl(tokenData.blockId) + '">' + tokenData.creationHeight + '</a></p>');
 
-	$('#nftMintedTransaction').html('<p><a href="' + getTransactionsUrl(tokenData.transactionId) + '">' + tokenData.transactionId + '</a></p>');
-	$('#nftCreationHeight').html('<p><a href="' + getBlockUrl(tokenData.blockId) + '">' + tokenData.creationHeight + '</a></p>');
+		let linkString = nftInfo.link;
+		if (linkString.length > 100) {
+			linkString = formatAddressString(linkString, 95);
+		}
+		if (nftInfo.additionalLinks.length > 0) {
 
-	let linkString = nftInfo.link;
-	if (linkString.length > 100) {
-		linkString = formatAddressString(linkString, 95);
-	}
-	if (nftInfo.additionalLinks.length > 0) {
+			let formattedLinksHtml = '<p>Link 01: <a  target="_new" href="' + nftInfo.link + '">' + linkString + '</a></p>';
 
-		let formattedLinksHtml = '<p>Link 01: <a  target="_new" href="' + nftInfo.link + '">' + linkString + '</a></p>';
+			for (let i = 0; i < nftInfo.additionalLinks.length; i++) {
+				linkString = nftInfo.additionalLinks[i];
+				if (linkString.length > 100) {
+					linkString = formatAddressString(linkString, 95);
+				}
 
-		for (let i = 0; i < nftInfo.additionalLinks.length; i++) {
-			linkString = nftInfo.additionalLinks[i];
-			if (linkString.length > 100) {
-				linkString = formatAddressString(linkString, 95);
+				formattedLinksHtml += '<p>Link ' + i + 2 + ': <a  target="_new" href="' + nftInfo.additionalLinks[i] + '">' + linkString + '</a></p>'
 			}
 
-			formattedLinksHtml += '<p>Link ' + i + 2 + ': <a  target="_new" href="' + nftInfo.additionalLinks[i] + '">' + linkString + '</a></p>'
+			$('#nftLink').html(formattedLinksHtml);
+		} else {
+			$('#nftLink').html('<p><a  target="_new" href="' + nftInfo.link + '">' + linkString + '</a></p>');
 		}
 
-		$('#nftLink').html(formattedLinksHtml);
+		if (nftInfo.type == NFT_TYPE.Image) {
+			$('#nftPreviewImg').attr('src', nftInfo.link);
+			$('#nftImageFull').attr('src', nftInfo.link);
+			$('#nftPreviewImg').show();
+
+			if (nftInfo.link.substr(0, 19) == 'data:image/svg+xml;') {
+				$('#nftPreviewImg').css('width', '200px');
+				$('#nftImageFull').css('width', '400px');
+			}
+		} else if (nftInfo.type == NFT_TYPE.Audio) {
+			$('#nftPreviewAudioSource').attr('src', nftInfo.link);
+			$('#nftPreviewAudio').show();
+			document.getElementById('nftAudio').load();
+
+			$('#nftPreviewImgHolder').hide();
+			$('#nftPreviewImgHolder').removeClass('col-lg-3');
+			$('#nftInfoHolder').removeClass('col-lg-9');
+
+			if (nftInfo.additionalLinks.length > 0) {
+				$('#nftPreviewImg').attr('src', nftInfo.additionalLinks[0]);
+			$('#nftImageFull').attr('src', nftInfo.additionalLinks[0]);
+			}
+		} else if (nftInfo.type == NFT_TYPE.Video) {
+			$('#nftPreviewVideoSource').attr('src', nftInfo.link);
+			$('#nftPreviewVideo').show();
+			document.getElementById('nftPreviewVideo').load();
+
+			$('#nftPreviewImgHolder').removeClass('col-lg-3');
+			$('#nftInfoHolder').removeClass('col-lg-9');
+
+			$('#nftPreviewImgHolder').addClass('col-xl-5');
+			$('#nftInfoHolder').addClass('col-xl-7');
+			$('#nftPreviewImgHolder').css('min-height', '0');
+		} else {
+			$('#nftPreviewImgHolder').hide();
+			$('#nftInfoHolder').removeClass('col-lg-9');
+			$('#nftInfoHolder').addClass('col-12');
+			$('#nftPreviewImgHolder').css('min-height', '0');
+		}
+
+		$('#nftAuction').html('<p>See on <a  target="_new" href="https://www.skyharbor.io/token/' + tokenData.id + '">SkyHarbor.io</a></p><p>See on <a  target="_new" href="https://ergoauctions.org/artwork/' + tokenData.id + '">Ergoauctions.org</a></p>');
+
+		$('#nftHolder').show();
 	} else {
-		$('#nftLink').html('<p><a  target="_new" href="' + nftInfo.link + '">' + linkString + '</a></p>');
-	}
-
-	if (nftInfo.type == NFT_TYPE.Image) {
-		$('#nftPreviewImg').attr('src', nftInfo.link);
-		$('#nftImageFull').attr('src', nftInfo.link);
-		$('#nftPreviewImg').show();
-
-		if (nftInfo.link.substr(0, 19) == 'data:image/svg+xml;') {
-			$('#nftPreviewImg').css('width', '200px');
-			$('#nftImageFull').css('width', '400px');
+		$('#nftHolder').remove();
+		
+		$('#nftType').html('<p>Token</p>');
+		
+		//Mint address
+		let mintAddress = tokenData.address;
+		if (tokenData.mintWallet != null) {
+			mintAddress = tokenData.mintWallet;
 		}
-	} else if (nftInfo.type == NFT_TYPE.Audio) {
-		$('#nftPreviewAudioSource').attr('src', nftInfo.link);
-		$('#nftPreviewAudio').show();
-		document.getElementById('nftAudio').load();
 
-		$('#nftPreviewImgHolder').hide();
-		$('#nftPreviewImgHolder').removeClass('col-lg-3');
-		$('#nftInfoHolder').removeClass('col-lg-9');
+		$('#nftMintedAddress').html('<p><a href="' + getWalletAddressUrl(mintAddress) + '">' + mintAddress + '</a></p>');
+		$('#nftMintedTransaction').html('<p><a href="' + getTransactionsUrl(tokenData.transactionId) + '">' + tokenData.transactionId + '</a></p>');
+		$('#nftCreationHeight').html('<p><a href="' + getBlockUrl(tokenData.blockId) + '">' + tokenData.creationHeight + '</a></p>');
 
-		if (nftInfo.additionalLinks.length > 0) {
-			$('#nftPreviewImg').attr('src', nftInfo.additionalLinks[0]);
-		$('#nftImageFull').attr('src', nftInfo.additionalLinks[0]);
-		}
-	} else if (nftInfo.type == NFT_TYPE.Video) {
-		$('#nftPreviewVideoSource').attr('src', nftInfo.link);
-		$('#nftPreviewVideo').show();
-		document.getElementById('nftPreviewVideo').load();
-
-		$('#nftPreviewImgHolder').removeClass('col-lg-3');
-		$('#nftInfoHolder').removeClass('col-lg-9');
-
-		$('#nftPreviewImgHolder').addClass('col-xl-5');
-		$('#nftInfoHolder').addClass('col-xl-7');
-		$('#nftPreviewImgHolder').css('min-height', '0');
-	} else {
-		$('#nftPreviewImgHolder').hide();
-		$('#nftInfoHolder').removeClass('col-lg-9');
-		$('#nftInfoHolder').addClass('col-12');
-		$('#nftPreviewImgHolder').css('min-height', '0');
+		$('#tokenHolder').show();
 	}
-
-	$('#nftAuction').html('<p>See on <a  target="_new" href="https://www.skyharbor.io/token/' + tokenData.id + '">SkyHarbor.io</a></p><p>See on <a  target="_new" href="https://ergoauctions.org/artwork/' + tokenData.id + '">Ergoauctions.org</a></p>');
-
-	$('#nftHolder').show();
 }
 
 function getCurrentAddress() {
@@ -171,6 +190,15 @@ function getCurrentAddress() {
 	});
 }
 
+function checkIfBurned() {
+	var jqxhr = $.get(API_HOST + 'boxes/unspent/byTokenId/' + tokenId, function(data) {
+		if (data.total == 0) {
+			$('#tokenBurned').show();
+			$.get(ERGEXPLORER_API_HOST + 'tokens/updateSingle?id=' + tokenId);
+		}
+	});
+}
+
 function onTokenIconLoaded() {
 	$('#tokenDescriptionHolderRight').removeClass('col-xl-10 col-9');
 	$('#tokenDescriptionHolderRight').addClass('col-xl-8 col-7');
@@ -180,6 +208,10 @@ function onTokenIconLoaded() {
 
 	$('#tokenIcon').addClass('d-flex');
 	$('#tokenIcon').show();
+
+	if (!hasIcon(tokenId)) {
+		addIcon(tokenId);
+	}
 }
 
 function copyTokenAddress(e) {

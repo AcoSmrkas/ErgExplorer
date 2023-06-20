@@ -1,10 +1,17 @@
 $(function() {	
-    getErgPrice();
-    getProtocolInfo();
-    getStats();
+	getPrices(onGotPrices);
 
     $('#searchType').val('0');
 });
+
+function onGotPrices() {
+    getProtocolInfo();
+    getStats();
+
+    if (gotPrices != undefined && gotPrices) {
+    	$('#ergPrice').html('$' + formatValue(prices['ERG'], 2));
+	}
+}
 
 function getProtocolInfo() {
 	const xhr = new XMLHttpRequest();
@@ -15,7 +22,7 @@ function getProtocolInfo() {
 
 	    $('#ergVersion').html(data.version);
 	    $('#ergSupply').html(formatErgValueString(data.supply, 0));
-	    $('#ergTotal').html(formatErgValueString(97739924000000000, 0));
+	    $('#ergTotal').html(formatErgValueString(97739924000000000, 0)); //+ ' <span class="text-light">' + formatDollarPriceString(97739924000000000) + '</span>'
 	    $('#ergHashRate').html(formatHashRateString(data.hashRate));
 	    $('#ergTxAvg').html(data.transactionAverage);
 	  }
@@ -40,21 +47,21 @@ function getStats() {
 		$('#statsAverageMiningTime').html('<p>' + millisToMinutesAndSeconds(data.blockSummary.averageMiningTime) + '</p>');
 
 		//Coins mined
-		$('#statsCoinsMined').html('<p>' + formatErgValueString(data.blockSummary.totalCoins, 0) + '</p>');
+		$('#statsCoinsMined').html('<p class="text-white">' + formatErgValueString(data.blockSummary.totalCoins, 0) + ' <span class="text-light">' + formatAssetDollarPriceString(data.blockSummary.totalCoins, ERG_DECIMALS, 'ERG') + '</span></p>');
 
 		//Transactions summary
 		//Number of transactions
 		$('#statsNumberOfTransactions').html('<p>' + data.transactionsSummary.total + '</p>');
 
 		//Total transaction fees
-		$('#statsTotalTransactionFees').html('<p>' + formatErgValueString(data.transactionsSummary.totalFee) + '</p>');
+		$('#statsTotalTransactionFees').html('<p class="text-white">' + formatErgValueString(data.transactionsSummary.totalFee) + ' <span class="text-light">' + formatAssetDollarPriceString(data.transactionsSummary.totalFee, ERG_DECIMALS, 'ERG') + '</span></p>');
 
 		//Total output volume
-		$('#statsTotalOutputVolume').html('<p>' + formatErgValueString(data.transactionsSummary.totalOutput) + '</p>');
+		$('#statsTotalOutputVolume').html('<p class="text-white">' + formatErgValueString(data.transactionsSummary.totalOutput) + ' <span class="text-light">' + formatAssetDollarPriceString(data.transactionsSummary.totalOutput, ERG_DECIMALS, 'ERG') + '</span></p>');
 
 		//Mining cost
 		//Blocks mined
-		$('#statsTotalMinersRevenue').html('<p>' + formatErgValueString(data.miningCost.totalMinersRevenue) + '</p>');
+		$('#statsTotalMinersRevenue').html('<p class="text-white">' + formatErgValueString(data.miningCost.totalMinersRevenue) + ' <span class="text-light">' + formatAssetDollarPriceString(data.miningCost.totalMinersRevenue, ERG_DECIMALS, 'ERG') + '</span></p>');
 
 		//Average mining time
 		$('#statsEarnedFromTransactionFees').html('<p>' + data.miningCost.percentEarnedTransactionsFees + '%</p>');
@@ -63,7 +70,7 @@ function getStats() {
 		$('#statsOfTransactionVolume').html('<p>' + data.miningCost.percentTransactionVolume + '%</p>');
 
 		//Number of transactions
-		$('#statsCostPerTransaction').html('<p>' + formatErgValueString(data.miningCost.costPerTransaction) + '</p>');
+		$('#statsCostPerTransaction').html('<p class="text-white">' + formatErgValueString(data.miningCost.costPerTransaction) + ' <span class="text-light">' + formatAssetDollarPriceString(data.miningCost.costPerTransaction, ERG_DECIMALS, 'ERG') + '</span></p>');
 
 		//Total transaction fees
 		$('#statsDifficulty').html('<p>' + data.miningCost.difficulty + '</p>');
@@ -73,30 +80,4 @@ function getStats() {
 
 		$('#statsHolder').show();
     });;
-}
-
-function getErgPrice() {
-	const data = JSON.stringify({
-		'currency': 'USD',
-		'code': 'ERG',
-		'meta': false
-	});
-
-	const xhr = new XMLHttpRequest();
-
-	xhr.addEventListener('readystatechange', function () {
-	  if (this.readyState === this.DONE) {
-	  	let data = JSON.parse(this.response);
-
-	    $('#ergPrice').html(formatDollarValueString(data.rate));
-	  }
-	});
-
-	xhr.open('POST', 'https://api.livecoinwatch.com/coins/single');
-	xhr.setRequestHeader('content-type', 'application/json');
-	xhr.setRequestHeader('x-api-key', '85ec3258-17d5-417f-b5d3-295dee1e5ee4');
-
-	xhr.withCredentials = false;
-
-	xhr.send(data);
 }

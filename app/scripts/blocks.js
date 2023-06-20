@@ -4,7 +4,7 @@ var blockId = '';
 $(function() {
 	blockId = getWalletAddressFromUrl();
 
-	printBlock();
+	getPrices(printBlock)
 
 	setDocumentTitle(blockId);
 
