@@ -1,4 +1,5 @@
 var prices = new Array();
+var pricesNames = new Array();
 var gotPrices = false;
 
 function getPrices(callback) {
@@ -7,6 +8,7 @@ function getPrices(callback) {
 		for (let i = 0; i < data.length; i++) {
 			if (data[i]['baseSymbol'] == 'ERG' && data[i]['quoteSymbol'] == 'SigUSD') {
 				prices['ERG'] = data[i]['lastPrice'];
+				pricesNames['ERG'] = 'ERG';
 				break;
 			}
 		}
@@ -15,7 +17,9 @@ function getPrices(callback) {
 			if (data[i]['baseSymbol'] == 'ERG') {
 				if (prices[data[i]['quoteId']] != undefined) continue;
 
-				prices[data[i]['quoteId']] = prices['ERG'] / data[i]['lastPrice'];
+				let price = prices['ERG'] / data[i]['lastPrice'];
+				prices[data[i]['quoteId']] = price;
+				pricesNames[data[i]['quoteSymbol']] = price;
 			}
 		}
 

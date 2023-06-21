@@ -12,27 +12,26 @@ var valueFieldsFull = new Array();
 var nftsCount = 0;
 var issuedNftsCount = 0;
 var mempoolIndexOffset = 0;
-var tokensArray;
+var tokensArray = new Array();
+var initRequestCount = -1;
+var initRequestDone = 0
 
 $(function() {
 	walletAddress = getWalletAddressFromUrl();	
 
 	setDocumentTitle(walletAddress);
 	
-    getPrices(onGotPrices);
+    getPrices(onInitRequestsFinished);
+
     getIssuedNfts(walletAddress, onGotIssuedNftInfo, false);
 
     setupQrCode();
 });
 
-function onGotPrices() {
-    printAddressSummary();
-	printTransactions();
-}
-
 function printAddressSummary() {
 	var jqxhr = $.get(API_HOST + 'addresses/' + walletAddress + '/balance/total',
 	function(data) {
+		//Total ERG value
 		$('#finalErgBalance').html('<strong class="erg-span">ERG</strong><span class="gray-color"> balance:</span> <strong>' + formatErgValueString(data.confirmed.nanoErgs, 2) + '</strong>');
 		
 		let ergDollarValue = formatAssetDollarPrice(data.confirmed.nanoErgs, ERG_DECIMALS, 'ERG');
@@ -40,9 +39,11 @@ function printAddressSummary() {
 			$('#finalErgBalance').html($('#finalErgBalance').html() + ' ' + formatDollarPriceString(ergDollarValue, 2));
 		}
 
+		//Balance tokens
 		if (data.confirmed.tokens.length > 0) {
 			$('#tokensHolder').show();
 
+			let totalVestingPrice = -1;
 			let tokensToShow = 2;
 			tokensContent = '';
 			tokensContentFull = '';
@@ -55,7 +56,6 @@ function printAddressSummary() {
 			let nftSearchTokens = [];
 			let totalAssetsValue = 0;
 			for (i = 0; i < tokensArray.length; i++) {
-
 				let tokensPrice = 0;
 				let tokensPriceString = '';
 				if (gotPrices && prices[tokensArray[i].tokenId] != undefined) {
@@ -87,7 +87,7 @@ function printAddressSummary() {
 				$('#finalAssetsBalance').html('<span class="gray-color">Tokens balance:</span> $' + formatValue(totalAssetsValue, 2) + '');
 				$('#finalAssetsBalance').show();
 
-				$('#finalBalance').html('<span class="gray-color">Final balance:</span> $' + formatValue(ergDollarValue + totalAssetsValue, 2) + '');
+				$('#finalBalance').html('<span class="grey-color">Final balance:</span> $' + formatValue(ergDollarValue + totalAssetsValue, 2) + '');
 				$('#finalBalance').show();
 			}
 
@@ -106,6 +106,9 @@ function printAddressSummary() {
 		$('#officialLink').show();
 
 		$('#summaryOk').show();
+
+		getErgopadVesting();
+		getErgopadStaking();
     })
     .fail(function() {
     	showLoadError('No results matching your query.');
@@ -246,58 +249,60 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 	return formattedResult;
 }
 
-function onGotNftInfo(nftInfo, message) {
-	if (nftInfo == null || !nftInfo.isNft) {
-		return;
+function onGotNftInfo(nftInfos, message) {
+	if (nftInfos == undefined || nftInfos == null) return;
+
+	for (let i = 0; i < nftInfos.length; i++) {
+		if (!nftInfos[i].isNft) continue;
+
+		let imgSrc = '';
+		let formattedHtml = '';
+		let nftHolderId = '';
+		let nftContentHolderId = '';
+
+		switch (nftInfos[i].type) {
+			case NFT_TYPE.Image:
+				imgSrc = nftInfos[i].link;
+				nftHolderId = '#nftImagesHolder';
+				nftContentHolderId = '#nftImagesContentHolder';
+				break;
+			case NFT_TYPE.Audio:
+				imgSrc = './images/nft-audio.png';
+				nftHolderId = '#nftAudioHolder';
+				nftContentHolderId = '#nftAudioContentHolder';
+				break;
+			case NFT_TYPE.Video:
+				imgSrc = './images/nft-video.png';
+				nftHolderId = '#nftVideoHolder';
+				nftContentHolderId = '#nftVideoContentHolder';
+				break;
+			case NFT_TYPE.ArtCollection:
+				imgSrc = './images/nft-artcollection.png';;
+				nftHolderId = '#nftArtCollectionHolder';
+				nftContentHolderId = '#nftArtCollectionContentHolder';
+				break;
+			case NFT_TYPE.FileAttachment:
+				imgSrc = './images/nft-file.png';
+				nftHolderId = '#nftFileHolder';
+				nftContentHolderId = '#nftFileContentHolder';
+				break;
+			case NFT_TYPE.MembershipToken:
+				imgSrc = './images/nft-membership.png';
+				nftHolderId = '#nftMembershipHolder';
+				nftContentHolderId = '#nftMembershipContentHolder';
+				break;
+		}
+
+		formattedHtml = $(nftContentHolderId).html() + '<a href="' + getTokenUrl(nftInfos[i].data.id) + '"><div class="card m-1" style="width: 100px;"><div class="cardImgHolder"><img src="' + imgSrc + '" class="card-img-top' + ((nftInfos[i].type == NFT_TYPE.Image) ? '' : ' p-4') + '"></div><div class="card-body p-2"><p class="card-text">' + nftInfos[i].data.name + '</p></div></div></a>';
+
+		$(nftContentHolderId).html(formattedHtml);
+		$(nftHolderId).show();
+		$('#nftsHolder').show();
+
+		nftsCount++;
+		$('#nftsTitle').html('<strong>Owned NFTs</strong> (+' + nftsCount + ') ');
+		$('#hideAllNftsAction').hide();
 	}
-
-	let imgSrc = '';
-	let formattedHtml = '';
-	let nftHolderId = '';
-	let nftContentHolderId = '';
-
-	switch (nftInfo.type) {
-		case NFT_TYPE.Image:
-			imgSrc = nftInfo.link;
-			nftHolderId = '#nftImagesHolder';
-			nftContentHolderId = '#nftImagesContentHolder';
-			break;
-		case NFT_TYPE.Audio:
-			imgSrc = './images/nft-audio.png';
-			nftHolderId = '#nftAudioHolder';
-			nftContentHolderId = '#nftAudioContentHolder';
-			break;
-		case NFT_TYPE.Video:
-			imgSrc = './images/nft-video.png';
-			nftHolderId = '#nftVideoHolder';
-			nftContentHolderId = '#nftVideoContentHolder';
-			break;
-		case NFT_TYPE.ArtCollection:
-			imgSrc = './images/nft-artcollection.png';;
-			nftHolderId = '#nftArtCollectionHolder';
-			nftContentHolderId = '#nftArtCollectionContentHolder';
-			break;
-		case NFT_TYPE.FileAttachment:
-			imgSrc = './images/nft-file.png';
-			nftHolderId = '#nftFileHolder';
-			nftContentHolderId = '#nftFileContentHolder';
-			break;
-		case NFT_TYPE.MembershipToken:
-			imgSrc = './images/nft-membership.png';
-			nftHolderId = '#nftMembershipHolder';
-			nftContentHolderId = '#nftMembershipContentHolder';
-			break;
-	}
-
-	formattedHtml = $(nftContentHolderId).html() + '<a href="' + getTokenUrl(nftInfo.data.id) + '"><div class="card m-1" style="width: 100px;"><div class="cardImgHolder"><img src="' + imgSrc + '" class="card-img-top' + ((nftInfo.type == NFT_TYPE.Image) ? '' : ' p-4') + '"></div><div class="card-body p-2"><p class="card-text">' + nftInfo.data.name + '</p></div></div></a>';
-
-	$(nftContentHolderId).html(formattedHtml);
-	$(nftHolderId).show();
-	$('#nftsHolder').show();
-
-	nftsCount++;
-	$('#nftsTitle').html('<strong>Owned NFTs</strong> (+' + nftsCount + ') ');
-	$('#hideAllNftsAction').hide();
 }
 
 function showNfts(e) {
@@ -427,64 +432,74 @@ function setupQrCode() {
 	});
 }
 
+function onGotIssuedNftInfo(nftInfos, message) {
+	if (nftInfos == undefined || nftInfos == null) return;
 
+	nftInfos.sort((a, b) => {
+		return a.data.name > b.data.name;
+	});
 
-function onGotIssuedNftInfo(nftInfo, message) {
-	let formattedHtml = '';
-	let nftHolderId = '';
-	let nftContentHolderId = '';
+	nftInfos.sort((a, b) => {
+		return a.data.isBurned == 't';
+	});
 
-	if (nftInfo.isNft) {
-		let imgSrc = '';
+	for (let i = 0; i < nftInfos.length; i++) {
+		let formattedHtml = '';
+		let nftHolderId = '';
+		let nftContentHolderId = '';
 
-		switch (nftInfo.type) {
-			case NFT_TYPE.Image:
-				imgSrc = nftInfo.link;
-				nftHolderId = '#issuedNftImagesHolder';
-				nftContentHolderId = '#issuedNftImagesContentHolder';
-				break;
-			case NFT_TYPE.Audio:
-				imgSrc = './images/nft-audio.png';
-				nftHolderId = '#issuedNftAudioHolder';
-				nftContentHolderId = '#issuedNftAudioContentHolder';
-				break;
-			case NFT_TYPE.Video:
-				imgSrc = './images/nft-video.png';
-				nftHolderId = '#issuedNftVideoHolder';
-				nftContentHolderId = '#issuedNftVideoContentHolder';
-				break;
-			case NFT_TYPE.ArtCollection:
-				imgSrc = './images/nft-artcollection.png';;
-				nftHolderId = '#issuedNftArtCollectionHolder';
-				nftContentHolderId = '#issuedNftArtCollectionContentHolder';
-				break;
-			case NFT_TYPE.FileAttachment:
-				imgSrc = './images/nft-file.png';
-				nftHolderId = '#issuedNftFileHolder';
-				nftContentHolderId = '#issuedNftFileContentHolder';
-				break;
-			case NFT_TYPE.MembershipToken:
-				imgSrc = './images/nft-membership.png';
-				nftHolderId = '#issuedNftMembershipHolder';
-				nftContentHolderId = '#issuedNftMembershipContentHolder';
-				break;
+		if (nftInfos[i].isNft) {
+			let imgSrc = '';
+
+			switch (nftInfos[i].type) {
+				case NFT_TYPE.Image:
+					imgSrc = nftInfos[i].link;
+					nftHolderId = '#issuedNftImagesHolder';
+					nftContentHolderId = '#issuedNftImagesContentHolder';
+					break;
+				case NFT_TYPE.Audio:
+					imgSrc = './images/nft-audio.png';
+					nftHolderId = '#issuedNftAudioHolder';
+					nftContentHolderId = '#issuedNftAudioContentHolder';
+					break;
+				case NFT_TYPE.Video:
+					imgSrc = './images/nft-video.png';
+					nftHolderId = '#issuedNftVideoHolder';
+					nftContentHolderId = '#issuedNftVideoContentHolder';
+					break;
+				case NFT_TYPE.ArtCollection:
+					imgSrc = './images/nft-artcollection.png';;
+					nftHolderId = '#issuedNftArtCollectionHolder';
+					nftContentHolderId = '#issuedNftArtCollectionContentHolder';
+					break;
+				case NFT_TYPE.FileAttachment:
+					imgSrc = './images/nft-file.png';
+					nftHolderId = '#issuedNftFileHolder';
+					nftContentHolderId = '#issuedNftFileContentHolder';
+					break;
+				case NFT_TYPE.MembershipToken:
+					imgSrc = './images/nft-membership.png';
+					nftHolderId = '#issuedNftMembershipHolder';
+					nftContentHolderId = '#issuedNftMembershipContentHolder';
+					break;
+			}
+
+			formattedHtml = $(nftContentHolderId).html() + '<a href="' + getTokenUrl(nftInfos[i].data.id) + '"><div class="card m-1" style="width: 100px;' + (nftInfos[i].data.isBurned == 't' ? 'border:1.5px solid red;' : '') + '"><div class="cardImgHolder"><img ' + (nftInfos[i].data.isBurned == 't' ? 'style="opacity: 0.4;"' : '') + 'src="' + imgSrc + '" class="card-img-top' + ((nftInfos[i].type == NFT_TYPE.Image) ? '' : ' p-4') + '"></div><div class="card-body p-2"><p class="card-text">' + nftInfos[i].data.name + '</p></div></div></a>';
+		} else {
+			nftHolderId = '#issuedTokenHolder';
+			nftContentHolderId = '#issuedTokenContentHolder';
+
+			formattedHtml = $(nftContentHolderId).html() + '<p><a href="' + getTokenUrl(nftInfos[i].data.id) + '">' + nftInfos[i].data.name + ' - ' + formatAddressString(nftInfos[i].data.id) + '</a>' + (nftInfos[i].data.isBurned == 't' ? ' (<span class="text-danger">Burned</span>)' : '') + '</p>';
 		}
 
-		formattedHtml = $(nftContentHolderId).html() + '<a href="' + getTokenUrl(nftInfo.data.id) + '"><div class="card m-1" style="width: 100px;"><div class="cardImgHolder"><img src="' + imgSrc + '" class="card-img-top' + ((nftInfo.type == NFT_TYPE.Image) ? '' : ' p-4') + '"></div><div class="card-body p-2"><p class="card-text">' + nftInfo.data.name + (nftInfo.data.isBurned == 't' ? ' (<span class="text-danger">Burned</span>)' : '') + '</p></div></div></a>';
-	} else {
-		nftHolderId = '#issuedTokenHolder';
-		nftContentHolderId = '#issuedTokenContentHolder';
+		$(nftContentHolderId).html(formattedHtml);
+		$(nftHolderId).show();
+		$('#issuedNftsHolder').show();
 
-		formattedHtml = $(nftContentHolderId).html() + '<p><a href="' + getTokenUrl(nftInfo.data.id) + '">' + nftInfo.data.name + ' - ' + formatAddressString(nftInfo.data.id) + '</a>' + (nftInfo.data.isBurned == 't' ? ' (<span class="text-danger">Burned</span>)' : '') + '</p>';
+		issuedNftsCount++;
+		$('#issuedNftsTitle').html('<strong>Issued Assets</strong> (+' + issuedNftsCount + ') ');
+		$('#hideIssuedNftsAction').hide();
 	}
-
-	$(nftContentHolderId).html(formattedHtml);
-	$(nftHolderId).show();
-	$('#issuedNftsHolder').show();
-
-	issuedNftsCount++;
-	$('#issuedNftsTitle').html('<strong>Issued Assets</strong> (+' + issuedNftsCount + ') ');
-	$('#hideIssuedNftsAction').hide();
 }
 
 function showIssuedNfts(e) {
@@ -507,4 +522,72 @@ function hideIssuedNfts(e) {
 	scrollToElement($('#issuedNftsTitle'));
 
 	e.preventDefault();
+}
+
+//https://api.ergopad.io/vesting/v2/
+function getErgopadVesting() {
+	$.ajax({
+	    type: 'POST',
+	    url: 'https://api.ergopad.io/vesting/v2/',
+	    data: JSON.stringify({addresses: [walletAddress]}),
+	    contentType: 'application/json; charset=utf-8',
+	    dataType: 'json',
+	    success: function(data) {
+	    	let ergopadVestingData = data;
+
+			let keys = Object.keys(ergopadVestingData);
+			let totalVestingPrice = 0;
+			for (let i = 0; i < tokensArray.length; i++) {
+				for (let j = 0; j < keys.length; j++) {
+					let vestingAsset = ergopadVestingData[keys[j]];
+					for (let k = 0; k < vestingAsset.length; k++) {
+						let vestingEntry = vestingAsset[k];
+						let vestingEntryKeyId = vestingEntry['Vesting Key Id'];
+						if (tokensArray[i].tokenId == vestingEntryKeyId) {
+							totalVestingPrice += vestingEntry['Remaining'] * pricesNames[keys[j]];
+						}	
+					}
+				}
+			}
+
+			if (totalVestingPrice > 0) {
+				$('#ergopadVesting').html('<a href="https://www.ergopad.io/dashboard"" target="_new"><img src="https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/d71693c49a84fbbecd4908c94813b46514b18b67a99952dc1e6e4791556de413.svg" class="token-icon"> Ergopad</a> vesting: <span class="text-light">$' + formatValue(totalVestingPrice, 2) + '</span>');
+				$('#ergopadVesting').show();
+			}
+	    }
+	});
+}
+
+//https://api.ergopad.io/staking/staked-all/
+function getErgopadStaking() {
+	$.ajax({
+	    type: 'POST',
+	    url: 'https://api.ergopad.io/staking/staked-all/',
+	    data: JSON.stringify({addresses: [walletAddress]}),
+	    contentType: 'application/json; charset=utf-8',
+	    dataType: 'json',
+	    success: function(data) {
+	    	let ergopadStakingData = data;
+
+			let keys = Object.keys(pricesNames);
+			let totalVestingPrice = 0;
+			for (let i = 0; i < keys.length; i++) {
+				for (let j = 0; j < ergopadStakingData.length; j++) {
+					if (keys[i] == ergopadStakingData[j].tokenName) {
+						totalVestingPrice += ergopadStakingData[j]['addresses'][walletAddress].totalStaked * pricesNames[keys[i]];
+					}
+				}
+			}
+
+			if (totalVestingPrice == 0) return;
+
+			$('#ergopadStaking').html('<a href="https://www.ergopad.io/dashboard"" target="_new"><img src="https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/d71693c49a84fbbecd4908c94813b46514b18b67a99952dc1e6e4791556de413.svg" class="token-icon"> Ergopad</a> staking: <span class="text-light">$' + formatValue(totalVestingPrice, 2) + '</span>');
+			$('#ergopadStaking').show();
+	    }
+	});
+}
+
+function onInitRequestsFinished() {
+    printAddressSummary();
+	printTransactions();
 }

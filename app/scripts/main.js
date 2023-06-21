@@ -186,7 +186,13 @@ function formatValue(value, digits) {
 }
 
 function formatAssetValueString(value, decimals, digits = 2) {
-	return formatValue(getAssetValue(value, decimals), digits);
+	let assetValue = getAssetValue(value, decimals);
+
+	if (assetValue > 0.1) {
+		digits = 2;
+	}
+
+	return formatValue(assetValue, digits);
 }
 
 function formatAssetNameAndValueString(name, valueString, tokenId) {

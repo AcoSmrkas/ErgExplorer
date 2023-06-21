@@ -27,16 +27,16 @@ function getNftsInfo(tokenIds, callback, onlyNft = true) {
 			onlyNft: onlyNft,
 			ids: tokenIds
 		}, function(data) {
+			let nfts = [];
+
 			if (data.total > 0) {
 				let items = data.items;
 
 				for (let i = items.length - 1; i >= 0; i--) {
-					let nft = null;
-
-					nft = processNftData(data.items[i]);
-
-					callback(nft, null);
+					nfts.push(processNftData(data.items[i]));
 				}
+
+				callback(nfts, null);
 			}
 		})
 		.fail(function() {
@@ -70,16 +70,16 @@ function getIssuedNfts(address, callback) {
 			onlyNft: true,
 			address: address
 		}, function(data) {
+		let nfts = [];
+
 		if (data.total > 0) {
 			let items = data.items;
 
 			for (let i = items.length - 1; i >= 0; i--) {
-				let nft = null;
-
-				nft = processNftData(data.items[i]);
-
-				callback(nft, null);
+				nfts.push(processNftData(data.items[i]));
 			}
+
+			callback(nfts, null);
 		}
     })
     .fail(function() {
