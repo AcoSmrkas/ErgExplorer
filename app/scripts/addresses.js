@@ -29,7 +29,12 @@ $(function() {
 });
 
 function printAddressSummary() {
-	var jqxhr = $.get(API_HOST + 'addresses/' + walletAddress + '/balance/total',
+	let balanceUrl = API_HOST + 'addresses/' + walletAddress + '/balance/total';
+	if (networkType == 'testnet') {
+		balanceUrl = API_HOST + 'api/v1/addresses/' + walletAddress + '/balance/total';
+	}
+
+	var jqxhr = $.get(balanceUrl,
 	function(data) {
 		//Total ERG value
 		$('#finalErgBalance').html('<strong class="erg-span">ERG</strong><span class="gray-color"> balance:</span> <strong>' + formatErgValueString(data.confirmed.nanoErgs, 2) + '</strong>');
@@ -87,7 +92,7 @@ function printAddressSummary() {
 				$('#finalAssetsBalance').html('<span class="gray-color">Tokens balance:</span> $' + formatValue(totalAssetsValue, 2) + '');
 				$('#finalAssetsBalance').show();
 
-				$('#finalBalance').html('<span class="grey-color">Final balance:</span> $' + formatValue(ergDollarValue + totalAssetsValue, 2) + '');
+				$('#finalBalance').html('<span class="grey-color">Total:</span> $' + formatValue(ergDollarValue + totalAssetsValue, 2) + '');
 				$('#finalBalance').show();
 			}
 
@@ -98,7 +103,7 @@ function printAddressSummary() {
 
 		let walletAddressString = walletAddress;
 		if (walletAddressString.length > 70) {
-			walletAddressString = formatAddressString(walletAddressString, 60);
+			walletAddressString = formatAddressString(walletAddressString, 58);
 		}
 		$('#address').html(walletAddressString + ' &#128203;');
 		$('#officialLink').html(getOfficialExplorereAddressUrl(walletAddressString));
@@ -125,8 +130,14 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 	for (let i = 0; i < transactionsJson.items.length; i++) {
 		const item = transactionsJson.items[i];
 
-		formattedResult += '<tr>';		
-		isWallet2Wallet = item.outputs[0].address.substring(0, 1) == '9';
+		formattedResult += '<tr>';
+
+		let addressPrefix = '9';
+		if (networkType == 'testnet') {
+			addressPrefix = '3';
+		}
+
+		isWallet2Wallet = item.outputs[0].address.substring(0, 1) == addressPrefix;
 
 		let isTxOut = false;
 		for (let j = 0; j < item.inputs.length; j++) {
@@ -180,6 +191,10 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		formattedResult += '<td><span class="d-lg-none"><strong>To: </strong></span><a href="' + getWalletAddressUrl(toAddress) + '">' + formatAddressString(toAddress, 10) + '</a></td>';
 
 		//Status
+		if (networkType == 'testnet') {
+			item.numConfirmations = item.confirmationsCount;
+		}
+
 		formattedResult += '<td><span class="d-lg-none"><strong>Status: </strong></span><span class="' + ((isMempool) ? 'text-warning' : 'text-success' ) + '">' + ((isMempool) ? 'Pending' : 'Confirmed (' + nFormatter(item.numConfirmations) + ')') + '</span></td>';
 		
 		//Fee
@@ -338,7 +353,13 @@ function printTransactions() {
 }
 
 function getMempoolData() {
-	let jqxhr = $.get(API_HOST_2 + 'mempool/transactions/byAddress/' + walletAddress, function(data) {
+	let mempoolUrl = API_HOST_2 + 'mempool/transactions/byAddress/' + walletAddress;
+
+	if (networkType == 'testnet') {
+		mempoolUrl = API_HOST_2 + 'api/v1/mempool/transactions/byAddress/' + walletAddress
+	}
+
+	let jqxhr = $.get(mempoolUrl, function(data) {
     		mempoolData = data;
 
    			totalTransactions += mempoolData.total;
@@ -385,7 +406,11 @@ function onMempoolAndTransactionsDataFetched() {
 }
 
 function getOfficialExplorereAddressUrl(address) {
-	return 'https://explorer.ergoplatform.com/addresses/' + address;
+	if (networkType == 'testnet') {
+		return 'https://testnet.ergoplatform.com/addresses/' + address;
+	} else {
+		return 'https://explorer.ergoplatform.com/addresses/' + address;
+	}
 }
 
 function showAllTokens(e) {
@@ -537,6 +562,7 @@ function getErgopadVesting() {
 
 			let keys = Object.keys(ergopadVestingData);
 			let totalVestingPrice = 0;
+			let totalReddemablePrice = 0;
 			for (let i = 0; i < tokensArray.length; i++) {
 				for (let j = 0; j < keys.length; j++) {
 					let vestingAsset = ergopadVestingData[keys[j]];
@@ -545,13 +571,14 @@ function getErgopadVesting() {
 						let vestingEntryKeyId = vestingEntry['Vesting Key Id'];
 						if (tokensArray[i].tokenId == vestingEntryKeyId) {
 							totalVestingPrice += vestingEntry['Remaining'] * pricesNames[keys[j]];
+							totalReddemablePrice += vestingEntry['Redeemable'] * pricesNames[keys[j]];
 						}	
 					}
 				}
 			}
 
 			if (totalVestingPrice > 0) {
-				$('#ergopadVesting').html('<a href="https://www.ergopad.io/dashboard"" target="_new"><img src="https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/d71693c49a84fbbecd4908c94813b46514b18b67a99952dc1e6e4791556de413.svg" class="token-icon"> Ergopad</a> vesting: <span class="text-light">$' + formatValue(totalVestingPrice, 2) + '</span>');
+				$('#ergopadVesting').html('<a href="https://www.ergopad.io/dashboard"" target="_new"><img src="https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/d71693c49a84fbbecd4908c94813b46514b18b67a99952dc1e6e4791556de413.svg" class="token-icon"> Ergopad</a> vesting: <span class="text-light">$' + formatValue(totalVestingPrice, 2) + '</span>' + (totalReddemablePrice > 0 ? '<br><img src="https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/d71693c49a84fbbecd4908c94813b46514b18b67a99952dc1e6e4791556de413.svg" class="token-icon" style="visibility:hidden;"> <span style="font-size:0.9em;">Redeemable: $' + formatValue(totalReddemablePrice, 2) + '</span>' : ''));
 				$('#ergopadVesting').show();
 			}
 	    }

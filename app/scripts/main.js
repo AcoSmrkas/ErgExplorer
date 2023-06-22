@@ -1,9 +1,9 @@
 const FEE_ADDRESS = '2iHkR7CWvD1R4j1yZg5bkeDRQavjAaVPeTDFGGLZduHyfWMuYpmhHocX8GJoaieTx78FntzJbCBVL6rf96ocJoZdmWBL2fci7NqWgAirppPQmZ7fN9V6z13Ay6brPriBKYqLp1bT2Fk4FkFLCfdPpe';
 const DONATION_ADDRESS = '9hiaAS3pCydq12CS7xrTBBn2YTfdfSRCsXyQn9KZHVpVyEPk9zk';
-//https://api.ergoplatform.com/api/v1/
-//https://api.ergo.aap.cornell.edu/api/v1/
-const API_HOST = 'https://api.ergo.aap.cornell.edu/api/v1/';
-const API_HOST_2 = 'https://api.ergoplatform.com/api/v1/';
+//https://api.ergoplatform.com/
+//https://api.ergo.aap.cornell.edu/
+var API_HOST = 'https://api.ergo.aap.cornell.edu/api/v1/';
+var API_HOST_2 = 'https://api.ergoplatform.com/api/v1/';
 //https://api.ergexplorer.com/
 //https://localhost/ergexplorer-api/
 var ERGEXPLORER_API_HOST = 'https://api.ergexplorer.com/';
@@ -11,9 +11,13 @@ const ERG_DECIMALS = 9;
 const IS_DEV_ENVIRONMENT = window.location.host == 'localhost:9000';
 
 var qrCode = null;
+var networkType = 'mainnet';
 
 $(function() {
 	$('#searchInput').val('');
+
+	setupMainnetTestnet();
+	setOfficialLink();
 
 	if (IS_DEV_ENVIRONMENT) {
 		ERGEXPLORER_API_HOST = 'https://localhost/ergexplorer-api/'
@@ -300,6 +304,52 @@ function onTokenIconLoad(element) {
 
 function zeroPad (num, places) {
 	return String(num).padStart(places, '0');
+}
+
+//Mainnet/Testnet
+function setupMainnetTestnet() {
+	networkType = localStorage.getItem('network');
+	
+	if (networkType == undefined) {
+		networkType = 'mainnet';
+	}
+
+	if (networkType == 'testnet') {
+		$('#networkType').html('Testnet')
+		$('#networkType').removeClass('text-light');
+		$('#networkType').addClass('erg-span-important');
+		localStorage.setItem('network', 'testnet');
+		API_HOST = API_HOST_2 = 'https://api-testnet.ergoplatform.com/';
+	} else {
+		$('#networkType').html('Mainnet')
+	}
+}
+
+function switchToMainnet(e) {
+	e.preventDefault();
+
+	if (networkType == 'mainnet') return;
+
+	localStorage.setItem('network', 'mainnet');
+
+	window.location.assign('/');
+}
+
+function switchToTestnet(e) {
+	e.preventDefault();
+
+	if (networkType == 'testnet') return;
+
+	localStorage.setItem('network', 'testnet');
+
+	window.location.assign('/');
+}
+
+function setOfficialLink() {
+	if (networkType == 'testnet') {
+		$('#officialLink').html('https://testnet.ergoplatform.com');
+		$('#officialLink').attr('href', 'https://testnet.ergoplatform.com');
+	}
 }
 
 //Utils

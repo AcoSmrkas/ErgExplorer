@@ -37,7 +37,13 @@ function getProtocolInfo() {
 }
 
 function getStats() {
-	var jqxhr = $.get('https://api.ergoplatform.com/stats', function(data) {
+	let statsUrl = 'https://api.ergoplatform.com/stats';
+
+	if (networkType == 'testnet') {
+		statsUrl = 'https://api-testnet.ergoplatform.com/stats';
+	}
+
+	var jqxhr = $.get(statsUrl, function(data) {
 		
 		//Blocks summary
 		//Blocks mined

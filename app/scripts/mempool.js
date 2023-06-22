@@ -5,7 +5,13 @@ $(function() {
 });
 
 function printMempool() {
-	var jqxhr = $.get('https://api.ergoplatform.com/transactions/unconfirmed?limit=' + ITEMS_PER_PAGE + '&offset=' + offset + '&sortBy=size&sortDirection=desc', function(data) {
+    let apiUrl = 'https://api.ergoplatform.com/';
+
+    if (networkType == 'testnet') {
+        apiUrl = 'https://api-testnet.ergoplatform.com/';
+    }
+
+	var jqxhr = $.get(apiUrl + 'transactions/unconfirmed?limit=' + ITEMS_PER_PAGE + '&offset=' + offset + '&sortBy=size&sortDirection=desc', function(data) {
 		let formattedResult = '';
 		let totalBlocks = data.total;
 		let items = data.items;

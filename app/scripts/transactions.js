@@ -12,7 +12,13 @@ $(function() {
 });
 
 function printTransaction() {
-	var jqxhr = $.get(API_HOST + 'transactions/' + txId, function(data) {
+	let txUrl = API_HOST + 'transactions/' + txId;
+
+	if (networkType == 'testnet') {
+		txUrl = API_HOST + 'api/v1/transactions/' + txId;
+	}
+
+	var jqxhr = $.get(txUrl, function(data) {
 
 		//Id
 		$('#txHeader').html('<p><a href="Copy to clipboard!" onclick="copyTransactionAddress(event)">' + data.id + ' &#128203;</a></p>');

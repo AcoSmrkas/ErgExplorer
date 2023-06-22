@@ -45,23 +45,46 @@ function getNftsInfo(tokenIds, callback, onlyNft = true) {
 }
 
 function getNftInfo(tokenId, callback) {
-	var jqxhr = $.post(ERGEXPLORER_API_HOST + 'tokens/byId',
-		{
-			onlyNft: true,
-			ids: [tokenId]
-		}, function(data) {
-		
-		let nft = null;
+	if (networkType != 'testnet') {
+		var jqxhr = $.post(ERGEXPLORER_API_HOST + 'tokens/byId',
+			{
+				onlyNft: true,
+				ids: [tokenId]
+			}, function(data) {
+			
+			let nft = null;
 
-		if (data.total > 0) {
-			nft = processNftData(data.items[0]);
-		}
+			if (data.total > 0) {
+				nft = processNftData(data.items[0]);
+			}
 
-		callback(nft, null);
-    })
-    .fail(function() {
-    	callback(null, 'Failed to fetch NFT data.');
-    });
+			callback(nft, null);
+	    })
+	    .fail(function() {
+	    	callback(null, 'Failed to fetch NFT data.');
+	    });
+	} else {
+		$.get(API_HOST + 'api/v1/tokens/' + tokenId, function(data) {
+			let tokenData = data;
+			$.get(API_HOST + 'api/v1/boxes/byTokenId/' + tokenId, function(data) {
+				let nftData = data;
+
+				Object.assign(tokenData, nftData.items[0]);
+
+				let nft = null;
+
+				nft = processNftData(tokenData);
+
+				callback(nft, null);
+		    })
+		    .fail(function() {
+		    	callback(null, 'Failed to fetch NFT data.');
+		    });	
+	    })
+	    .fail(function() {
+	    	callback(null, 'Failed to fetch NFT data.');
+	    });
+	}
 }
 
 function getIssuedNfts(address, callback) {
@@ -92,9 +115,9 @@ function processNftData(nftData) {
 		return null;
 	}
 
-	let typeString = (nftData.additionalRegisters.R7 == undefined || nftData.additionalRegisters.R7.serializedValue == null ? undefined : nftData.additionalRegisters.R7.serializedValue);
-	let hash = (nftData.additionalRegisters.R8 == undefined || nftData.additionalRegisters.R8.renderedValue == null ? undefined : nftData.additionalRegisters.R8.renderedValue);
-	let tempLink = (nftData.additionalRegisters.R9 == undefined || nftData.additionalRegisters.R9.renderedValue == null ? undefined : nftData.additionalRegisters.R9.renderedValue.split(','));
+	let typeString = (nftData.additionalRegisters == undefined || nftData.additionalRegisters.R7 == undefined || nftData.additionalRegisters.R7.serializedValue == null ? undefined : nftData.additionalRegisters.R7.serializedValue);
+	let hash = (nftData.additionalRegisters == undefined || nftData.additionalRegisters.R8 == undefined || nftData.additionalRegisters.R8.renderedValue == null ? undefined : nftData.additionalRegisters.R8.renderedValue);
+	let tempLink = (nftData.additionalRegisters == undefined || nftData.additionalRegisters.R9 == undefined || nftData.additionalRegisters.R9.renderedValue == null ? undefined : nftData.additionalRegisters.R9.renderedValue.split(','));
 
 	let additionalLinks = new Array();
 	if (tempLink == undefined) {

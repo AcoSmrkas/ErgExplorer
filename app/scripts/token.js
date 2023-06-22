@@ -27,6 +27,7 @@ function onGetNftInfoDone(nftInfo, message) {
 	$('#tokenName').html('<p>' + tokenData.name + '</p>');
 
 	//Emission amount
+	let emissionAmount = tokenData.emissionAmount;
 	$('#tokenEmissionAmount').html('<p>' + formatValue(tokenData.emissionAmount) + '</p>');
 
 	if (tokenData.emissionAmount == 1) {
@@ -58,6 +59,10 @@ function onGetNftInfoDone(nftInfo, message) {
 	$('#tokenIconImg').attr('src', 'https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/' + tokenData.id + '.svg');
 
 	$('#tokenDataHolder').show();
+
+	if (networkType == 'testnet') {
+//		return;
+	}
 
 	if (nftInfo.isNft) {
 		$('#tokenHolder').remove();
@@ -146,7 +151,11 @@ function onGetNftInfoDone(nftInfo, message) {
 			$('#nftPreviewImgHolder').css('min-height', '0');
 		}
 
-		$('#nftAuction').html('<p>See on <a  target="_new" href="https://www.skyharbor.io/token/' + tokenData.id + '">SkyHarbor.io</a></p><p>See on <a  target="_new" href="https://ergoauctions.org/artwork/' + tokenData.id + '">Ergoauctions.org</a></p>');
+		if (networkType == 'mainnet') {
+			$('#nftAuction').html('<p>See on <a  target="_new" href="https://www.skyharbor.io/token/' + tokenData.id + '">SkyHarbor.io</a></p><p>See on <a  target="_new" href="https://ergoauctions.org/artwork/' + tokenData.id + '">Ergoauctions.org</a></p>');
+		} else {
+			$('#marketplaceHolder').remove();
+		}
 
 		$('#nftHolder').show();
 	} else {

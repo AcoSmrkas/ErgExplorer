@@ -275,6 +275,14 @@ select, option {
 	color: $orange-color;
 }
 
+.erg-span-important {
+	color: $orange-color !important;
+}
+
+.erg-span-important:after {
+	color: $gray-color;
+}
+
 .row {
 	margin: 0 !important;
 }
@@ -298,6 +306,19 @@ select, option {
 .navbar-brand span {
 	line-height: 32px;
 	vertical-align: bottom;
+}
+
+#dropdown a {
+	border: 0;
+	box-shadow: none;
+}
+
+#dropdown > ul {
+	background-color: #333;
+}
+
+#dropdown > ul > li > a:hover {
+	background-color: $orange-color;
 }
 
 #rightNav {

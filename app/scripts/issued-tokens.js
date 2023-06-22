@@ -1,8 +1,12 @@
 const TOKEN_TYPE_PARAM = 'type';
+const ORDER_BY_PARAM = 'order';
 const UTILITY_TOKEN_PATAM = 'hideUtility';
+const BURNED_TOKEN_PATAM = 'hideBurned';
 var tokenType = 'all';
 var query = '';
 var hideUtility = false;
+var hideBurned = false;
+var orderBy = false;
 var setup = true;
 
 $(function() {
@@ -11,7 +15,13 @@ $(function() {
         query = '';
     }
 
+    if (networkType == 'testnet') {
+        $('#search').remove();
+    }
+
+    setupOrderSelect();
     setupTypeSelect();
+    setupToggleBurnedTokens();
     setupToggleUtilityTokens();
     printIssuedTokens();
 
@@ -22,7 +32,13 @@ $(function() {
 });
 
 function printIssuedTokens() {
-	var jqxhr = $.get(ERGEXPLORER_API_HOST + 'tokens/search?limit=' + ITEMS_PER_PAGE + '&offset=' + offset + '&query=' + query + '&type=' + tokenType + '&hideUtility=' + hideUtility, function(data) {
+    let tokensSearchUrl = ERGEXPLORER_API_HOST + 'tokens/search?limit=' + ITEMS_PER_PAGE + '&offset=' + offset + '&query=' + query + '&type=' + tokenType + '&hideUtility=' + hideUtility + '&order=' + orderBy + '&hideBurned=' + hideBurned;
+
+    if (networkType == 'testnet') {
+        tokensSearchUrl = API_HOST + 'api/v1/tokens?limit=' + ITEMS_PER_PAGE + '&offset=' + offset;
+    }
+
+	var jqxhr = $.get(tokensSearchUrl, function(data) {
         
 		let formattedResult = '';
 		let items = data.items;
@@ -39,10 +55,19 @@ function printIssuedTokens() {
         		formattedResult += '<td><span class="d-lg-none"><strong>Id: </strong></span><a href="' + getTokenUrl(tokenData.data.id) + '">' + formatAddressString(tokenData.data.id) + '</a></td>';
 
                 //Name
+                if (tokenData.data.name == null || tokenData.data.name == '') {
+                    tokenData.data.name = '';
+                }
+
         		formattedResult += '<td><span class="d-lg-none"><strong>Name: </strong></span>' + tokenData.data.name + '</td>';
 
                 //Type
                 let type = '<span class="text-info">Token</span>';
+
+                if (networkType == 'testnet') {
+                    type = '<span class="text-light">Unknown</span>';
+                }
+
                 if (tokenData.type != undefined) {
                     switch (tokenData.type) {
                         case NFT_TYPE.Image:
@@ -98,14 +123,27 @@ function printIssuedTokens() {
     });
 }
 
-function onTokenTypeChanged() {
-    if (setup) {
-        return;
+function setupToggleBurnedTokens() {
+    hideBurned = params[BURNED_TOKEN_PATAM];
+
+    if (hideBurned == undefined) {
+        hideBurned = 'false';
+        $('#toggleBurned').prop('checked', '');
+    } else {
+        hideBurned = 'true';
+        $('#toggleBurned').prop('checked', 'checked');
+    }
+}
+
+function onToggleBurnedTokens() {
+    let toggleBurned = $('#toggleBurned').prop('checked');
+    
+    if (toggleBurned == true) {
+        params[BURNED_TOKEN_PATAM] = 'true';
+    } else {  
+        delete(params[BURNED_TOKEN_PATAM]);
     }
 
-    tokenType = $('#tokenType').val();
-
-    params[TOKEN_TYPE_PARAM] = tokenType;
     params['offset'] = 0;
 
     window.location.assign(getCurrentUrlWithParams());
@@ -145,4 +183,43 @@ function setupTypeSelect() {
     }
 
     $('#tokenType').val(tokenType);
+}
+
+function onTokenTypeChanged() {
+    if (setup) {
+        return;
+    }
+
+    tokenType = $('#tokenType').val();
+
+    params[TOKEN_TYPE_PARAM] = tokenType;
+    params['offset'] = 0;
+
+    window.location.assign(getCurrentUrlWithParams());
+}
+
+function setupOrderSelect() {
+    orderBy = params[ORDER_BY_PARAM];
+
+    if (orderBy == undefined) {
+        orderBy = false;
+    }
+
+    if (orderBy == false) {
+        $('#orderBy').val('recent');        
+    } else {
+        $('#orderBy').val(orderBy);
+    }
+}
+
+function onOrderChanged() {
+    if (setup) {
+        return;
+    }
+
+    orderBy = $('#orderBy').val();
+
+    params[ORDER_BY_PARAM] = orderBy;
+
+    window.location.assign(getCurrentUrlWithParams());
 }
