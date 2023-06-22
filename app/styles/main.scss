@@ -308,9 +308,10 @@ select, option {
 	vertical-align: bottom;
 }
 
-#dropdown a {
+#dropdown > a {
 	border: 0;
 	box-shadow: none;
+	line-height: 28px;
 }
 
 #dropdown > ul {
