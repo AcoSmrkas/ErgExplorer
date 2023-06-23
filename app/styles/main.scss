@@ -1,4 +1,4 @@
-$orange-color: #FF5E18;
+$orange-color: #FF6020;
 $orange-color-hover: #FF8418;
 $gray-color: #AAAAAA;
 
@@ -24,7 +24,7 @@ footer {
 }
 
 h2 {
-	color: $gray-color;
+	color: #CCC;
 	font-weight: bold;
 }
 
@@ -40,6 +40,10 @@ table {
 	padding: 15px;
 }
 
+tbody {
+	border-top: 2px solid $orange-color !important;
+}
+
 a {
 	text-decoration: none;
 	color: $gray-color;
@@ -50,7 +54,7 @@ a:hover {
 }
 
 .text-white {
-	color: #EEE !important;	
+	color: #CCC !important;	
 }
 
 .text-light {
@@ -292,15 +296,27 @@ select, option {
 }
 
 .div-cell {
-	border: 1px solid #666;
+	border: 1px solid #555;
 	border-radius: 5px 5px;
 	padding: 15px;
+}
+
+.div-cell-dark {
+	border: 1px solid #555;
+	border-radius: 5px 5px;
+	padding: 15px;
+	background-color: #333;
 }
 
 .div-summary {
 	border: 2px solid $orange-color;
 	border-radius: 5px 5px;
 	padding: 15px; 
+}
+
+.navbar {
+	background-color: #333;
+	border-bottom: 1px solid $orange-color;
 }
 
 .navbar-brand span {

@@ -39,7 +39,6 @@ function printIssuedTokens() {
     }
 
 	var jqxhr = $.get(tokensSearchUrl, function(data) {
-        
 		let formattedResult = '';
 		let items = data.items;
 
@@ -65,30 +64,13 @@ function printIssuedTokens() {
                 let type = '<span class="text-info">Token</span>';
 
                 if (networkType == 'testnet') {
-                    type = '<span class="text-light">Unknown</span>';
+                    type = '<span class="text-light" id="tokenType-' + tokenData.data.id + '">Unknown</span>';
+
+                    getNftInfo(tokenData.data.id, onGotNftInfo);
                 }
 
                 if (tokenData.type != undefined) {
-                    switch (tokenData.type) {
-                        case NFT_TYPE.Image:
-                        type = '<span class="text-warning">NFT </span><img class="token-icon" src="./images/nft-image.png"/>';
-                        break;
-                        case NFT_TYPE.Audio:
-                        type = '<span class="text-warning">NFT </span><img class="token-icon" src="./images/nft-audio.png"/>';
-                        break;
-                        case NFT_TYPE.Video:
-                        type = '<span class="text-warning">NFT </span><img class="token-icon" src="./images/nft-video.png"/>';
-                        break;
-                        case NFT_TYPE.ArtCollection:
-                        type = '<span class="text-warning">NFT </span><img class="token-icon" src="./images/nft-artcollection.png"/>';
-                        break;
-                        case NFT_TYPE.FileAttachment:
-                        type = '<span class="text-warning">NFT </span><img class="token-icon" src="./images/nft-file.png"/>';
-                        break;
-                        case NFT_TYPE.MembershipToken:
-                        type = '<span class="text-warning">NFT </span><img class="token-icon" src="./images/nft-membership.png"/>';
-                        break;
-                    }
+                    type = tokenTypeSwitch(tokenData.type);
                 }
 
                 if (tokenData.data.isBurned == 't') {
@@ -220,6 +202,33 @@ function onOrderChanged() {
     orderBy = $('#orderBy').val();
 
     params[ORDER_BY_PARAM] = orderBy;
+    params['offset'] = 0;
 
     window.location.assign(getCurrentUrlWithParams());
+}
+
+function onGotNftInfo(nftInfo) {
+    let typeString = tokenTypeSwitch(nftInfo.type);
+
+    $('#tokenType-' + nftInfo.data.id).removeClass('text-light');
+    $('#tokenType-' + nftInfo.data.id).html(typeString);
+}
+
+function tokenTypeSwitch(type) {
+    switch (type) {
+        case NFT_TYPE.Image:
+        return '<span class="text-warning">NFT </span><img class="token-icon" src="./images/nft-image.png"/>';
+        case NFT_TYPE.Audio:
+        return '<span class="text-warning">NFT </span><img class="token-icon" src="./images/nft-audio.png"/>';
+        case NFT_TYPE.Video:
+        return '<span class="text-warning">NFT </span><img class="token-icon" src="./images/nft-video.png"/>';
+        case NFT_TYPE.ArtCollection:
+        return '<span class="text-warning">NFT </span><img class="token-icon" src="./images/nft-artcollection.png"/>';
+        case NFT_TYPE.FileAttachment:
+        return '<span class="text-warning">NFT </span><img class="token-icon" src="./images/nft-file.png"/>';
+        case NFT_TYPE.MembershipToken:
+        return '<span class="text-warning">NFT </span><img class="token-icon" src="./images/nft-membership.png"/>';
+        default:
+        return '<span class="text-info">Token</span>';
+    }
 }

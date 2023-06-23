@@ -16,13 +16,17 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-dark-5@1.1.3/dist/css/bootstrap-nightfall.min.css" rel="stylesheet" media="(prefers-color-scheme: dark)">
 
 		<!-- Font Awesome CSS -->
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 		<!-- build:css styles/main.css -->
 		<link rel="stylesheet" href="styles/main.css">
 		<!-- endbuild -->
 		
 		
+	<!-- build:css styles/index.css -->
+		<link rel="stylesheet" href="styles/index.css">
+	<!-- endbuild -->
+
 
 		<!-- SEO -->
 		<meta name="description" content="Erg Explorer is an independent tool for browsing the Ergo blockchain.">
@@ -47,7 +51,7 @@
 	
 	
 <!-- Navigation Menu -->
-<nav class="navbar navbar-expand-md navbar-dark bg-dark">
+<nav class="navbar navbar-expand-md navbar-dark p-1">
     <div class="container-fluid">
         <a class="navbar-brand" href="/"><img src="./images/logo.png" alt="Erg" height="30"> <span>Explorer (Alpha)</span></a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -83,7 +87,7 @@
                 </div>
                 </li>
                 <li class="nav-item">
-                    <a style="line-height:36px" class="nav-link" href="#" id="themeSwitch"><i class="fas fa-moon"></i></a>
+                    <a style="line-height:36px;cursor:default;pointer-events:none;" class="nav-link" href="#" onclick="event.preventDefault();" id="themeSwitch"><i class="fas fa-moon"></i></a>
                 </li>
             </ul>
         </div>
@@ -118,61 +122,105 @@
 			<div class="row w-100">
 				<div class="col div-summary">
 					<p>
-					<strong>NOTE:</strong> Erg Explorer is still in its <strong>alpha</strong> development phase. Please report any issues you encounter in our <strong><a href="https://t.me/ErgExplorer" target="_new">Telegram group</a></strong>.
+					<strong><span class="erg-span">NOTE</span>:</strong> Erg Explorer is still in its <strong><span class="erg-span">alpha</span></strong> development phase. Please report any issues you encounter in our <strong><a href="https://t.me/ErgExplorer" target="_new">Telegram group</a></strong>.
 					</p>
-					<p style="display: hidden;">Official Ergo Explorer link: <a target="_new" id="officialLink" href="https://explorer.ergoplatform.com">https://explorer.ergoplatform.com</a></p>
+					<p style="display: hidden;"><strong>Official Ergo Explorer link:</strong> <a target="_new" id="officialLink" href="https://explorer.ergoplatform.com">https://explorer.ergoplatform.com</a></p>
 				</div>
 			</div>
 
 			<br>
 
 			
-	<div class="row w-100">
-		<div class="col-md-1"></div>
-		<div class="col-md-3 m-md-1 m-sm-0 div-cell">
-			<h1><span class="erg-span"><strong>ERGO</strong></span> Price:</h1`>
-			<h2 class=""><span id="ergPrice"></span></h2>
+	<div id="txHolder">
+		<div id="tx"></div>
+	</div>
+
+	<div class="row w-100 div-cell-dark">
+		<div class="col-md-6 col-lg-4 p-1 pe-3">
+			<div class="d-flex">
+				<div class="me-3 text-center mx-auto index-card-symbol-holder">
+					<img src="images/logo.png" class="index-card-symbol" width="50">
+				</div>
+				<div class="flex-grow-1">
+					<p>Ergo price</p>
+					<h2 class="text-white index-card-values" id="ergPrice"></h2>
+				</div>
+			</div>
+			<hr class="my-3">
+			<div class="d-flex">
+				<div class="me-3 text-center mx-auto index-card-symbol-holder">
+					<i class="fas fa-globe erg-span index-card-symbol"></i>
+				</div>
+				<div class="flex-grow-1">
+					<p><strong class="erg-span"></strong>Market cap</p>
+					<h2 class="text-white index-card-values" id="marketCap"></h2>
+				</div>
+			</div>
 		</div>
-		<div class="col m-md-1 m-sm-0 div-cell">
-			<h1>Protocol info</h1>
-			<h5 class="">Version: <span id="ergVersion"></span></h2>
-			<h5 class="">Circulating Supply: <span id="ergSupply"></span></h2>
-			<h5 class="">Max Supply: <span id="ergTotal"></span></h2>
-			<h5 class="">Hash rate: <span id="ergHashRate"></span></h2>
-			<h5 class="">TXs Per day: <span id="ergTxAvg"></span></h2>
+		<hr class="my-3 d-block d-md-none">
+		<div class="col-md-6 col-lg-4 p-1 pe-3">
+			<div class="d-flex">
+				<div class="me-3 text-center mx-auto index-card-symbol-holder">
+					<i class="fas fa-bars erg-span index-card-symbol"></i>
+				</div>
+				<div class="flex-grow-1">
+					<p>Block height</p>
+					<h2 id="blockHeight" class="text-white index-card-values"></h2>
+				</div>
+			</div>
+			<hr class="my-3">
+			<div class="d-flex">
+				<div class="me-3 text-center mx-auto index-card-symbol-holder">
+					<i class="fas fa-list erg-span index-card-symbol"></i>
+				</div>
+				<div class="flex-grow-1">
+					<p><strong class="erg-span"></strong>Total transactions</p>
+					<h2 class="text-white index-card-values" id="totalTransactions"></h2>
+				</div>
+			</div>
+		</div>		
+		<hr class="my-3 d-block d-lg-none">
+		<div class="col p-1">
+			<h2 class="text-white" style="font-size:1.7em">Protocol information</h2>
+			<br>
+			<h5 style="font-size:1em" class="text-light">Version: <span class="text-white" id="ergVersion"></span></h2>
+			<h5 style="font-size:1em" class="text-light">Circulating Supply: <span id="ergSupply"></span></h2>
+			<h5 style="font-size:1em" class="text-light">Max Supply: <span id="ergTotal"></span></h2>
 		</div>
-		<div class="col-md-1"></div>
 	</div>
 	<br>
 	<div class="row w-100 p-0">		
-		<div class="col-md-1"><br></div>
-		<div class="col-md-10 m-0 div-cell p-0">
+		<div class="col-md-12 m-0 div-cell-dark p-2">
 			<div class="row w-100 p-0">	
-				<div id="statsHolderLeft" class="col-md-6 p-0 ">
-					<h2 class="p-3 m-0">24h Stats</h2>
-					<h3 class="p-3">Block summary</h3>
-					<div class="col-12 div-cell stripedHolder p-0">
+				<div id="statsHolderLeft" class="col-md-6 p-0">
+					<h2 class="p-3 m-0 text-white">24h Stats</h2>
+					<h3 class="p-3 erg-span">Block summary</h3>
+					<div class="col-12 p-1">
 					<div class="row w-100 p-1">
 						<div class="col-6"><strong>Blocks mined</strong></div>
 						<div id="statsBlocksMined" class="col"></div>
 					</div>
+					<hr class="my-1">
 					<div class="row w-100 p-1">
 						<div class="col-6"><strong>Average mining time</strong></div>
 						<div id="statsAverageMiningTime" class="col"></div>
 					</div>
+					<hr class="my-1">
 					<div class="row w-100 p-1">
 						<div class="col-6"><strong>Coins mined</strong></div>
 						<div id="statsCoinsMined" class="col"></div>
 					</div>
-					<h3 class="p-3">Transactions summary</h3>
+					<h3 class="p-3 erg-span">Transactions summary</h3>
 					<div class="row w-100 p-1">
 						<div class="col-6"><strong>Number of Transactions</strong></div>
 						<div id="statsNumberOfTransactions" class="col"></div>
 					</div>
+					<hr class="my-1">
 					<div class="row w-100 p-1">
 						<div class="col-6"><strong>Total Transaction Fees</strong></div>
 						<div id="statsTotalTransactionFees" class="col"></div>
 					</div>
+					<hr class="my-1">
 					<div class="row w-100 p-1">
 						<div class="col-6"><strong>Total Output Volume</strong></div>
 						<div id="statsTotalOutputVolume" class="col"></div>
@@ -181,28 +229,33 @@
 				</div>
 				<div id="statsHolderRight" class="col-md-6 p-0">
 					<h2 class="p-3 m-0"> </h2>
-					<h3 class="p-3">Mining cost</h3>
-					<div class="col-12 div-cell stripedHolder p-0">
+					<h3 class="p-3 erg-span">Mining cost</h3>
+					<div class="col-12 p-1">
 					<div class="row w-100 p-1">
 						<div class="col-6"><strong>Total Miners Revenue</strong></div>
 						<div id="statsTotalMinersRevenue" class="col"></div>
 					</div>
+					<hr class="my-1">
 					<div class="row w-100 p-1">
 						<div class="col-6"><strong>% Earned From Transaction Fees</strong></div>
 						<div id="statsEarnedFromTransactionFees" class="col"></div>
 					</div>
+					<hr class="my-1">
 					<div class="row w-100 p-1">
 						<div class="col-6"><strong>% Of Transaction Volume</strong></div>
 						<div id="statsOfTransactionVolume" class="col"></div>
 					</div>
+					<hr class="my-1">
 					<div class="row w-100 p-1">
 						<div class="col-6"><strong>Cost per Transaction</strong></div>
 						<div id="statsCostPerTransaction" class="col"></div>
 					</div>
+					<hr class="my-1">
 					<div class="row w-100 p-1">
 						<div class="col-6"><strong>Difficulty</strong></div>
 						<div id="statsDifficulty" class="col"></div>
 					</div>
+					<hr class="my-1">
 					<div class="row w-100 p-1">
 						<div class="col-6"><strong>Hash Rate</strong></div>
 						<div id="statsHashRate" class="col"></div>
@@ -211,7 +264,6 @@
 				</div>
 			</div>
 		</div>
-		<div class="col-md-1"></div>
 	</div>
 
 	<br>
@@ -247,6 +299,7 @@
 		<script src="./scripts/common/params.js?v=7"></script>
 		<script src="./scripts/main.js?v=7"></script>
 		
+	<script src="https://unpkg.com/@sjaakp/telex/dist/telex.js"></script>
 	<script src="./scripts/common/prices.js?v=7"></script>
 	<script src="./scripts/index.js?v=7"></script>
 
