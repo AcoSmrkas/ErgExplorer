@@ -1,8 +1,8 @@
 {% extends "layout.njk" %}
 
 {% block styles %}
-	<!-- build:css styles/index.css -->
-		<link rel="stylesheet" href="styles/index.css">
+	<!-- build:css styles/dark/index.css -->
+		<link class="cssFile" rel="stylesheet" href="styles/dark/index.css">
 	<!-- endbuild -->
 {% endblock %}
 
@@ -62,7 +62,7 @@
 		</div>		
 		<hr class="my-3 d-block d-lg-none">
 		<div class="col p-1">
-			<h2 class="text-white" style="font-size:1.7em">Protocol information</h2>
+			<h2 class="erg-span" style="font-size:1.7em">Protocol information</h2>
 			<br>
 			<h5 style="font-size:1em" class="text-light">Version: <span class="text-white" id="ergVersion"></span></h2>
 			<h5 style="font-size:1em" class="text-light">Circulating Supply: <span id="ergSupply"></span></h2>

@@ -518,3 +518,19 @@ function sortTokens(tokens) {
 function isAsciiArt(string) {
 	return (string != null && string.includes('▉'));
 }
+
+function switchTheme(e) {
+	e.preventDefault();
+
+	if (theme == 'dark') {
+		theme = 'light';
+	} else {
+		theme = 'dark';
+	}
+
+	$('html').attr('data-bs-theme', theme);
+
+	localStorage.setItem('theme', theme);
+
+	updateTheme();
+}

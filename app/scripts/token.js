@@ -30,6 +30,7 @@ function onGetNftInfoDone(nftInfo, message) {
 	let emissionAmount = tokenData.emissionAmount;
 	$('#tokenEmissionAmount').html('<p>' + formatValue(tokenData.emissionAmount) + '</p>');
 
+	console.log(tokenData.emissionAmount);
 	if (tokenData.emissionAmount == 1) {
 		getCurrentAddress();
 	} else {

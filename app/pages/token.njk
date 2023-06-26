@@ -1,8 +1,8 @@
 {% extends "layout.njk" %}
 
 {% block styles %}
-	<!-- build:css styles/token.css -->
-		<link rel="stylesheet" href="styles/token.css">
+	<!-- build:css styles/dark/token.css -->
+		<link rel="stylesheet" href="styles/dark/token.css">
 	<!-- endbuild -->
 {% endblock %}
 
@@ -150,6 +150,10 @@
 					<div class="row w-100 p-2">
 						<div class="col-md-3"><strong><p>Mint transaction</p></strong></div>
 						<div id="nftMintedTransaction" class="col"></div>
+					</div>	
+					<div id="nftCurrentAddressHolder" style="display: none;" class="row w-100 p-2">
+						<div class="col-md-3"><strong><p>Current address</p></strong></div>
+						<div id="nftCurrentAddress" class="col"></div>
 					</div>
 				</div>
 			</div>

@@ -1,0 +1,1 @@
+#txInputs>div:nth-child(odd),#txOutputs>div:nth-child(odd){background-color:#f5f5f5}#txInputs>div,#txOutputs>div{border-radius:0}#txRawInput,#txRawOutput{overflow-wrap:anywhere;white-space:break-spaces}

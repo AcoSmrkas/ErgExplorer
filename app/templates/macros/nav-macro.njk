@@ -24,11 +24,11 @@
                     <a class="nav-link {%if activePage == 'about' %} active {% endif %}" href="about">About/Donate</a>
                 </li>
             </ul>
-            <div id="rightNav" class="d-none d-md-block"><span>111111111111111</span></div>
+            <div id="rightNav" class="d-none d-lg-block"><span>111111111111111</span></div>
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
                 <div id="dropdown" class="dropdown nav-link">
-                    <a id="networkType" class="btn dropdown-toggle text-light p-0 p-md-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Mainnet</a>
+                    <a id="networkType" class="btn nav-link  dropdown-toggle text-light p-0 p-md-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Mainnet</a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="#" onclick="switchToMainnet(event)">Mainnet</a></li>
                         <li><a class="dropdown-item" href="#" onclick="switchToTestnet(event)">Testnet</a></li>
@@ -36,7 +36,7 @@
                 </div>
                 </li>
                 <li class="nav-item">
-                    <a style="line-height:36px;cursor:default;pointer-events:none;" class="nav-link" href="#" onclick="event.preventDefault();" id="themeSwitch"><i class="fas fa-moon"></i></a>
+                    <a style="line-height:36px;" class="nav-link" href="#" onclick="switchTheme(event);" id="themeSwitch"><i class="fas fa-moon"></i></a>
                 </li>
             </ul>
         </div>

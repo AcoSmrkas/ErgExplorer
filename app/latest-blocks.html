@@ -1,9 +1,8 @@
 <!doctype html>
-<html class="no-js" data-bs-color-scheme lang="en">
+<html id="index" class="no-js" data-bs-theme="dark" lang="en">
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<meta name="color-scheme" content="dark">
 
 		<title>Erg Explorer (Alpha) - Independent tool for browsing the Ergo Blockchain</title>
 
@@ -13,16 +12,58 @@
 
 		<!-- Bootstrap 5 CSS -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap-dark-5@1.1.3/dist/css/bootstrap-nightfall.min.css" rel="stylesheet" media="(prefers-color-scheme: dark)">
+
+        <!-- Additional theme file -->
+        <link id="additionalTheme" href="" rel="stylesheet" media="(prefers-color-scheme: dark)">
 
 		<!-- Font Awesome CSS -->
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-		<!-- build:css styles/main.css -->
-		<link rel="stylesheet" href="styles/main.css">
+		<!-- build:css styles/dark/main.css -->
+		<link class="cssFile" rel="stylesheet" href="styles/dark/main.css">
 		<!-- endbuild -->
 		
 		
+
+        <script type="text/javascript">
+        	var theme = 'dark';
+
+        	function updateTheme() {        		
+				theme = localStorage.getItem('theme');
+
+				if (theme == undefined) {
+					theme = 'dark';
+				}
+
+				document.getElementById('index').setAttribute('data-bs-theme', theme);
+
+	        	if (theme == 'dark') {
+	        		let cssFiles = document.getElementsByTagName('link');
+
+	        		for (var i = 0; i < cssFiles.length; i++) {
+	        			let oldUrl = cssFiles[i].getAttribute('href');
+	        			let newUrl = oldUrl.replace('styles/light/', 'styles/dark/');
+
+	        			cssFiles[i].setAttribute('href', newUrl);
+	        		}
+
+	        		document.getElementById('additionalTheme').setAttribute('href', 'https://cdn.jsdelivr.net/npm/bootstrap-dark-5@1.1.3/dist/css/bootstrap-nightfall.min.css');
+	        	} else {
+	        		document.getElementById('additionalTheme').setAttribute('href', '');
+
+	        		let cssFiles = document.getElementsByTagName('link');
+
+	        		for (var i = 0; i < cssFiles.length; i++) {
+	        			let oldUrl = cssFiles[i].getAttribute('href');
+	        			let newUrl = oldUrl.replace('styles/dark/', 'styles/light/');
+
+	        			cssFiles[i].setAttribute('href', newUrl);
+	        		}
+	        	}
+        	}
+
+        	updateTheme();
+        </script>
 
 		<!-- SEO -->
 		<meta name="description" content="Erg Explorer is an independent tool for browsing the Ergo blockchain.">
@@ -41,7 +82,7 @@
 
 	</head>
 
-	<body class="bg-dark">
+	<body >
 
 		
 	
@@ -71,11 +112,11 @@
                     <a class="nav-link " href="about">About/Donate</a>
                 </li>
             </ul>
-            <div id="rightNav" class="d-none d-md-block"><span>111111111111111</span></div>
+            <div id="rightNav" class="d-none d-lg-block"><span>111111111111111</span></div>
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
                 <div id="dropdown" class="dropdown nav-link">
-                    <a id="networkType" class="btn dropdown-toggle text-light p-0 p-md-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Mainnet</a>
+                    <a id="networkType" class="btn nav-link  dropdown-toggle text-light p-0 p-md-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Mainnet</a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="#" onclick="switchToMainnet(event)">Mainnet</a></li>
                         <li><a class="dropdown-item" href="#" onclick="switchToTestnet(event)">Testnet</a></li>
@@ -83,7 +124,7 @@
                 </div>
                 </li>
                 <li class="nav-item">
-                    <a style="line-height:36px;cursor:default;pointer-events:none;" class="nav-link" href="#" onclick="event.preventDefault();" id="themeSwitch"><i class="fas fa-moon"></i></a>
+                    <a style="line-height:36px;" class="nav-link" href="#" onclick="switchTheme(event);" id="themeSwitch"><i class="fas fa-moon"></i></a>
                 </li>
             </ul>
         </div>

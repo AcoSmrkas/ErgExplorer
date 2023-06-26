@@ -1,8 +1,8 @@
 {% extends "layout.njk" %}
 
 {% block styles %}
-	<!-- build:css styles/transactions.css -->
-	<link rel="stylesheet" href="styles/transactions.css">
+	<!-- build:css styles/dark/transactions.css -->
+	<link rel="stylesheet" href="styles/dark/transactions.css">
 	<!-- endbuild -->
 {% endblock %}
 
@@ -15,7 +15,7 @@
 	<h2 class="main-heading p-2">Transaction</h2>
 
 	<div id="txDataHolder" style="display: none;" class="col-md-12">
-		<div class="row w-100 div-cell">
+		<div class="row w-100 div-cell-dark">
 			<div id="txHeader" class="col-9">
 			</div>
 			<div id="txTime" class="col-3 d-flex justify-content-end">
@@ -75,7 +75,7 @@
 		<br>
 
 		<div class="row w-100">
-			<div class="col-12 div-cell">
+			<div class="col-12 div-cell-dark">
 				<h2>Raw inputs</h2>
 				<br>
 				<pre id="txRawInput"></pre>
@@ -85,7 +85,7 @@
 		<br>
 
 		<div class="row w-100">
-			<div class="col-12 div-cell">
+			<div class="col-12 div-cell-dark">
 				<h2>Raw outputs</h2>
 				<br>
 				<pre id="txRawOutput"></pre>

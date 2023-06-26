@@ -1,9 +1,8 @@
 <!doctype html>
-<html class="no-js" data-bs-color-scheme lang="en">
+<html id="index" class="no-js" data-bs-theme="dark" lang="en">
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<meta name="color-scheme" content="dark">
 
 		<title>Erg Explorer (Alpha) - Independent tool for browsing the Ergo Blockchain</title>
 
@@ -13,20 +12,62 @@
 
 		<!-- Bootstrap 5 CSS -->
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap-dark-5@1.1.3/dist/css/bootstrap-nightfall.min.css" rel="stylesheet" media="(prefers-color-scheme: dark)">
+
+        <!-- Additional theme file -->
+        <link id="additionalTheme" href="" rel="stylesheet" media="(prefers-color-scheme: dark)">
 
 		<!-- Font Awesome CSS -->
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-		<!-- build:css styles/main.css -->
-		<link rel="stylesheet" href="styles/main.css">
+		<!-- build:css styles/dark/main.css -->
+		<link class="cssFile" rel="stylesheet" href="styles/dark/main.css">
 		<!-- endbuild -->
 		
 		
-	<!-- build:css styles/addresses.css -->
-	<link rel="stylesheet" href="styles/addresses.css">
+	<!-- build:css styles/dark/addresses.css -->
+	<link rel="stylesheet" href="styles/dark/addresses.css">
 	<!-- endbuild -->
 
+
+        <script type="text/javascript">
+        	var theme = 'dark';
+
+        	function updateTheme() {        		
+				theme = localStorage.getItem('theme');
+
+				if (theme == undefined) {
+					theme = 'dark';
+				}
+
+				document.getElementById('index').setAttribute('data-bs-theme', theme);
+
+	        	if (theme == 'dark') {
+	        		let cssFiles = document.getElementsByTagName('link');
+
+	        		for (var i = 0; i < cssFiles.length; i++) {
+	        			let oldUrl = cssFiles[i].getAttribute('href');
+	        			let newUrl = oldUrl.replace('styles/light/', 'styles/dark/');
+
+	        			cssFiles[i].setAttribute('href', newUrl);
+	        		}
+
+	        		document.getElementById('additionalTheme').setAttribute('href', 'https://cdn.jsdelivr.net/npm/bootstrap-dark-5@1.1.3/dist/css/bootstrap-nightfall.min.css');
+	        	} else {
+	        		document.getElementById('additionalTheme').setAttribute('href', '');
+
+	        		let cssFiles = document.getElementsByTagName('link');
+
+	        		for (var i = 0; i < cssFiles.length; i++) {
+	        			let oldUrl = cssFiles[i].getAttribute('href');
+	        			let newUrl = oldUrl.replace('styles/dark/', 'styles/light/');
+
+	        			cssFiles[i].setAttribute('href', newUrl);
+	        		}
+	        	}
+        	}
+
+        	updateTheme();
+        </script>
 
 		<!-- SEO -->
 		<meta name="description" content="Erg Explorer is an independent tool for browsing the Ergo blockchain.">
@@ -45,7 +86,7 @@
 
 	</head>
 
-	<body class="bg-dark">
+	<body >
 
 		
 	
@@ -75,11 +116,11 @@
                     <a class="nav-link " href="about">About/Donate</a>
                 </li>
             </ul>
-            <div id="rightNav" class="d-none d-md-block"><span>111111111111111</span></div>
+            <div id="rightNav" class="d-none d-lg-block"><span>111111111111111</span></div>
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
                 <div id="dropdown" class="dropdown nav-link">
-                    <a id="networkType" class="btn dropdown-toggle text-light p-0 p-md-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Mainnet</a>
+                    <a id="networkType" class="btn nav-link  dropdown-toggle text-light p-0 p-md-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Mainnet</a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="#" onclick="switchToMainnet(event)">Mainnet</a></li>
                         <li><a class="dropdown-item" href="#" onclick="switchToTestnet(event)">Testnet</a></li>
@@ -87,7 +128,7 @@
                 </div>
                 </li>
                 <li class="nav-item">
-                    <a style="line-height:36px;cursor:default;pointer-events:none;" class="nav-link" href="#" onclick="event.preventDefault();" id="themeSwitch"><i class="fas fa-moon"></i></a>
+                    <a style="line-height:36px;" class="nav-link" href="#" onclick="switchTheme(event);" id="themeSwitch"><i class="fas fa-moon"></i></a>
                 </li>
             </ul>
         </div>
@@ -135,11 +176,11 @@
 		<h2 class="main-heading p-2">Address</h2>
 		
 		<div id="summaryOk" style="display: none;" class="row w-100">
-			<div class="col-md-8 col-sm-12 div-cell">
+			<div class="col-md-8 col-sm-12 div-cell-dark">
 				<h4><strong>Summary</strong></h4>
 
-				<div class="row w-100">
-					<div class="col-md-9">
+				<div class="row w-100 p-0">
+					<div class="col-md-9 p-0">
 						<p><strong>Address:</strong> <a onclick="copyWalletAddress(event)" href="Copy to clipboard!" id="address"></a></p>
 						<p id="totalTransactions"></p>
 					</div>
@@ -151,7 +192,7 @@
 				<br>
 
 				<div id="nftsHolder" class="row w-100" style="display: none;">
-					<div class="col-12">
+					<div class="col-12 p-0">
 						<h4 style="display:inline-block;" id="nftsTitle"><strong>Owned NFTs</strong></h4><a id="showAllNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="showNfts(event)">Show</a>
 						<a id="hideAllNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="hideNfts(event)">Hide</a>
 						<div id="nftsShowAll" style="display: none;">
@@ -196,7 +237,7 @@
 				</div>
 				<br>
 				<div id="issuedNftsHolder" class="row w-100" style="display: none;">
-					<div class="col-12">
+					<div class="col-12 p-0">
 					<h4 style="display:inline-block;" id="issuedNftsTitle"><strong>Issued assets</strong></h4><a id="showIssuedNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="showIssuedNfts(event)">Show</a>
 						<a id="hideIssuedNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="hideIssuedNfts(event)">Hide</a>
 						<div id="nftsShowIssued" style="display: none;">
@@ -246,7 +287,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="col-md col-sm-12 div-cell">
+			<div class="col-md col-sm-12 div-cell-dark">
 				<h4><strong>Balance</strong></h4>
 				<h5 id="finalErgBalance"></h5>
 				<h5 style="display: none" id="finalAssetsBalance"></h5>

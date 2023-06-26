@@ -1,8 +1,8 @@
 {% extends "layout.njk" %}
 
 {% block styles %}
-	<!-- build:css styles/addresses.css -->
-	<link rel="stylesheet" href="styles/addresses.css">
+	<!-- build:css styles/dark/addresses.css -->
+	<link rel="stylesheet" href="styles/dark/addresses.css">
 	<!-- endbuild -->
 {% endblock %}
 
@@ -16,11 +16,11 @@
 		<h2 class="main-heading p-2">Address</h2>
 		
 		<div id="summaryOk" style="display: none;" class="row w-100">
-			<div class="col-md-8 col-sm-12 div-cell">
+			<div class="col-md-8 col-sm-12 div-cell-dark">
 				<h4><strong>Summary</strong></h4>
 
-				<div class="row w-100">
-					<div class="col-md-9">
+				<div class="row w-100 p-0">
+					<div class="col-md-9 p-0">
 						<p><strong>Address:</strong> <a onclick="copyWalletAddress(event)" href="Copy to clipboard!" id="address"></a></p>
 						<p id="totalTransactions"></p>
 					</div>
@@ -32,7 +32,7 @@
 				<br>
 
 				<div id="nftsHolder" class="row w-100" style="display: none;">
-					<div class="col-12">
+					<div class="col-12 p-0">
 						<h4 style="display:inline-block;" id="nftsTitle"><strong>Owned NFTs</strong></h4><a id="showAllNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="showNfts(event)">Show</a>
 						<a id="hideAllNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="hideNfts(event)">Hide</a>
 						<div id="nftsShowAll" style="display: none;">
@@ -77,7 +77,7 @@
 				</div>
 				<br>
 				<div id="issuedNftsHolder" class="row w-100" style="display: none;">
-					<div class="col-12">
+					<div class="col-12 p-0">
 					<h4 style="display:inline-block;" id="issuedNftsTitle"><strong>Issued assets</strong></h4><a id="showIssuedNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="showIssuedNfts(event)">Show</a>
 						<a id="hideIssuedNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="hideIssuedNfts(event)">Hide</a>
 						<div id="nftsShowIssued" style="display: none;">
@@ -127,7 +127,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="col-md col-sm-12 div-cell">
+			<div class="col-md col-sm-12 div-cell-dark">
 				<h4><strong>Balance</strong></h4>
 				<h5 id="finalErgBalance"></h5>
 				<h5 style="display: none" id="finalAssetsBalance"></h5>

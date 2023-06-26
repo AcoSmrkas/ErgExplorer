@@ -1,6 +1,4 @@
-$orange-color: #FF6020;
-$orange-color-hover: #FF8418;
-$gray-color: #AAAAAA;
+@import './vars';
 
 //Global properties
 body {
@@ -12,7 +10,7 @@ body {
 
 @font-face {
 	font-family: "DejaVu";
-	src: url('../fonts/DejaVuSansMono.ttf');
+	src: url('../../fonts/DejaVuSansMono.ttf');
 }
 
 pre {
@@ -21,10 +19,11 @@ pre {
 
 footer {
   margin-top: auto;
+  background-color: $gray-3 !important;
 }
 
 h2 {
-	color: #CCC;
+	color: $gray-c;
 	font-weight: bold;
 }
 
@@ -35,7 +34,7 @@ p {
 }
 
 table {  
-	border: 2px solid $orange-color;
+	border: 1px solid $gray-5 !important;
 	border-radius: 5px 5px;
 	padding: 15px;
 }
@@ -44,6 +43,15 @@ tbody {
 	border-top: 2px solid $orange-color !important;
 }
 
+.table > :not(caption) > * > * {
+	background-color: $gray-3 !important;
+}
+
+.table-dark {
+	--bs-table-striped-bg: #404040;
+	border-color: $gray-5;
+}
+	
 a {
 	text-decoration: none;
 	color: $gray-color;
@@ -54,11 +62,11 @@ a:hover {
 }
 
 .text-white {
-	color: #CCC !important;	
+	color: $gray-c !important;	
 }
 
 .text-light {
-	color: #999 !important;	
+	color: $gray-9 !important;	
 }
 
 //Links
@@ -106,13 +114,13 @@ a:hover {
 
 //Search form
 .form-control-lg {
-	background-color: #333;
+	background-color: $gray-3;
 	color: #fff;
-	border-color: #333;
+	border-color: $gray-3;
 }
 
 .form-control:focus {
-	background-color: #333;
+	background-color: $gray-3;
 	box-shadow: none;
 	border: 1px solid $orange-color;
 }
@@ -296,16 +304,16 @@ select, option {
 }
 
 .div-cell {
-	border: 1px solid #555;
+	border: 1px solid $gray-5;
 	border-radius: 5px 5px;
 	padding: 15px;
 }
 
 .div-cell-dark {
-	border: 1px solid #555;
+	border: 1px solid $gray-5;
 	border-radius: 5px 5px;
 	padding: 15px;
-	background-color: #333;
+	background-color: $gray-3;
 }
 
 .div-summary {
@@ -315,13 +323,17 @@ select, option {
 }
 
 .navbar {
-	background-color: #333;
+	background-color: $gray-3;
 	border-bottom: 1px solid $orange-color;
 }
 
 .navbar-brand span {
 	line-height: 32px;
 	vertical-align: bottom;
+}
+
+.dropdown-menu {
+	min-width: 100px;
 }
 
 #dropdown > a {
@@ -331,7 +343,7 @@ select, option {
 }
 
 #dropdown > ul {
-	background-color: #333;
+	background-color: $gray-3;
 }
 
 #dropdown > ul > li > a:hover {
@@ -347,8 +359,8 @@ select, option {
 }
 
 .btn-primary {
-	background-color: #555;
-	border-color: #555;
+	background-color: $gray-5;
+	border-color: $gray-5;
 }
 
 .btn-primary:hover {
@@ -372,8 +384,8 @@ select, option {
 }
 
 .footer {
-	background-color: #333;
-	color: #999;
+	background-color: $gray-3;
+	color: $gray-9;
 	padding: 5px;
 	position: fixed;
 	bottom: 0;
@@ -394,13 +406,83 @@ select, option {
 }
 
 .stripedHolder > div:nth-child(odd) {
-	background-color: #454545;
+	background-color: $gray-3;
 }
 
 .stripedHolderEven > div:nth-child(even) {
-	background-color: #454545;
+	background-color: $gray-3;
 }
 
 .pre-ascii {
 	line-height: 1;
+}
+
+pre, td, th, select, option, .btn, .dropdown-item {
+	color: $gray-c !important;
+}
+
+.btn-info {
+	color: black !important;
+}
+
+.nav-link:hover, #networkType:hover, #networkType:focus {
+	color: $orange-color !important;
+}
+
+.form-control::placeholder {
+	color: $gray-9 !important;
+}
+
+#networkType {
+	  color: rgba(250,250,250,.55) !important;
+}
+
+[data-bs-theme="light"] {
+	span {
+		color: $gray-color;
+	}
+
+	.erg-span {
+		color: $orange-color !important;
+	}
+
+	body {
+		color: $gray-color !important;
+	}
+
+	a {
+		color: $gray-color !important;
+	}
+
+	a:hover, a:hover > span, a:hover > span > span {
+		color: $orange-color !important;
+	}
+
+	#dropdown > ul > li > a:hover {
+		color: $gray-3 !important;
+	}
+
+	select, select:active, select:focus, select:hover {
+		color: $gray-color !important;
+	}
+
+	option:focus {
+		background-color: $orange-color;
+	}
+
+	.table-dark {
+		--bs-table-striped-bg: #e3e3e3;
+	}
+
+	pre, td, th {
+		color: $gray-color;
+	}
+
+	.button-info {
+		color: $gray-5 !important;
+	}
+
+	#networkType {
+	  color: $gray-color !important;
+	}
 }
