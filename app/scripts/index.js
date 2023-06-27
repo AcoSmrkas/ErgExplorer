@@ -86,7 +86,8 @@ function setupTicker() {
 
 		tickerMessages.push({
 			id: 'msg' + i,
-			content: '<a href="' + url + '"><img class="ticker-img" src="https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/' + imgId + '.svg"> <span>$' + formatValue(prices[tickerIds[i]], digits) + '</span></a>'
+			content: '<a class="ticker-url" href="' + url + '"><img class="ticker-img" src="https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/' + imgId + '.svg"> <span>$' + formatValue(prices[tickerIds[i]], digits) + '</span></a>'
+			
 		});
 	}
 

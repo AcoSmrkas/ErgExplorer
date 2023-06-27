@@ -1,7 +1,5 @@
-@import './vars';
-
 #txInputs > div:nth-child(odd), #txOutputs > div:nth-child(odd) {
-	background-color: $gray-3;
+	background-color: var(--striped-1);
 }
 
 #txInputs > div, #txOutputs > div {

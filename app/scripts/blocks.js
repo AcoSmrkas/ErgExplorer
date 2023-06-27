@@ -98,14 +98,14 @@ function printBlockTransactions() {
 		let transactionData = blockTransactions[i];
 
 		//Header
-		formattedData += '<div class="row w-100 div-cell"><div class="col-9"><a href="' + getTransactionsUrl(transactionData.id) + '">' + transactionData.id + '</a></div><div id="txTime" class="col-3 d-flex justify-content-end">' + formatDateString(transactionData.timestamp) + '</div></div>';
+		formattedData += '<div class="row w-100 div-cell-dark"><div class="col-9"><a href="' + getTransactionsUrl(transactionData.id) + '">' + transactionData.id + '</a></div><div id="txTime" class="col-3 d-flex justify-content-end">' + formatDateString(transactionData.timestamp) + '</div></div>';
 
-		formattedData += '<div class="row w-100"><div class="col-md-6 div-cell block-tx-holder">';
+		formattedData += '<div class="row w-100"><div class="col-md-6 div-cell-dark p-0 block-tx-holder">';
 
 		//Inputs
 		formattedData += formatInputsOutputs(transactionData.inputs);
 
-		formattedData += '</div><div class="col-md-6 div-cell block-tx-holder">';
+		formattedData += '</div><div class="col-md-6 div-cell-dark p-0 block-tx-holder">';
 
 		//Outputs
 		formattedData += formatInputsOutputs(transactionData.outputs);

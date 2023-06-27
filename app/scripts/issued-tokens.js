@@ -217,17 +217,17 @@ function onGotNftInfo(nftInfo) {
 function tokenTypeSwitch(type) {
     switch (type) {
         case NFT_TYPE.Image:
-        return '<span class="text-warning">NFT </span><img class="token-icon" src="./images/nft-image.png"/>';
+        return '<span class="text-warning">NFT </span><img class="token-icon nft-icon" src="./images/nft-image.png"/>';
         case NFT_TYPE.Audio:
-        return '<span class="text-warning">NFT </span><img class="token-icon" src="./images/nft-audio.png"/>';
+        return '<span class="text-warning">NFT </span><img class="token-icon nft-icon" src="./images/nft-audio.png"/>';
         case NFT_TYPE.Video:
-        return '<span class="text-warning">NFT </span><img class="token-icon" src="./images/nft-video.png"/>';
+        return '<span class="text-warning">NFT </span><img class="token-icon nft-icon" src="./images/nft-video.png"/>';
         case NFT_TYPE.ArtCollection:
-        return '<span class="text-warning">NFT </span><img class="token-icon" src="./images/nft-artcollection.png"/>';
+        return '<span class="text-warning">NFT </span><img class="token-icon nft-icon" src="./images/nft-artcollection.png"/>';
         case NFT_TYPE.FileAttachment:
-        return '<span class="text-warning">NFT </span><img class="token-icon" src="./images/nft-file.png"/>';
+        return '<span class="text-warning">NFT </span><img class="token-icon nft-icon" src="./images/nft-file.png"/>';
         case NFT_TYPE.MembershipToken:
-        return '<span class="text-warning">NFT </span><img class="token-icon" src="./images/nft-membership.png"/>';
+        return '<span class="text-warning">NFT </span><img class="token-icon nft-icon" src="./images/nft-membership.png"/>';
         default:
         return '<span class="text-info">Token</span>';
     }

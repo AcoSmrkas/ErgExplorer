@@ -1,11 +1,10 @@
-@import './vars';
-
 //Global properties
 body {
 	padding-bottom: 30px;
 	min-height: 100vh;
 	display: flex;
 	flex-direction: column;
+	background-color: var(--background);
 }
 
 @font-face {
@@ -19,67 +18,71 @@ pre {
 
 footer {
   margin-top: auto;
-  background-color: $gray-3 !important;
+  background-color: var(--forms-bg) !important;
 }
 
 h2 {
-	color: $gray-c;
+	color: var(--text-strong);
 	font-weight: bold;
 }
 
+h3 {
+	color: var(--orange-color);
+}
+
 p {
-	color: $gray-color;
+	color: var(--text-color);
 	margin-bottom: 0;
 	overflow-wrap: anywhere;
 }
 
 table {  
-	border: 1px solid $gray-5 !important;
+	border: 1px solid var(--borders) !important;
 	border-radius: 5px 5px;
 	padding: 15px;
 }
 
 tbody {
-	border-top: 2px solid $orange-color !important;
+	border-top: 2px solid var(--orange-color) !important;
 }
 
 .table > :not(caption) > * > * {
-	background-color: $gray-3 !important;
+	background-color: var(--forms-bg) !important;
 }
 
 .table-dark {
-	--bs-table-striped-bg: #404040;
-	border-color: $gray-5;
+	--bs-table-striped-bg: var(--striped-1);
+	border-color: var(--borders);
 }
 	
 a {
 	text-decoration: none;
-	color: $gray-color;
+	color: var(--text-color);
 }
 
 a:hover {
-	color: $orange-color;
+	color: var(--orange-color);
 }
 
 .text-white {
-	color: $gray-c !important;	
+	color: var(--text-strong) !important;	
 }
 
 .text-light {
-	color: $gray-9 !important;	
+	color: var(--text-light) !important;	
 }
 
 //Links
 .page-link {
-	color: $gray-color;
+	color: var(--text-color);
 }
 
 .page-link:hover, .page-link:focus {
-	color: $orange-color;
+	color: var(--orange-color);
 }
 
 .active {
-	color: $orange-color !important;
+	color: var(--orange-color) !important;
 }
 
 //Checkboxes
@@ -104,25 +107,25 @@ a:hover {
  }
 
  .form-check-input:checked {
- 	background: $orange-color;
+ 	background: var(--orange-color);
  }
 
   .form-check-input:focus {
  	box-shadow: none;
- 	border: 1px solid $orange-color;
+ 	border: 1px solid var(--orange-color);
  }
 
 //Search form
 .form-control-lg {
-	background-color: $gray-3;
+	background-color: var(--forms-bg);
 	color: #fff;
-	border-color: $gray-3;
+	border-color: var(--forms-bg);
 }
 
 .form-control:focus {
-	background-color: $gray-3;
+	background-color: var(--forms-bg);
 	box-shadow: none;
-	border: 1px solid $orange-color;
+	border: 1px solid var(--orange-color);
 }
 
 .form-control:focus {
@@ -284,15 +287,15 @@ select, option {
 }
 
 .erg-span {
-	color: $orange-color;
+	color: var(--orange-color);
 }
 
 .erg-span-important {
-	color: $orange-color !important;
+	color: var(--orange-color) !important;
 }
 
 .erg-span-important:after {
-	color: $gray-color;
+	color: var(--text-color);
 }
 
 .row {
@@ -300,31 +303,32 @@ select, option {
 }
 
 .text-primary {
-	color: $orange-color;
+	color: var(--orange-color);
 }
 
 .div-cell {
-	border: 1px solid $gray-5;
+	border: 1px solid var(--borders);
 	border-radius: 5px 5px;
 	padding: 15px;
 }
 
 .div-cell-dark {
-	border: 1px solid $gray-5;
+	border: 1px solid var(--borders);
 	border-radius: 5px 5px;
 	padding: 15px;
-	background-color: $gray-3;
+	background-color: var(--forms-bg);
 }
 
 .div-summary {
-	border: 2px solid $orange-color;
+	border: 2px solid var(--orange-color);
 	border-radius: 5px 5px;
 	padding: 15px; 
+	background-color: var(--forms-bg);
 }
 
 .navbar {
-	background-color: $gray-3;
-	border-bottom: 1px solid $orange-color;
+	background-color: var(--forms-bg);
+	border-bottom: 1px solid var(--orange-color);
 }
 
 .navbar-brand span {
@@ -343,11 +347,11 @@ select, option {
 }
 
 #dropdown > ul {
-	background-color: $gray-3;
+	background-color: var(--forms-bg);
 }
 
 #dropdown > ul > li > a:hover {
-	background-color: $orange-color;
+	background-color: var(--orange-color);
 }
 
 #rightNav {
@@ -355,27 +359,27 @@ select, option {
 }
 
 .gray-color {
-	color: $gray-color;
+	color: var(--text-color);
 }
 
 .btn-primary {
-	background-color: $gray-5;
-	border-color: $gray-5;
+	background-color: var(--borders);
+	border-color: var(--borders);
 }
 
 .btn-primary:hover {
-	background-color: $orange-color;
-	border-color: $orange-color;
+	background-color: var(--orange-color);
+	border-color: var(--orange-color);
 }
 
 .btn-info {
-	background-color: $orange-color;
+	background-color: var(--orange-color);
 	color: black;
 	border: none;
 }
 
 .btn-info:hover, .btn-info:focus {
-	background-color: $orange-color-hover;
+	background-color: var(--orange-color-hover);
 	color: black;
 }
 
@@ -384,8 +388,8 @@ select, option {
 }
 
 .footer {
-	background-color: $gray-3;
-	color: $gray-9;
+	background-color: var(--forms-bg);
+	color: var(--text-light);
 	padding: 5px;
 	position: fixed;
 	bottom: 0;
@@ -393,10 +397,14 @@ select, option {
 }
 
 .token-icon {
-	width: 20px;
-	height: 20px;
+	width: 18px;
+	height: 18px;
 	line-height: 25px;
 	padding-bottom: 3px;
+}
+
+.nft-icon {
+	filter: brightness(0.9);
 }
 
 .tokenDescriptionPre {
@@ -406,11 +414,11 @@ select, option {
 }
 
 .stripedHolder > div:nth-child(odd) {
-	background-color: $gray-3;
+	background-color: var(--forms-bg);
 }
 
 .stripedHolderEven > div:nth-child(even) {
-	background-color: $gray-3;
+	background-color: var(--forms-bg);
 }
 
 .pre-ascii {
@@ -418,19 +426,20 @@ select, option {
 }
 
 pre, td, th, select, option, .btn, .dropdown-item {
-	color: $gray-c !important;
+	color: var(--text-strong) !important;
 }
 
 .btn-info {
 	color: black !important;
+	font-weight: bold;
 }
 
 .nav-link:hover, #networkType:hover, #networkType:focus {
-	color: $orange-color !important;
+	color: var(--orange-color) !important;
 }
 
 .form-control::placeholder {
-	color: $gray-9 !important;
+	color: var(--text-light) !important;
 }
 
 #networkType {
@@ -438,51 +447,60 @@ pre, td, th, select, option, .btn, .dropdown-item {
 }
 
 [data-bs-theme="light"] {
-	span {
-		color: $gray-color;
-	}
-
 	.erg-span {
-		color: $orange-color !important;
+		color: var(--orange-color) !important;
 	}
 
-	body {
-		color: $gray-color !important;
+	span, pre, td, th {
+		color: var(--text-color);
 	}
 
-	a {
-		color: $gray-color !important;
+	body, a, select, select:active, select:focus, select:hover, #networkType, .form-control {
+		color: var(--text-color) !important;
 	}
 
-	a:hover, a:hover > span, a:hover > span > span {
-		color: $orange-color !important;
+	a:hover, .ticker-url:hover, .ticker-url:hover > span, .ticker-url:hover > span > span, .nav-link:hover, #networkType:hover, #networkType:focus {
+		color: var(--orange-color) !important;
 	}
 
 	#dropdown > ul > li > a:hover {
-		color: $gray-3 !important;
-	}
-
-	select, select:active, select:focus, select:hover {
-		color: $gray-color !important;
+		color: var(--forms-bg) !important;
 	}
 
 	option:focus {
-		background-color: $orange-color;
+		background-color: var(--orange-color);
 	}
 
 	.table-dark {
 		--bs-table-striped-bg: #e3e3e3;
 	}
 
-	pre, td, th {
-		color: $gray-color;
+	.btn {
+		color: #fff !important;
 	}
 
-	.button-info {
-		color: $gray-5 !important;
+	.btn-primary {
+		background-color: var(--text-light);
 	}
 
-	#networkType {
-	  color: $gray-color !important;
+	.btn-primary:hover {
+		color: #fff !important;
+		background-color: var(--orange-color);
+	}
+
+	.nft-icon {
+		filter: brightness(0.3);
+	}
+
+	.text-success {
+		color: #22aa22 !important;
+	}
+
+	.text-info {
+		color: #3377FF !important;
+	}
+
+	.text-warning {
+		color: #ff7700 !important;
 	}
 }

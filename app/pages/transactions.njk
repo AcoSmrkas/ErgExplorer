@@ -1,8 +1,8 @@
 {% extends "layout.njk" %}
 
 {% block styles %}
-	<!-- build:css styles/dark/transactions.css -->
-	<link rel="stylesheet" href="styles/dark/transactions.css">
+	<!-- build:css styles/transactions.css -->
+	<link rel="stylesheet" href="styles/transactions.css">
 	<!-- endbuild -->
 {% endblock %}
 
@@ -23,7 +23,7 @@
 		</div>
 
 		<div class="row w-100">
-			<div class="col-md-6 div-cell">
+			<div class="col-md-6 div-cell-dark">
 				<div class="row w-100">
 					<div class="col-6">
 						<p><strong>Size</strong></p>
@@ -39,7 +39,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="col-md-6 div-cell">
+			<div class="col-md-6 div-cell-dark">
 				<div class="row w-100">
 					<div class="col-6">
 						<p><strong>Total coins transferred</strong></p>
@@ -58,14 +58,14 @@
 		<br>
 
 		<div class="row w-100">
-			<div class="col-md-6 div-cell">
-				<h2>Inputs</h2>
+			<div class="col-md-6 div-cell-dark p-0">
+				<h2 class="p-3">Inputs</h2>
 				<br>
 				<div id="txInputs">
 				</div>
 			</div>
-			<div class="col-md-6 div-cell">
-				<h2>Outputs</h2>
+			<div class="col-md-6 div-cell-dark p-0">
+				<h2 class="p-3">Outputs</h2>
 				<br>			
 				<div id="txOutputs">
 				</div>
@@ -101,6 +101,6 @@
 {% endblock %}
 
 {% block scripts %}
-		<script src="./scripts/common/prices.js?v=7"></script>
-		<script src="./scripts/transactions.js?v=7"></script>
+		<script src="./scripts/common/prices.js?v=8"></script>
+		<script src="./scripts/transactions.js?v=8"></script>
 {% endblock %}

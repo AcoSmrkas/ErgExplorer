@@ -1,5 +1,3 @@
-@import './vars';
-
 #txHolder {
   height: 78px;
 }
@@ -10,9 +8,9 @@
   left: 0;
   padding-top: 10px;
   padding-bottom: 10px;
-  background-color: $gray-3;
-  border-top: 1px solid $gray-5;
-  border-bottom: 1px solid $gray-5;
+  background-color: var(--forms-bg);
+  border-top: 1px solid var(--borders);
+  border-bottom: 1px solid var(--borders);
 }
 
 .ticker-img {

@@ -1,10 +1,8 @@
-@import './vars';
-
 #blockDataLeft > div:nth-child(odd), #blockDataRight > div:nth-child(odd), .block-tx-holder > div:nth-child(odd), #blockExtension > div:nth-child(odd) {
-	background-color: $gray-3;
+	background-color: var(--striped-1);
 }
 
-#txInputs > div, #txOutputs > div {
+.block-tx-holder > div {
 	border-radius: 0;
 }
 
