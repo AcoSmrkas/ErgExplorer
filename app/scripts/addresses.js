@@ -96,7 +96,7 @@ function printAddressSummary() {
 				$('#finalBalance').show();
 			}
 
-			getNftsInfo(nftSearchTokens, onGotNftInfo);
+			getNftsInfo(nftSearchTokens, onGotOwnedNftInfo);
 
 			$('#tokens').html(tokensContent);
 		}
@@ -264,14 +264,29 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 	return formattedResult;
 }
 
-function onGotNftInfo(nftInfos, message) {
-	if (nftInfos == undefined || nftInfos == null) return;
+function onGotOwnedNftInfo(nftInfos, message) {
+	if (nftInfos == undefined || nftInfos == null || nftInfos.length == 0) return;
 
+	nftInfos.sort((a, b) => {
+		return a.data.name > b.data.name;
+	});
+
+	nftInfos.sort((a, b) => {
+		return a.data.isBurned == 't';
+	});
+
+	let html = [];
+	html['token'] = '';
+	html[NFT_TYPE.Image] = '';
+	html[NFT_TYPE.Audio] = '';
+	html[NFT_TYPE.Video] = '';
+	html[NFT_TYPE.ArtCollection] = '';
+	html[NFT_TYPE.FileAttachment] = '';
+	html[NFT_TYPE.MembershipToken] = '';
 	for (let i = 0; i < nftInfos.length; i++) {
 		if (!nftInfos[i].isNft) continue;
 
 		let imgSrc = '';
-		let formattedHtml = '';
 		let nftHolderId = '';
 		let nftContentHolderId = '';
 
@@ -308,16 +323,23 @@ function onGotNftInfo(nftInfos, message) {
 				break;
 		}
 
-		formattedHtml = $(nftContentHolderId).html() + '<a href="' + getTokenUrl(nftInfos[i].data.id) + '"><div class="card m-1" style="width: 100px;"><div class="cardImgHolder"><img src="' + imgSrc + '" class="card-img-top' + ((nftInfos[i].type == NFT_TYPE.Image) ? '' : ' p-4') + '"></div><div class="card-body p-2"><p class="card-text">' + nftInfos[i].data.name + '</p></div></div></a>';
+		html[nftInfos[i].type] += '<a href="' + getTokenUrl(nftInfos[i].data.id) + '"><div class="card m-1" style="width: 100px;"><div class="cardImgHolder"><img src="' + imgSrc + '" class="card-img-top' + ((nftInfos[i].type == NFT_TYPE.Image) ? '' : ' p-4') + '"></div><div class="card-body p-2"><p class="card-text">' + nftInfos[i].data.name + '</p></div></div></a>';
 
-		$(nftContentHolderId).html(formattedHtml);
 		$(nftHolderId).show();
-		$('#nftsHolder').show();
 
 		nftsCount++;
-		$('#nftsTitle').html('<strong>Owned NFTs</strong> (+' + nftsCount + ') ');
-		$('#hideAllNftsAction').hide();
 	}
+
+	$('#nftImagesContentHolder').html(html[NFT_TYPE.Image]);
+	$('#nftAudioContentHolder').html(html[NFT_TYPE.Audio]);
+	$('#nftVideoContentHolder').html(html[NFT_TYPE.Video]);
+	$('#nftArtCollectionContentHolder').html(html[NFT_TYPE.ArtCollection]);
+	$('#nftFileContentHolder').html(html[NFT_TYPE.FileAttachment]);
+	$('#nftMembershipContentHolder').html(html[NFT_TYPE.MembershipToken]);
+
+	$('#nftsHolder').show();
+	$('#nftsTitle').html('<strong>Owned NFTs</strong> (+' + nftsCount + ') ');
+	$('#hideAllNftsAction').hide();
 }
 
 function showNfts(e) {
@@ -458,7 +480,7 @@ function setupQrCode() {
 }
 
 function onGotIssuedNftInfo(nftInfos, message) {
-	if (nftInfos == undefined || nftInfos == null) return;
+	if (nftInfos == undefined || nftInfos == null || nftInfos.length == 0) return;
 
 	nftInfos.sort((a, b) => {
 		return a.data.name > b.data.name;
@@ -468,8 +490,15 @@ function onGotIssuedNftInfo(nftInfos, message) {
 		return a.data.isBurned == 't';
 	});
 
-	for (let i = 0; i < nftInfos.length; i++) {
-		let formattedHtml = '';
+	let html = [];
+	html['token'] = '';
+	html[NFT_TYPE.Image] = '';
+	html[NFT_TYPE.Audio] = '';
+	html[NFT_TYPE.Video] = '';
+	html[NFT_TYPE.ArtCollection] = '';
+	html[NFT_TYPE.FileAttachment] = '';
+	html[NFT_TYPE.MembershipToken] = '';
+	for (let i = 0; i < nftInfos.length; i++) {		
 		let nftHolderId = '';
 		let nftContentHolderId = '';
 
@@ -509,22 +538,30 @@ function onGotIssuedNftInfo(nftInfos, message) {
 					break;
 			}
 
-			formattedHtml = $(nftContentHolderId).html() + '<a href="' + getTokenUrl(nftInfos[i].data.id) + '"><div class="card m-1" style="width: 100px;' + (nftInfos[i].data.isBurned == 't' ? 'border:1.5px solid red;' : '') + '"><div class="cardImgHolder"><img ' + (nftInfos[i].data.isBurned == 't' ? 'style="opacity: 0.4;"' : '') + 'src="' + imgSrc + '" class="card-img-top' + ((nftInfos[i].type == NFT_TYPE.Image) ? '' : ' p-4') + '"></div><div class="card-body p-2"><p class="card-text">' + nftInfos[i].data.name + '</p></div></div></a>';
+			html[nftInfos[i].type] += '<a href="' + getTokenUrl(nftInfos[i].data.id) + '"><div class="card m-1" style="width: 100px;' + (nftInfos[i].data.isBurned == 't' ? 'border:1.5px solid red;' : '') + '"><div class="cardImgHolder"><img ' + (nftInfos[i].data.isBurned == 't' ? 'style="opacity: 0.4;"' : '') + 'src="' + imgSrc + '" class="card-img-top' + ((nftInfos[i].type == NFT_TYPE.Image) ? '' : ' p-4') + '"></div><div class="card-body p-2"><p class="card-text">' + nftInfos[i].data.name + '</p></div></div></a>';
 		} else {
 			nftHolderId = '#issuedTokenHolder';
 			nftContentHolderId = '#issuedTokenContentHolder';
 
-			formattedHtml = $(nftContentHolderId).html() + '<p><a href="' + getTokenUrl(nftInfos[i].data.id) + '">' + nftInfos[i].data.name + ' - ' + formatAddressString(nftInfos[i].data.id) + '</a>' + (nftInfos[i].data.isBurned == 't' ? ' (<span class="text-danger">Burned</span>)' : '') + '</p>';
+			html['token'] += '<p><a href="' + getTokenUrl(nftInfos[i].data.id) + '">' + nftInfos[i].data.name + ' - ' + formatAddressString(nftInfos[i].data.id) + '</a>' + (nftInfos[i].data.isBurned == 't' ? ' (<span class="text-danger">Burned</span>)' : '') + '</p>';
 		}
 
-		$(nftContentHolderId).html(formattedHtml);
 		$(nftHolderId).show();
-		$('#issuedNftsHolder').show();
 
 		issuedNftsCount++;
-		$('#issuedNftsTitle').html('<strong>Issued Assets</strong> (+' + issuedNftsCount + ') ');
-		$('#hideIssuedNftsAction').hide();
 	}
+
+	$('#issuedTokenContentHolder').html(html['token']);
+	$('#issuedNftImagesContentHolder').html(html[NFT_TYPE.Image]);
+	$('#issuedNftAudioContentHolder').html(html[NFT_TYPE.Audio]);
+	$('#issuedNftVideoContentHolder').html(html[NFT_TYPE.Video]);
+	$('#issuedNftArtCollectionContentHolder').html(html[NFT_TYPE.ArtCollection]);
+	$('#issuedNftFileContentHolder').html(html[NFT_TYPE.FileAttachment]);
+	$('#issuedNftMembershipContentHolder').html(html[NFT_TYPE.MembershipToken]);
+
+	$('#issuedNftsHolder').show();
+	$('#issuedNftsTitle').html('<strong>Issued Assets</strong> (+' + issuedNftsCount + ') ');
+	$('#hideIssuedNftsAction').hide();
 }
 
 function showIssuedNfts(e) {

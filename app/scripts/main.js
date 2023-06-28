@@ -36,7 +36,7 @@ window.addEventListener('hashchange', () => {
 );
 
 function setDocumentTitle(text) {
-	document.title = 'Erg Explorer (Alpha) - ' + text;
+	document.title = 'Erg Explorer (Beta) - ' + text;
 }
 
 function getWalletAddressFromUrl() {
