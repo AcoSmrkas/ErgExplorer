@@ -22,8 +22,8 @@ $(function() {
 	setDocumentTitle(walletAddress);
 	
     getPrices(onInitRequestsFinished);
-
     getIssuedNfts(walletAddress, onGotIssuedNftInfo, false);
+    getAddressInfo();
 
     setupQrCode();
 });
@@ -49,7 +49,7 @@ function printAddressSummary() {
 			$('#tokensHolder').show();
 
 			let totalVestingPrice = -1;
-			let tokensToShow = 2;
+			let tokensToShow = 4;
 			tokensContent = '';
 			tokensContentFull = '';
 
@@ -268,11 +268,25 @@ function onGotOwnedNftInfo(nftInfos, message) {
 	if (nftInfos == undefined || nftInfos == null || nftInfos.length == 0) return;
 
 	nftInfos.sort((a, b) => {
-		return a.data.name > b.data.name;
+		return a.data.isBurned == 't' ? 1 : -1;
 	});
 
 	nftInfos.sort((a, b) => {
-		return a.data.isBurned == 't';
+		if (a.data.isBurned != 't'
+			|| b.data.isBurned != 't') {
+			return 0;
+		}
+
+		return a.data.name > b.data.name ? 1 : -1;
+	});
+
+	nftInfos.sort((a, b) => {
+		if (a.data.isBurned == 't'
+			|| b.data.isBurned == 't') {
+			return 0;
+		}
+
+		return a.data.name > b.data.name ? 1 : -1;
 	});
 
 	let html = [];
@@ -330,16 +344,18 @@ function onGotOwnedNftInfo(nftInfos, message) {
 		nftsCount++;
 	}
 
-	$('#nftImagesContentHolder').html(html[NFT_TYPE.Image]);
-	$('#nftAudioContentHolder').html(html[NFT_TYPE.Audio]);
-	$('#nftVideoContentHolder').html(html[NFT_TYPE.Video]);
-	$('#nftArtCollectionContentHolder').html(html[NFT_TYPE.ArtCollection]);
-	$('#nftFileContentHolder').html(html[NFT_TYPE.FileAttachment]);
-	$('#nftMembershipContentHolder').html(html[NFT_TYPE.MembershipToken]);
+	if (nftsCount > 0) {
+		$('#nftImagesContentHolder').html(html[NFT_TYPE.Image]);
+		$('#nftAudioContentHolder').html(html[NFT_TYPE.Audio]);
+		$('#nftVideoContentHolder').html(html[NFT_TYPE.Video]);
+		$('#nftArtCollectionContentHolder').html(html[NFT_TYPE.ArtCollection]);
+		$('#nftFileContentHolder').html(html[NFT_TYPE.FileAttachment]);
+		$('#nftMembershipContentHolder').html(html[NFT_TYPE.MembershipToken]);
 
-	$('#nftsHolder').show();
-	$('#nftsTitle').html('<strong>Owned NFTs</strong> (+' + nftsCount + ') ');
-	$('#hideAllNftsAction').hide();
+		$('#nftsHolder').show();
+		$('#nftsTitle').html('<strong>Owned NFTs</strong> (+' + nftsCount + ') ');
+		$('#hideAllNftsAction').hide();
+	}
 }
 
 function showNfts(e) {
@@ -483,11 +499,25 @@ function onGotIssuedNftInfo(nftInfos, message) {
 	if (nftInfos == undefined || nftInfos == null || nftInfos.length == 0) return;
 
 	nftInfos.sort((a, b) => {
-		return a.data.name > b.data.name;
+		return a.data.isBurned == 't' ? 1 : -1;
 	});
 
 	nftInfos.sort((a, b) => {
-		return a.data.isBurned == 't';
+		if (a.data.isBurned != 't'
+			|| b.data.isBurned != 't') {
+			return 0;
+		}
+
+		return a.data.name > b.data.name ? 1 : -1;
+	});
+
+	nftInfos.sort((a, b) => {
+		if (a.data.isBurned == 't'
+			|| b.data.isBurned == 't') {
+			return 0;
+		}
+
+		return a.data.name > b.data.name ? 1 : -1;
 	});
 
 	let html = [];
@@ -617,6 +647,7 @@ function getErgopadVesting() {
 			if (totalVestingPrice > 0) {
 				$('#ergopadVesting').html('<a href="https://www.ergopad.io/dashboard"" target="_new"><img src="https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/d71693c49a84fbbecd4908c94813b46514b18b67a99952dc1e6e4791556de413.svg" class="token-icon"> Ergopad</a> vesting: <span class="text-light">$' + formatValue(totalVestingPrice, 2) + '</span>' + (totalReddemablePrice > 0 ? '<br><img src="https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/d71693c49a84fbbecd4908c94813b46514b18b67a99952dc1e6e4791556de413.svg" class="token-icon" style="visibility:hidden;"> <span style="font-size:0.9em;">Redeemable: $' + formatValue(totalReddemablePrice, 2) + '</span>' : ''));
 				$('#ergopadVesting').show();
+				$('#ergopad').show();
 			}
 	    }
 	});
@@ -647,6 +678,7 @@ function getErgopadStaking() {
 
 			$('#ergopadStaking').html('<a href="https://www.ergopad.io/dashboard"" target="_new"><img src="https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/d71693c49a84fbbecd4908c94813b46514b18b67a99952dc1e6e4791556de413.svg" class="token-icon"> Ergopad</a> staking: <span class="text-light">$' + formatValue(totalVestingPrice, 2) + '</span>');
 			$('#ergopadStaking').show();
+			$('#ergopad').show();
 	    }
 	});
 }
@@ -654,4 +686,25 @@ function getErgopadStaking() {
 function onInitRequestsFinished() {
     printAddressSummary();
 	printTransactions();
+}
+
+function getAddressInfo() {
+	var jqxhr = $.get(ERGEXPLORER_API_HOST + 'addressbook/getAddressInfo?address=' + walletAddress,
+	function (data) {
+		if (data.total == 0) return;
+
+		let title = data.items[0].name;
+		let type = ''
+		if (data.items[0].type != '') {
+			type += ' (' + data.items[0].type + ')';
+		}
+
+		let html = title;
+		if (data.items[0].name != '') {
+			html = '<a href="' + data.items[0].url + '" target="_new"><span class="text-success">' + title + '</span></a>' + type;
+		}
+
+		$('#verifiedOwner').html(html);
+		$('#verifiedOwnerHolder').show();
+	});
 }

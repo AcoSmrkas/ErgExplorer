@@ -36,7 +36,7 @@ window.addEventListener('hashchange', () => {
 );
 
 function setDocumentTitle(text) {
-	document.title = 'Erg Explorer (Beta) - ' + text;
+	document.title = 'Erg Explorer - ' + text;
 }
 
 function getWalletAddressFromUrl() {
@@ -286,7 +286,7 @@ function getAssetTitle(asset, iconIsToTheLeft) {
 	}
 
 	if (asset.tokenId == 'ba553573f83c61be880d79db0f4068177fa75ab7c250ce3543f7e7aeb471a9d2') {
-		imgSrc = 'https://cloudflare-ipfs.com/ipfs/bafybeifjq7aaleq2eg4o4vhqsg2zjow6pkbb3upb7vpz6g24r777ikh5ua';
+		imgSrc = 'images/tokens/ba553573f83c61be880d79db0f4068177fa75ab7c250ce3543f7e7aeb471a9d2.png';
 	}
 
 	let iconHtml = '<img style="display: none;" onload="onTokenIconLoad(this)"  class="token-icon" src="' + imgSrc + '"/>';
@@ -397,7 +397,7 @@ function formatInputsOutputs(data) {
 	let formattedData = '';
 
 	for (let i = 0; i < data.length; i++) {
-		formattedData += '<div class="row div-cell">';
+		formattedData += '<div class="row div-cell border-flat">';
 		
 		//Address
 		formattedData += '<div class="col-9"><span><strong>Address: </strong></span><a href="' + getWalletAddressUrl(data[i].address) + '" >' + formatAddressString(data[i].address, 15) + '</a></div>';

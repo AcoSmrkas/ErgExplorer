@@ -12,18 +12,22 @@
 {% endblock %}
 
 {% block content %}
-	<h2 class="main-heading p-2">Block</h2>
-
+	<div class="row w-100">
+		<div class="col-md-12">
+			<h2>Block</h2>
+		</div>
+	</div>
+	<br>
 	<div id="blockDataHolder" style="display: none;" class="col-md-12">
-		<div class="row w-100 div-cell-dark">
+		<div class="row w-100 div-cell-dark border-bottom-flat">
 			<div id="blockHeader" class="col-9">
 			</div>
 			<div id="blockTime" class="col-3 d-flex justify-content-end">
 			</div>
 		</div>
 
-		<div class="row w-100">
-			<div id="blockDataLeft" class="col-lg-3 div-cell-dark p-0">
+		<div class="row w-100 two-column-holder-top-flat-lg">
+			<div id="blockDataLeft" class="col-lg-3 div-cell-dark border-top-flat p-0">
 				<div class="row w-100 p-1">
 					<div class="col-5">
 						<p><strong>Height</strong></p>
@@ -74,7 +78,7 @@
 				</div>
 			</div>
 
-			<div id="blockDataRight" class="col-lg-9 div-cell-dark p-0">
+			<div id="blockDataRight" class="col-lg-9 div-cell-dark border-top-flat p-0">
 				<div class="row w-100 p-1">
 					<div class="col-lg-3 col-4">
 						<p><strong>Previous block</strong></p>
@@ -171,6 +175,6 @@
 {% endblock %}
 
 {% block scripts %}
-	<script src="./scripts/common/prices.js?v=8"></script>
-	<script src="./scripts/blocks.js?v=8"></script>
+	<script src="./scripts/common/prices.js?v=9"></script>
+	<script src="./scripts/blocks.js?v=9"></script>
 {% endblock %}

@@ -99,9 +99,6 @@
         <div class="collapse navbar-collapse flex-grow-1 text-right" id="navbarNav">
             <ul class="navbar-nav w-100 justify-content-center">
                 <li class="nav-item">
-                    <a class="nav-link  active " href="/">Home</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link " href="issued-tokens">Tokens</a>
                 </li>
                 <li class="nav-item">
@@ -109,6 +106,9 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link " href="mempool">Mempool</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link " href="addressbook">Address book</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link " href="about">About/Donate</a>
@@ -151,7 +151,7 @@
 				  <option value="2">Token</option>
 				  <option value="3">Block</option>
 				</select>
-				<button onclick="searchAddress()" class="btn btn-lg btn-primary" type="button"><i class="fas fa-search"></i></button>
+				<button onclick="searchAddress()" class="btn btn-lg btn-info" type="button"><i class="fas fa-search"></i></button>
      		</div>
     	</div>
  	</div>
@@ -161,7 +161,7 @@
 			<div class="row w-100">
 				<div class="col div-summary">
 					<p>
-					<strong><span class="erg-span">NOTE</span>:</strong> Erg Explorer is still in its <strong><span class="erg-span">alpha</span></strong> development phase. Please report any issues you encounter in our <strong><a href="https://t.me/ErgExplorer" target="_new">Telegram group</a></strong>.
+					<strong><span class="erg-span">NOTE</span>:</strong> Erg Explorer is still in its <strong><span class="erg-span">beta</span></strong> development phase. Please report any issues you encounter in our <strong><a href="https://t.me/ErgExplorer" target="_new">Telegram group</a></strong>.
 					</p>
 					<p style="display: hidden;"><strong>Official Ergo Explorer link:</strong> <a target="_new" id="officialLink" href="https://explorer.ergoplatform.com">https://explorer.ergoplatform.com</a></p>
 				</div>
@@ -219,7 +219,7 @@
 			</div>
 		</div>		
 		<hr class="my-3 d-block d-lg-none">
-		<div class="col p-1">
+		<div class="col p-1 ps-lg-3 border-lg-start">
 			<h2 class="erg-span" style="font-size:1.7em">Protocol information</h2>
 			<br>
 			<h5 style="font-size:1em" class="text-light">Version: <span class="text-white" id="ergVersion"></span></h2>
@@ -334,13 +334,13 @@
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
 
 		<!-- Custom JavaScript -->
-		<script src="./scripts/common/token-icons.js?v=8"></script>
-		<script src="./scripts/common/params.js?v=8"></script>
-		<script src="./scripts/main.js?v=8"></script>
+		<script src="./scripts/common/token-icons.js?v=9"></script>
+		<script src="./scripts/common/params.js?v=9"></script>
+		<script src="./scripts/main.js?v=9"></script>
 		
 	<script src="https://unpkg.com/@sjaakp/telex/dist/telex.js"></script>
-	<script src="./scripts/common/prices.js?v=8"></script>
-	<script src="./scripts/index.js?v=8"></script>
+	<script src="./scripts/common/prices.js?v=9"></script>
+	<script src="./scripts/index.js?v=9"></script>
 
 	</body>
 </html>

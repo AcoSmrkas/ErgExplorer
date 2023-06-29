@@ -99,9 +99,6 @@
         <div class="collapse navbar-collapse flex-grow-1 text-right" id="navbarNav">
             <ul class="navbar-nav w-100 justify-content-center">
                 <li class="nav-item">
-                    <a class="nav-link " href="/">Home</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link " href="issued-tokens">Tokens</a>
                 </li>
                 <li class="nav-item">
@@ -109,6 +106,9 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link " href="mempool">Mempool</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link " href="addressbook">Address book</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link " href="about">About/Donate</a>
@@ -151,7 +151,7 @@
 				  <option value="2">Token</option>
 				  <option value="3">Block</option>
 				</select>
-				<button onclick="searchAddress()" class="btn btn-lg btn-primary" type="button"><i class="fas fa-search"></i></button>
+				<button onclick="searchAddress()" class="btn btn-lg btn-info" type="button"><i class="fas fa-search"></i></button>
      		</div>
     	</div>
  	</div>
@@ -161,7 +161,7 @@
 			<div class="row w-100">
 				<div class="col div-summary">
 					<p>
-					<strong><span class="erg-span">NOTE</span>:</strong> Erg Explorer is still in its <strong><span class="erg-span">alpha</span></strong> development phase. Please report any issues you encounter in our <strong><a href="https://t.me/ErgExplorer" target="_new">Telegram group</a></strong>.
+					<strong><span class="erg-span">NOTE</span>:</strong> Erg Explorer is still in its <strong><span class="erg-span">beta</span></strong> development phase. Please report any issues you encounter in our <strong><a href="https://t.me/ErgExplorer" target="_new">Telegram group</a></strong>.
 					</p>
 					<p style="display: hidden;"><strong>Official Ergo Explorer link:</strong> <a target="_new" id="officialLink" href="https://explorer.ergoplatform.com">https://explorer.ergoplatform.com</a></p>
 				</div>
@@ -170,18 +170,22 @@
 			<br>
 
 			
-	<h2 class="main-heading p-2">Transaction</h2>
-
+	<div class="row w-100">
+		<div class="col-md-12">
+			<h2>Transaction</h2>
+		</div>
+	</div>
+	<br>
 	<div id="txDataHolder" style="display: none;" class="col-md-12">
-		<div class="row w-100 div-cell-dark">
+		<div class="row w-100 div-cell-dark border-bottom-flat">
 			<div id="txHeader" class="col-9">
 			</div>
 			<div id="txTime" class="col-3 d-flex justify-content-end">
 			</div>
 		</div>
 
-		<div class="row w-100">
-			<div class="col-md-6 div-cell-dark">
+		<div class="row w-100 two-column-holder-top-flat-md">
+			<div class="col-md-6 div-cell-dark border-top-flat">
 				<div class="row w-100">
 					<div class="col-6">
 						<p><strong>Size</strong></p>
@@ -197,7 +201,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="col-md-6 div-cell-dark">
+			<div class="col-md-6 div-cell-dark border-top-flat">
 				<div class="row w-100">
 					<div class="col-6">
 						<p><strong>Total coins transferred</strong></p>
@@ -215,16 +219,14 @@
 
 		<br>
 
-		<div class="row w-100">
+		<div class="row w-100 two-column-holder two-column-holder-md">
 			<div class="col-md-6 div-cell-dark p-0">
 				<h2 class="p-3">Inputs</h2>
-				<br>
 				<div id="txInputs">
 				</div>
 			</div>
-			<div class="col-md-6 div-cell-dark p-0">
+			<div class="col-md-6 div-cell-dark p-0 mt-4 mt-md-0">
 				<h2 class="p-3">Outputs</h2>
-				<br>			
 				<div id="txOutputs">
 				</div>
 			</div>
@@ -296,12 +298,12 @@
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
 
 		<!-- Custom JavaScript -->
-		<script src="./scripts/common/token-icons.js?v=8"></script>
-		<script src="./scripts/common/params.js?v=8"></script>
-		<script src="./scripts/main.js?v=8"></script>
+		<script src="./scripts/common/token-icons.js?v=9"></script>
+		<script src="./scripts/common/params.js?v=9"></script>
+		<script src="./scripts/main.js?v=9"></script>
 		
-		<script src="./scripts/common/prices.js?v=8"></script>
-		<script src="./scripts/transactions.js?v=8"></script>
+		<script src="./scripts/common/prices.js?v=9"></script>
+		<script src="./scripts/transactions.js?v=9"></script>
 
 	</body>
 </html>

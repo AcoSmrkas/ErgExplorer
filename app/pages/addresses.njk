@@ -13,134 +13,147 @@
 
 {% block content %}
 	<div class="col-md-12">
-		<h2 class="main-heading p-2">Address</h2>
-		
-		<div id="summaryOk" style="display: none;" class="row w-100">
-			<div class="col-md-8 col-sm-12 div-cell-dark">
-				<h4><strong>Summary</strong></h4>
-
-				<div class="row w-100 p-0">
-					<div class="col-md-9 p-0">
-						<p><strong>Address:</strong> <a onclick="copyWalletAddress(event)" href="Copy to clipboard!" id="address"></a></p>
-						<p id="totalTransactions"></p>
-					</div>
-					<div class="col-md-3" style="text-align: end;">
-						<button id="showQRcodeBtn" type="button" class="btn btn-info">Show QR Code</button>
-					</div>
-				</div>
-
-				<br>
-
-				<div id="nftsHolder" class="row w-100" style="display: none;">
-					<div class="col-12 p-0">
-						<h4 style="display:inline-block;" id="nftsTitle"><strong>Owned NFTs</strong></h4><a id="showAllNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="showNfts(event)">Show</a>
-						<a id="hideAllNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="hideNfts(event)">Hide</a>
-						<div id="nftsShowAll" style="display: none;">
-							<div id="nftImagesHolder" class="row w-100 p-0" style="display: none;">
-								<h5 class="p-2">Image</h5>
-								<div class="row w-100 p-0">
-									<div id="nftImagesContentHolder" class="col p-0"></div>
-								</div>
-							</div>
-							<div id="nftAudioHolder" class="row w-100 p-0" style="display: none;">
-								<h5 class="p-2">Audio</h5>
-								<div class="row w-100 p-0">
-									<div id="nftAudioContentHolder" class="col p-0"></div>
-								</div>
-							</div>
-							<div id="nftVideoHolder" class="row w-100 p-0" style="display: none;">
-								<h5 class="p-1">Video</h5>
-								<div class="row w-100 p-0">
-									<div id="nftVideoContentHolder" class="col p-0"></div>
-								</div>
-							</div>
-							<div id="nftArtCollectionHolder" class="row w-100 p-0" style="display: none;">
-								<h5 class="p-1">Art collection</h5>
-								<div class="row w-100 p-0">
-									<div id="nftArtCollectionContentHolder" class="col p-0"></div>
-								</div>
-							</div>
-							<div id="nftFileHolder" class="row w-100 p-0" style="display: none;">
-								<h5 class="p-1">File attachment</h5>
-								<div class="row w-100 p-0">
-									<div id="nftFileContentHolder" class="col p-0"></div>
-								</div>
-							</div>
-							<div id="nftMembershipHolder" class="row w-100 p-0" style="display: none;">
-								<h5 class="p-1">Membership</h5>
-								<div class="row w-100 p-0">
-									<div id="nftMembershipContentHolder" class="col p-0"></div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				<br>
-				<div id="issuedNftsHolder" class="row w-100" style="display: none;">
-					<div class="col-12 p-0">
-					<h4 style="display:inline-block;" id="issuedNftsTitle"><strong>Issued assets</strong></h4><a id="showIssuedNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="showIssuedNfts(event)">Show</a>
-						<a id="hideIssuedNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="hideIssuedNfts(event)">Hide</a>
-						<div id="nftsShowIssued" style="display: none;">
-							<div id="issuedTokenHolder" class="row w-100 p-0" style="display: none;">
-								<h5 class="p-2">Token</h5>
-								<div class="row w-100 p-0">
-									<div id="issuedTokenContentHolder" class="col p-2"></div>
-								</div>
-							</div>
-							<div id="issuedNftImagesHolder" class="row w-100 p-0" style="display: none;">
-								<h5 class="p-2">Image</h5>
-								<div class="row w-100 p-0">
-									<div id="issuedNftImagesContentHolder" class="col p-0"></div>
-								</div>
-							</div>
-							<div id="issuedNftAudioHolder" class="row w-100 p-0" style="display: none;">
-								<h5 class="p-2">Audio</h5>
-								<div class="row w-100 p-0">
-									<div id="issuedNftAudioContentHolder" class="col p-0"></div>
-								</div>
-							</div>
-							<div id="issuedNftVideoHolder" class="row w-100 p-0" style="display: none;">
-								<h5 class="p-1">Video</h5>
-								<div class="row w-100 p-0">
-									<div id="issuedNftVideoContentHolder" class="col p-0"></div>
-								</div>
-							</div>
-							<div id="issuedNftArtCollectionHolder" class="row w-100 p-0" style="display: none;">
-								<h5 class="p-1">Art collection</h5>
-								<div class="row w-100 p-0">
-									<div id="issuedNftArtCollectionContentHolder" class="col p-0"></div>
-								</div>
-							</div>
-							<div id="issuedNftFileHolder" class="row w-100 p-0" style="display: none;">
-								<h5 class="p-1">File attachment</h5>
-								<div class="row w-100 p-0">
-									<div id="issuedNftFileContentHolder" class="col p-0"></div>
-								</div>
-							</div>
-							<div id="issuedNftMembershipHolder" class="row w-100 p-0" style="display: none;">
-								<h5 class="p-1">Membership</h5>
-								<div class="row w-100 p-0">
-									<div id="issuedNftMembershipContentHolder" class="col p-0"></div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
+		<div class="row w-100">
+			<div class="col-md-12">
+				<h2>Address</h2>
 			</div>
-			<div class="col-md col-sm-12 div-cell-dark">
-				<h4><strong>Balance</strong></h4>
-				<h5 id="finalErgBalance"></h5>
-				<h5 style="display: none" id="finalAssetsBalance"></h5>
-				<h4 style="display: none" id="finalBalance"></h4>
-				<hr>
-				<p style="display: none" id="ergopadVesting"></p>
-				<p style="display: none" id="ergopadStaking"></p>
-				<br>
-				<div id="tokensHolder" style="display:none">
-					<h4><strong>Tokens:</strong></h4>
+		</div>
+		<br>
+		<div id="summaryOk" style="display: none;">
+			<div class="row w-100 div-cell-dark border-bottom-flat" style="align-items:center;">
+				<div class="col">
+					<p><a title="Copy" onclick="copyWalletAddress(event)" href="Copy to clipboard!" id="address"></a></p>
+				</div>
+			</div>		
+			<div class="row w-100 div-cell-dark border-top-flat">
+				<div class="col-md p-0">
+					<div class="row w-100">
+						<div class="col-lg-6 col-md-12">
+							<h4><strong>Summary</strong></h4>
+							<p id="verifiedOwnerHolder" style="display: none;"><strong>Verified owner: </strong><span id="verifiedOwner"></span></p>
+							<p id="totalTransactions"></p>
+							<br>
+							<button id="showQRcodeBtn" type="button" class="btn btn-info">Show QR Code</button>
+							<hr class="my-3 d-lg-none">
+						</div>
+						<div class="col-lg-6 col-md-12 border-lg-start">
+							<h4><strong>Balance</strong></h4>
+							<h5 id="finalErgBalance"></h5>
+							<h5 style="display: none" id="finalAssetsBalance"></h5>
+							<h4 style="display: none" id="finalBalance"></h4>
+							
+							<div id="ergopad" style="display: none;">
+							<hr class="my-3 p-0">
+							<p style="display: none" id="ergopadVesting"></p>
+							<p style="display: none" id="ergopadStaking"></p>
+							</div>
+						</div>
+					</div>
+					<div class="row w-100">
+						<div id="nftsHolder" class="row w-100" style="display: none;">
+						<div class="col-12 p-0">
+							<hr class="my-3">
+							<h4 style="display:inline-block;" id="nftsTitle"><strong>Owned NFTs</strong></h4><a id="showAllNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="showNfts(event)">Show</a>
+							<a id="hideAllNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="hideNfts(event)">Hide</a>
+							<div id="nftsShowAll" style="display: none;">
+								<div id="nftImagesHolder" class="row w-100 p-0" style="display: none;">
+									<h5 class="p-2">Image</h5>
+									<div class="row w-100 p-0">
+										<div id="nftImagesContentHolder" class="col p-0"></div>
+									</div>
+								</div>
+								<div id="nftAudioHolder" class="row w-100 p-0" style="display: none;">
+									<h5 class="p-2">Audio</h5>
+									<div class="row w-100 p-0">
+										<div id="nftAudioContentHolder" class="col p-0"></div>
+									</div>
+								</div>
+								<div id="nftVideoHolder" class="row w-100 p-0" style="display: none;">
+									<h5 class="p-1">Video</h5>
+									<div class="row w-100 p-0">
+										<div id="nftVideoContentHolder" class="col p-0"></div>
+									</div>
+								</div>
+								<div id="nftArtCollectionHolder" class="row w-100 p-0" style="display: none;">
+									<h5 class="p-1">Art collection</h5>
+									<div class="row w-100 p-0">
+										<div id="nftArtCollectionContentHolder" class="col p-0"></div>
+									</div>
+								</div>
+								<div id="nftFileHolder" class="row w-100 p-0" style="display: none;">
+									<h5 class="p-1">File attachment</h5>
+									<div class="row w-100 p-0">
+										<div id="nftFileContentHolder" class="col p-0"></div>
+									</div>
+								</div>
+								<div id="nftMembershipHolder" class="row w-100 p-0" style="display: none;">
+									<h5 class="p-1">Membership</h5>
+									<div class="row w-100 p-0">
+										<div id="nftMembershipContentHolder" class="col p-0"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id="issuedNftsHolder" class="row w-100" style="display: none;">
+						<div class="col-12 p-0">
+						<hr class="my-3">
+						<h4 style="display:inline-block;" id="issuedNftsTitle"><strong>Issued assets</strong></h4><a id="showIssuedNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="showIssuedNfts(event)">Show</a>
+							<a id="hideIssuedNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="hideIssuedNfts(event)">Hide</a>
+							<div id="nftsShowIssued" style="display: none;">
+								<div id="issuedTokenHolder" class="row w-100 p-0" style="display: none;">
+									<h5 class="p-2">Token</h5>
+									<div class="row w-100 p-0">
+										<div id="issuedTokenContentHolder" class="col p-2"></div>
+									</div>
+								</div>
+								<div id="issuedNftImagesHolder" class="row w-100 p-0" style="display: none;">
+									<h5 class="p-2">Image</h5>
+									<div class="row w-100 p-0">
+										<div id="issuedNftImagesContentHolder" class="col p-0"></div>
+									</div>
+								</div>
+								<div id="issuedNftAudioHolder" class="row w-100 p-0" style="display: none;">
+									<h5 class="p-2">Audio</h5>
+									<div class="row w-100 p-0">
+										<div id="issuedNftAudioContentHolder" class="col p-0"></div>
+									</div>
+								</div>
+								<div id="issuedNftVideoHolder" class="row w-100 p-0" style="display: none;">
+									<h5 class="p-1">Video</h5>
+									<div class="row w-100 p-0">
+										<div id="issuedNftVideoContentHolder" class="col p-0"></div>
+									</div>
+								</div>
+								<div id="issuedNftArtCollectionHolder" class="row w-100 p-0" style="display: none;">
+									<h5 class="p-1">Art collection</h5>
+									<div class="row w-100 p-0">
+										<div id="issuedNftArtCollectionContentHolder" class="col p-0"></div>
+									</div>
+								</div>
+								<div id="issuedNftFileHolder" class="row w-100 p-0" style="display: none;">
+									<h5 class="p-1">File attachment</h5>
+									<div class="row w-100 p-0">
+										<div id="issuedNftFileContentHolder" class="col p-0"></div>
+									</div>
+								</div>
+								<div id="issuedNftMembershipHolder" class="row w-100 p-0" style="display: none;">
+									<h5 class="p-1">Membership</h5>
+									<div class="row w-100 p-0">
+										<div id="issuedNftMembershipContentHolder" class="col p-0"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					</div>
+				</div>
+				<div class="col-lg-4 col-md-12 border-lg-start" id="tokensHolder" style="display:none">
+					<hr class="my-3 d-lg-none">
+					<h4><strong>Tokens</strong></h4>
 					<p id="tokens"></p>
 				</div>
-			</div>
+			  </div>
 		  </div>
 
 		  <div id="txView" class="row w-100">
@@ -157,7 +170,7 @@
 						<th scope="col">To</th>
 						<th scope="col">Status</th>
 						<th scope="col" style="min-width: 100px">Fee</th>
-						<th scope="col">Value</th>
+						<th scope="col" >Value</th>
 					</tr>
 				</thead>
 
@@ -181,9 +194,9 @@
 {% endblock %}
 
 {% block scripts %}	
-	<script src="./scripts/common/prices.js?v=8"></script>
-	<script src="./scripts/common/pagination.js?v=8"></script>
-	<script src="./scripts/common/nft.js?v=8"></script>
-	<script src="./scripts/addresses.js?v=8"></script>
-	<script src="./scripts/3rd-party/qrcode.min.js?v=8"></script>
+	<script src="./scripts/common/prices.js?v=9"></script>
+	<script src="./scripts/common/pagination.js?v=9"></script>
+	<script src="./scripts/common/nft.js?v=9"></script>
+	<script src="./scripts/addresses.js?v=9"></script>
+	<script src="./scripts/3rd-party/qrcode.min.js?v=9"></script>
 {% endblock %}

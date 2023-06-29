@@ -52,6 +52,7 @@ function setupTicker() {
 //		'0f604d3d5e20d6ea5bc1eee9117230f8679fc36603468c79c8246df462893ae7',
 //		'3e0b62c7bc36bc7abf2bf76303722c31788aa579d771e427a0b2c8357da160ba',
 		'0cd8c9f416e5b1ca9f986a7f10a84191dfb85941619e49e53c0dc30ebf83324b',
+		'ba553573f83c61be880d79db0f4068177fa75ab7c250ce3543f7e7aeb471a9d2',
 		'36aba4b4a97b65be491cf9f5ca57b5408b0da8d0194f30ec8330d1e8946161c1',
 		'5a34d53ca483924b9a6aa0c771f11888881b516a8d1a9cdc535d063fe26d065e',
 		'fbbaac7337d051c10fc3da0ccb864f4d32d40027551e1c3ea3ce361f39b91e40',
@@ -69,27 +70,30 @@ function setupTicker() {
 		'fcfca7654fb0da57ecf9a3f489bcbeb1d43b56dce7e73b352f7bc6f2561d2a1b'];
 //		'6de6f46e5c3eca524d938d822e444b924dbffbe02e5d34bd9dcd4bbfe9e85940',
 
-	let keys = Object.keys(prices);
-	for (var i = 0; i < tickerIds.length; i++) {
-		let imgId = tickerIds[i];
-		let url = getTokenUrl(tickerIds[i]);
+    for (var i = 0; i < tickerIds.length; i++) {
+            let imgId = tickerIds[i];
+            let url = getTokenUrl(tickerIds[i]);
 
-		if (tickerIds[i] == 'ERG') {
-			imgId = '0000000000000000000000000000000000000000000000000000000000000000';
-			url = 'https://coinmarketcap.com/currencies/ergo/';
-		}
+            if (tickerIds[i] == 'ERG') {
+                    imgId = '0000000000000000000000000000000000000000000000000000000000000000';
+                    url = 'https://coinmarketcap.com/currencies/ergo/';
+            }
 
-		let digits = 6;
-		if (prices[tickerIds[i]] > 0.1) {
-			digits = 2;
-		}
+            let imgUrl = 'https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/' + imgId + '.svg';
+            let digits = 6;
+            if (prices[tickerIds[i]] > 0.1) {
+                    digits = 2;
+            }
 
-		tickerMessages.push({
-			id: 'msg' + i,
-			content: '<a class="ticker-url" href="' + url + '"><img class="ticker-img" src="https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/' + imgId + '.svg"> <span>$' + formatValue(prices[tickerIds[i]], digits) + '</span></a>'
-			
-		});
-	}
+            if (tickerIds[i] == 'ba553573f83c61be880d79db0f4068177fa75ab7c250ce3543f7e7aeb471a9d2') {
+                    imgUrl = '/images/tokens/ba553573f83c61be880d79db0f4068177fa75ab7c250ce3543f7e7aeb471a9d2.png';
+            }
+
+            tickerMessages.push({
+                    id: 'msg' + i,
+                    content: '<a class="ticker-url" href="' + url + '"><img class="ticker-img" src="' + imgUrl + '"> <span>$' + formatValue(prices[tickerIds[i]], digits) + '</span></a>'
+            });
+    }
 
 	var qtx = Telex.widget('tx',
 		{

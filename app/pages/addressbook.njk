@@ -2,42 +2,41 @@
 
 {% block navigation %}
 	{% import 'macros/nav-macro.njk' as nav %}
-	{{nav.active('latest-blocks')}}
+	{{nav.active('addressbook')}}
 {% endblock %}
 
 {% block content %}
 	<div class="col-md-12">
 		<div class="row w-100">
 			<div class="col-md-12">
-				<h2>Latest blocks</h2>
+				<h2>Address book</h2>
 			</div>
 		</div>
 
 		<br>
 
-		<div id="blocksHolder" style="display: none;">
+		<div id="addressbookHolder" style="display: none;">
 			<div class="row w-100">
 				<table class="table table-dark table-striped">
 					<thead>
 						<tr>    
-							<th scope="col">Height</th>
-							<th scope="col">Time</th>
-							<th scope="col">Transactions</th>
-							<th scope="col">Mined by</th>
-							<th scope="col">Reward</th>
-							<th scope="col">Difficulty</th>
-							<th scope="col">Size</th>
+							<th scope="col">Name</th>
+							<th scope="col">Type</th>
+							<th scope="col">Address</th>
+							<th scope="col">Url</th>
 						</tr>   
 					</thead>
 
-					<tbody id="transactionsTableBody">          
+					<tbody id="addressbookTableBody">          
 					</tbody>
 				</table>
 		 	</div>
-	 	</div>
 
-		{% include "partials/error-message.njk" %}
+			{% include "partials/pagination.njk" %}		 	
+	 	</div>
 	</div>
+
+	{% include "partials/error-message.njk" %}
 
 	{% include "partials/loading.njk" %}
 {% endblock %}
@@ -45,5 +44,5 @@
 {% block scripts %}
 	<script src="./scripts/common/prices.js?v=9"></script>
 	<script src="./scripts/common/pagination.js?v=9"></script>
-	<script src="./scripts/latest-blocks.js?v=9"></script>
+	<script src="./scripts/addressbook.js?v=9"></script>
 {% endblock %}

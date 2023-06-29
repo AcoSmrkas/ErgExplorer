@@ -15,12 +15,12 @@
 	<h2 class="main-heading p-2">Token</h2>
 
 	<div id="tokenDataHolder" style="display: none;" class="col-md-12">
-		<div class="row w-100 div-cell-dark p-3">
+		<div class="row w-100 div-cell-dark p-3 border-bottom-flat">
 			<div id="tokenHeader" class="col"></div>
 		</div>
 
-		<div class="row w-100">
-			<div id="tokenDataLeft" class="col-lg-4 div-cell-dark p-0">
+		<div class="row w-100 two-column-holder-top-flat-lg">
+			<div id="tokenDataLeft" class="col-lg-4 div-cell-dark border-top-flat p-0">
 				<div class="row w-100 p-1">
 					<div class="col-5">
 						<p><strong>Name</strong></p>
@@ -63,7 +63,7 @@
 				</div>
 			</div>
 
-			<div id="tokenDataRight" class="col-lg-8 div-cell-dark p-0">
+			<div id="tokenDataRight" class="col-lg-8 div-cell-dark border-top-flat p-0">
 				<div class="row w-100 p-1">
 					<div id="tokenDescriptionHolderLeft" class="col-xl-2 col-3">
 						<p><strong>Description</strong></p>
@@ -81,15 +81,15 @@
 		<div id="nftHolder" style="display: none;">
 			<h3 class="p-2">NFT Info</h3>
 			<div class="div-cell-dark row w-100 p-0">
-				<div class="col-12 p-0" style="display: none;" id="nftPreviewAudio">
-					<audio id="nftAudio" controls crossorigin loop name="media"><source id="nftPreviewAudioSource" src="" type="audio/mp3"></audio>
+				<div class="col-12 p-0 border-bottom-flat" style="display: none;" id="nftPreviewAudio">
+					<audio id="nftAudio" class="border-bottom-flat" controls crossorigin loop name="media"><source id="nftPreviewAudioSource" src="" type="audio/mp3"></audio>
 				</div>
-				<div id="nftPreviewImgHolder" class="col-lg-3 p-0">
+				<div id="nftPreviewImgHolder" class="col-lg-3 p-0" style="border-radius: 5px 0 0 5px;">
 					<img id="nftPreviewImg" onclick="showFullImgPreview()" style="display: none;" onload="onNftImageLoad()" src="">
 					<video style="display: none;" id="nftPreviewVideo" controls crossorigin allowfullscreen name="media"><source id="nftPreviewVideoSource" src="" type="video/mp4"></video>
 				</div>
 				<div id="nftInfoHolder" class="col-lg-9 p-0">
-					<div class="row w-100 p-2">
+					<div class="row w-100 p-2 border-bottom-flat">
 						<div class="col-md-3"><strong><p>Type</p></strong></div>
 						<div id="nftType" class="col"></div>
 					</div>
@@ -123,7 +123,7 @@
 						<div class="col-md-3"><strong><p>SHA-256 hash</p></strong></div>
 						<div id="nftHash" class="col"></div>
 					</div>
-					<div id="marketplaceHolder" class="row w-100 p-2">
+					<div id="marketplaceHolder" class="row w-100 p-2 border-top-flat">
 						<div class="col-md-3"><strong><p>Marketplace</p></strong></div>
 						<div id="nftAuction" class="col"></div>
 					</div>
@@ -135,7 +135,7 @@
 			<h3 class="p-2">Info</h3>
 			<div class="div-cell-dark row w-100 p-0">
 				<div id="nftInfoHolder" class="col-lg-12 p-0">
-					<div class="row w-100 p-2">
+					<div class="row w-100 p-2 border-bottom-flat">
 						<div class="col-md-3"><strong><p>Type</p></strong></div>
 						<div id="nftType" class="col"></div>
 					</div>
@@ -174,6 +174,6 @@
 {% endblock %}
 
 {% block scripts %}
-	<script src="./scripts/common/nft.js?v=8"></script>
-	<script src="./scripts/token.js?v=8"></script>
+	<script src="./scripts/common/nft.js?v=9"></script>
+	<script src="./scripts/token.js?v=9"></script>
 {% endblock %}

@@ -12,6 +12,10 @@ body {
 	src: url('../../fonts/DejaVuSansMono.ttf');
 }
 
+pre, td, th, select, option, .btn, .dropdown-item {
+	color: var(--text-strong) !important;
+}
+
 pre {
 	font-family: 'DejaVu';
 }
@@ -54,7 +58,7 @@ tbody {
 	--bs-table-striped-bg: var(--striped-1);
 	border-color: var(--borders);
 }
-	
+
 a {
 	text-decoration: none;
 	color: var(--text-color);
@@ -62,6 +66,85 @@ a {
 
 a:hover {
 	color: var(--orange-color);
+}
+
+.two-column-holder-top-flat-md > div:first-of-type,
+.two-column-holder-top-flat-lg > div:first-of-type {
+	border-radius: 0;
+	border-bottom: none;
+}
+
+.two-column-holder > div > div > div,
+.two-column-holder > div > div {
+	border-top: none;
+	border-right: none;
+	border-left: none;
+}
+
+.two-column-holder > div > div:first-of-type {
+	border-top: 1px solid var(--borders);
+}
+
+.two-column-holder > div > div > div:last-of-type {
+	border-radius: 5px !important;
+}
+
+/* Small Devices, Tablets */
+@media only screen and (min-width : 768px) {
+	.border-md-start {
+		border-left: 1px solid var(--borders);
+	}
+
+	.two-column-holder-md > div:first-of-type {
+		border-radius: 5px 0 0 5px;
+		border-right: none;
+		border-bottom: 1px solid var(--borders);
+	}
+
+	.two-column-holder-md > div:last-of-type {
+		border-radius: 0 5px 5px 0;
+	}
+
+	.two-column-holder-top-flat-md > div:first-of-type {
+		border-radius: 0 0 0 5px;
+		border-right: none;
+		border-bottom: 1px solid var(--borders);
+	}
+
+	.two-column-holder-top-flat-md > div:last-of-type {
+		border-radius: 0 0 5px 0;
+	}
+}
+
+/* Medium Devices, Desktops */
+@media only screen and (min-width : 992px) {
+	.border-lg-start {
+		border-left: 1px solid var(--borders);
+	}
+
+	.two-column-holder-lg > div:first-of-type {
+		border-radius: 5px 0 0 5px;
+		border-right: none;
+	}
+
+	.two-column-holder-lg > div:last-of-type {
+		border-radius: 0 5px 5px 0;
+	}
+
+	.two-column-holder-top-flat-lg > div:first-of-type {
+		border-radius: 0 0 0 5px;
+		border-right: none;
+		border-bottom: 1px solid var(--borders);
+	}
+
+	.two-column-holder-top-flat-lg > div:last-of-type {
+		border-radius: 0 0 5px 0;
+	}
+}
+
+/* Large Devices, Wide Screens */
+@media only screen and (min-width : 1200px) {
+	
 }
 
 .text-white {
@@ -326,6 +409,19 @@ select, option {
 	background-color: var(--forms-bg);
 }
 
+.border-top-flat {
+	border-radius: 0px 0px 5px 5px;
+}
+
+.border-bottom-flat {
+	border-radius: 5px 5px 0px 0px;
+	border-bottom: none;
+}
+
+.border-flat {
+	border-radius: none;
+}
+
 .navbar {
 	background-color: var(--forms-bg);
 	border-bottom: 1px solid var(--orange-color);
@@ -374,13 +470,15 @@ select, option {
 
 .btn-info {
 	background-color: var(--orange-color);
-	color: black;
 	border: none;
+	color: #EEE !important;
+	font-weight: bold;
 }
 
-.btn-info:hover, .btn-info:focus {
-	background-color: var(--orange-color-hover);
-	color: black;
+.btn-info:hover, .btn-info:focus, .btn-info:active {
+	background-color: var(--orange-color-hover) !important;
+	color: #EEE !important;
+	box-shadow: none !important;
 }
 
 .btn-info:focus {
@@ -423,15 +521,6 @@ select, option {
 
 .pre-ascii {
 	line-height: 1;
-}
-
-pre, td, th, select, option, .btn, .dropdown-item {
-	color: var(--text-strong) !important;
-}
-
-.btn-info {
-	color: black !important;
-	font-weight: bold;
 }
 
 .nav-link:hover, #networkType:hover, #networkType:focus {

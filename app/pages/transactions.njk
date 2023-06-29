@@ -12,18 +12,22 @@
 {% endblock %}
 
 {% block content %}
-	<h2 class="main-heading p-2">Transaction</h2>
-
+	<div class="row w-100">
+		<div class="col-md-12">
+			<h2>Transaction</h2>
+		</div>
+	</div>
+	<br>
 	<div id="txDataHolder" style="display: none;" class="col-md-12">
-		<div class="row w-100 div-cell-dark">
+		<div class="row w-100 div-cell-dark border-bottom-flat">
 			<div id="txHeader" class="col-9">
 			</div>
 			<div id="txTime" class="col-3 d-flex justify-content-end">
 			</div>
 		</div>
 
-		<div class="row w-100">
-			<div class="col-md-6 div-cell-dark">
+		<div class="row w-100 two-column-holder-top-flat-md">
+			<div class="col-md-6 div-cell-dark border-top-flat">
 				<div class="row w-100">
 					<div class="col-6">
 						<p><strong>Size</strong></p>
@@ -39,7 +43,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="col-md-6 div-cell-dark">
+			<div class="col-md-6 div-cell-dark border-top-flat">
 				<div class="row w-100">
 					<div class="col-6">
 						<p><strong>Total coins transferred</strong></p>
@@ -57,16 +61,14 @@
 
 		<br>
 
-		<div class="row w-100">
+		<div class="row w-100 two-column-holder two-column-holder-md">
 			<div class="col-md-6 div-cell-dark p-0">
 				<h2 class="p-3">Inputs</h2>
-				<br>
 				<div id="txInputs">
 				</div>
 			</div>
-			<div class="col-md-6 div-cell-dark p-0">
+			<div class="col-md-6 div-cell-dark p-0 mt-4 mt-md-0">
 				<h2 class="p-3">Outputs</h2>
-				<br>			
 				<div id="txOutputs">
 				</div>
 			</div>
@@ -101,6 +103,6 @@
 {% endblock %}
 
 {% block scripts %}
-		<script src="./scripts/common/prices.js?v=8"></script>
-		<script src="./scripts/transactions.js?v=8"></script>
+		<script src="./scripts/common/prices.js?v=9"></script>
+		<script src="./scripts/transactions.js?v=9"></script>
 {% endblock %}
