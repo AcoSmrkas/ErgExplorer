@@ -1,8 +1,6 @@
 var params = [];
 
-$(function() {
-	readParams();
-});
+readParams();
 
 function readParams() {
 	let hash = window.location.hash;

@@ -3,8 +3,6 @@ var mempoolData = undefined;
 var transactionsData = undefined;
 var tokensContentFull = '';
 var tokensContent = '';
-var mempoolRequestDone = false;
-var transactionsRequestDone = false;
 var formattedResult = '';
 var totalTransactions = 0;
 var valueFields = new Array();
@@ -15,6 +13,12 @@ var mempoolIndexOffset = 0;
 var tokensArray = new Array();
 var initRequestCount = -1;
 var initRequestDone = 0
+var addresses = new Array();
+var addressbook = new Array();
+var mempoolData = undefined;
+var transactionsData = undefined;
+var mempoolRequestDone = false;
+var transactionsRequestDone = false;
 
 $(function() {
 	walletAddress = getWalletAddressFromUrl();	
@@ -29,7 +33,7 @@ $(function() {
 });
 
 function printAddressSummary() {
-	let balanceUrl = API_HOST + 'addresses/' + walletAddress + '/balance/total';
+	let balanceUrl = API_HOST_2 + 'addresses/' + walletAddress + '/balance/total';
 	if (networkType == 'testnet') {
 		balanceUrl = API_HOST + 'api/v1/addresses/' + walletAddress + '/balance/total';
 	}
@@ -185,13 +189,15 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		formattedResult += '<td class="' + ((isTxOut) ? (isWallet2Wallet) ? 'text-danger' : 'text-info' : 'text-success') + '">' + ((isTxOut) ? (isWallet2Wallet) ? 'Out' : 'Smart ' + smartInOutString : 'In') + '</td>';
 		
 		//From
-		formattedResult += '<td><span class="d-lg-none"><strong>From: </strong></span><a href="' + getWalletAddressUrl(fromAddress) + '" >' + formatAddressString(fromAddress, 10) + '</a></td>';
+		addAddress(fromAddress);
+		formattedResult += '<td><span class="d-lg-none"><strong>From: </strong></span><a class="address-string" addr="' + fromAddress + '" href="' + getWalletAddressUrl(fromAddress) + '" >' + (getOwner(fromAddress) == undefined ? formatAddressString(fromAddress, 10) : getOwner(fromAddress)) + '</a></td>';
 		
 		//To
-		formattedResult += '<td><span class="d-lg-none"><strong>To: </strong></span><a href="' + getWalletAddressUrl(toAddress) + '">' + formatAddressString(toAddress, 10) + '</a></td>';
+		addAddress(toAddress);
+		formattedResult += '<td><span class="d-lg-none"><strong>To: </strong></span><a class="address-string" addr="' + toAddress +'" href="' + getWalletAddressUrl(toAddress) + '">' + (getOwner(toAddress) == undefined ? formatAddressString(toAddress, 10) : getOwner(toAddress)) + '</a></td>';
 
 		//Status
-		if (networkType == 'testnet') {
+		if (item.numConfirmations == undefined) {
 			item.numConfirmations = item.confirmationsCount;
 		}
 
@@ -381,57 +387,67 @@ function hideNfts(e) {
 }
 
 function printTransactions() {
-	if (offset == 0) {
-		getMempoolData()
-	} else {
-		mempoolRequestDone = true;
-	}
+    if (offset == 0) {
+        getMempoolData()
+    } else {
+        mempoolRequestDone = true;
+    }
 
-	getTransactionsData();
+    getTransactionsData();
 }
 
 function getMempoolData() {
-	let mempoolUrl = API_HOST_2 + 'mempool/transactions/byAddress/' + walletAddress;
+    let mempoolUrl = API_HOST_2 + 'mempool/transactions/byAddress/' + walletAddress;
 
-	if (networkType == 'testnet') {
-		mempoolUrl = API_HOST_2 + 'api/v1/mempool/transactions/byAddress/' + walletAddress
-	}
+    if (networkType == 'testnet') {
+        mempoolUrl = API_HOST_2 + 'api/v1/mempool/transactions/byAddress/' + walletAddress
+    }
 
-	let jqxhr = $.get(mempoolUrl, function(data) {
-    		mempoolData = data;
+    let jqxhr = $.get(mempoolUrl, function(data) {
+        mempoolData = data;
 
-   			totalTransactions += mempoolData.total;
-   			formattedResult += getFormattedTransactionsString(mempoolData, true);
-        })
-        .fail(function() {
-        	console.log('Mempool transactions fetch failed.');
-        })
-        .always(function() {
-        	mempoolRequestDone = true;
-        	onMempoolAndTransactionsDataFetched();
-        });
+       totalTransactions += mempoolData.total;
+       formattedResult += getFormattedTransactionsString(mempoolData, true);
+               })
+    .fail(function() {
+        console.log('Mempool transactions fetch failed.');
+    })
+    .always(function() {
+        mempoolRequestDone = true;
+        onMempoolAndTransactionsDataFetched();
+    });
 }
 
 function getTransactionsData() {
-	var jqxhr = $.get(API_HOST + 'addresses/' + walletAddress + '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE, function(data) {
-        	transactionsData = data;
-        	totalTransactions += transactionsData.total;
+    var jqxhr = $.get(API_HOST_2 + 'addresses/' + walletAddress + '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE, function(data) {
+            transactionsData = data;
+            totalTransactions += transactionsData.total;
 
-        	formattedResult += getFormattedTransactionsString(transactionsData, false);
+            formattedResult += getFormattedTransactionsString(transactionsData, false);
 
-			setupPagination(transactionsData.total);
+            setupPagination(transactionsData.total);
         })
         .fail(function() {
             console.log('Transactions fetch failed.');
         })
         .always(function() {
-        	transactionsRequestDone = true;
-        	onMempoolAndTransactionsDataFetched();
+            transactionsRequestDone = true;
+            onMempoolAndTransactionsDataFetched();
         });
 }
 
 function onMempoolAndTransactionsDataFetched() {
-	if (!mempoolRequestDone || !transactionsRequestDone) return;
+    if (!mempoolRequestDone || !transactionsRequestDone) {
+		return;
+	}
+
+	totalTransactions += mempoolData.total;
+	totalTransactions += transactionsData.total;
+
+	formattedResult += getFormattedTransactionsString(mempoolData, true);
+	formattedResult += getFormattedTransactionsString(transactionsData, false);
+
+	setupPagination(transactionsData.total);
 
 	$('#totalTransactions').html('<strong>Total transactions:</strong> ' + totalTransactions);
 
@@ -441,6 +457,8 @@ function onMempoolAndTransactionsDataFetched() {
 	}
 
 	$('#txLoading').hide();
+
+	getAddressesInfo();
 }
 
 function getOfficialExplorereAddressUrl(address) {
@@ -616,7 +634,6 @@ function hideIssuedNfts(e) {
 	e.preventDefault();
 }
 
-//https://api.ergopad.io/vesting/v2/
 function getErgopadVesting() {
 	$.ajax({
 	    type: 'POST',
@@ -653,7 +670,6 @@ function getErgopadVesting() {
 	});
 }
 
-//https://api.ergopad.io/staking/staked-all/
 function getErgopadStaking() {
 	$.ajax({
 	    type: 'POST',
@@ -707,4 +723,40 @@ function getAddressInfo() {
 		$('#verifiedOwner').html(html);
 		$('#verifiedOwnerHolder').show();
 	});
+}
+
+function getAddressesInfo() {
+	console.log(addresses);
+
+	var jqxhr = $.post(ERGEXPLORER_API_HOST + 'addressbook/getAddressesInfo',
+		{'addresses' : addresses},
+	function (data) {
+		if (data.total == 0) return;
+
+		addressbook = data.items;
+
+		$('.address-string').each(function(index) {
+			$(this).html(getOwner($(this).attr('addr')));
+		});
+	});
+}
+
+function addAddress(address) {
+	for (let i = 0; i < addresses.length; i++) {
+		if (addresses[i] == address) {
+			return;
+		}
+	}
+
+	addresses.push(address);
+}
+
+function getOwner(address) {
+	for (var i = 0; i < addressbook.length; i++) {
+		if (addressbook[i]['address'] == address) {
+			return addressbook[i]['name'];
+		}
+	}
+
+	return undefined;
 }

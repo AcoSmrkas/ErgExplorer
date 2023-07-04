@@ -9,7 +9,18 @@ var hideBurned = false;
 var orderBy = false;
 var setup = true;
 
+updateUi();
+
 $(function() {
+    printIssuedTokens();
+
+    $('#searchType').val('2');
+    $('#searchInput').val(query);
+
+    setup = false;
+});
+
+function updateUi() {
     query = params['query'];
     if (query == undefined) {
         query = '';
@@ -23,13 +34,7 @@ $(function() {
     setupTypeSelect();
     setupToggleBurnedTokens();
     setupToggleUtilityTokens();
-    printIssuedTokens();
-
-    $('#searchType').val('2');
-    $('#searchInput').val(query);
-
-    setup = false;
-});
+}
 
 function printIssuedTokens() {
     let tokensSearchUrl = ERGEXPLORER_API_HOST + 'tokens/search?limit=' + ITEMS_PER_PAGE + '&offset=' + offset + '&query=' + query + '&type=' + tokenType + '&hideUtility=' + hideUtility + '&order=' + orderBy + '&hideBurned=' + hideBurned;
@@ -80,7 +85,7 @@ function printIssuedTokens() {
                 formattedResult += '<td><span class="d-lg-none"><strong>Type: </strong></span>' + type + '</td>';
 
                 //Emission amount
-        		formattedResult += '<td><span class="d-lg-none"><strong>Amount: </strong></span>' + formatValue(tokenData.data.emissionAmount) + '</td>';
+        		formattedResult += '<td><span class="d-lg-none"><strong>Amount: </strong></span>' + formatValue(getAssetValue(tokenData.data.emissionAmount, tokenData.data.decimals)) + '</td>';
 
                 //Description
                 let asciiArt = isAsciiArt(tokenData.data.description);

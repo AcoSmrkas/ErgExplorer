@@ -1,22 +1,11 @@
-const FEE_ADDRESS = '2iHkR7CWvD1R4j1yZg5bkeDRQavjAaVPeTDFGGLZduHyfWMuYpmhHocX8GJoaieTx78FntzJbCBVL6rf96ocJoZdmWBL2fci7NqWgAirppPQmZ7fN9V6z13Ay6brPriBKYqLp1bT2Fk4FkFLCfdPpe';
-const DONATION_ADDRESS = '9hiaAS3pCydq12CS7xrTBBn2YTfdfSRCsXyQn9KZHVpVyEPk9zk';
-//https://api.ergoplatform.com/
-//https://api.ergo.aap.cornell.edu/
-var API_HOST = 'https://api.ergo.aap.cornell.edu/api/v1/';
-var API_HOST_2 = 'https://api.ergoplatform.com/api/v1/';
-//https://api.ergexplorer.com/
-//https://localhost/ergexplorer-api/
-var ERGEXPLORER_API_HOST = 'https://api.ergexplorer.com/';
-const ERG_DECIMALS = 9;
-const IS_DEV_ENVIRONMENT = window.location.host == 'localhost:9000';
-
 var qrCode = null;
 var networkType = 'mainnet';
+
+setupMainnetTestnet();
 
 $(function() {
 	$('#searchInput').val('');
 
-	setupMainnetTestnet();
 	setOfficialLink();
 
 	if (IS_DEV_ENVIRONMENT) {
@@ -320,6 +309,7 @@ function setupMainnetTestnet() {
 		$('#networkType').addClass('erg-span-important');
 		localStorage.setItem('network', 'testnet');
 		API_HOST = API_HOST_2 = 'https://api-testnet.ergoplatform.com/';
+		FEE_ADDRESS = 'Bf1X9JgQTUtgntaer91B24n6kP8L2kqEiQqNf1z97BKo9UbnW3WRP9VXu8BXd1LsYCiYbHJEdWKxkF5YNx5n7m31wsDjbEuB3B13ZMDVBWkepGmWfGa71otpFViHDCuvbw1uNicAQnfuWfnj8fbCa4';
 	} else {
 		$('#networkType').html('Mainnet')
 	}

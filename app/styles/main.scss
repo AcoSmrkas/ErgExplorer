@@ -531,10 +531,6 @@ select, option {
 	color: var(--text-light) !important;
 }
 
-#networkType {
-	  color: rgba(250,250,250,.55) !important;
-}
-
 [data-bs-theme="light"] {
 	.erg-span {
 		color: var(--orange-color) !important;
@@ -544,11 +540,11 @@ select, option {
 		color: var(--text-color);
 	}
 
-	body, a, select, select:active, select:focus, select:hover, #networkType, .form-control {
+	body, a, select, select:active, select:focus, select:hover, .form-control, #dropdown > a::after {
 		color: var(--text-color) !important;
 	}
 
-	a:hover, .ticker-url:hover, .ticker-url:hover > span, .ticker-url:hover > span > span, .nav-link:hover, #networkType:hover, #networkType:focus {
+	a:hover, .ticker-url:hover, .ticker-url:hover > span, .ticker-url:hover > span > span, .nav-link:hover, #networkType:hover, #networkType:focus, #dropdown:hover > a::after {
 		color: var(--orange-color) !important;
 	}
 

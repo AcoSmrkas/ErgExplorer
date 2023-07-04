@@ -15,10 +15,10 @@ html[data-bs-theme="dark"] {
 
 html[data-bs-theme="light"] {
 	--text-color: #444;
-	--striped-1: #e3e3e3;
+	--striped-1: #e6e6e6;
 	--forms-bg: #FFF;
 	--borders: #CCC;
 	--text-light: #444;
 	--text-strong: #222;
-	--background: #EEE;
+	--background: #ccc;
 }
