@@ -32,16 +32,7 @@ function printAddresses() {
 
                      //Type
                     let type = items[i].type;
-                    let spanClass = '';
-                    switch (type) {
-                        case 'Exchange':
-                            spanClass = 'text-success';
-                            break;
-
-                        case 'Service':
-                            spanClass = 'text-warning';
-                            break;
-                    }
+                    let spanClass = getOwnerTypeClass(type);
 
                     formattedResult += '<p><strong>Type: </strong><span class="' + spanClass + '">' + type + '</span></p>';
 

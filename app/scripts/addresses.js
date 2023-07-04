@@ -154,9 +154,11 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		let fromAddress = ((isTxOut) ? walletAddress : item.inputs[0].address);
 		let toAddress = ((isTxOut) ? item.outputs[0].address : walletAddress);
 		let isSmart = isTxOut && !isWallet2Wallet;		
-		let outputsAddress = (isSmart ? walletAddress : toAddress);
+		let smartAddress = walletAddress.length > 100
+		let outputsAddress = (isSmart && !smartAddress ? walletAddress : toAddress);
 		let ownAddressCount = 0;
 		let smartOut = false;
+
 		if (isSmart) {
 			for (let j = 0; j < item.outputs.length; j++) {
 				if (item.outputs[j].address == walletAddress) {
@@ -405,10 +407,8 @@ function getMempoolData() {
 
     let jqxhr = $.get(mempoolUrl, function(data) {
         mempoolData = data;
-
-       totalTransactions += mempoolData.total;
-       formattedResult += getFormattedTransactionsString(mempoolData, true);
-               })
+		totalTransactions += mempoolData.total;
+    })
     .fail(function() {
         console.log('Mempool transactions fetch failed.');
     })
@@ -419,30 +419,23 @@ function getMempoolData() {
 }
 
 function getTransactionsData() {
-    var jqxhr = $.get(API_HOST_2 + 'addresses/' + walletAddress + '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE, function(data) {
-            transactionsData = data;
-            totalTransactions += transactionsData.total;
-
-            formattedResult += getFormattedTransactionsString(transactionsData, false);
-
-            setupPagination(transactionsData.total);
-        })
-        .fail(function() {
-            console.log('Transactions fetch failed.');
-        })
-        .always(function() {
-            transactionsRequestDone = true;
-            onMempoolAndTransactionsDataFetched();
-        });
+var jqxhr = $.get(API_HOST_2 + 'addresses/' + walletAddress + '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE, function(data) {
+        transactionsData = data;
+		totalTransactions += transactionsData.total;
+    })
+    .fail(function() {
+        console.log('Transactions fetch failed.');
+    })
+    .always(function() {
+        transactionsRequestDone = true;
+        onMempoolAndTransactionsDataFetched();
+    });
 }
 
 function onMempoolAndTransactionsDataFetched() {
     if (!mempoolRequestDone || !transactionsRequestDone) {
 		return;
 	}
-
-	totalTransactions += mempoolData.total;
-	totalTransactions += transactionsData.total;
 
 	formattedResult += getFormattedTransactionsString(mempoolData, true);
 	formattedResult += getFormattedTransactionsString(transactionsData, false);
@@ -712,12 +705,12 @@ function getAddressInfo() {
 		let title = data.items[0].name;
 		let type = ''
 		if (data.items[0].type != '') {
-			type += ' (' + data.items[0].type + ')';
+			type += ' (<span class="' + getOwnerTypeClass(data.items[0].type) + '">' + data.items[0].type + '</span>)';
 		}
 
 		let html = title;
 		if (data.items[0].name != '') {
-			html = '<a href="' + data.items[0].url + '" target="_new"><span class="text-success">' + title + '</span></a>' + type;
+			html = '<a href="' + data.items[0].url + '" target="_new"><span class="">' + title + '</span></a>' + type;
 		}
 
 		$('#verifiedOwner').html(html);
@@ -726,8 +719,6 @@ function getAddressInfo() {
 }
 
 function getAddressesInfo() {
-	console.log(addresses);
-
 	var jqxhr = $.post(ERGEXPLORER_API_HOST + 'addressbook/getAddressesInfo',
 		{'addresses' : addresses},
 	function (data) {
@@ -754,7 +745,13 @@ function addAddress(address) {
 function getOwner(address) {
 	for (var i = 0; i < addressbook.length; i++) {
 		if (addressbook[i]['address'] == address) {
-			return addressbook[i]['name'];
+			let owner = addressbook[i]['name'];
+
+			if (addressbook[i]['urltype'] != '') {
+				owner += ' (' + addressbook[i]['urltype'] + ')';
+			}
+
+			return owner;
 		}
 	}
 

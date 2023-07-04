@@ -487,20 +487,22 @@ function nFormatter(num, digits) {
 
 function sortTokens(tokens) {
 	let tokensArray = tokens.sort((a, b) => {
-		return a.amount / Math.pow(10, a.decimals) < b.amount / Math.pow(10, b.decimals);
+		let aAmount = a.amount / Math.pow(10, a.decimals);
+		let bAmount = b.amount / Math.pow(10, b.decimals);
+
+		if (aAmount === bAmount) return 0;
+
+		return aAmount > bAmount ? -1 : 1;
 	});
 
-	let tempArray = new Array();
-	for (let i = 0; i < tokensArray.length; i++) {
-		if (tokensArray[i].amount > 1000000000000) {
-			tempArray.push(tokensArray[i]);
-		}
-	}
+	tokensArray.sort((a, b) => {
+		let aAmount = a.amount / Math.pow(10, a.decimals);
+		let bAmount = b.amount / Math.pow(10, b.decimals);
 
-	for (let i = 0; i < tempArray.length; i++) {
-		tokensArray.shift();
-		tokensArray.push(tempArray[i]);
-	}
+		if (aAmount > 10000000000) return 1;
+	    if (bAmount > 10000000000) return -1;
+	    return 0;
+	});
 
 	return tokensArray
 }
@@ -523,4 +525,20 @@ function switchTheme(e) {
 	localStorage.setItem('theme', theme);
 
 	updateTheme();
+}
+
+function getOwnerTypeClass(type) {
+    switch (type) {
+        case 'Exchange':
+            return 'text-success';
+
+        case 'Service':
+            return 'text-warning';
+
+        case 'NFT Artist':
+        	return 'text-info';
+
+        default:
+        	return '';
+    }
 }
