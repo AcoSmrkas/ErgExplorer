@@ -12,9 +12,7 @@ var issuedNftsCount = 0;
 var mempoolIndexOffset = 0;
 var tokensArray = new Array();
 var initRequestCount = -1;
-var initRequestDone = 0
-var addresses = new Array();
-var addressbook = new Array();
+var initRequestDone = 0;
 var mempoolData = undefined;
 var transactionsData = undefined;
 var mempoolRequestDone = false;
@@ -716,44 +714,4 @@ function getAddressInfo() {
 		$('#verifiedOwner').html(html);
 		$('#verifiedOwnerHolder').show();
 	});
-}
-
-function getAddressesInfo() {
-	var jqxhr = $.post(ERGEXPLORER_API_HOST + 'addressbook/getAddressesInfo',
-		{'addresses' : addresses},
-	function (data) {
-		if (data.total == 0) return;
-
-		addressbook = data.items;
-
-		$('.address-string').each(function(index) {
-			$(this).html(getOwner($(this).attr('addr')));
-		});
-	});
-}
-
-function addAddress(address) {
-	for (let i = 0; i < addresses.length; i++) {
-		if (addresses[i] == address) {
-			return;
-		}
-	}
-
-	addresses.push(address);
-}
-
-function getOwner(address) {
-	for (var i = 0; i < addressbook.length; i++) {
-		if (addressbook[i]['address'] == address) {
-			let owner = addressbook[i]['name'];
-
-			if (addressbook[i]['urltype'] != '') {
-				owner += ' (' + addressbook[i]['urltype'] + ')';
-			}
-
-			return owner;
-		}
-	}
-
-	return undefined;
 }

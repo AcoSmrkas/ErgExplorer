@@ -51,7 +51,6 @@ function getNftInfo(tokenId, callback) {
 				onlyNft: true,
 				ids: [tokenId]
 			}, function(data) {
-			console.log(data);
 			let nft = null;
 
 			if (data.total > 0) {

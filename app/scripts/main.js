@@ -1,5 +1,7 @@
 var qrCode = null;
 var networkType = 'mainnet';
+var addresses = new Array();
+var addressbook = new Array();
 
 setupMainnetTestnet();
 
@@ -151,9 +153,6 @@ function formatErgValueString(value, maxDecimals = 4) {
     }
 
 	return '<strong title="' + ergValue + '"><span class="text-white">' + ergValue.toLocaleString('en-US', { maximumFractionDigits: maxDecimals, minimumFractionDigits: minimumFractionDigits }) + '</span></strong> ERG';
-
-	// icon, looks fugly, will hold
-	// ' + '<img style="display: none;" onload="onTokenIconLoad(this)"  class="token-icon" src="https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/0000000000000000000000000000000000000000000000000000000000000000.svg"/>';
 }
 
 function formatDateString(dateString) {
@@ -541,4 +540,45 @@ function getOwnerTypeClass(type) {
         default:
         	return '';
     }
+}
+
+//Addressbook
+function getAddressesInfo() {
+	var jqxhr = $.post(ERGEXPLORER_API_HOST + 'addressbook/getAddressesInfo',
+		{'addresses' : addresses},
+	function (data) {
+		if (data.total == 0) return;
+
+		addressbook = data.items;
+
+		$('.address-string').each(function(index) {
+			$(this).html(getOwner($(this).attr('addr')));
+		});
+	});
+}
+
+function addAddress(address) {
+	for (let i = 0; i < addresses.length; i++) {
+		if (addresses[i] == address) {
+			return;
+		}
+	}
+
+	addresses.push(address);
+}
+
+function getOwner(address) {
+	for (var i = 0; i < addressbook.length; i++) {
+		if (addressbook[i]['address'] == address) {
+			let owner = addressbook[i]['name'];
+
+			if (addressbook[i]['urltype'] != '') {
+				owner += ' (' + addressbook[i]['urltype'] + ')';
+			}
+
+			return owner;
+		}
+	}
+
+	return undefined;
 }

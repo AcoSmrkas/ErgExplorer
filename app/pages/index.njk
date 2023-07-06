@@ -69,6 +69,26 @@
 			<h5 style="font-size:1em" class="text-light">Max Supply: <span id="ergTotal"></span></h2>
 		</div>
 	</div>
+	 <div id="txView" style="display: none" class="row w-100">
+			<br>
+			<h2>Latest big transactions</h2>
+			<br>
+			<table class="table table-dark table-striped">
+				<thead>
+					<tr>
+						<th scope="col">Tx</th>
+						<th scope="col" style="min-width: 156px">Time</th>
+						<th scope="col">From</th>
+						<th scope="col">To</th>
+						<th scope="col">Value</th>
+					</tr>
+				</thead>
+
+				<tbody id="transactionsTableBody">
+
+				</tbody>
+			</table>
+		</div>
 	<br>
 	<div class="row w-100 p-0">		
 		<div class="col-md-12 m-0 div-cell-dark p-2">
@@ -101,11 +121,14 @@
 						<div class="col-6"><strong>Total Transaction Fees</strong></div>
 						<div id="statsTotalTransactionFees" class="col"></div>
 					</div>
+					<!--
 					<hr class="my-1">
 					<div class="row w-100 p-1">
 						<div class="col-6"><strong>Total Output Volume</strong></div>
 						<div id="statsTotalOutputVolume" class="col"></div>
 					</div>
+					-->
+					<br>
 					</div>
 				</div>
 				<div id="statsHolderRight" class="col-md-6 p-0">

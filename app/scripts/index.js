@@ -8,6 +8,7 @@ $(function() {
 function onGotPrices() {
     getProtocolInfo();
     getStats();
+	getWhaleTxs();
 
     if (gotPrices != undefined && gotPrices) {
     	$('#ergPrice').html('$' + formatValue(prices['ERG'], 2));
@@ -102,6 +103,48 @@ function setupTicker() {
 		}, tickerMessages);
 }
 
+function getWhaleTxs() {
+	if (networkType == 'testnet') {
+		return;
+	}
+
+	var jqxhr = $.get(ERGEXPLORER_API_HOST + 'transactions/getWhaleTxs',
+	function(data) {
+		let formattedResult = '';
+		let items = data.items;
+
+		for (var i = 0; i < items.length; i++) {
+			let item = items[i];
+
+			formattedResult += '<tr>';
+
+			//Tx
+			formattedResult += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionsUrl(item.txid) + '"><i class="fas fa-link text-info"></i></a></td>';
+			
+			//Time
+			formattedResult += '<td><span class="d-lg-none"><strong>Time: </strong></span>' + formatDateString(parseInt(item.time)) + '</td>';
+
+			//From
+			let fromAddress = item.fromaddress;
+			addAddress(fromAddress);
+			formattedResult += '<td><span class="d-lg-none"><strong>From: </strong></span><a class="address-string" addr="' + fromAddress + '" href="' + getWalletAddressUrl(fromAddress) + '" >' + (getOwner(fromAddress) == undefined ? formatAddressString(fromAddress, 10) : getOwner(fromAddress)) + '</a></td>';
+		
+			//To
+			let toAddress = item.toaddress;
+			addAddress(toAddress);
+			formattedResult += '<td><span class="d-lg-none"><strong>To: </strong></span><a class="address-string" addr="' + toAddress +'" href="' + getWalletAddressUrl(toAddress) + '">' + (getOwner(toAddress) == undefined ? formatAddressString(toAddress, 10) : getOwner(toAddress)) + '</a></td>';
+
+			//Value
+			formattedResult += '<td><span class="d-lg-none"><strong>Value: </strong></span>' + formatErgValueString(item.value) + ' <span class="text-light">($' + formatValue(formatAssetDollarPrice(item.value, ERG_DECIMALS, 'ERG'), 2) + ')</span></td></tr>';
+
+			formattedResult += '</tr>';
+		}
+
+		$('#transactionsTableBody').html(formattedResult);
+		$('#txView').show();	
+    });
+}
+
 function getProtocolInfo() {
 	const xhr = new XMLHttpRequest();
 
@@ -154,7 +197,7 @@ function getStats() {
 		$('#statsTotalTransactionFees').html('<p class="text-white">' + formatErgValueString(data.transactionsSummary.totalFee) + ' <span class="text-light">' + formatAssetDollarPriceString(data.transactionsSummary.totalFee, ERG_DECIMALS, 'ERG') + '</span></p>');
 
 		//Total output volume
-		$('#statsTotalOutputVolume').html('<p class="text-white">' + formatErgValueString(data.transactionsSummary.totalOutput) + ' <span class="text-light">' + formatAssetDollarPriceString(data.transactionsSummary.totalOutput, ERG_DECIMALS, 'ERG') + '</span></p>');
+//		$('#statsTotalOutputVolume').html('<p class="text-white">' + formatErgValueString(data.transactionsSummary.totalOutput) + ' <span class="text-light">' + formatAssetDollarPriceString(data.transactionsSummary.totalOutput, ERG_DECIMALS, 'ERG') + '</span></p>');
 
 		//Mining cost
 		//Blocks mined
