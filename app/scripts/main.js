@@ -224,7 +224,7 @@ function formatNftDescription(description) {
 		return description;
 	}
 
-	if (isJson(description)) {
+	if (isJson(description) && isNaN(description)) {
 		let jsonObject = JSON.parse(description);
 		let result = '';
 		result = parseNftJson(jsonObject, result, 0);
