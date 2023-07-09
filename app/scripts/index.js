@@ -9,12 +9,13 @@ function onGotPrices() {
     getProtocolInfo();
     getStats();
 	getWhaleTxs();
+	getPoolStats();
 
     if (gotPrices != undefined && gotPrices) {
     	$('#ergPrice').html('$' + formatValue(prices['ERG'], 2));
 	}
 
-	setupTicker();
+	//setupTicker();
 }
 
 function getNetworkState() {
@@ -27,6 +28,44 @@ function getNetworkState() {
 	var jqxhr = $.get(networkStateUrl, function(data) {
 		$('#blockHeight').html(data.height.toLocaleString('en-US', { maximumFractionDigits: 0, minimumFractionDigits: 0 }));
 		$('#totalTransactions').html(data.maxTxGix.toLocaleString('en-US', { maximumFractionDigits: 0, minimumFractionDigits: 0 }));
+	});
+}
+
+function getPoolStats() {
+	// Get the current Unix timestamp in milliseconds
+	var currentTimestamp = Date.now();
+
+	// Calculate the timestamp for 24 hours ago (subtracting 24 hours in milliseconds)
+	var twentyFourHoursAgoTimestamp = currentTimestamp - (24 * 60 * 60 * 1000);
+	$.get('https://api.spectrum.fi/v1/amm/pools/stats?from=' + twentyFourHoursAgoTimestamp,
+	function (data) {
+		let poolStatsData = data;
+
+		poolStatsData.sort(function (a, b) {
+			if (a.volume.value === b.volume.value) return 0;
+
+			return a.volume.value > b.volume.value ? -1 : 1;
+		});
+
+		let formattedResult = '';
+		for (let i = 0; i < 10; i++) {
+			let poolStat = poolStatsData[i];
+			formattedResult += '<tr>';
+
+			//Token
+			formattedResult += '<td><span class="d-lg-none"><strong>Token: </strong></span><a href="' + getTokenUrl(poolStat.lockedY.id) + '">' + getAssetTitleParams(poolStat.lockedY.id, poolStat.lockedY.ticker, true) + '</a></td>';
+
+			//Price
+			formattedResult += '<td><span class="d-lg-none"><strong>Price: </strong></span>$' + formatValue(prices[poolStat.lockedY.id], 4) + '</td>';
+
+			//Volume
+			formattedResult += '<td><span class="d-lg-none"><strong>Volume: </strong></span>$' + formatValue(poolStat.volume.value, 2) + '</td>';
+
+			formattedResult += '</tr>';
+		}
+
+		$('#tokensTableBody').html (formattedResult);
+		$('#tokenView').show();
 	});
 }
 
@@ -142,6 +181,8 @@ function getWhaleTxs() {
 
 		$('#transactionsTableBody').html(formattedResult);
 		$('#txView').show();	
+
+		getAddressesInfo();
     });
 }
 

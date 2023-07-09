@@ -84,7 +84,8 @@ function onGetNftInfoDone(nftInfo, message) {
 			mintAddress = tokenData.mintWallet;
 		}
 
-		$('#nftMintedAddress').html('<p><a href="' + getWalletAddressUrl(mintAddress) + '">' + mintAddress + '</a></p>');
+		addAddress(mintAddress);
+		$('#nftMintedAddress').html('<p><a class="address-string" addr="' + mintAddress + '" href="' + getWalletAddressUrl(mintAddress) + '">' + mintAddress + '</a></p>');
 
 		$('#nftMintedTransaction').html('<p><a href="' + getTransactionsUrl(tokenData.transactionId) + '">' + tokenData.transactionId + '</a></p>');
 		$('#nftCreationHeight').html('<p><a href="' + getBlockUrl(tokenData.blockId) + '">' + tokenData.creationHeight + '</a></p>');
@@ -187,8 +188,12 @@ function getCurrentAddress() {
 
 		var jqxhr = $.get(API_HOST + 'boxes/byTokenId/' + tokenId + '?offset=' + txOFfset, function(data) {
 			let currentAddress = data.items[0].address;
-			$('#nftCurrentAddress').html('<p><a href="' + getWalletAddressUrl(currentAddress) + '">' + currentAddress + '</a></p>');
+
+			addAddress(currentAddress);
+			$('#nftCurrentAddress').html('<p><a class="address-string" addr="' + currentAddress + '" href="' + getWalletAddressUrl(currentAddress) + '">' + currentAddress + '</a></p>');
 			$('#nftCurrentAddressHolder').show();
+
+			getAddressesInfo();
 		})
 		.fail(function() {
 			console.log('Failed to fetch current address (2).');

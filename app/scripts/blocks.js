@@ -19,6 +19,8 @@ function printBlock() {
 		printBlockTransactions();
 
 		$('#blockDataHolder').show();
+
+		getAddressesInfo();
     })
     .fail(function() {
     	showLoadError('No results matching your query.');

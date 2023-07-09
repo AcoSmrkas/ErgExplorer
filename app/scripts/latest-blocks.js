@@ -5,10 +5,12 @@ $(function() {
 });
 
 function printLatestBlocks() {
-	var jqxhr = $.get(API_HOST + '/blocks?limit=' + ITEMS_PER_PAGE + '&sortBy=height&sortDirection=desc', function(data) {
+	var jqxhr = $.get(API_HOST + '/blocks?limit=' + ITEMS_PER_PAGE + '&sortBy=height&sortDirection=desc&offset=' + offset, function(data) {
 		let formattedResult = '';
 		let totalBlocks = data.total;
 		let items = data.items;
+
+        setupPagination(totalBlocks);
 
 		for (let i = 0; i < items.length; i++) {
     		formattedResult += '<tr>';
@@ -22,8 +24,9 @@ function printLatestBlocks() {
             //Transactions
     		formattedResult += '<td><span class="d-lg-none"><strong>Transactions: </strong></span>' + items[i].transactionsCount + '</td>';
 
-            //Mined by	
-    		formattedResult += '<td><span class="d-lg-none"><strong>Mined by: </strong></span><a href="' + getWalletAddressUrl(items[i].miner.address) + '">' + items[i].miner.name + '</a></td>';	
+            //Mined by
+            addAddress(items[i].miner.address);
+    		formattedResult += '<td><span class="d-lg-none"><strong>Mined by: </strong></span><a class="address-string" addr="' + items[i].miner.address + '" href="' + getWalletAddressUrl(items[i].miner.address) + '">' + items[i].miner.name + '</a></td>';	
 
             //Reward
     		formattedResult += '<td><span class="d-lg-none"><strong>Reward: </strong></span>' + formatErgValueString(items[i].minerReward) + ' <span class="text-light">' + formatAssetDollarPriceString(items[i].minerReward, ERG_DECIMALS, 'ERG') + '</span></td>';
@@ -40,6 +43,8 @@ function printLatestBlocks() {
 		$('#transactionsTableBody').html(formattedResult);
         
         $('#blocksHolder').show();
+
+        getAddressesInfo();
     })
     .fail(function() {
         showLoadError('Failed to fetch latest blocks.');

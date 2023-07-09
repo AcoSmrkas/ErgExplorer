@@ -74,6 +74,8 @@ function printTransaction() {
 		$('#txRawOutput').html(JSON.stringify(data.outputs, null, 4));
 
 		$('#txDataHolder').show();
+
+		getAddressesInfo();
     })
     .fail(function() {
     	showLoadError('No results matching your query.');

@@ -268,18 +268,30 @@ function formatNftDescriptonJson(key, value, indent) {
 }
 
 function getAssetTitle(asset, iconIsToTheLeft) {
+	return getAssetTitleParams(asset.tokenId, asset.name, iconIsToTheLeft);
+}
+
+function getAssetTitleParams(tokenId, name, iconIsToTheLeft) {
 	let imgSrc = '';
-	if (hasIcon(asset.tokenId)) {
-		imgSrc = getIcon(asset.tokenId);
+	if (hasIcon(tokenId)) {
+		imgSrc = getIcon(tokenId);
 	}
 
-	if (asset.tokenId == 'ba553573f83c61be880d79db0f4068177fa75ab7c250ce3543f7e7aeb471a9d2') {
+	if (tokenId == 'ba553573f83c61be880d79db0f4068177fa75ab7c250ce3543f7e7aeb471a9d2') {
 		imgSrc = 'images/tokens/ba553573f83c61be880d79db0f4068177fa75ab7c250ce3543f7e7aeb471a9d2.png';
+	}
+
+	if (tokenId == 'd1d2ae2ac0456aa43550dd4fda45e4f866d523be9170d3a3e4cab43a83926334') {
+		imgSrc = 'https://ergcube.com/uploads/posts/2023-04/gcel1-sp.png';
+	}
+
+	if (tokenId == '91289d5cefb9d78e3ea248d4e9c5b0e3c3de54f64bfae85c0070580961995262') {
+		imgSrc = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/91289d5cefb9d78e3ea248d4e9c5b0e3c3de54f64bfae85c0070580961995262.svg';
 	}
 
 	let iconHtml = '<img style="display: none;" onload="onTokenIconLoad(this)"  class="token-icon" src="' + imgSrc + '"/>';
 
-	return '<a href="' + getTokenUrl(asset.tokenId) + '">' + (iconIsToTheLeft ? iconHtml + ' ' : '') + ((asset.name == '' || asset.name == null) ? formatAddressString(asset.tokenId, 15) : asset.name) + (iconIsToTheLeft ? '' : ' ' + iconHtml) + '</a>';
+	return '<a href="' + getTokenUrl(tokenId) + '">' + (iconIsToTheLeft ? iconHtml + ' ' : '') + ((name == '' || name == null) ? formatAddressString(tokenId, 15) : name) + (iconIsToTheLeft ? '' : ' ' + iconHtml) + '</a>';
 }
 
 function getAssetValue(amount, decimals) {
@@ -389,7 +401,8 @@ function formatInputsOutputs(data) {
 		formattedData += '<div class="row div-cell border-flat">';
 		
 		//Address
-		formattedData += '<div class="col-9"><span><strong>Address: </strong></span><a href="' + getWalletAddressUrl(data[i].address) + '" >' + formatAddressString(data[i].address, 15) + '</a></div>';
+		addAddress(data[i].address);
+		formattedData += '<div class="col-9"><span><strong>Address: </strong></span><a class="address-string" addr="' + data[i].address + '" href="' + getWalletAddressUrl(data[i].address) + '" >' + formatAddressString(data[i].address, 15) + '</a></div>';
 
 		//Status
 		formattedData += '<div class="col-3 d-flex justify-content-end">' + (data[i].spentTransactionId == null ? '<span class="text-danger">Unspent' : '<span class="text-success">Spent') + '</span></div>';
@@ -536,6 +549,9 @@ function getOwnerTypeClass(type) {
 
         case 'NFT Artist':
         	return 'text-info';
+
+        case 'Mining pool':
+        	return 'text-danger';
 
         default:
         	return '';
