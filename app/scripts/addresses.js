@@ -171,11 +171,8 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		}
 
 		//Tx
-		if (isMempool) {
-			formattedResult += '<td></td>';
-		} else {
 			formattedResult += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionsUrl(item.id) + '"><i class="fas fa-link text-info"></i></a></td>';
-		}
+		
 
 		//Timestamp
 		formattedResult += '<td><span class="d-lg-none"><strong>Time: </strong></span>' + formatDateString((isMempool) ? item.creationTimestamp : item.timestamp) + '</td>';

@@ -62,7 +62,7 @@
 		</div>		
 		<hr class="my-3 d-block d-lg-none">
 		<div class="col p-1 ps-lg-3 border-lg-start">
-			<h2 class="erg-span" style="font-size:1.7em">Protocol information</h2>
+			<h2 class="erg-span" style="font-size:1.7em; margin-bottom: 0;">Protocol information</h2>
 			<br>
 			<h5 style="font-size:1em" class="text-light">Version: <span class="text-white" id="ergVersion"></span></h2>
 			<h5 style="font-size:1em" class="text-light">Circulating Supply: <span id="ergSupply"></span></h2>
@@ -76,9 +76,7 @@
 				<tr>
 					<th scope="col">Token</th>
 					<th scope="col">Price</th>
-					<!--
-					<th scope="col">Change</th>
-					-->
+					<th scope="col">Price change</th>
 					<th scope="col">Volume</th>
 				</tr>
 			</thead>
@@ -192,6 +190,6 @@
 
 {% block scripts %}
 	<script src="https://unpkg.com/@sjaakp/telex/dist/telex.js"></script>
-	<script src="./scripts/common/prices.js?v=11"></script>
-	<script src="./scripts/index.js?v=11"></script>
+	<script src="./scripts/common/prices.js?v=12"></script>
+	<script src="./scripts/index.js?v=12"></script>
 {% endblock %}

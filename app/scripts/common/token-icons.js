@@ -1,5 +1,8 @@
 var tokenIcons = [];
 //TokenIconsArrayStart
+tokenIcons['3e0b62c7bc36bc7abf2bf76303722c31788aa579d771e427a0b2c8357da160ba'] = 'https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/3e0b62c7bc36bc7abf2bf76303722c31788aa579d771e427a0b2c8357da160ba.svg';
+tokenIcons['91289d5cefb9d78e3ea248d4e9c5b0e3c3de54f64bfae85c0070580961995262'] = 'https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/91289d5cefb9d78e3ea248d4e9c5b0e3c3de54f64bfae85c0070580961995262.svg';
+tokenIcons['36aba4b4a97b65be491cf9f5ca57b5408b0da8d0194f30ec8330d1e8946161c1'] = 'https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/36aba4b4a97b65be491cf9f5ca57b5408b0da8d0194f30ec8330d1e8946161c1.svg';
 tokenIcons['9dbc8dd9d7ea75e38ef43cf3c0ffde2c55fd74d58ac7fc0489ec8ffee082991b'] = 'https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/9dbc8dd9d7ea75e38ef43cf3c0ffde2c55fd74d58ac7fc0489ec8ffee082991b.svg';
 tokenIcons['003bd19d0187117f130b62e1bcab0939929ff5c7709f843c5c4dd158949285d0'] = 'https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/003bd19d0187117f130b62e1bcab0939929ff5c7709f843c5c4dd158949285d0.svg';
 tokenIcons['1fd6e032e8476c4aa54c18c1a308dce83940e8f4a28f576440513ed7326ad489'] = 'https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/1fd6e032e8476c4aa54c18c1a308dce83940e8f4a28f576440513ed7326ad489.svg';

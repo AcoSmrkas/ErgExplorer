@@ -48,15 +48,21 @@ function getPoolStats() {
 		});
 
 		let formattedResult = '';
+		let ids = ['ERG'];
 		for (let i = 0; i < 10; i++) {
 			let poolStat = poolStatsData[i];
+			ids.push(poolStat.lockedY.id);
+
 			formattedResult += '<tr>';
 
 			//Token
 			formattedResult += '<td><span class="d-lg-none"><strong>Token: </strong></span><a href="' + getTokenUrl(poolStat.lockedY.id) + '">' + getAssetTitleParams(poolStat.lockedY.id, poolStat.lockedY.ticker, true) + '</a></td>';
-
+console.log(prices[poolStat.lockedY.id]);
 			//Price
-			formattedResult += '<td><span class="d-lg-none"><strong>Price: </strong></span>$' + formatValue(prices[poolStat.lockedY.id], 4) + '</td>';
+			formattedResult += '<td><span class="d-lg-none"><strong>Price: </strong></span>$' + formatValue(prices[poolStat.lockedY.id], 5) + '</td>';
+
+			//Change
+			formattedResult += '<td><span class="d-lg-none"><strong>Change: </strong></span><span id="change-' + poolStat.lockedY.id + '"></span></td>';
 
 			//Volume
 			formattedResult += '<td><span class="d-lg-none"><strong>Volume: </strong></span>$' + formatValue(poolStat.volume.value, 2) + '</td>';
@@ -66,6 +72,47 @@ function getPoolStats() {
 
 		$('#tokensTableBody').html (formattedResult);
 		$('#tokenView').show();
+
+		getPriceHistory(ids);
+	});
+}
+
+function getPriceHistory(ids) {
+	$.post('https://api.ergexplorer.com/' + 'tokens/getPriceHistory',
+	{
+		'ids': ids
+	},
+	function(data) {
+		let lastTimestamp = data.items[data.items.length - 1].timestamp;
+
+		for (var i = data.items.length - 1; i >= 0; i--) {
+			let item = data.items[i];
+			if (item.timestamp != lastTimestamp) {
+				break;
+			}
+
+			let oldPrice = item.price;
+			let newPrice = prices[item.tokenid];
+			let classString = 'text-success';
+
+			let difference = (newPrice * 100 / oldPrice) - 100;
+			difference = toFixed(difference, 2);
+
+			if (difference >= 0) {
+				difference = '+' + difference;
+			} else {
+				difference = difference;
+				classString = 'text-danger';
+			}
+
+			if (item.tokenid == 'ERG') {
+				$('#ergPrice').html($('#ergPrice').html() + ' (<span class="' + classString + '">' + difference + '%</span> 24h)');	
+				continue;
+			}
+
+			$('#change-' + item.tokenid).html(difference + '%');
+			$('#change-' + item.tokenid).addClass(classString);
+		}
 	});
 }
 
@@ -166,12 +213,12 @@ function getWhaleTxs() {
 			//From
 			let fromAddress = item.fromaddress;
 			addAddress(fromAddress);
-			formattedResult += '<td><span class="d-lg-none"><strong>From: </strong></span><a class="address-string" addr="' + fromAddress + '" href="' + getWalletAddressUrl(fromAddress) + '" >' + (getOwner(fromAddress) == undefined ? formatAddressString(fromAddress, 10) : getOwner(fromAddress)) + '</a></td>';
+			formattedResult += '<td><span class="d-lg-none"><strong>From: </strong></span>' + (fromAddress == 'N/A' ? 'N/A' : '<a class="address-string" addr="' + fromAddress + '" href="' + getWalletAddressUrl(fromAddress) + '" >' + (getOwner(fromAddress) == undefined ? formatAddressString(fromAddress, 10) : getOwner(fromAddress)) + '</a>') + '</td>';
 		
 			//To
 			let toAddress = item.toaddress;
 			addAddress(toAddress);
-			formattedResult += '<td><span class="d-lg-none"><strong>To: </strong></span><a class="address-string" addr="' + toAddress +'" href="' + getWalletAddressUrl(toAddress) + '">' + (getOwner(toAddress) == undefined ? formatAddressString(toAddress, 10) : getOwner(toAddress)) + '</a></td>';
+			formattedResult += '<td><span class="d-lg-none"><strong>To: </strong></span>' + (toAddress == 'N/A' ? 'N/A' : '<a class="address-string" addr="' + toAddress + '" href="' + getWalletAddressUrl(toAddress) + '" >' + (getOwner(toAddress) == undefined ? formatAddressString(toAddress, 10) : getOwner(toAddress)) + '</a>') + '</td>';
 
 			//Value
 			formattedResult += '<td><span class="d-lg-none"><strong>Value: </strong></span>' + formatErgValueString(item.value) + ' <span class="text-light">($' + formatValue(formatAssetDollarPrice(item.value, ERG_DECIMALS, 'ERG'), 2) + ')</span></td></tr>';

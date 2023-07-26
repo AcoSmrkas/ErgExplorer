@@ -4,18 +4,30 @@ var txId = '';
 $(function() {
 	txId = getWalletAddressFromUrl();
 
-	getPrices(printTransaction);
+	getPrices(onGotPrices);
 
 	setDocumentTitle(txId);
 
     $('#searchType').val('1');
 });
 
-function printTransaction() {
+function onGotPrices() {
+	printTransaction(false);
+}
+
+function printTransaction(mempool) {
 	let txUrl = API_HOST + 'transactions/' + txId;
 
 	if (networkType == 'testnet') {
 		txUrl = API_HOST + 'api/v1/transactions/' + txId;
+	}
+
+	if (mempool) {
+		txUrl = 'https://api.ergoplatform.com/transactions/unconfirmed/' + txId;
+
+		if (networkType == 'testnet') {
+			txUrl = 'https://api-testnet.ergoplatform.com/transactions/unconfirmed/' + txId;
+		}		
 	}
 
 	var jqxhr = $.get(txUrl, function(data) {
@@ -24,7 +36,11 @@ function printTransaction() {
 		$('#txHeader').html('<p><a href="Copy to clipboard!" onclick="copyTransactionAddress(event)">' + data.id + ' &#128203;</a></p>');
 
 		//Time
-		$('#txTime').html('<p>' + formatDateString(data.timestamp) + '</p>');
+		if (mempool) {
+			$('#txTime').html('<p>' + formatDateString(data.creationTimestamp) + '</p>');
+		} else {
+			$('#txTime').html('<p>' + formatDateString(data.timestamp) + '</p>');
+		}
 
 		//Inputs
 		$('#txInputs').html(formatInputsOutputs(data.inputs));
@@ -36,13 +52,27 @@ function printTransaction() {
 		$('#txSize').html(formatKbSizeString(data.size));
 
 		//Date received
-		$('#txReceivedTime').html(formatDateString(data.timestamp));
-		
+		if (mempool) {
+			$('#txReceivedTime').remove();
+			$('#receivedTimeLeft').remove();
+		} else {
+			$('#txReceivedTime').html(formatDateString(data.timestamp));
+		}
+
 		//Inclusion height
-		$('#txIncludedInBlocks').html(data.inclusionHeight);
-		
+		if (mempool) {
+			$('#includedInBlocksLeft').remove();
+			$('#txIncludedInBlocks').remove();
+		} else {
+			$('#txIncludedInBlocks').html('<a href="' + getBlockUrl(data.outputs[0].blockId) + '">' + data.inclusionHeight + '</a>');
+		}
+
 		//Confirmations nr.
-		$('#txConfirmations').html(data.numConfirmations);
+		if (mempool) {
+			$('#txConfirmations').html('<span class="text-warning">Unconfirmed</a>');
+		} else {
+			$('#txConfirmations').html(data.numConfirmations);
+		}
 
 		//Total coins transferred
 		for (let i = 0; i < data.outputs.length; i++) {
@@ -76,12 +106,15 @@ function printTransaction() {
 		$('#txDataHolder').show();
 
 		getAddressesInfo();
+
+        $('#txLoading').hide();
     })
     .fail(function() {
-    	showLoadError('No results matching your query.');
-    })
-    .always(function() {
-        $('#txLoading').hide();
+    	if (mempool) {
+    		showLoadError('No results matching your query.');
+    	} else {
+    		printTransaction(true);
+    	}
     });
 }
 

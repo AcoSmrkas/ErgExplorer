@@ -21,7 +21,7 @@ function printMempool() {
         		formattedResult += '<tr>';
 
                 //Id
-        		formattedResult += '<td><span class="d-lg-none"><strong>Id: </strong></span>' + formatAddressString(items[i].id, 40) + '</td>';
+        		formattedResult += '<td><span class="d-lg-none"><strong>Id: </strong></span><a href="' + getTransactionsUrl(items[i].id) + '">' + formatAddressString(items[i].id, 40) + '</a></td>';
 
                 //Time
         		formattedResult += '<td><span class="d-lg-none"><strong>Time: </strong></span>' + formatDateString(items[i].creationTimestamp) + '</td>';
