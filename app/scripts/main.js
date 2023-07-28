@@ -155,6 +155,12 @@ function formatErgValueString(value, maxDecimals = 4) {
 	return '<strong title="' + ergValue + '"><span class="text-white">' + ergValue.toLocaleString('en-US', { maximumFractionDigits: maxDecimals, minimumFractionDigits: minimumFractionDigits }) + '</span></strong> ERG';
 }
 
+function formatTimeString(dateString, seconds) {
+	const date = new Date(dateString);
+
+	return zeroPad(date.getHours(), 2) + ':' + zeroPad(date.getMinutes(), 2) + (seconds ? ':' + zeroPad(date.getSeconds(), 2) : '');
+}
+
 function formatDateString(dateString) {
 	const date = new Date(dateString);
 
@@ -173,7 +179,24 @@ function formatHashRateString(value) {
 	return (value / 1000000000000).toLocaleString('en-US') + ' TH/s'
 }
 
-function formatValue(value, digits) {
+function formatValue(value, digits, autodigits = false) {
+	if (autodigits) {
+		let temp = value.toString().split('.');
+		if (temp.length > 1) {
+			let realSmall = temp[1].split('-');
+			if (realSmall.length > 1) {
+				digits = parseInt(realSmall[1]) + 1;
+			} else {
+				for (let j = 0; j < temp[1].length; j++) {
+					if (temp[1][j] != '0' && j > 1) {
+						digits = j + 2;
+						break;
+					}
+				}
+			}
+		}
+	}
+
 	return '<span title="' + value.toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: 2 }) + '">' + nFormatter(value, digits) + '</span>';
 }
 
@@ -287,6 +310,10 @@ function getAssetTitleParams(tokenId, name, iconIsToTheLeft) {
 
 	if (tokenId == '91289d5cefb9d78e3ea248d4e9c5b0e3c3de54f64bfae85c0070580961995262') {
 		imgSrc = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/91289d5cefb9d78e3ea248d4e9c5b0e3c3de54f64bfae85c0070580961995262.svg';
+	}
+
+	if (tokenId == '00bd762484086cf560d3127eb53f0769d76244d9737636b2699d55c56cd470bf') {
+		imgSrc = 'https://www.tabbylab.io/upload/tabbyposlogo.png';
 	}
 
 	let iconHtml = '<img style="display: none;" onload="onTokenIconLoad(this)"  class="token-icon" src="' + imgSrc + '"/>';

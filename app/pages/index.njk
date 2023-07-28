@@ -23,7 +23,7 @@
 					<img src="images/logo.png" class="index-card-symbol" width="50">
 				</div>
 				<div class="flex-grow-1">
-					<p>Ergo price</p>
+					<p>ERG price</p>
 					<h2 class="text-white index-card-values" id="ergPrice"></h2>
 				</div>
 			</div>
@@ -70,21 +70,37 @@
 		</div>
 	</div>
 	<div id="tokenView" style="display: none" class="row w-100">
-		<h2 class="subtitle">Latest tokens by volume in 24h</h2>
-		<table class="table table-dark table-striped">
-			<thead>
-				<tr>
-					<th scope="col">Token</th>
-					<th scope="col">Price</th>
-					<th scope="col">Price change</th>
-					<th scope="col">Volume</th>
-				</tr>
-			</thead>
+		<div class="col-md-6">
+			<h2 class="subtitle">Top 10 by volume</h2>
+			<table class="table table-dark table-striped">
+				<thead>
+					<tr>
+						<th scope="col">Token</th>
+						<th scope="col">Volume</th>
+					</tr>
+				</thead>
 
-			<tbody id="tokensTableBody">
+				<tbody id="tokensVolumeTableBody">
 
-			</tbody>
-		</table>
+				</tbody>
+			</table>
+		</div>
+		<div class="col-md-6">
+			<h2 class="subtitle">Top 10 gainers</h2>
+			<table class="table table-dark table-striped">
+				<thead>
+					<tr>
+						<th scope="col">Token</th>
+						<th scope="col">Price</th>
+						<th scope="col">Change</th>
+					</tr>
+				</thead>
+
+				<tbody id="tokensGainersTableBody">
+
+				</tbody>
+			</table>
+		</div>
 	</div>	
 	 <div id="txView" style="display: none" class="row w-100">
 		<h2 class="subtitle">Latest big transactions</h2>
@@ -190,6 +206,6 @@
 
 {% block scripts %}
 	<script src="https://unpkg.com/@sjaakp/telex/dist/telex.js"></script>
-	<script src="./scripts/common/prices.js?v=12"></script>
-	<script src="./scripts/index.js?v=12"></script>
+	<script src="./scripts/common/prices.js?v=13"></script>
+	<script src="./scripts/index.js?v=13"></script>
 {% endblock %}

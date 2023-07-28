@@ -1,14 +1,131 @@
 var tokenData = undefined;
 var tokenId = '';
 var nftType = undefined;
+var decimals = 0;
 
 $(function() {
 	tokenId = getWalletAddressFromUrl();
 
 	getNftInfo(tokenId, onGetNftInfoDone);
+	getPrices(getPriceHistory);
 
 	setDocumentTitle(tokenId);
 });
+
+function getPriceHistory() {
+	$.post(ERGEXPLORER_API_HOST + 'tokens/getPriceHistory',
+		{ids : [tokenId]},
+		function(data) {
+		if (data.items.length == 0) {
+			return;
+		}
+
+		 //Diff
+		 let lastTimestamp = data.items[data.items.length - 1].timestamp;
+
+		for (var i = data.items.length - 1; i >= 0; i--) {
+			let item = data.items[i];
+			if (item.tokenid == tokenId) {
+				let oldPrice = item.price;
+				let newPrice = prices[item.tokenid];
+				console.log(item.tokenid, oldPrice, newPrice, item.timestamp);
+				let difference = (newPrice * 100 / oldPrice) - 100;
+				difference = toFixed(difference, 2);
+
+				let classString = 'text-success';
+				if (difference >= 0) {
+					difference = '+' + difference;
+				} else {
+					difference = difference;
+					classString = 'text-danger';
+				}
+
+				$('#usdChange').html(difference + '%');
+				$('#usdChange').addClass(classString);
+
+				break;
+			}
+		}
+
+		 $('#usdPrice').html('$' + formatValue(prices[tokenId], 2, true));
+
+		 //Chart
+		 		data.items = data.items.reverse();
+		data.items.push({
+			'price': prices[tokenId],
+			'timestamp': Date.now()
+		})
+
+		 new Chart(
+		    document.getElementById('chart'),
+		    {
+		      type: 'line',
+		      options: {
+		      	responsive: true,
+		        animation: true,
+		        fill: false,
+		        borderColor: 'rgba(251, 92, 22, 1)',
+		        plugins: {
+		          legend: {
+		            display: false
+		          },
+		          tooltip: {
+		            enabled: true
+		          }
+		        }
+		      },
+		      data: {
+		        labels: data.items.map(row => formatTimeString(parseInt(row.timestamp), false)),
+		        datasets: [
+		          {
+		            label: '$',
+		            data: data.items.map(row => row.price)
+		          }
+		        ]
+		      }
+		    }
+		  );
+
+		$('#priceInfo').show();
+	});
+}
+
+function getHolders() {
+	$.get('https://api.ergo.watch/lists/addresses/by/balance?token_id=' + tokenId + '&limit=10',
+		function(data) {
+		
+		printHolders(data);
+	}).fail( function(error) {		
+		$.get(ERGEXPLORER_API_HOST + 'tokens/getHolders?id=' + tokenId,
+			function(data) {
+
+			data = data.items;
+			
+			printHolders(data);
+		});
+	});
+}
+
+function printHolders(data) {
+	let formattedResult = '';
+
+	for (let i = 0; i < data.length; i++) {
+		formattedResult += '<tr>';
+
+		//Address
+		addAddress(data[i].address);
+		formattedResult += '<td><span class="d-lg-none"><strong>Address: </strong></span><a class="address-string" addr="' + data[i].address + '" href="' + getWalletAddressUrl(data[i].address) + '">' + formatAddressString(data[i].address) + '</a></td>';	
+
+		//Balance
+		formattedResult += '<td class=""><span class="d-lg-none"><strong>Balance: </strong></span>' + formatAssetValueString(data[i].balance, decimals) + ' ' + getAssetTitleParams(tokenData.id, tokenData.name, false) + ' <span class="text-light">' + formatDollarPriceString(data[i].balance / Math.pow(10, tokenData.decimals) * prices[tokenData.id]) + '</span></td>';
+
+		formattedResult += '</tr>';
+	}
+
+	$('#holdersTableBody').html(formattedResult);
+
+    getAddressesInfo();
+}
 
 function onGetNftInfoDone(nftInfo, message) {
 	$('#txLoading').hide();
@@ -18,7 +135,7 @@ function onGetNftInfoDone(nftInfo, message) {
     	return;
 	}
 
-	let tokenData = nftInfo.data;
+	tokenData = nftInfo.data;
 
 	//Id
 	$('#tokenHeader').html('<p><a href="Copy to clipboard!" onclick="copyTokenAddress(event)">' + tokenData.id + ' &#128203;</a></p>');
@@ -27,6 +144,7 @@ function onGetNftInfoDone(nftInfo, message) {
 	$('#tokenName').html('<p>' + tokenData.name + '</p>');
 
 	//Emission amount
+	decimals = tokenData.decimals;
 	let emissionAmount = getAssetValue(tokenData.emissionAmount, tokenData.decimals);
 	$('#tokenEmissionAmount').html('<p>' + formatValue(emissionAmount) + '</p>');
 
@@ -56,7 +174,7 @@ function onGetNftInfoDone(nftInfo, message) {
 	$('#tokenDescription').html('<pre class="tokenDescriptionPre' + (asciiArt ? ' pre-ascii' : '') + '">' + formatNftDescription(tokenData.description) + '</pre>');
 
 	//Icon
-	$('#tokenIconImg').attr('src', 'https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/' + tokenData.id + '.svg');
+	$('#tokenIconImg').attr('src', 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/' + tokenData.id + '.svg');
 
 	$('#tokenDataHolder').show();
 
@@ -176,6 +294,8 @@ function onGetNftInfoDone(nftInfo, message) {
 
 		$('#tokenHolder').show();
 	}
+
+	getHolders();
 }
 
 function getCurrentAddress() {

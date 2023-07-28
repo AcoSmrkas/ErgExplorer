@@ -69,7 +69,7 @@ function printTransaction(mempool) {
 
 		//Confirmations nr.
 		if (mempool) {
-			$('#txConfirmations').html('<span class="text-warning">Unconfirmed</a>');
+			$('#txConfirmations').html('<span class="text-warning">Pending</a>');
 		} else {
 			$('#txConfirmations').html(data.numConfirmations);
 		}

@@ -155,6 +155,41 @@
 						<div class="col-md-3"><strong><p>Current address</p></strong></div>
 						<div id="nftCurrentAddress" class="col"></div>
 					</div>
+				</div>				
+			</div>
+		</div>
+
+		<br>
+
+		<div id="priceInfo" style="display: none;">		
+			<h3 class="p-2">Finance</h3>
+			<div class="div-cell-dark row w-100 p-0">
+				<div class="col border-lg-start">
+					<div class="row w-100 p-2 div-striped-holder">
+						<div class="col-12 p-1">
+							<p><strong>Price USD:</strong> <span class="text-light" id="usdPrice"></span></p>
+						</div>
+						<div class="col-12 p-1">
+							<p><strong>24h change:</strong> <span class="" id="usdChange"></span></p>
+						</div>
+					</div>
+					<h4 class="p-3">24h price USD</h4>
+					<canvas style="width:100%;padding-bottom:10px;" id="chart"></canvas>
+				</div>
+				<div class="p-0 col-xl-5 col-lg-6 col-md-12 col-sm-12 col-12">
+					<h4 class="p-3">Top 10 holders</h4>
+					<table class="table table-dark table-striped m-0">
+						<thead>
+							<tr>
+								<th scope="col">Address</th>
+								<th class="" scope="col">Balance</th>
+							</tr>
+						</thead>
+
+						<tbody id="holdersTableBody">
+
+						</tbody>
+					</table>
 				</div>
 			</div>
 		</div>
@@ -174,6 +209,8 @@
 {% endblock %}
 
 {% block scripts %}
-	<script src="./scripts/common/nft.js?v=12"></script>
-	<script src="./scripts/token.js?v=12"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.3.1/chart.umd.min.js" integrity="sha512-UcCmTcAm3IkzrswF+WqvwWSjsnv8nsJpDL09KHCETWS0g0WjoIZDRUYXCeHeow1cEij0kqL9OwRwirv/xCQ6GA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="./scripts/common/prices.js?v=13"></script>
+	<script src="./scripts/common/nft.js?v=13"></script>
+	<script src="./scripts/token.js?v=13"></script>
 {% endblock %}

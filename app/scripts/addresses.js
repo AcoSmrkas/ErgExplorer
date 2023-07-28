@@ -17,6 +17,7 @@ var mempoolData = undefined;
 var transactionsData = undefined;
 var mempoolRequestDone = false;
 var transactionsRequestDone = false;
+var mempoolCount = 0;
 
 $(function() {
 	walletAddress = getWalletAddressFromUrl();	
@@ -171,8 +172,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		}
 
 		//Tx
-			formattedResult += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionsUrl(item.id) + '"><i class="fas fa-link text-info"></i></a></td>';
-		
+		formattedResult += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionsUrl(item.id) + '"><i class="fas fa-link text-info"></i></a></td>';
 
 		//Timestamp
 		formattedResult += '<td><span class="d-lg-none"><strong>Time: </strong></span>' + formatDateString((isMempool) ? item.creationTimestamp : item.timestamp) + '</td>';
@@ -403,6 +403,13 @@ function getMempoolData() {
     let jqxhr = $.get(mempoolUrl, function(data) {
         mempoolData = data;
 		totalTransactions += mempoolData.total;
+		mempoolCount = mempoolData.total
+
+		if (mempoolData.total > 0) {
+			Notification.requestPermission((result) => { });
+
+			setInterval(checkMempoolChanged, 60000);
+		}
     })
     .fail(function() {
         console.log('Mempool transactions fetch failed.');
@@ -410,6 +417,24 @@ function getMempoolData() {
     .always(function() {
         mempoolRequestDone = true;
         onMempoolAndTransactionsDataFetched();
+    });
+}
+
+function checkMempoolChanged() {
+	let mempoolUrl = API_HOST_2 + 'mempool/transactions/byAddress/' + walletAddress;
+
+    if (networkType == 'testnet') {
+        mempoolUrl = API_HOST_2 + 'api/v1/mempool/transactions/byAddress/' + walletAddress
+    }
+
+    let jqxhr = $.get(mempoolUrl, function(data) {
+    	if (data.total != mempoolCount) {
+    		const img = 'https://ergexplorer.com/images/logo.png';
+			const text = 'Transaction on address ' + walletAddress + ' has been confirmed on the Ergo blockchain.';
+			const notification = new Notification('Transaction confirmed', { body: text, icon: img });
+
+    		location.reload();
+    	}
     });
 }
 
@@ -650,7 +675,7 @@ function getErgopadVesting() {
 			}
 
 			if (totalVestingPrice > 0) {
-				$('#ergopadVesting').html('<a href="https://www.ergopad.io/dashboard"" target="_new"><img src="https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/d71693c49a84fbbecd4908c94813b46514b18b67a99952dc1e6e4791556de413.svg" class="token-icon"> Ergopad</a> vesting: <span class="text-light">$' + formatValue(totalVestingPrice, 2) + '</span>' + (totalReddemablePrice > 0 ? '<br><img src="https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/d71693c49a84fbbecd4908c94813b46514b18b67a99952dc1e6e4791556de413.svg" class="token-icon" style="visibility:hidden;"> <span style="font-size:0.9em;">Redeemable: $' + formatValue(totalReddemablePrice, 2) + '</span>' : ''));
+				$('#ergopadVesting').html('<a href="https://www.ergopad.io/dashboard"" target="_new"><img src="https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/d71693c49a84fbbecd4908c94813b46514b18b67a99952dc1e6e4791556de413.svg" class="token-icon"> Ergopad</a> vesting: <span class="text-light">$' + formatValue(totalVestingPrice, 2) + '</span>' + (totalReddemablePrice > 0 ? '<br><img src="https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/d71693c49a84fbbecd4908c94813b46514b18b67a99952dc1e6e4791556de413.svg" class="token-icon" style="visibility:hidden;"> <span style="font-size:0.9em;">Redeemable: $' + formatValue(totalReddemablePrice, 2) + '</span>' : ''));
 				$('#ergopadVesting').show();
 				$('#ergopad').show();
 			}
@@ -680,7 +705,7 @@ function getErgopadStaking() {
 
 			if (totalVestingPrice == 0) return;
 
-			$('#ergopadStaking').html('<a href="https://www.ergopad.io/dashboard"" target="_new"><img src="https://raw.githubusercontent.com/ergolabs/ergo-dex-asset-icons/master/light/d71693c49a84fbbecd4908c94813b46514b18b67a99952dc1e6e4791556de413.svg" class="token-icon"> Ergopad</a> staking: <span class="text-light">$' + formatValue(totalVestingPrice, 2) + '</span>');
+			$('#ergopadStaking').html('<a href="https://www.ergopad.io/dashboard"" target="_new"><img src="https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/d71693c49a84fbbecd4908c94813b46514b18b67a99952dc1e6e4791556de413.svg" class="token-icon"> Ergopad</a> staking: <span class="text-light">$' + formatValue(totalVestingPrice, 2) + '</span>');
 			$('#ergopadStaking').show();
 			$('#ergopad').show();
 	    }
