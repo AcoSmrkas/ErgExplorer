@@ -109,7 +109,7 @@ function getPriceHistory() {
 			let difference = item.difference;
 			let classString = 'text-success';
 
-			if (difference >= 0) {
+			if (difference > 0) {
 				difference = '+' + difference;
 			} else {
 				difference = difference;

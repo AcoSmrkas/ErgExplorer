@@ -33,7 +33,7 @@ function getPriceHistory() {
 				difference = toFixed(difference, 2);
 
 				let classString = 'text-success';
-				if (difference >= 0) {
+				if (difference > 0) {
 					difference = '+' + difference;
 				} else {
 					difference = difference;
@@ -114,10 +114,14 @@ function printHolders(data) {
 
 		//Address
 		addAddress(data[i].address);
-		formattedResult += '<td><span class="d-lg-none"><strong>Address: </strong></span><a class="address-string" addr="' + data[i].address + '" href="' + getWalletAddressUrl(data[i].address) + '">' + formatAddressString(data[i].address) + '</a></td>';	
+		formattedResult += '<td><span class="d-lg-none"><strong>Address: </strong></span><a class="address-string" addr="' + data[i].address + '" href="' + getWalletAddressUrl(data[i].address) + '">' + formatAddressString(data[i].address, 10) + '</a></td>';
 
 		//Balance
 		formattedResult += '<td class=""><span class="d-lg-none"><strong>Balance: </strong></span>' + formatAssetValueString(data[i].balance, decimals) + ' ' + getAssetTitleParams(tokenData.id, tokenData.name, false) + ' <span class="text-light">' + formatDollarPriceString(data[i].balance / Math.pow(10, tokenData.decimals) * prices[tokenData.id]) + '</span></td>';
+
+		//Percent
+		let percent = formatValue(data[i].balance * 100 / tokenData.emissionAmount, 2);
+		formattedResult += '<td><span class="d-lg-none"><strong>Percent: </strong></span>' + percent + '%</td>';
 
 		formattedResult += '</tr>';
 	}
