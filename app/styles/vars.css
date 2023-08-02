@@ -4,8 +4,8 @@
 }
 
 html[data-bs-theme="dark"] {
-	--text-color: #AAA;
 	--striped-1: #2a2a2a;
+	--text-color: #AAA;
 	--forms-bg: #333;
 	--borders: #4f4f4f;
 	--text-light: #999;
@@ -14,11 +14,11 @@ html[data-bs-theme="dark"] {
 }
 
 html[data-bs-theme="light"] {
+	--striped-1: #f8f8f8;
 	--text-color: #444;
-	--striped-1: #e6e6e6;
 	--forms-bg: #FFF;
 	--borders: #CCC;
 	--text-light: #444;
 	--text-strong: #222;
-	--background: #ccc;
+	--background: #f8f8f8;
 }

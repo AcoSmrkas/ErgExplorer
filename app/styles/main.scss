@@ -59,6 +59,10 @@ tbody {
 	border-color: var(--borders);
 }
 
+.table-striped > tbody > tr:nth-of-type(2n+1) > * {
+  --bs-table-bg-type: var(--striped-1);
+}
+
 a {
 	text-decoration: none;
 	color: var(--text-color);
@@ -432,6 +436,10 @@ select, option {
 	vertical-align: bottom;
 }
 
+.navbar-toggler {
+	border: none;
+}
+
 .dropdown-menu {
 	min-width: 100px;
 }
@@ -587,5 +595,9 @@ select, option {
 
 	.text-warning {
 		color: #ff7700 !important;
+	}
+
+	.navbar-toggler-icon {
+		filter: sepia(100%) saturate(300%) brightness(0%) hue-rotate(180deg)
 	}
 }

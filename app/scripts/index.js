@@ -84,10 +84,12 @@ function getPriceHistory() {
 			let oldPrice = item.price;
 			let newPrice = prices[item.tokenid];
 			if (item.tokenid == '9a06d9e545a41fd51eeffc5e20d818073bf820c635e2a9d922269913e0de369d') {
-			console.log(item.tokenid, oldPrice, newPrice, item.timestamp);	
 			}
 
 			let difference = (newPrice * 100 / oldPrice) - 100;
+			if (difference === 0) {
+				difference = 0.000001;
+			}
 			difference = toFixed(difference, 2);
 
 			data.items[i].difference = difference;
@@ -99,12 +101,8 @@ function getPriceHistory() {
 			return parseFloat(a.difference) > parseFloat(b.difference) ? -1 : 1;
 		});
 
-		console.log(data.items);
-
-		//Gainers
-		let formattedResult = '';
-		let ergPlus = 0;
-		for (let i = 0; i < 10 + ergPlus; i++) {
+		//Erg
+		for (let i = 0; i < data.items.length; i++) {
 			let item = data.items[i];
 			let difference = item.difference;
 			let classString = 'text-success';
@@ -114,13 +112,31 @@ function getPriceHistory() {
 			} else {
 				difference = difference;
 				classString = 'text-danger';
-			}
+			}	
 
 			if (item.tokenid == 'ERG') {
 				$('#ergPrice').html($('#ergPrice').html() + ' (<span class="' + classString + '">' + difference + '%</span> 24h)');
-				ergPlus = 1;
-				continue;
+
+				data.items.splice(i, 1);
+
+				break;
 			}
+		}
+
+		//Gainers
+		let formattedResult = '';
+		let end = 5;
+		for (let i = 0; i < end; i++) {
+			let item = data.items[i];
+			let difference = item.difference;
+			let classString = 'text-success';
+
+			if (difference >= 0) {
+				difference = '+' + difference;
+			} else {
+				difference = difference;
+				classString = 'text-danger';
+			}			
 
 			$('#change-' + item.tokenid).html(difference + '%');
 			$('#change-' + item.tokenid).addClass(classString);
@@ -153,6 +169,11 @@ function getPriceHistory() {
 			formattedResult += '<td><span class="d-lg-none"><strong>Change: </strong></span><span class="' + classString + '">' + difference + '%</span></td>';
 
 			formattedResult += '</tr>';
+
+			if (i == 4) {
+				i = data.items.length - end - 1;
+				end = data.items.length;
+			}
 		}
 
 		$('#tokensGainersTableBody').html (formattedResult);
@@ -193,7 +214,7 @@ function getWhaleTxs() {
 			formattedResult += '<td><span class="d-lg-none"><strong>To: </strong></span>' + (toAddress == 'N/A' ? 'N/A' : '<a class="address-string" addr="' + toAddress + '" href="' + getWalletAddressUrl(toAddress) + '" >' + (getOwner(toAddress) == undefined ? formatAddressString(toAddress, 10) : getOwner(toAddress)) + '</a>') + '</td>';
 
 			//Value
-			formattedResult += '<td><span class="d-lg-none"><strong>Value: </strong></span>' + formatErgValueString(item.value) + ' <span class="text-light">($' + formatValue(formatAssetDollarPrice(item.value, ERG_DECIMALS, 'ERG'), 2) + ')</span></td></tr>';
+			formattedResult += '<td><span class="d-lg-none"><strong>Value: </strong></span>' + formatAssetValueString(item.value, item.decimals) + ' ' + getAssetTitleParams(item.tokenid, item.ticker, false) + ' <span class="text-light">' + formatDollarPriceString(item.value / Math.pow(10, item.decimals) * prices[item.tokenid]) + '</span></td></tr>';
 
 			formattedResult += '</tr>';
 		}

@@ -28,7 +28,6 @@ function getPriceHistory() {
 			if (item.tokenid == tokenId) {
 				let oldPrice = item.price;
 				let newPrice = prices[item.tokenid];
-				console.log(item.tokenid, oldPrice, newPrice, item.timestamp);
 				let difference = (newPrice * 100 / oldPrice) - 100;
 				difference = toFixed(difference, 2);
 
@@ -50,7 +49,7 @@ function getPriceHistory() {
 		 $('#usdPrice').html('$' + formatValue(prices[tokenId], 2, true));
 
 		 //Chart
-		 		data.items = data.items.reverse();
+ 		data.items = data.items.reverse();
 		data.items.push({
 			'price': prices[tokenId],
 			'timestamp': Date.now()
@@ -91,19 +90,26 @@ function getPriceHistory() {
 }
 
 function getHolders() {
-	$.get('https://api.ergo.watch/lists/addresses/by/balance?token_id=' + tokenId + '&limit=10',
-		function(data) {
-		
-		printHolders(data);
-	}).fail( function(error) {		
-		$.get(ERGEXPLORER_API_HOST + 'tokens/getHolders?id=' + tokenId,
-			function(data) {
+	let timeout = setTimeout(getHoldersFallback, 2000);
 
-			data = data.items;
-			
+	$.ajax({
+		url: 'https://api.ergo.watch/lists/addresses/by/balance?token_id=' + tokenId + '&limit=10',
+		success: function(data) {	
+			if (timeout) {
+				clearTimeout(timeout);
+			}
+
 			printHolders(data);
-		});
+		}
 	});
+}
+
+function getHoldersFallback() {
+	$.get(ERGEXPLORER_API_HOST + 'tokens/getHolders?id=' + tokenId,
+		function(data) {
+			printHolders(data.items);
+		}
+	);
 }
 
 function printHolders(data) {

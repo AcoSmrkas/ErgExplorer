@@ -330,6 +330,10 @@ function getAssetTitleParams(tokenId, name, iconIsToTheLeft) {
 
 	let iconHtml = '<img style="display: none;" onload="onTokenIconLoad(this)"  class="token-icon" src="' + imgSrc + '"/>';
 
+	if (tokenId == 'ERG') {
+		return name;
+	}
+
 	return '<a href="' + getTokenUrl(tokenId) + '">' + (iconIsToTheLeft ? iconHtml + ' ' : '') + ((name == '' || name == null) ? formatAddressString(tokenId, 15) : name) + (iconIsToTheLeft ? '' : ' ' + iconHtml) + '</a>';
 }
 
@@ -476,10 +480,27 @@ function showLoadError(message) {
 }
 
 function showToast() {
-	const toastLiveExample = document.getElementById('liveToast')
-	const toast = new bootstrap.Toast(toastLiveExample)
+	const toastLiveExample = document.getElementById('liveToast');
+	const toast = new bootstrap.Toast(toastLiveExample);
 
-	toast.show()
+	toast.show();
+}
+
+function showNotificationPermissionToast() {
+	const toastLiveExample = document.getElementById('notificationToast');
+	const toast = new bootstrap.Toast(toastLiveExample);
+
+	toast.show();
+}
+
+function hideNotificationPermissionToast() {
+	$('#notificationToast').fadeOut(200);
+}
+
+function requestNotificationPermission(action) {
+	Notification.requestPermission((result) => {
+		action();
+	});
 }
 
 function isJson(str) {
@@ -629,6 +650,8 @@ function getOwner(address) {
 
 			if (addressbook[i]['urltype'] != '') {
 				owner += ' (' + addressbook[i]['urltype'] + ')';
+			} else {
+				owner += ' (' + addressbook[i]['address'].substr(-4) + ')';
 			}
 
 			return owner;

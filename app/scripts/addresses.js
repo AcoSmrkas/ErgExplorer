@@ -18,6 +18,7 @@ var transactionsData = undefined;
 var mempoolRequestDone = false;
 var transactionsRequestDone = false;
 var mempoolCount = 0;
+var mempoolInterval = undefined;
 
 $(function() {
 	walletAddress = getWalletAddressFromUrl();	
@@ -406,9 +407,7 @@ function getMempoolData() {
 		mempoolCount = mempoolData.total
 
 		if (mempoolData.total > 0) {
-			Notification.requestPermission((result) => { });
-
-			setInterval(checkMempoolChanged, 60000);
+			showNotificationPermissionToast();
 		}
     })
     .fail(function() {
@@ -429,13 +428,52 @@ function checkMempoolChanged() {
 
     let jqxhr = $.get(mempoolUrl, function(data) {
     	if (data.total != mempoolCount) {
-    		const img = 'https://ergexplorer.com/images/logo.png';
-			const text = 'Transaction on address ' + walletAddress + ' has been confirmed on the Ergo blockchain.';
-			const notification = new Notification('Transaction confirmed', { body: text, icon: img });
+    		if (Notification.permission === 'granted') {
+	    		const img = 'https://ergexplorer.com/images/logo.png';
+				const text = 'Transaction on address ' + walletAddress + ' has been confirmed.';
+				const notification = new Notification('Transaction confirmed', { body: text, icon: img });
+				
+				notification.onclick = function(x) {
+					window.focus();
+					this.close();
+					location.reload();
+				};
+			}
 
-    		location.reload();
+			if (mempoolInterval != undefined) {
+				clearTimeout(mempoolInterval);
+			}
+
+			if (document.hasFocus()) {
+  				location.reload();
+  			}
     	}
     });
+}
+
+function trackTransaction() {
+	if (Notification.permission !== 'granted') {
+		return;
+	}
+
+	if (mempoolInterval != undefined) {
+		return;
+	}
+
+	mempoolInterval = setInterval(checkMempoolChanged, 30000);
+}
+
+function onNotificationToastYes() {
+	requestNotificationPermission(() => {
+		trackTransaction();
+	});
+
+	hideNotificationPermissionToast();	
+	trackTransaction();
+}
+
+function onNotificationToastNo() {
+	hideNotificationPermissionToast();
 }
 
 function getTransactionsData() {

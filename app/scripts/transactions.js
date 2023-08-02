@@ -1,5 +1,6 @@
 var totalCoinsTransferred = 0;
 var txId = '';
+var mempoolInterval = undefined;
 
 $(function() {
 	txId = getWalletAddressFromUrl();
@@ -31,6 +32,9 @@ function printTransaction(mempool) {
 	}
 
 	var jqxhr = $.get(txUrl, function(data) {
+		if (mempool) {
+			showNotificationPermissionToast();
+		}
 
 		//Id
 		$('#txHeader').html('<p><a href="Copy to clipboard!" onclick="copyTransactionAddress(event)">' + data.id + ' &#128203;</a></p>');
@@ -112,10 +116,66 @@ function printTransaction(mempool) {
     .fail(function() {
     	if (mempool) {
     		showLoadError('No results matching your query.');
+	        $('#txLoading').hide();
     	} else {
     		printTransaction(true);
     	}
     });
+}
+
+function checkMempoolChanged() {
+	let txUrl = API_HOST + 'transactions/' + txId;
+
+	if (networkType == 'testnet') {
+		txUrl = API_HOST + 'api/v1/transactions/' + txId;
+	}
+
+	var jqxhr = $.get(txUrl, function(data) {
+		if (Notification.permission === 'granted') {
+    		const img = 'https://ergexplorer.com/images/logo.png';
+			const text = 'Transaction  ' + txId + ' has been confirmed.';
+			const notification = new Notification('Transaction confirmed', { body: text, icon: img });
+			
+			notification.onclick = function(x) {
+				window.focus();
+				this.close();
+				location.reload();
+			};
+		}
+
+		if (mempoolInterval != undefined) {
+			clearInterval(mempoolInterval);
+		}
+
+		if (document.hasFocus()) {
+  			location.reload();
+  		}
+	});
+}
+
+function trackTransaction() {
+	if (Notification.permission !== 'granted') {
+		return;
+	}
+
+	if (mempoolInterval != undefined) {
+		return;
+	}
+
+	mempoolInterval = setInterval(checkMempoolChanged, 30000);
+}
+
+function onNotificationToastYes() {
+	requestNotificationPermission(() => {
+		trackTransaction();
+	});
+
+	hideNotificationPermissionToast();	
+	trackTransaction();
+}
+
+function onNotificationToastNo() {
+	hideNotificationPermissionToast();
 }
 
 function copyTransactionAddress(e) {

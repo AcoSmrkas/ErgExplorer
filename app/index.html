@@ -230,7 +230,7 @@
 	<div id="tokenView" style="display: none" class="row w-100">
 		<div class="col-md-6">
 			<h2 class="subtitle">Top 10 by volume</h2>
-			<table class="table table-dark table-striped">
+			<table class="table table-striped table-dark">
 				<thead>
 					<tr>
 						<th scope="col">Token</th>
@@ -244,7 +244,7 @@
 			</table>
 		</div>
 		<div class="col-md-6">
-			<h2 class="subtitle">Top 10 gainers</h2>
+			<h2 class="subtitle">Top 5 gainers/losers</h2>
 			<table class="table table-dark table-striped">
 				<thead>
 					<tr>
@@ -370,11 +370,23 @@
     </div>
 </footer>
 
-		<!-- Bootstrap Toast -->
+		<!-- Bootstrap Toast Clipboard -->
 		<div class="toast-container position-fixed bottom-0 end-0 p-3">
 			<div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
 				<div id="toastBody" class="toast-body">
 					Copied to clipboard!
+				</div>
+			</div>
+		</div>
+
+		<!-- Bootstrap Toast Notification -->
+		<div class="toast-container position-fixed bottom-0 end-0 p-3">
+			<div id="notificationToast" data-bs-config='{"autohide":false}' class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+				<div id="notificationToastBody" class="toast-body d-flex align-items-end">
+					<p id="notificationToastText">Transaction pending. Do you want to get notified when it confirms?</p>
+					<br>
+					<button class="btn btn-primary m-1 end-0" onclick="onNotificationToastNo()">No</button> 
+					<button class="btn btn-info m-1 end-0" onclick="onNotificationToastYes()">Yes</button>
 				</div>
 			</div>
 		</div>
@@ -388,14 +400,14 @@
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
 
 		<!-- Custom JavaScript -->
-		<script src="./scripts/common/config.js?v=13"></script>
-		<script src="./scripts/common/token-icons.js?v=13"></script>
-		<script src="./scripts/common/params.js?v=13"></script>
-		<script src="./scripts/main.js?v=13"></script>
+		<script src="./scripts/common/config.js?v=14"></script>
+		<script src="./scripts/common/token-icons.js?v=14"></script>
+		<script src="./scripts/common/params.js?v=14"></script>
+		<script src="./scripts/main.js?v=14"></script>
 		
 	<script src="https://unpkg.com/@sjaakp/telex/dist/telex.js"></script>
-	<script src="./scripts/common/prices.js?v=13"></script>
-	<script src="./scripts/index.js?v=13"></script>
+	<script src="./scripts/common/prices.js?v=14"></script>
+	<script src="./scripts/index.js?v=14"></script>
 
 	</body>
 </html>
