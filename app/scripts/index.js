@@ -83,8 +83,6 @@ function getPriceHistory() {
 
 			let oldPrice = item.price;
 			let newPrice = prices[item.tokenid];
-			if (item.tokenid == '9a06d9e545a41fd51eeffc5e20d818073bf820c635e2a9d922269913e0de369d') {
-			}
 
 			let difference = (newPrice * 100 / oldPrice) - 100;
 			if (difference === 0) {

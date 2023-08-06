@@ -27,6 +27,13 @@ tokenIcons['00bd762484086cf560d3127eb53f0769d76244d9737636b2699d55c56cd470bf'] =
 tokenIcons['18c938e1924fc3eadc266e75ec02d81fe73b56e4e9f4e268dffffcb30387c42d'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/18c938e1924fc3eadc266e75ec02d81fe73b56e4e9f4e268dffffcb30387c42d.svg';
 tokenIcons['01dce8a5632d19799950ff90bca3b5d0ca3ebfa8aaafd06f0cc6dd1e97150e7f'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/01dce8a5632d19799950ff90bca3b5d0ca3ebfa8aaafd06f0cc6dd1e97150e7f.svg';
 tokenIcons['0cd8c9f416e5b1ca9f986a7f10a84191dfb85941619e49e53c0dc30ebf83324b'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/0cd8c9f416e5b1ca9f986a7f10a84191dfb85941619e49e53c0dc30ebf83324b.svg';
+tokenIcons['ba553573f83c61be880d79db0f4068177fa75ab7c250ce3543f7e7aeb471a9d2'] = 'images/tokens/ba553573f83c61be880d79db0f4068177fa75ab7c250ce3543f7e7aeb471a9d2.png';
+tokenIcons['d1d2ae2ac0456aa43550dd4fda45e4f866d523be9170d3a3e4cab43a83926334'] = 'https://ergcube.com/uploads/posts/2023-04/gcel1-sp.png';
+tokenIcons['91289d5cefb9d78e3ea248d4e9c5b0e3c3de54f64bfae85c0070580961995262'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/91289d5cefb9d78e3ea248d4e9c5b0e3c3de54f64bfae85c0070580961995262.svg';
+tokenIcons['00bd762484086cf560d3127eb53f0769d76244d9737636b2699d55c56cd470bf'] = 'https://www.tabbylab.io/upload/tabbyposlogo.png';
+tokenIcons['00b1e236b60b95c2c6f8007a9d89bc460fc9e78f98b09faec9449007b40bccf3'] = 'https://i.ibb.co/rM43NVy/EGIO.png';
+tokenIcons['59ee24951ce668f0ed32bdb2e2e5731b6c36128748a3b23c28407c5f8ccbf0f6'] = 'https://lh5.googleusercontent.com/gfd3pTcy2I7F3th8rwhn6s8GmQa9h7nJDVm_GBxqDhpCQiZHU3E-_XdqEcaD2euj61MClyL0MEZ4kjwy4XiPTv8=w16383';
+tokenIcons['e8b20745ee9d18817305f32eb21015831a48f02d40980de6e849f886dca7f807'] = 'https://raw.githubusercontent.com/RunOnFlux/press/master/Flux_Asset_SVG/Flux%20Logo/Symbol/Round%20Symbol/SVG/Flux_symbol_blue-white.svg';
 //TokenIconsArrayStop
 
 function hasIcon(tokenId) {

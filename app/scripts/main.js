@@ -300,34 +300,6 @@ function getAssetTitleParams(tokenId, name, iconIsToTheLeft) {
 		imgSrc = getIcon(tokenId);
 	}
 
-	//$BASS
-	if (tokenId == 'ba553573f83c61be880d79db0f4068177fa75ab7c250ce3543f7e7aeb471a9d2') {
-		imgSrc = 'images/tokens/ba553573f83c61be880d79db0f4068177fa75ab7c250ce3543f7e7aeb471a9d2.png';
-	}
-
-	//GreasyCEX
-	if (tokenId == 'd1d2ae2ac0456aa43550dd4fda45e4f866d523be9170d3a3e4cab43a83926334') {
-		imgSrc = 'https://ergcube.com/uploads/posts/2023-04/gcel1-sp.png';
-	}
-
-	//Peperg
-	if (tokenId == '91289d5cefb9d78e3ea248d4e9c5b0e3c3de54f64bfae85c0070580961995262') {
-		imgSrc = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/91289d5cefb9d78e3ea248d4e9c5b0e3c3de54f64bfae85c0070580961995262.svg';
-	}
-
-	if (tokenId == '00bd762484086cf560d3127eb53f0769d76244d9737636b2699d55c56cd470bf') {
-		imgSrc = 'https://www.tabbylab.io/upload/tabbyposlogo.png';
-	}
-
-	if (tokenId == '00b1e236b60b95c2c6f8007a9d89bc460fc9e78f98b09faec9449007b40bccf3') {
-		imgSrc = 'https://i.ibb.co/rM43NVy/EGIO.png';
-	}
-
-	//Walrus
-	if (tokenId == '59ee24951ce668f0ed32bdb2e2e5731b6c36128748a3b23c28407c5f8ccbf0f6') {
-		imgSrc = 'https://gateway.pinata.cloud/ipfs/QmZkB935jDaHrBnCtzSAiX8zgt9LaxGcLtLSQfYs2tCqbB';
-	}
-
 	let iconHtml = '<img style="display: none;" onload="onTokenIconLoad(this)"  class="token-icon" src="' + imgSrc + '"/>';
 
 	if (tokenId == 'ERG') {
@@ -416,6 +388,15 @@ function copyToClipboard(e, text) {
 	showToast();
 }
 
+function showCustomToast(text) {
+	$('#customToastBody').html(text);
+
+	const toastLiveExample = document.getElementById('customToast');
+	const toast = new bootstrap.Toast(toastLiveExample);
+
+	toast.show();
+}
+
 function showQRcode(text) {
 	if (qrCode == null) {
 		 qrCode = new QRCode(document.getElementById('qrcode'), {
@@ -477,6 +458,17 @@ function formatInputsOutputs(data) {
 function showLoadError(message) {
 	$('#loadErrorMessage').html(message);
 	$('#loadError').show();
+}
+
+function animateDots() {
+	let dots = $('#dots').html();
+
+	if (dots == '...') { dots = ''; }
+	else if (dots == '..') { dots = '...'; }
+	else if (dots == '.') { dots = '..'; }
+	else if (dots == '') { dots = '.'; }
+
+	$('#dots').html(dots);
 }
 
 function showToast() {

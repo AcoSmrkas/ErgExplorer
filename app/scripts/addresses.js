@@ -19,6 +19,8 @@ var mempoolRequestDone = false;
 var transactionsRequestDone = false;
 var mempoolCount = 0;
 var mempoolInterval = undefined;
+var mempoolTxIds = new Array();
+var txNotification = undefined;
 
 $(function() {
 	walletAddress = getWalletAddressFromUrl();	
@@ -32,11 +34,15 @@ $(function() {
     setupQrCode();
 });
 
-function printAddressSummary() {
-	let balanceUrl = API_HOST_2 + 'addresses/' + walletAddress + '/balance/total';
-	if (networkType == 'testnet') {
-		balanceUrl = API_HOST + 'api/v1/addresses/' + walletAddress + '/balance/total';
+window.onfocus = (event) => {
+	if (txNotification != undefined) {
+		txNotification.close();
+		location.reload();
 	}
+};
+
+function printAddressSummary() {
+	let balanceUrl = getTxsUrl();
 
 	var jqxhr = $.get(balanceUrl,
 	function(data) {
@@ -96,7 +102,7 @@ function printAddressSummary() {
 				$('#finalAssetsBalance').html('<span class="gray-color">Tokens balance:</span> $' + formatValue(totalAssetsValue, 2) + '');
 				$('#finalAssetsBalance').show();
 
-				$('#finalBalance').html('<span class="grey-color">Total:</span> $' + formatValue(ergDollarValue + totalAssetsValue, 2) + '');
+				$('#finalBalance').html('<span class="grey-color"><b>Total:</b></span> $' + formatValue(ergDollarValue + totalAssetsValue, 2) + '');
 				$('#finalBalance').show();
 			}
 
@@ -136,6 +142,15 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 
 		formattedResult += '<tr>';
 
+		//Fee
+		let fee = 0;
+		for (let j = 0; j < item.outputs.length; j++) {
+			if (item.outputs[j].address == FEE_ADDRESS) {
+				fee = item.outputs[j].value;
+			}
+		}
+
+		//From/to address
 		let addressPrefix = '9';
 		if (networkType == 'testnet') {
 			addressPrefix = '3';
@@ -151,8 +166,26 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 			}
 		}
 
-		let fromAddress = ((isTxOut) ? walletAddress : item.inputs[0].address);
-		let toAddress = ((isTxOut) ? item.outputs[0].address : walletAddress);
+		let inputsAddress = 'N/A';
+		if (item.inputs != undefined && item.inputs.length > 0) {
+			inputsAddress = item.inputs[0].address;
+		}
+
+		let fromAddress = ((isTxOut) ? walletAddress : inputsAddress);
+		let toAddress = walletAddress;
+		if (isTxOut) {
+			toAddress = -1;
+			for (let j = 0; j < item.outputs.length; j++) {
+				if (item.outputs[j].address != fromAddress) {
+					toAddress = item.outputs[j].address;
+					break;
+				}
+			}
+			if (toAddress == -1) {
+				toAddress = item.outputs[0].address;
+			}
+		}
+
 		let isSmart = isTxOut && !isWallet2Wallet;		
 		let smartAddress = walletAddress.length > 100
 		let outputsAddress = (isSmart && !smartAddress ? walletAddress : toAddress);
@@ -169,7 +202,34 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 			if (ownAddressCount == 1) {
 				outputsAddress = toAddress;
 				smartOut = true;
-			}			
+			}
+
+			if (fromAddress == toAddress) {
+				let inputValue = -1;
+				for (let j = 0; j < item.inputs.length; j++) {
+					if (item.inputs[j].address == fromAddress) {
+						inputValue = item.inputs[j].value;
+						break;
+					}
+				}
+
+				let outputValue = -1;
+				for (let j = 0; j < item.outputs.length; j++) {
+					if (item.outputs[j].address == toAddress) {
+						outputValue = item.outputs[j].value;
+						break;
+					}
+				}
+
+				if (item.outputs.length > 1) {
+					for (let j = 0; j < item.outputs.length; j++) {
+						if (item.outputs[j].address != fromAddress) {
+							toAddress = outputsAddress = item.outputs[j].address;
+							break;
+						}
+					}
+				}
+			}	
 		}
 
 		//Tx
@@ -182,13 +242,18 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		formattedResult += '<td><span class="d-lg-none"><strong>Block: </strong></span>' + ((isMempool) ? item.outputs[0].creationHeight : '<a href="' + getBlockUrl(item.blockId) + '">' + item.inclusionHeight + '</a>') + '</td>';
 		
 		// In or Out tx.
-		let smartInOutString = (smartOut ? 'Out' : 'In');
+		let smartInOutString = (smartOut ? '<span class="text-danger">Out</span>' : '<span class="text-success">In</span>');
 
-		formattedResult += '<td class="' + ((isTxOut) ? (isWallet2Wallet) ? 'text-danger' : 'text-info' : 'text-success') + '">' + ((isTxOut) ? (isWallet2Wallet) ? 'Out' : 'Smart ' + smartInOutString : 'In') + '</td>';
+		formattedResult += '<td class="' + ((isTxOut) ? (isWallet2Wallet) ? 'text-danger' : 'text-info' : 'text-success') + '">' + ((isTxOut) ? (isWallet2Wallet) ? 'Out' : smartInOutString + ' <span title="Smart Contract interaction. Check transaction link for more details.">(Smart)</span>' : 'In') + '</td>';
 		
 		//From
 		addAddress(fromAddress);
-		formattedResult += '<td><span class="d-lg-none"><strong>From: </strong></span><a class="address-string" addr="' + fromAddress + '" href="' + getWalletAddressUrl(fromAddress) + '" >' + (getOwner(fromAddress) == undefined ? formatAddressString(fromAddress, 10) : getOwner(fromAddress)) + '</a></td>';
+		let formattedAddress = formatAddressString(fromAddress, 10);
+		let addressString = '<a class="address-string" addr="' + fromAddress + '" href="' + getWalletAddressUrl(fromAddress) + '" >' + (getOwner(fromAddress) == undefined ? formattedAddress : getOwner(fromAddress)) + '</a>';
+		if (fromAddress == 'N/A') {
+			addressString = (getOwner(fromAddress) == undefined ? fromAddress : getOwner(fromAddress));
+		}
+		formattedResult += '<td><span class="d-lg-none"><strong>From: </strong></span>' + addressString + '</td>';
 		
 		//To
 		addAddress(toAddress);
@@ -202,61 +267,97 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		formattedResult += '<td><span class="d-lg-none"><strong>Status: </strong></span><span class="' + ((isMempool) ? 'text-warning' : 'text-success' ) + '">' + ((isMempool) ? 'Pending' : 'Confirmed (' + nFormatter(item.numConfirmations) + ')') + '</span></td>';
 		
 		//Fee
-		let fee = 0;
-		for (let j = 0; j < item.outputs.length; j++) {
-			if (item.outputs[j].address == FEE_ADDRESS) {
-				fee = item.outputs[j].value;
-			}
-		}
-
 		formattedResult += '<td><span class="d-lg-none"><strong>Fee: </strong></span>' + formatErgValueString(fee) + '</td>';
 
 		//Value
-		let value = 0;
-		let assets = ' ';
-		let assetsFull = ' ';
-		let tokensToShow = 2;
+		let totalTransferedAssets = {
+			value: 0,
+			assets: {}
+		};
 
 		for (let j = 0; j < item.outputs.length; j++) {
 			if (item.outputs[j].address == outputsAddress) {
 
-				value = item.outputs[j].value;
+				totalTransferedAssets.value += item.outputs[j].value;
 				
 				//Sort
 				let tokensArray = sortTokens(item.outputs[j].assets);
 				
 				for (let k = 0; k < tokensArray.length; k++) {
-					let assetPrice = -1;
-					if (gotPrices && prices[tokensArray[k].tokenId] != undefined) {
-						assetPrice = formatAssetDollarPriceString(tokensArray[k].amount, tokensArray[k].decimals, tokensArray[k].tokenId);
-					}
-
-					let assetsString = '<br><strong><span class="text-white">' + formatAssetValueString(tokensArray[k].amount, tokensArray[k].decimals, 4) + '</span></strong> ' + getAssetTitle(tokensArray[k], false) + (assetPrice == -1 ? '' : ' <span class="text-light">' + assetPrice +'</span>');
-
-					assetsFull += assetsString;
-					
-					if (k > tokensToShow) continue;
-
-					assets += assetsString;
-
-					if (k == tokensToShow && tokensArray.length > tokensToShow + 1) {
-						assets += '<p>...</p><p><strong><a href="#" onclick="showFullValue(event, ' + (i + mempoolIndexOffset) + ')">Show all</a></strong></p>';
+					if (totalTransferedAssets.assets[tokensArray[k].tokenId] == undefined) {
+						totalTransferedAssets.assets[tokensArray[k].tokenId] = tokensArray[k];
+					} else {
+						totalTransferedAssets.assets[tokensArray[k].tokenId].amount += tokensArray[k].amount;
 					}
 				}
-
-				assetsFull += '<p> </p><p><strong><a href="#" onclick="hideFullValue(event, ' + (i + mempoolIndexOffset) + ')">Hide</a></strong></p>';
-
-				break;
 			}
+		}
+
+		for (let j = 0; j < item.inputs.length; j++) {
+			if (item.inputs[j].address == outputsAddress) {
+
+				totalTransferedAssets.value -= item.inputs[j].value;
+				
+				//Sort
+				let tokensArray = sortTokens(item.inputs[j].assets);
+				
+				for (let k = 0; k < tokensArray.length; k++) {
+					if (totalTransferedAssets.assets[tokensArray[k].tokenId] == undefined) {
+						totalTransferedAssets.assets[tokensArray[k].tokenId] = tokensArray[k];
+					} else {
+						totalTransferedAssets.assets[tokensArray[k].tokenId].amount -= tokensArray[k].amount;
+					}
+				}
+			}
+		}
+
+		let assets = ' ';
+		let assetsFull = ' ';
+		let tokensToShow = 2;
+		let keys = Object.keys(totalTransferedAssets.assets)
+		for (let j = 0; j < keys.length; j++) {
+			let asset = totalTransferedAssets.assets[keys[j]];
+
+			if (asset.amount <= 0) {
+				continue;
+			}
+
+			let assetPrice = -1;
+			if (gotPrices && prices[asset.tokenId] != undefined) {
+				assetPrice = formatAssetDollarPriceString(asset.amount, asset.decimals, asset.tokenId);
+			}
+
+			let assetsString = '<br><strong><span class="text-white">' + formatAssetValueString(asset.amount, asset.decimals, 4) + '</span></strong> ' + getAssetTitle(asset, false) + (assetPrice == -1 ? '' : ' <span class="text-light">' + assetPrice +'</span>');
+
+			assetsFull += assetsString;
+			
+			if (j > tokensToShow) continue;
+
+			assets += assetsString;
+
+			if (j == tokensToShow && totalTransferedAssets.assets.length > tokensToShow + 1) {
+				assets += '<p>...</p><p><strong><a href="#" onclick="showFullValue(event, ' + (i + mempoolIndexOffset) + ')">Show all</a></strong></p>';
+			}
+
+			assetsFull += '<p> </p><p><strong><a href="#" onclick="hideFullValue(event, ' + (i + mempoolIndexOffset) + ')">Hide</a></strong></p>';
 		}
 
 		let ergDollarValue = -1
 		if (gotPrices) {
-			ergDollarValue = formatAssetDollarPrice(value, ERG_DECIMALS, 'ERG');
+			ergDollarValue = formatAssetDollarPrice(totalTransferedAssets.value, ERG_DECIMALS, 'ERG');
 		}
 
-		valueFields[i + mempoolIndexOffset] = formatErgValueString(value, 5) + (ergDollarValue == -1 ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>') + assets;
-		valueFieldsFull[i + mempoolIndexOffset] = formatErgValueString(value, 5) + (ergDollarValue == -1 ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>') + assetsFull;
+		let ergValueString = '';
+		if (totalTransferedAssets.value > 0) {
+			ergValueString = formatErgValueString(totalTransferedAssets.value, 5) + (ergDollarValue == -1 ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>')
+formatErgValueString(totalTransferedAssets.value, 5) + (ergDollarValue == -1 ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>');
+		} else {
+			assets = assets.substr(5);
+			assetsFull = assets.substr(5);
+		}
+
+		valueFields[i + mempoolIndexOffset] = ergValueString + assets;
+		valueFieldsFull[i + mempoolIndexOffset] = ergValueString + assetsFull;
 
 		formattedResult += '<td><span class="d-lg-none"><strong>Value: </strong></span><span id="txValue' + (i + mempoolIndexOffset) + '">' + valueFields[i + mempoolIndexOffset] + '</span></td></tr>';
 	}
@@ -395,11 +496,7 @@ function printTransactions() {
 }
 
 function getMempoolData() {
-    let mempoolUrl = API_HOST_2 + 'mempool/transactions/byAddress/' + walletAddress;
-
-    if (networkType == 'testnet') {
-        mempoolUrl = API_HOST_2 + 'api/v1/mempool/transactions/byAddress/' + walletAddress
-    }
+    let mempoolUrl = getMempoolUrl();
 
     let jqxhr = $.get(mempoolUrl, function(data) {
         mempoolData = data;
@@ -407,6 +504,10 @@ function getMempoolData() {
 		mempoolCount = mempoolData.total
 
 		if (mempoolData.total > 0) {
+			for (let i = 0; i < mempoolData.items.length; i++) {
+				mempoolTxIds.push(mempoolData.items[i].id);
+			}
+
 			showNotificationPermissionToast();
 		}
     })
@@ -420,35 +521,107 @@ function getMempoolData() {
 }
 
 function checkMempoolChanged() {
+	let mempoolUrl = getMempoolUrl();
+
+    let jqxhr = $.get(mempoolUrl, function(data) {
+    	let newMempoolCount = data.total;
+
+    	if (newMempoolCount != mempoolCount) {
+    		let balanceUrl = getTxsDataUrl();
+
+			var jqxhr = $.get(balanceUrl,
+			function(data) {
+				for (let i = 0; i < data.items.length; i++) {
+					let found = false;
+					for (let j = 0; j < mempoolTxIds.length; j++) {
+						if (data.items[i].id == mempoolTxIds[j]) {
+							onMempoolTxConfirmed();
+							found = true;
+							break;
+						}
+					}
+
+					if (found) {
+						break;
+					}
+
+					if (i == data.items.length - 1
+						&& !found
+						&& newMempoolCount == 0) {
+						onMempoolEmptyNoConfirmation();
+						break;
+					}
+				}
+			});    		
+    	}
+    });
+}
+
+function onMempoolTxConfirmed() {
+	if (Notification.permission === 'granted') {
+		const img = 'https://ergexplorer.com/images/logo.png';
+		const text = 'Transaction on address ' + walletAddress + ' has been confirmed.';
+		txNotification = new Notification('Transaction confirmed', { body: text, icon: img });
+		
+		txNotification.onclick = function(x) {
+			window.focus();
+			this.close();
+			location.reload();
+		};
+	}
+
+	if (mempoolInterval != undefined) {
+		clearTimeout(mempoolInterval);
+	}
+
+	if (document.hasFocus()) {
+		location.reload();
+	}
+}
+
+function onMempoolEmptyNoConfirmation() {
+	if (Notification.permission === 'granted') {
+		const img = 'https://ergexplorer.com/images/logo.png';
+		const text = 'Transaction on address ' + walletAddress + ' status updated.';
+		const notification = new Notification('Transaction updated', { body: text, icon: img });
+		
+		notification.onclick = function(x) {
+			window.focus();
+			this.close();
+			location.reload();
+		};
+	}
+
+	if (mempoolInterval != undefined) {
+		clearTimeout(mempoolInterval);
+	}
+
+	if (document.hasFocus()) {
+		location.reload();
+	}
+}
+
+function getTxsUrl() {
+	let balanceUrl = API_HOST_2 + 'addresses/' + walletAddress + '/balance/total';
+	if (networkType == 'testnet') {
+		balanceUrl = API_HOST + 'api/v1/addresses/' + walletAddress + '/balance/total';
+	}
+
+	return balanceUrl;
+}
+
+function getTxsDataUrl() {
+	return API_HOST_2 + 'addresses/' + walletAddress + '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
+}
+
+function getMempoolUrl() {
 	let mempoolUrl = API_HOST_2 + 'mempool/transactions/byAddress/' + walletAddress;
 
     if (networkType == 'testnet') {
         mempoolUrl = API_HOST_2 + 'api/v1/mempool/transactions/byAddress/' + walletAddress
     }
 
-    let jqxhr = $.get(mempoolUrl, function(data) {
-    	if (data.total != mempoolCount) {
-    		if (Notification.permission === 'granted') {
-	    		const img = 'https://ergexplorer.com/images/logo.png';
-				const text = 'Transaction on address ' + walletAddress + ' has been confirmed.';
-				const notification = new Notification('Transaction confirmed', { body: text, icon: img });
-				
-				notification.onclick = function(x) {
-					window.focus();
-					this.close();
-					location.reload();
-				};
-			}
-
-			if (mempoolInterval != undefined) {
-				clearTimeout(mempoolInterval);
-			}
-
-			if (document.hasFocus()) {
-  				location.reload();
-  			}
-    	}
-    });
+    return mempoolUrl;
 }
 
 function trackTransaction() {
@@ -459,6 +632,9 @@ function trackTransaction() {
 	if (mempoolInterval != undefined) {
 		return;
 	}
+
+	showCustomToast('Monitoring mempool<span id="dots">...</span>');
+	setInterval(animateDots, 300);
 
 	mempoolInterval = setInterval(checkMempoolChanged, 30000);
 }
@@ -477,7 +653,7 @@ function onNotificationToastNo() {
 }
 
 function getTransactionsData() {
-var jqxhr = $.get(API_HOST_2 + 'addresses/' + walletAddress + '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE, function(data) {
+var jqxhr = $.get(getTxsDataUrl(), function(data) {
         transactionsData = data;
 		totalTransactions += transactionsData.total;
     })
@@ -773,5 +949,10 @@ function getAddressInfo() {
 
 		$('#verifiedOwner').html(html);
 		$('#verifiedOwnerHolder').show();
+
+		if (data.items[0].urltype != '') {
+			$('#addressName').html(data.items[0].urltype);
+			$('#addressNameHolder').show();
+		}
 	});
 }

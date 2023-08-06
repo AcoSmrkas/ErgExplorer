@@ -184,7 +184,11 @@ function onGetNftInfoDone(nftInfo, message) {
 	$('#tokenDescription').html('<pre class="tokenDescriptionPre' + (asciiArt ? ' pre-ascii' : '') + '">' + formatNftDescription(tokenData.description) + '</pre>');
 
 	//Icon
-	$('#tokenIconImg').attr('src', 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/' + tokenData.id + '.svg');
+	let tImg = getIcon(tokenData.id);
+	if (tImg == undefined) {
+		tImg = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/' + tokenData.id + '.svg';
+	}
+	$('#tokenIconImg').attr('src', tImg);
 
 	$('#tokenDataHolder').show();
 

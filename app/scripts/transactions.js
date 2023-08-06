@@ -1,6 +1,7 @@
 var totalCoinsTransferred = 0;
 var txId = '';
 var mempoolInterval = undefined;
+var txNotification = undefined;
 
 $(function() {
 	txId = getWalletAddressFromUrl();
@@ -12,11 +13,18 @@ $(function() {
     $('#searchType').val('1');
 });
 
+window.onfocus = (event) => {
+	if (txNotification != undefined) {
+		txNotification.close();
+		location.reload();
+	}
+};
+
 function onGotPrices() {
 	printTransaction(false);
 }
 
-function printTransaction(mempool) {
+function getTxUrl(mempool) {
 	let txUrl = API_HOST + 'transactions/' + txId;
 
 	if (networkType == 'testnet') {
@@ -30,6 +38,12 @@ function printTransaction(mempool) {
 			txUrl = 'https://api-testnet.ergoplatform.com/transactions/unconfirmed/' + txId;
 		}		
 	}
+
+	return txUrl;
+}
+
+function printTransaction(mempool) {
+	let txUrl = getTxUrl(mempool);
 
 	var jqxhr = $.get(txUrl, function(data) {
 		if (mempool) {
@@ -124,33 +138,31 @@ function printTransaction(mempool) {
 }
 
 function checkMempoolChanged() {
-	let txUrl = API_HOST + 'transactions/' + txId;
+	var jqxhr = $.get(getTxUrl(false), function(data) {
+		onMempoolTxConfirmed();
+	});
+}
 
-	if (networkType == 'testnet') {
-		txUrl = API_HOST + 'api/v1/transactions/' + txId;
+function onMempoolTxConfirmed() {
+	if (Notification.permission === 'granted') {
+		const img = 'https://ergexplorer.com/images/logo.png';
+		const text = 'Transaction  ' + txId + ' has been confirmed.';
+		txNotification = new Notification('Transaction confirmed', { body: text, icon: img });
+		
+		txNotification.onclick = function(x) {
+			window.focus();
+			this.close();
+			location.reload();
+		};
 	}
 
-	var jqxhr = $.get(txUrl, function(data) {
-		if (Notification.permission === 'granted') {
-    		const img = 'https://ergexplorer.com/images/logo.png';
-			const text = 'Transaction  ' + txId + ' has been confirmed.';
-			const notification = new Notification('Transaction confirmed', { body: text, icon: img });
-			
-			notification.onclick = function(x) {
-				window.focus();
-				this.close();
-				location.reload();
-			};
-		}
+	if (mempoolInterval != undefined) {
+		clearInterval(mempoolInterval);
+	}
 
-		if (mempoolInterval != undefined) {
-			clearInterval(mempoolInterval);
-		}
-
-		if (document.hasFocus()) {
-  			location.reload();
-  		}
-	});
+	if (document.hasFocus()) {
+		location.reload();
+	}
 }
 
 function trackTransaction() {
@@ -161,6 +173,9 @@ function trackTransaction() {
 	if (mempoolInterval != undefined) {
 		return;
 	}
+
+	showCustomToast('Monitoring mempool<span id="dots">...</span>');
+	setInterval(animateDots, 300);
 
 	mempoolInterval = setInterval(checkMempoolChanged, 30000);
 }

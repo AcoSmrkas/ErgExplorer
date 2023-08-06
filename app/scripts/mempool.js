@@ -38,7 +38,7 @@ function printMempool() {
     			formattedResult += '</tr>';	
     		}
         } else {
-            formattedResult = '<td colspan="12">No transactions currently in mempool.</td>';
+            formattedResult = '<td colspan="12" class="p-2">No transactions currently in mempool.</td>';
             $('#pagination').hide();
         }
 
