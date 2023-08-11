@@ -624,7 +624,6 @@ function getTxsUrl() {
 }
 
 function getTxsDataUrl() {
-	return ERGEXPLORER_API_HOST + 'user/getUserTransactions?address=' + walletAddress + '&tokenIds[]=9a06d9e545a41fd51eeffc5e20d818073bf820c635e2a9d922269913e0de369d&offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
 	return API_HOST_2 + 'addresses/' + walletAddress + '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
 }
 

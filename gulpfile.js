@@ -6,6 +6,7 @@ const del = require('del');
 const wiredep = require('wiredep').stream;
 const runSequence = require('run-sequence');
 const nunjucksRender = require('gulp-nunjucks-render');
+const terser = require('gulp-terser');
 
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
@@ -57,7 +58,7 @@ gulp.task('lint:test', () => {
 gulp.task('html', ['nunjucks', 'styles', 'styles-css', 'scripts'], () => {
   return gulp.src('app/*.html')
     .pipe($.useref({searchPath: ['.tmp', 'app', '.']}))
-    .pipe($.if(/\.js$/, $.uglify({compress: {drop_console: true}})))
+    .pipe($.if(/\.js$/, $.terser({compress: {drop_console: true}})))
     .pipe($.if(/\.css$/, $.cssnano({safe: true, autoprefixer: false})))
     .pipe($.if(/\.html$/, $.htmlmin({
       collapseWhitespace: true,
@@ -91,7 +92,8 @@ gulp.task('styles-css', () => {
 
 gulp.task('scripts-build', () => {
   return gulp.src('app/scripts/**/*.js')
-    .pipe(gulp.dest('dist/scripts'));
+      .pipe(terser())
+      .pipe(gulp.dest('dist/scripts'));
 });
 
 gulp.task('extras', () => {
