@@ -2,6 +2,12 @@ var tokenData = undefined;
 var tokenId = '';
 var nftType = undefined;
 var decimals = 0;
+var from24h = Date.now() - (24 * 60 * 60 * 1000);
+var from7d = Date.now() - (7 * 24 * 60 * 60 * 1000);
+var priceData = undefined;
+var chart = undefined;
+var chartType = undefined;
+var tempDate = -1;
 
 $(function() {
 	tokenId = getWalletAddressFromUrl();
@@ -14,78 +20,14 @@ $(function() {
 
 function getPriceHistory() {
 	$.post(ERGEXPLORER_API_HOST + 'tokens/getPriceHistory',
-		{ids : [tokenId]},
+		{from: from7d, ids : [tokenId]},
 		function(data) {
 		if (data.items.length == 0) {
 			return;
 		}
 
-		 //Diff
-		 let lastTimestamp = data.items[data.items.length - 1].timestamp;
-
-		for (var i = data.items.length - 1; i >= 0; i--) {
-			let item = data.items[i];
-			if (item.tokenid == tokenId) {
-				let oldPrice = item.price;
-				let newPrice = prices[item.tokenid];
-				let difference = (newPrice * 100 / oldPrice) - 100;
-				difference = toFixed(difference, 2);
-
-				let classString = 'text-success';
-				if (difference > 0) {
-					difference = '+' + difference;
-				} else {
-					difference = difference;
-					classString = 'text-danger';
-				}
-
-				$('#usdChange').html(difference + '%');
-				$('#usdChange').addClass(classString);
-
-				break;
-			}
-		}
-
-		 $('#usdPrice').html('$' + formatValue(prices[tokenId], 2, true));
-
-		 //Chart
- 		data.items = data.items.reverse();
-		data.items.push({
-			'price': prices[tokenId],
-			'timestamp': Date.now()
-		})
-
-		 new Chart(
-		    document.getElementById('chart'),
-		    {
-		      type: 'line',
-		      options: {
-		      	responsive: true,
-		        animation: true,
-		        fill: false,
-		        borderColor: 'rgba(251, 92, 22, 1)',
-		        plugins: {
-		          legend: {
-		            display: false
-		          },
-		          tooltip: {
-		            enabled: true
-		          }
-		        }
-		      },
-		      data: {
-		        labels: data.items.map(row => formatTimeString(parseInt(row.timestamp), false)),
-		        datasets: [
-		          {
-		            label: '$',
-		            data: data.items.map(row => row.price)
-		          }
-		        ]
-		      }
-		    }
-		  );
-
-		$('#priceInfo').show();
+		priceData = data;
+		printGainersLosers(from24h);
 	});
 }
 
@@ -133,6 +75,8 @@ function printHolders(data) {
 	}
 
 	$('#holdersTableBody').html(formattedResult);
+	$('#holdersLoading').hide();
+	$('#holdersTable').show();
 
     getAddressesInfo();
 }
@@ -397,4 +341,138 @@ function onNftImageLoad() {
 
 	$('#nftPreviewImgHolder').addClass('col-lg-4');
 	$('#nftInfoHolder').addClass('col-lg-8');
+}
+
+function printGainersLosers7d() {
+	printGainersLosers(from7d);
+	$('#showGainersLosers7d').removeClass('btn-primary');
+	$('#showGainersLosers7d').addClass('btn-info');
+	$('#showGainersLosers24h').removeClass('btn-info');
+	$('#showGainersLosers24h').addClass('btn-primary');
+}
+
+function printGainersLosers24h() {
+	printGainersLosers(from24h);
+	$('#showGainersLosers24h').removeClass('btn-primary');
+	$('#showGainersLosers24h').addClass('btn-info');
+	$('#showGainersLosers7d').removeClass('btn-info');
+	$('#showGainersLosers7d').addClass('btn-primary');
+}
+
+function printGainersLosers(timeframe) {
+	let data = JSON.parse(JSON.stringify(priceData));
+	chartType = timeframe;
+
+	let from7dset = false;
+	for (var i = data.items.length - 1; i >= 0; i--) {
+		let item = data.items[i];
+
+		let oldPrice = item.price;
+		let newPrice = prices[item.tokenid];
+		let difference = (newPrice * 100 / oldPrice) - 100;
+		difference = toFixed(difference, 2);
+
+		let classString = 'text-success';
+		if (difference > 0) {
+			difference = '+' + difference;
+		} else {
+			difference = difference;
+			classString = 'text-danger';
+		}
+
+		if (from7dset == false && from7d <= item.timestamp && item.tokenid == tokenId) {
+			$('#usdChange7d').html(difference + '%');
+			$('#usdChange7d').addClass(classString);
+
+			from7dset = true;
+		} else if (from7dset == true && from24h <= item.timestamp && item.tokenid == tokenId) {
+			$('#usdChange24h').html(difference + '%');
+			$('#usdChange24h').addClass(classString);
+
+			break;
+		}
+	}
+
+	 $('#usdPrice').html('$' + formatValue(prices[tokenId], 2, true));
+
+	 let tI = 0;
+	 let lastTimestamp = -1;
+	for (var i = data.items.length - 1; i >= 0; i--) {
+		if (timeframe > data.items[i].timestamp) {
+			data.items.splice(i, 1);
+			continue;
+		}
+
+		if (timeframe == from7d
+			&& i != data.items.length - 1
+			&& i != 0
+			&& tI % 6 != 0) {
+			data.items.splice(i, 1);	
+		}
+
+		if (lastTimestamp != data.items[i].timestamp) {
+			lastTimestamp = data.items[i].timestamp;
+			tI = 0;
+		}
+
+		tI++;
+	}
+
+	 //Chart
+	data.items = data.items.reverse();
+	data.items.push({
+		'price': prices[tokenId],
+		'timestamp': Date.now()
+	})
+
+	if (chart != undefined) {
+		chart.destroy();
+	}
+
+	chart = new Chart(
+	    document.getElementById('chart'),
+	    {
+	      type: 'line',
+	      options: {
+	      	responsive: true,
+	        animation: true,
+	        fill: false,
+	        borderColor: 'rgba(251, 92, 22, 1)',
+	        plugins: {
+	          legend: {
+	            display: false
+	          },
+	          tooltip: {
+	            enabled: true
+	          }
+	        }
+	      },
+	      data: {
+	        labels: data.items.map(mapLabel),
+	        datasets: [
+	          {
+	            label: '$',
+	            data: data.items.map(row => row.price)
+	          }
+	        ]
+	      }
+	    }
+	  );
+
+	$('#priceInfo').show();
+}
+
+function mapLabel(row, index) {
+	if (chartType == from24h) {
+		return formatTimeString(parseInt(row.timestamp), false);
+	} else {
+		let dateString = new Date(parseInt(row.timestamp)).toLocaleDateString();
+
+		if (dateString != tempDate) {
+			tempDate = dateString;
+			return dateString;
+		} else {
+			return '';
+		}
+	}
 }

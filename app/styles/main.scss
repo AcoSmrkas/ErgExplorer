@@ -93,6 +93,13 @@ a:hover {
 	border-radius: 5px !important;
 }
 
+/* Phones */
+@media only screen and (min-width : 576px) {
+	.border-sm-start {
+		border-left: 1px solid var(--borders);
+	}
+}
+
 /* Small Devices, Tablets */
 @media only screen and (min-width : 768px) {
 	.border-md-start {

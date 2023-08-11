@@ -126,6 +126,7 @@ function printAddressSummary() {
 		getErgopadStaking();
     })
     .fail(function() {
+    	$('#txLoading').hide();
     	showLoadError('No results matching your query.');
     });
 }
@@ -244,11 +245,14 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		// In or Out tx.
 		let smartInOutString = (smartOut ? '<span class="text-danger">Out</span>' : '<span class="text-success">In</span>');
 
-		formattedResult += '<td class="' + ((isTxOut) ? (isWallet2Wallet) ? 'text-danger' : 'text-info' : 'text-success') + '">' + ((isTxOut) ? (isWallet2Wallet) ? 'Out' : smartInOutString + ' <span title="Smart Contract interaction. Check transaction link for more details.">(Smart)</span>' : 'In') + '</td>';
+		formattedResult += '<td class="' + ((isTxOut) ? (isWallet2Wallet) ? 'text-danger' : 'text-info' : 'text-success') + '">' + ((isTxOut) ? (isWallet2Wallet) ? 'Out' : smartInOutString + ' <span title="Smart Contract interaction. Check transaction link for full details.">(SC)</span>' : 'In') + '</td>';
 		
 		//From
 		addAddress(fromAddress);
 		let formattedAddress = formatAddressString(fromAddress, 10);
+		if (fromAddress == walletAddress) {
+			formattedAddress = 'This Address';
+		}
 		let addressString = '<a class="address-string" addr="' + fromAddress + '" href="' + getWalletAddressUrl(fromAddress) + '" >' + (getOwner(fromAddress) == undefined ? formattedAddress : getOwner(fromAddress)) + '</a>';
 		if (fromAddress == 'N/A') {
 			addressString = (getOwner(fromAddress) == undefined ? fromAddress : getOwner(fromAddress));
@@ -257,14 +261,22 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		
 		//To
 		addAddress(toAddress);
-		formattedResult += '<td><span class="d-lg-none"><strong>To: </strong></span><a class="address-string" addr="' + toAddress +'" href="' + getWalletAddressUrl(toAddress) + '">' + (getOwner(toAddress) == undefined ? formatAddressString(toAddress, 10) : getOwner(toAddress)) + '</a></td>';
+		formattedAddress = formatAddressString(toAddress, 10)
+		if (toAddress == walletAddress) {
+			formattedAddress = 'This Address';
+		}
+		formattedResult += '<td><span class="d-lg-none"><strong>To: </strong></span><a class="address-string" addr="' + toAddress +'" href="' + getWalletAddressUrl(toAddress) + '">' + (getOwner(toAddress) == undefined ? formattedAddress : getOwner(toAddress)) + '</a></td>';
 
 		//Status
 		if (item.numConfirmations == undefined) {
 			item.numConfirmations = item.confirmationsCount;
 		}
 
-		formattedResult += '<td><span class="d-lg-none"><strong>Status: </strong></span><span class="' + ((isMempool) ? 'text-warning' : 'text-success' ) + '">' + ((isMempool) ? 'Pending' : 'Confirmed (' + nFormatter(item.numConfirmations) + ')') + '</span></td>';
+		let confirmationsString = '';
+		if (item.numConfirmations != undefined) {
+			//confirmationsString = ' (' + nFormatter(item.numConfirmations) + ')';
+		}
+		formattedResult += '<td><span class="d-lg-none"><strong>Status: </strong></span><span class="' + ((isMempool) ? 'text-warning' : 'text-success' ) + '">' + ((isMempool) ? 'Pending' : 'Confirmed' + confirmationsString) + '</span></td>';
 		
 		//Fee
 		formattedResult += '<td><span class="d-lg-none"><strong>Fee: </strong></span>' + formatErgValueString(fee) + '</td>';
@@ -310,6 +322,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 				}
 			}
 		}
+
 
 		let assets = ' ';
 		let assetsFull = ' ';
@@ -611,6 +624,7 @@ function getTxsUrl() {
 }
 
 function getTxsDataUrl() {
+	return ERGEXPLORER_API_HOST + 'user/getUserTransactions?address=' + walletAddress + '&tokenIds[]=9a06d9e545a41fd51eeffc5e20d818073bf820c635e2a9d922269913e0de369d&offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
 	return API_HOST_2 + 'addresses/' + walletAddress + '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
 }
 
@@ -653,7 +667,7 @@ function onNotificationToastNo() {
 }
 
 function getTransactionsData() {
-var jqxhr = $.get(getTxsDataUrl(), function(data) {
+	var jqxhr = $.get(getTxsDataUrl(), function(data) {
         transactionsData = data;
 		totalTransactions += transactionsData.total;
     })

@@ -1,3 +1,8 @@
+var from24h = Date.now() - (24 * 60 * 60 * 1000);
+var from7d = Date.now() - (7 * 24 * 60 * 60 * 1000);
+var priceData = undefined;
+var ergPriceSet = false;
+
 $(function() {	
 	getPrices(onGotPrices);
 	getNetworkState();
@@ -39,6 +44,16 @@ function getPoolStats() {
 	function (data) {
 		let poolStatsData = data;
 
+		for (let i = 0; i < poolStatsData.length; i++) {
+			for (let j = i + 1; j < poolStatsData.length; j++) {
+				if (poolStatsData[i].lockedY.id === poolStatsData[j].lockedY.id) {
+					poolStatsData[i].volume.value += poolStatsData[j].volume.value;
+					poolStatsData.splice(j, 1);
+					j--;
+				}
+			}
+		}
+
 		poolStatsData.sort(function (a, b) {
 			if (a.volume.value === b.volume.value) return 0;
 
@@ -70,114 +85,148 @@ function getPoolStats() {
 }
 
 function getPriceHistory() {
-	$.post(ERGEXPLORER_API_HOST + 'tokens/getPriceHistory',
+	$.post(ERGEXPLORER_API_HOST + 'tokens/getPriceHistory', {from: from7d},
 	function(data) {
-		let lastTimestamp = data.items[data.items.length - 1].timestamp;
+		priceData = data;
+		printGainersLosers(from24h);
+	}).fail(function (data) {
+		$('#tokenLoading').hide();
+	});
+}
 
-		for (var i = data.items.length - 1; i >= 0; i--) {
-			let item = data.items[i];
-			if (item.timestamp != lastTimestamp) {
-				data.items.splice(i, 1);
-				continue;
-			}
+function printGainersLosers7d() {
+	printGainersLosers(from7d);
+	$('#showGainersLosers7d').removeClass('btn-primary');
+	$('#showGainersLosers7d').addClass('btn-info');
+	$('#showGainersLosers24h').removeClass('btn-info');
+	$('#showGainersLosers24h').addClass('btn-primary');
+}
 
-			let oldPrice = item.price;
-			let newPrice = prices[item.tokenid];
+function printGainersLosers24h() {
+	printGainersLosers(from24h);
+	$('#showGainersLosers24h').removeClass('btn-primary');
+	$('#showGainersLosers24h').addClass('btn-info');
+	$('#showGainersLosers7d').removeClass('btn-info');
+	$('#showGainersLosers7d').addClass('btn-primary');
+}
 
-			let difference = (newPrice * 100 / oldPrice) - 100;
-			if (difference === 0) {
-				difference = 0.000001;
-			}
-			difference = toFixed(difference, 2);
+function printGainersLosers(timeframe) {
+	let data = JSON.parse(JSON.stringify(priceData));
 
-			data.items[i].difference = difference;
+	let lastTimestamp = -1;
+	for (var i = data.items.length - 1; i >= 0; i--) {
+		if (timeframe <= data.items[i].timestamp) {
+			lastTimestamp = data.items[i].timestamp;
+			break;
+		}
+	}
+
+	for (var i = data.items.length - 1; i >= 0; i--) {
+		let item = data.items[i];
+		if (item.timestamp != lastTimestamp) {
+			data.items.splice(i, 1);
+			continue;
 		}
 
-		data.items = data.items.sort(function (a, b) {
-			if (a.difference === b.difference) return 0;
+		let oldPrice = item.price;
+		let newPrice = prices[item.tokenid];
 
-			return parseFloat(a.difference) > parseFloat(b.difference) ? -1 : 1;
-		});
-
-		//Erg
-		for (let i = 0; i < data.items.length; i++) {
-			let item = data.items[i];
-			let difference = item.difference;
-			let classString = 'text-success';
-
-			if (difference > 0) {
-				difference = '+' + difference;
-			} else {
-				difference = difference;
-				classString = 'text-danger';
-			}	
-
-			if (item.tokenid == 'ERG') {
-				$('#ergPrice').html($('#ergPrice').html() + ' (<span class="' + classString + '">' + difference + '%</span> 24h)');
-
-				data.items.splice(i, 1);
-
-				break;
-			}
+		let difference = (newPrice * 100 / oldPrice) - 100;
+		if (difference === 0) {
+			difference = 0.000001;
 		}
+		difference = toFixed(difference, 2);
 
-		//Gainers
-		let formattedResult = '';
-		let end = 5;
-		for (let i = 0; i < end; i++) {
-			let item = data.items[i];
-			let difference = item.difference;
-			let classString = 'text-success';
+		data.items[i].difference = difference;
+	}
 
-			if (difference >= 0) {
-				difference = '+' + difference;
+	data.items = data.items.sort(function (a, b) {
+		if (a.difference === b.difference) return 0;
+
+		return parseFloat(a.difference) > parseFloat(b.difference) ? -1 : 1;
+	});
+
+	//Erg
+	for (let i = 0; i < data.items.length; i++) {
+		let item = data.items[i];
+		let difference = item.difference;
+		let classString = 'text-success';
+
+		if (difference > 0) {
+			difference = '+' + difference;
+		} else {
+			difference = difference;
+			classString = 'text-danger';
+		}	
+
+		if (item.tokenid == 'ERG' && !ergPriceSet) {
+			$('#ergPrice').html($('#ergPrice').html() + ' (<span class="' + classString + '">' + difference + '%</span> 24h)');
+
+			data.items.splice(i, 1);
+
+			ergPriceSet = true;
+
+			break;
+		}
+	}
+
+	//Gainers
+	let formattedResult = '';
+	let end = 5;
+	for (let i = 0; i < end; i++) {
+		let item = data.items[i];
+		let difference = item.difference;
+		let classString = 'text-success';
+
+		if (difference >= 0) {
+			difference = '+' + difference;
+		} else {
+			difference = difference;
+			classString = 'text-danger';
+		}			
+
+		$('#change-' + item.tokenid).html(difference + '%');
+		$('#change-' + item.tokenid).addClass(classString);
+
+		formattedResult += '<tr>';
+
+		//Token
+		formattedResult += '<td><span class="d-lg-none"><strong>Token: </strong></span><a href="' + getTokenUrl(item.tokenid) + '">' + getAssetTitleParams(item.tokenid, item.ticker, true) + '</a></td>';
+		
+		//Price			
+		let decimals = 2;
+		let temp = prices[item.tokenid].toString().split('.');
+		if (temp.length > 1) {
+			let realSmall = temp[1].split('-');
+			if (realSmall.length > 1) {
+				decimals = parseInt(realSmall[1]) + 1;
 			} else {
-				difference = difference;
-				classString = 'text-danger';
-			}			
-
-			$('#change-' + item.tokenid).html(difference + '%');
-			$('#change-' + item.tokenid).addClass(classString);
-
-			formattedResult += '<tr>';
-
-			//Token
-			formattedResult += '<td><span class="d-lg-none"><strong>Token: </strong></span><a href="' + getTokenUrl(item.tokenid) + '">' + getAssetTitleParams(item.tokenid, item.ticker, true) + '</a></td>';
-			
-			//Price			
-			let decimals = 2;
-			let temp = prices[item.tokenid].toString().split('.');
-			if (temp.length > 1) {
-				let realSmall = temp[1].split('-');
-				if (realSmall.length > 1) {
-					decimals = parseInt(realSmall[1]) + 1;
-				} else {
-					for (let j = 0; j < temp[1].length; j++) {
-						if (temp[1][j] != '0' && j > 2) {
-							decimals = j + 2;
-							break;
-						}
+				for (let j = 0; j < temp[1].length; j++) {
+					if (temp[1][j] != '0' && j > 2) {
+						decimals = j + 2;
+						break;
 					}
 				}
 			}
-
-			formattedResult += '<td><span class="d-lg-none"><strong>Price: </strong></span>$' + formatValue(prices[item.tokenid], decimals) + '</td>';
-
-			//Change
-			formattedResult += '<td><span class="d-lg-none"><strong>Change: </strong></span><span class="' + classString + '">' + difference + '%</span></td>';
-
-			formattedResult += '</tr>';
-
-			if (i == 4) {
-				i = data.items.length - end - 1;
-				end = data.items.length;
-			}
 		}
 
-		$('#tokensGainersTableBody').html (formattedResult);
+		formattedResult += '<td><span class="d-lg-none"><strong>Price: </strong></span>$' + formatValue(prices[item.tokenid], decimals) + '</td>';
 
-		$('#tokenView').show();
-	});
+		//Change
+		formattedResult += '<td><span class="d-lg-none"><strong>Change: </strong></span><span class="' + classString + '">' + difference + '%</span></td>';
+
+		formattedResult += '</tr>';
+
+		if (i == 4) {
+			i = data.items.length - end - 1;
+			end = data.items.length;
+		}
+	}
+
+	$('#tokensGainersTableBody').html (formattedResult);
+
+	$('#tokenView').show();
+	$('#tokenLoading').hide();
 }
 
 function getWhaleTxs() {
