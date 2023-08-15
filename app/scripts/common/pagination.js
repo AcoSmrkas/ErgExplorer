@@ -42,9 +42,20 @@ function setupPagination(totalItems) {
 }
 
 function getUrlWithOffset(setOffset) {
+	let temp = undefined;
+	if (params['offset'] != undefined) {
+		temp = params['offset'];
+	}
+
 	params['offset'] = setOffset;
 
-	return getUrlWithParams(window.location.pathname.substring(1));
+	let urlWithOffset = getUrlWithParams(window.location.pathname.substring(1));
+
+	if (temp != undefined) {
+		params['offset'] = temp;
+	}
+
+	return urlWithOffset;
 }
 
 function enterPageNum(e) {

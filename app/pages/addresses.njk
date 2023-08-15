@@ -4,6 +4,9 @@
 	<!-- build:css styles/addresses.css -->
 	<link rel="stylesheet" href="styles/addresses.css">
 	<!-- endbuild -->
+
+	<!-- Tempus Dominus Styles -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@eonasdan/tempus-dominus@6.7.11/dist/css/tempus-dominus.min.css" crossorigin="anonymous">
 {% endblock %}
 
 {% block navigation %}
@@ -155,7 +158,78 @@
 					<p id="tokens"></p>
 				</div>
 			  </div>
+			  <br>
 		  </div>
+
+		  <div class="row w-100 div-cell">
+			<div id="search" class="row w-100 p-0 m-0">
+				<div class="col-12">
+					<h3>Filter</h3>
+				</div>
+				<form class="row g-3">
+					<div class="col-md-4">
+					    <input type="text" class="form-control" id="tokenId" name="tokenId" placeholder="Token ID">
+					</div>
+					<div class="col-md-4">
+					    <input type="text" class="form-control" id="minValue" name="minValue" placeholder="Min. value">
+					</div>
+					<div class="col-md-4">
+					    <input type="text" class="form-control" id="maxValue" name="maxValue" placeholder="Max. value">
+					</div>
+
+					<div class="col-4">
+					      <div
+					        class="input-group log-event"
+					        id="datetimepicker1"
+					        data-td-target-input="nearest"
+					        data-td-target-toggle="nearest"
+					      >
+					        <input
+					          id="fromDate"
+					          type="text"
+					          class="form-control"
+					          data-td-target="#datetimepicker1"
+					          placeholder="From date"
+					        />
+					        <span
+					          class="input-group-text"
+					          data-td-target="#datetimepicker1"
+					          data-td-toggle="datetimepicker"
+					        >
+					          <i class="fas fa-calendar"></i>
+					        </span>
+					      </div>
+					</div>
+					<div class="col-4">
+					      <div
+					        class="input-group log-event"
+					        id="datetimepicker2"
+					        data-td-target-input="nearest"
+					        data-td-target-toggle="nearest"
+					      >
+					        <input
+					          id="toDate"
+					          type="text"
+					          class="form-control"
+					          data-td-target="#datetimepicker1"
+					          placeholder="To date"
+					        />
+					        <span
+					          class="input-group-text"
+					          data-td-target="#datetimepicker1"
+					          data-td-toggle="datetimepicker"
+					        >
+					          <i class="fas fa-calendar"></i>
+					        </span>
+					      </div>
+					</div>
+					 <div class="col-4 d-flex justify-content-end">
+						  <button type="submit" onclick="clearFilter(event)" class="btn btn-primary">Clear</button>
+					    <button type="submit" onclick="filterTransactions(event)" class="btn btn-info ms-2">Filter</button>
+					 </div>
+				</form>
+			</div>
+		</div>
 
 		  <div id="txView" class="row w-100">
 		  	<br>
@@ -195,9 +269,13 @@
 {% endblock %}
 
 {% block scripts %}	
-	<script src="./scripts/common/prices.js?v=15"></script>
-	<script src="./scripts/common/pagination.js?v=15"></script>
-	<script src="./scripts/common/nft.js?v=15"></script>
-	<script src="./scripts/addresses.js?v=15"></script>
-	<script src="./scripts/3rd-party/qrcode.min.js?v=15"></script>
+	<!-- Popperjs -->
+	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" crossorigin="anonymous"></script>
+	<!-- Tempus Dominus JavaScript -->
+	<script src="https://cdn.jsdelivr.net/npm/@eonasdan/tempus-dominus@6.7.11/dist/js/tempus-dominus.min.js" crossorigin="anonymous"></script>
+	<script src="./scripts/common/prices.js?v=16"></script>
+	<script src="./scripts/common/pagination.js?v=16"></script>
+	<script src="./scripts/common/nft.js?v=16"></script>
+	<script src="./scripts/addresses.js?v=16"></script>
+	<script src="./scripts/3rd-party/qrcode.min.js?v=16"></script>
 {% endblock %}

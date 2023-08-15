@@ -1,14 +1,21 @@
-var from24h = Date.now() - (24 * 60 * 60 * 1000);
-var from7d = Date.now() - (7 * 24 * 60 * 60 * 1000);
+var from24h = Date.now() - (25 * 60 * 60 * 1000);
+var from7d = Date.now() - ((7 * 24 + 1) * 60 * 60 * 1000);
 var priceData = undefined;
 var ergPriceSet = false;
+var ergPriceHtml = undefined;
 
 $(function() {	
-	getPrices(onGotPrices);
+	updatePrices();
 	getNetworkState();
 
     $('#searchType').val('0');
 });
+
+function updatePrices() {
+	getPrices(onGotPrices);
+
+	setTimeout(updatePrices, 60000 * 5);
+}
 
 function onGotPrices() {
     getProtocolInfo();
@@ -17,7 +24,12 @@ function onGotPrices() {
 	getPoolStats();
 
     if (gotPrices != undefined && gotPrices) {
-    	$('#ergPrice').html('$' + formatValue(prices['ERG'], 2));
+    	ergPriceHtml = '$' + formatValue(prices['ERG'], 2);
+
+    	if (!ergPriceSet) {
+    		$('#ergPrice').html(ergPriceHtml);
+    		ergPriceSet = true;
+		}
 	}
 }
 
@@ -85,7 +97,11 @@ function getPoolStats() {
 }
 
 function getPriceHistory() {
-	$.post(ERGEXPLORER_API_HOST + 'tokens/getPriceHistory', {from: from7d},
+	$.post(ERGEXPLORER_API_HOST + 'tokens/getPriceHistory',
+		{
+			'from': from7d,
+			'milestones': 'true'
+		},
 	function(data) {
 		priceData = data;
 		printGainersLosers(from24h);
@@ -159,12 +175,10 @@ function printGainersLosers(timeframe) {
 			classString = 'text-danger';
 		}	
 
-		if (item.tokenid == 'ERG' && !ergPriceSet) {
-			$('#ergPrice').html($('#ergPrice').html() + ' (<span class="' + classString + '">' + difference + '%</span> 24h)');
+		if (item.tokenid == 'ERG') {
+			$('#ergPrice').html(ergPriceHtml + ' (<span class="' + classString + '">' + difference + '%</span> 24h)');
 
 			data.items.splice(i, 1);
-
-			ergPriceSet = true;
 
 			break;
 		}
@@ -194,21 +208,7 @@ function printGainersLosers(timeframe) {
 		formattedResult += '<td><span class="d-lg-none"><strong>Token: </strong></span><a href="' + getTokenUrl(item.tokenid) + '">' + getAssetTitleParams(item.tokenid, item.ticker, true) + '</a></td>';
 		
 		//Price			
-		let decimals = 2;
-		let temp = prices[item.tokenid].toString().split('.');
-		if (temp.length > 1) {
-			let realSmall = temp[1].split('-');
-			if (realSmall.length > 1) {
-				decimals = parseInt(realSmall[1]) + 1;
-			} else {
-				for (let j = 0; j < temp[1].length; j++) {
-					if (temp[1][j] != '0' && j > 2) {
-						decimals = j + 2;
-						break;
-					}
-				}
-			}
-		}
+		let decimals = getDecimals(prices[item.tokenid]);
 
 		formattedResult += '<td><span class="d-lg-none"><strong>Price: </strong></span>$' + formatValue(prices[item.tokenid], decimals) + '</td>';
 

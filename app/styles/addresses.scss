@@ -61,3 +61,20 @@
 	min-height: 50px;
 	max-height: 50px;
 }
+
+
+label {
+	font-size: 1.2em;
+	min-width: 60px;
+	line-height: 42px;
+	margin-bottom: 0 !important;
+	margin-right: 2px;
+}
+
+.checkbox-xl {
+	min-width: 150px;
+}
+
+select {
+	max-width: 200px;
+}

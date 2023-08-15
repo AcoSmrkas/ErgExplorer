@@ -7,6 +7,7 @@ const wiredep = require('wiredep').stream;
 const runSequence = require('run-sequence');
 const nunjucksRender = require('gulp-nunjucks-render');
 const terser = require('gulp-terser');
+const concat = require('gulp-concat');
 
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;

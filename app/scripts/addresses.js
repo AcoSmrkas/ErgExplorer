@@ -21,6 +21,8 @@ var mempoolCount = 0;
 var mempoolInterval = undefined;
 var mempoolTxIds = new Array();
 var txNotification = undefined;
+var datePickerFrom = undefined;
+var datePickerTo = undefined;
 
 $(function() {
 	walletAddress = getWalletAddressFromUrl();	
@@ -32,6 +34,7 @@ $(function() {
     getAddressInfo();
 
     setupQrCode();
+    setupDatePicker();
 });
 
 window.onfocus = (event) => {
@@ -624,7 +627,39 @@ function getTxsUrl() {
 }
 
 function getTxsDataUrl() {
-	return API_HOST_2 + 'addresses/' + walletAddress + '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
+	if (params['filter'] == undefined) {
+		return API_HOST_2 + 'addresses/' + walletAddress + '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
+	} else {
+		let tokenId = params['tokenId'];
+		let minValue = params['minValue'];
+		let maxValue = params['maxValue'];
+		let fromDate = params['fromDate'];
+		let toDate = params['toDate'];
+
+		let filterApiUrl = ERGEXPLORER_API_HOST + 'user/getUserTransactions?&address=' + walletAddress + '&offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
+
+		if (tokenId != undefined) {
+			filterApiUrl += "&tokenId=" + tokenId;
+		}
+
+		if (minValue != undefined) {
+			filterApiUrl += "&minValue=" + minValue;
+		}
+
+		if (maxValue != undefined) {
+			filterApiUrl += "&maxValue=" + maxValue;
+		}
+
+		if (fromDate != undefined) {
+			filterApiUrl += "&fromDate=" + fromDate;
+		}
+
+		if (toDate != undefined) {
+			filterApiUrl += "&toDate=" + toDate;
+		}
+
+		return filterApiUrl;
+	}
 }
 
 function getMempoolUrl() {
@@ -751,6 +786,110 @@ function setupQrCode() {
 		$('body').css('height', 'inherit');
 		$('body').css('overflow-y', 'auto');
 	});
+}
+
+function setupDatePicker() {
+    datePickerFrom = new tempusDominus.TempusDominus(document.getElementById('datetimepicker1'), {
+	  allowInputToggle: true,
+	  display: {
+	    viewMode: 'calendar',
+	    components: {
+	      decades: false,
+	      year: true,
+	      month: true,
+	      date: true,
+	      hours: false,
+	      minutes: false,
+	      seconds: false
+	    },
+	    buttons: {
+	      today: true,
+	      clear: true,
+	      close: true
+	    }
+	  }
+	});
+
+    datePickerFrom.dates.formatInput = function(date) {
+    	{
+    		return date.toLocaleDateString();
+    	}
+	}
+
+    datePickerTo = new tempusDominus.TempusDominus(document.getElementById('datetimepicker2'), {
+	  allowInputToggle: true,
+	  display: {
+	    viewMode: 'calendar',
+	    components: {
+	      decades: false,
+	      year: true,
+	      month: true,
+	      date: true,
+	      hours: false,
+	      minutes: false,
+	      seconds: false
+	    },
+	    buttons: {
+	      today: true,
+	      clear: true,
+	      close: true
+	    }
+	  }
+	});
+
+    datePickerTo.dates.formatInput = function(date) {
+    	{
+    		return date.toLocaleDateString();
+    	}
+	}
+}
+
+function filterTransactions(e) {
+	e.preventDefault();
+
+	clearFilterParams();
+
+	params['filter'] = "true";
+
+	let tokenId = $('#tokenId').val();
+	if (tokenId.trim() != "") {
+		params['tokenId'] = tokenId;
+	}
+	let minValue = $('#minValue').val();
+	if (minValue.trim() != "") {
+		params['minValue'] = minValue;
+	}
+	let maxValue = $('#maxValue').val();
+	if (maxValue.trim() != "") {
+		params['maxValue'] = maxValue;
+	}
+
+	if (datePickerFrom.dates._dates.length > 0) {
+		params['fromDate'] = datePickerFrom.dates._dates[0].getTime();
+	}
+
+	if (datePickerTo.dates._dates.length > 0) {
+		params['toDate'] = datePickerTo.dates._dates[0].getTime();
+	}
+
+	window.location.assign(getCurrentUrlWithParams());
+}
+
+function clearFilter(e) {
+	e.preventDefault();	
+
+	clearFilterParams();
+
+	window.location.assign(getCurrentUrlWithParams());
+}
+
+function clearFilterParams() {
+	delete params['filter'];
+	delete params['tokenId'];
+	delete params['minValue'];
+	delete params['maxValue'];
+	delete params['fromDate'];
+	delete params['toDate'];
 }
 
 function onGotIssuedNftInfo(nftInfos, message) {

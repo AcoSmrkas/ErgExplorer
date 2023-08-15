@@ -207,6 +207,8 @@ function formatAssetValueString(value, decimals, digits = 2) {
 		digits = 2;
 	}
 
+	digits = getDecimals(assetValue);
+
 	return formatValue(assetValue, digits);
 }
 
@@ -230,6 +232,8 @@ function formatDollarPriceString(value, digits = 5) {
 	if (value >= 0.1) {
 		digits = 2;
 	}
+
+	digits = getDecimals(value, 1);
 
 	return '($' + formatValue(value, digits) + ')';
 }
@@ -656,4 +660,36 @@ function getOwner(address) {
 function toFixed(num, fixed) {
     var re = new RegExp('^-?\\d+(?:\.\\d{0,' + (fixed || -1) + '})?');
     return num.toString().match(re)[0];
+}
+
+function getDecimals(value, additional = 2) {
+	let decimals = 2;
+	value = value.toString().split('.');
+	if (value.length > 1) {
+		let realSmall = value[1].split('-');
+		if (realSmall.length > 1) {
+			decimals = parseInt(realSmall[1]) + 1;
+		} else {
+			for (let j = 0; j < value[1].length; j++) {
+				if (value[1][j] != '0') {
+					decimals = j + additional;
+
+					if (value[1].length > j + 1
+	                	&& value[1][j + 1] != '0') {
+	                	decimals++;
+	                }
+
+					break;
+				}
+			}
+		}
+	} else {
+		decimals = 2;
+	}
+
+	if (decimals < 2) {
+		decimals = 2;
+	}
+
+	return decimals;
 }
