@@ -433,7 +433,7 @@ function formatInputsOutputs(data) {
 		formattedData += '<div class="col-9"><span><strong>Address: </strong></span><a class="address-string" addr="' + data[i].address + '" href="' + getWalletAddressUrl(data[i].address) + '" >' + formatAddressString(data[i].address, 15) + '</a></div>';
 
 		//Status
-		formattedData += '<div class="col-3 d-flex justify-content-end">' + (data[i].spentTransactionId == undefined ? '' : data[i].spentTransactionId == null ? '<span class="text-danger">Unspent' : '<span class="text-success">Spent') + '</span></div>';
+		formattedData += '<div class="col-3 d-flex justify-content-end">' + (data[i].spentTransactionId === undefined ? '' : data[i].spentTransactionId === null ? '<span class="text-success">Unspent' : '<span class="text-danger">Spent') + '</span></div>';
 
 		//Value
 		formattedData += '<div style="padding-bottom:10px;" class="col-10"><span><strong>Value: </strong></span><span class="">' + formatErgValueString(data[i].value, 5) + ' <span class="text-light">' + formatAssetDollarPriceString(data[i].value, ERG_DECIMALS, 'ERG') + '</span></span></div>';
