@@ -21,7 +21,7 @@ window.onfocus = (event) => {
 };
 
 function onGotPrices() {
-	printTransaction(false);
+	getTransaction(false);
 }
 
 function getTxUrl(mempool) {
@@ -42,99 +42,125 @@ function getTxUrl(mempool) {
 	return txUrl;
 }
 
-function printTransaction(mempool) {
+function getTransaction(mempool) {
 	let txUrl = getTxUrl(mempool);
 
-	var jqxhr = $.get(txUrl, function(data) {
+	$.get(txUrl, function(data) {
 		if (mempool) {
-			showNotificationPermissionToast();
-		}
+			let walletAddress = data.inputs[0].address;
 
-		//Id
-		$('#txHeader').html('<p><a href="Copy to clipboard!" onclick="copyTransactionAddress(event)">' + data.id + ' &#128203;</a></p>');
+			let addressMempoolUrl = API_HOST_2 + 'mempool/transactions/byAddress/' + walletAddress;
 
-		//Time
-		if (mempool) {
-			$('#txTime').html('<p>' + formatDateString(data.creationTimestamp) + '</p>');
+		    if (networkType == 'testnet') {
+		        addressMempoolUrl = API_HOST_2 + 'api/v1/mempool/transactions/byAddress/' + walletAddress
+		    }
+
+			$.get(addressMempoolUrl, function(data) {
+				for (let i = 0; i < data.items.length; i++) {
+					if (data.items[i].id == txId) {
+						printTransaction(data.items[i], mempool);
+						break;
+					}
+				}
+			}).fail(function() {
+				printTransaction(data, mempool);
+			});
 		} else {
-			$('#txTime').html('<p>' + formatDateString(data.timestamp) + '</p>');
+			printTransaction(data, mempool);
 		}
-
-		//Inputs
-		$('#txInputs').html(formatInputsOutputs(data.inputs));
-
-		//Outputs
-		$('#txOutputs').html(formatInputsOutputs(data.outputs));
-
-		//Size
-		$('#txSize').html(formatKbSizeString(data.size));
-
-		//Date received
-		if (mempool) {
-			$('#txReceivedTime').remove();
-			$('#receivedTimeLeft').remove();
-		} else {
-			$('#txReceivedTime').html(formatDateString(data.timestamp));
-		}
-
-		//Inclusion height
-		if (mempool) {
-			$('#includedInBlocksLeft').remove();
-			$('#txIncludedInBlocks').remove();
-		} else {
-			$('#txIncludedInBlocks').html('<a href="' + getBlockUrl(data.outputs[0].blockId) + '">' + data.inclusionHeight + '</a>');
-		}
-
-		//Confirmations nr.
-		if (mempool) {
-			$('#txConfirmations').html('<span class="text-warning">Pending</a>');
-		} else {
-			$('#txConfirmations').html(data.numConfirmations);
-		}
-
-		//Total coins transferred
-		for (let i = 0; i < data.outputs.length; i++) {
-			totalCoinsTransferred += data.outputs[i].value;
-		}
-
-		$('#txTotalCoinsTransferred').html(formatErgValueString(totalCoinsTransferred, 6) + ' ' + formatAssetDollarPriceString(totalCoinsTransferred, ERG_DECIMALS, 'ERG'));
-
-		//Fee
-		let fee = 0;
-		for (let j = 0; j < data.outputs.length; j++) {
-			if (data.outputs[j].address == FEE_ADDRESS) {
-				fee = data.outputs[j].value;
-			}
-		}
-
-		$('#txFees').html(formatErgValueString(fee, 5) + ' ' + formatAssetDollarPriceString(fee, ERG_DECIMALS, 'ERG'));
-		
-		//Fees per byte
-		$('#txFeesPerByte').html(formatErgValueString(fee / (data.size), 9));
-		
-		//Tx scripts
-		$('#txScripts').html('Scripts');
-
-		//Raw input
-		$('#txRawInput').html(JSON.stringify(data.inputs, null, 4));
-
-		//Raw output
-		$('#txRawOutput').html(JSON.stringify(data.outputs, null, 4));
-
-		$('#txDataHolder').show();
-
-		getAddressesInfo();
-
-        $('#txLoading').hide();
-    })
+	})
     .fail(function() {
     	if (mempool) {
     		showLoadError('No results matching your query.');
 	        $('#txLoading').hide();
     	} else {
-    		printTransaction(true);
+    		getTransaction(true);
     	}
     });
+}
+
+function printTransaction(data, mempool) {	
+	if (mempool) {
+		showNotificationPermissionToast();
+	}
+
+	//Id
+	$('#txHeader').html('<p><a href="Copy to clipboard!" onclick="copyTransactionAddress(event)">' + data.id + ' &#128203;</a></p>');
+
+	//Time
+	if (mempool) {
+		$('#txTime').html('<p>' + formatDateString(data.creationTimestamp) + '</p>');
+	} else {
+		$('#txTime').html('<p>' + formatDateString(data.timestamp) + '</p>');
+	}
+
+	//Inputs
+	$('#txInputs').html(formatInputsOutputs(data.inputs));
+
+	//Outputs
+	$('#txOutputs').html(formatInputsOutputs(data.outputs));
+
+	//Size
+	$('#txSize').html(formatKbSizeString(data.size));
+
+	//Date received
+	if (mempool) {
+		$('#txReceivedTime').remove();
+		$('#receivedTimeLeft').remove();
+	} else {
+		$('#txReceivedTime').html(formatDateString(data.timestamp));
+	}
+
+	//Inclusion height
+	if (mempool) {
+		$('#includedInBlocksLeft').remove();
+		$('#txIncludedInBlocks').remove();
+	} else {
+		$('#txIncludedInBlocks').html('<a href="' + getBlockUrl(data.outputs[0].blockId) + '">' + data.inclusionHeight + '</a>');
+	}
+
+	//Confirmations nr.
+	if (mempool) {
+		$('#txConfirmations').html('<span class="text-warning">Pending</a>');
+	} else {
+		$('#txConfirmations').html(data.numConfirmations);
+	}
+
+	//Total coins transferred
+	for (let i = 0; i < data.outputs.length; i++) {
+		totalCoinsTransferred += data.outputs[i].value;
+	}
+
+	$('#txTotalCoinsTransferred').html(formatErgValueString(totalCoinsTransferred, 6) + ' ' + formatAssetDollarPriceString(totalCoinsTransferred, ERG_DECIMALS, 'ERG'));
+
+	//Fee
+	let fee = 0;
+	for (let j = 0; j < data.outputs.length; j++) {
+		if (data.outputs[j].address == FEE_ADDRESS) {
+			fee = data.outputs[j].value;
+		}
+	}
+
+	$('#txFees').html(formatErgValueString(fee, 5) + ' ' + formatAssetDollarPriceString(fee, ERG_DECIMALS, 'ERG'));
+	
+	//Fees per byte
+	$('#txFeesPerByte').html(formatErgValueString(fee / (data.size), 9));
+	
+	//Tx scripts
+	$('#txScripts').html('Scripts');
+
+	//Raw input
+	$('#txRawInput').html(JSON.stringify(data.inputs, null, 4));
+
+	//Raw output
+	$('#txRawOutput').html(JSON.stringify(data.outputs, null, 4));
+
+	$('#txDataHolder').show();
+
+	getAddressesInfo();
+
+    $('#txLoading').hide();
+   
 }
 
 function checkMempoolChanged() {
