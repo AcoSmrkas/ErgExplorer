@@ -76,5 +76,14 @@ label {
 }
 
 select {
-	max-width: 200px;
+	min-height: inherit;
+	max-width: 100%;
+}
+
+select:not(:focus):not(:active):not(:hover) {
+	border: 1px solid var(--bs-border-color);
+}
+
+select:hover {
+	border: 1px solid var(--bs-border-color);
 }

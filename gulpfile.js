@@ -93,7 +93,7 @@ gulp.task('styles-css', () => {
 
 gulp.task('scripts-build', () => {
   return gulp.src('app/scripts/**/*.js')
-      .pipe(terser())
+      .pipe(terser({compress: {drop_console: true}}))
       .pipe(gulp.dest('dist/scripts'));
 });
 

@@ -143,7 +143,9 @@ function searchAddress() {
 function formatErgValueString(value, maxDecimals = 4) {
     let ergValue = value / 1000000000;
 
-    if (ergValue > 10) {
+    maxDecimals = getDecimals(ergValue, 1);
+
+    if (ergValue > 10 || ergValue < -10) {
             maxDecimals = 2;
     }
 
@@ -207,7 +209,7 @@ function formatAssetValueString(value, decimals, digits = 2) {
 		digits = 2;
 	}
 
-	digits = getDecimals(assetValue);
+	digits = getDecimals(assetValue, 1);
 
 	return formatValue(assetValue, digits);
 }
@@ -241,6 +243,10 @@ function formatDollarPriceString(value, digits = 5) {
 function formatAssetDollarPrice(tokenAmount, tokenDecimals, tokenId) {
 	if (gotPrices == undefined || !gotPrices || prices[tokenId] == undefined) {
 		return -1;
+	}
+
+	if (tokenAmount < 0) {
+		tokenAmount *= -1;
 	}
 
 	return getAssetValue(tokenAmount, tokenDecimals) * prices[tokenId];
@@ -554,6 +560,10 @@ function nFormatter(num, digits) {
 }
 
 function sortTokens(tokens) {
+	if (tokens == undefined) {
+		return new Array();
+	}
+
 	let tokensArray = tokens.sort((a, b) => {
 		let aAmount = a.amount / Math.pow(10, a.decimals);
 		let bAmount = b.amount / Math.pow(10, b.decimals);
@@ -663,6 +673,10 @@ function toFixed(num, fixed) {
 }
 
 function getDecimals(value, additional = 2) {
+	if (value < 0) {
+		value *= -1;
+	}
+
 	let decimals = 2;
 	value = value.toString().split('.');
 	if (value.length > 1) {

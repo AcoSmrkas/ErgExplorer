@@ -134,13 +134,134 @@ function printAddressSummary() {
     });
 }
 
+const TxType = {
+	Wallet2Wallet: 'Wallet2Wallet',
+	Wallet2Contract: 'Wallet2Contract',
+	Contract2Wallet: 'Contract2Wallet',
+	Contract2Contract: 'Contract2Contract',
+	Origin: 'Origin'
+}
+
+function getTxType(tx) {		
+	if (tx.inputs == undefined || tx.inputs.length == 0) {
+		return TxType.Origin;
+	}
+
+	let input0isWallet = isWalletAddress(tx.inputs[0].address);
+	let output0isWallet = isWalletAddress(tx.outputs[0].address);
+
+	if (input0isWallet && output0isWallet) {
+		return TxType.Wallet2Wallet;
+	}
+
+	if (!input0isWallet && !output0isWallet) {
+		return TxType.Contract2Contract;
+	}
+
+	if (input0isWallet && !output0isWallet) {
+		return TxType.Wallet2Contract;
+	}
+
+	if (!input0isWallet && output0isWallet) {
+		return TxType.Contract2Wallet;
+	}
+}
+
+function isWalletAddress(address) {
+	let walletAddressPrefix = networkType == 'testnet' ? '3' : '9';
+
+	return address.substring(0, 1) == walletAddressPrefix;
+}
+
+function formatTxAddressString(address) {
+	let formattedAddress;
+	
+	if (address == walletAddress) {
+		formattedAddress = 'This Address';
+	} else {
+		formattedAddress = formatAddressString(address, 10);
+	}
+
+	let addressString = '<a title="' + address + '" class="address-string" addr="' + address + '" href="' + getWalletAddressUrl(address) + '" >' + (getOwner(address) == undefined ? formattedAddress : getOwner(address)) + '</a>';
+	if (address == AddressType.NA) {
+		addressString = '<span class="text-light">' + AddressType.NA + '</span>';
+	} else if (address == AddressType.Multiple) {
+		addressString = '<span class="text-light" title="This transaction has multiple receiving addresses. Check transaction link for more details.">' + AddressType.Multiple + '</span>';
+	}
+
+	return addressString;
+}
+
+function getTxInOutType(totalTransferedAssets) {
+	let txInOut = checkAssetsSign(totalTransferedAssets.assets);
+
+	if (txInOut != TxInOut.Mixed) {
+		if (totalTransferedAssets.value > 0) {
+			if (txInOut == TxInOut.Out) {
+				txInOut = TxInOut.Mixed;
+			} else {
+				txInOut = TxInOut.In;
+			}
+		} else if (totalTransferedAssets.value < 0) {
+			if (txInOut == TxInOut.In) {
+				txInOut = TxInOut.Mixed;
+			} else {
+				txInOut = TxInOut.Out;
+			}
+		}
+	}
+
+	return txInOut;
+}
+
+function checkAssetsSign(assets) {
+	let assetsSign = undefined;
+
+	let assetsKeys = Object.keys(assets);
+	for (let i = 0; i < assetsKeys.length; i++) {
+		let asset = assets[assetsKeys[i]];
+
+		if (asset.amount > 0) {
+			if (assetsSign == TxInOut.Out) {
+				assetsSign = TxInOut.Mixed;
+			}
+
+			if (assetsSign == undefined) {
+				assetsSign = TxInOut.In;
+			}
+		}
+
+		if (asset.amount < 0) {
+			if (assetsSign == TxInOut.In) {
+				assetsSign = TxInOut.Mixed;
+			}
+
+			if (assetsSign == undefined) {
+				assetsSign = TxInOut.Out;
+			}
+		}
+	}
+
+	return assetsSign;
+}
+
+const TxInOut = {
+	In: 'In',
+	Out: 'Out',
+	Mixed: 'Mixed'
+}
+
+const AddressType = {
+	NA: 'N/A',
+	Multiple: 'Multiple'
+}
+
 function getFormattedTransactionsString(transactionsJson, isMempool) {
 	if (transactionsJson == undefined || transactionsJson == '' || transactionsJson.total == 0) {
 		return '';
 	}
 
 	let formattedResult = '';
-	let isWallet2Wallet = true;
 	for (let i = 0; i < transactionsJson.items.length; i++) {
 		const item = transactionsJson.items[i];
 
@@ -154,137 +275,9 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 			}
 		}
 
-		//From/to address
-		let addressPrefix = '9';
-		if (networkType == 'testnet') {
-			addressPrefix = '3';
-		}
+		let outputsAddress = walletAddress;
+		let txType = getTxType(item);
 
-		isWallet2Wallet = item.outputs[0].address.substring(0, 1) == addressPrefix;
-
-		let isTxOut = false;
-		for (let j = 0; j < item.inputs.length; j++) {
-			if (item.inputs[j].address == walletAddress) {
-				isTxOut = true;
-				break;
-			}
-		}
-
-		let inputsAddress = 'N/A';
-		if (item.inputs != undefined && item.inputs.length > 0) {
-			inputsAddress = item.inputs[0].address;
-		}
-
-		let fromAddress = ((isTxOut) ? walletAddress : inputsAddress);
-		let toAddress = walletAddress;
-		if (isTxOut) {
-			toAddress = -1;
-			for (let j = 0; j < item.outputs.length; j++) {
-				if (item.outputs[j].address != fromAddress) {
-					toAddress = item.outputs[j].address;
-					break;
-				}
-			}
-			if (toAddress == -1) {
-				toAddress = item.outputs[0].address;
-			}
-		}
-
-		let isSmart = isTxOut && !isWallet2Wallet;		
-		let smartAddress = walletAddress.length > 100
-		let outputsAddress = (isSmart && !smartAddress ? walletAddress : toAddress);
-		let ownAddressCount = 0;
-		let smartOut = false;
-
-		if (isSmart) {
-			for (let j = 0; j < item.outputs.length; j++) {
-				if (item.outputs[j].address == walletAddress) {
-					ownAddressCount++;
-				}
-			}
-
-			if (ownAddressCount == 1) {
-				outputsAddress = toAddress;
-				smartOut = true;
-			}
-
-			if (fromAddress == toAddress) {
-				let inputValue = -1;
-				for (let j = 0; j < item.inputs.length; j++) {
-					if (item.inputs[j].address == fromAddress) {
-						inputValue = item.inputs[j].value;
-						break;
-					}
-				}
-
-				let outputValue = -1;
-				for (let j = 0; j < item.outputs.length; j++) {
-					if (item.outputs[j].address == toAddress) {
-						outputValue = item.outputs[j].value;
-						break;
-					}
-				}
-
-				if (item.outputs.length > 1) {
-					for (let j = 0; j < item.outputs.length; j++) {
-						if (item.outputs[j].address != fromAddress) {
-							toAddress = outputsAddress = item.outputs[j].address;
-							break;
-						}
-					}
-				}
-			}	
-		}
-
-		//Tx
-		formattedResult += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionsUrl(item.id) + '"><i class="fas fa-link text-info"></i></a></td>';
-
-		//Timestamp
-		formattedResult += '<td><span class="d-lg-none"><strong>Time: </strong></span>' + formatDateString((isMempool) ? item.creationTimestamp : item.timestamp) + '</td>';
-
-		//Block nr.
-		formattedResult += '<td><span class="d-lg-none"><strong>Block: </strong></span>' + ((isMempool) ? item.outputs[0].creationHeight : '<a href="' + getBlockUrl(item.blockId) + '">' + item.inclusionHeight + '</a>') + '</td>';
-		
-		// In or Out tx.
-		let smartInOutString = (smartOut ? '<span class="text-danger">Out</span>' : '<span class="text-success">In</span>');
-
-		formattedResult += '<td class="' + ((isTxOut) ? (isWallet2Wallet) ? 'text-danger' : 'text-info' : 'text-success') + '">' + ((isTxOut) ? (isWallet2Wallet) ? 'Out' : smartInOutString + ' <span title="Smart Contract interaction. Check transaction link for full details.">(SC)</span>' : 'In') + '</td>';
-		
-		//From
-		addAddress(fromAddress);
-		let formattedAddress = formatAddressString(fromAddress, 10);
-		if (fromAddress == walletAddress) {
-			formattedAddress = 'This Address';
-		}
-		let addressString = '<a class="address-string" addr="' + fromAddress + '" href="' + getWalletAddressUrl(fromAddress) + '" >' + (getOwner(fromAddress) == undefined ? formattedAddress : getOwner(fromAddress)) + '</a>';
-		if (fromAddress == 'N/A') {
-			addressString = (getOwner(fromAddress) == undefined ? fromAddress : getOwner(fromAddress));
-		}
-		formattedResult += '<td><span class="d-lg-none"><strong>From: </strong></span>' + addressString + '</td>';
-		
-		//To
-		addAddress(toAddress);
-		formattedAddress = formatAddressString(toAddress, 10)
-		if (toAddress == walletAddress) {
-			formattedAddress = 'This Address';
-		}
-		formattedResult += '<td><span class="d-lg-none"><strong>To: </strong></span><a class="address-string" addr="' + toAddress +'" href="' + getWalletAddressUrl(toAddress) + '">' + (getOwner(toAddress) == undefined ? formattedAddress : getOwner(toAddress)) + '</a></td>';
-
-		//Status
-		if (item.numConfirmations == undefined) {
-			item.numConfirmations = item.confirmationsCount;
-		}
-
-		let confirmationsString = '';
-		if (item.numConfirmations != undefined) {
-			//confirmationsString = ' (' + nFormatter(item.numConfirmations) + ')';
-		}
-		formattedResult += '<td><span class="d-lg-none"><strong>Status: </strong></span><span class="' + ((isMempool) ? 'text-warning' : 'text-success' ) + '">' + ((isMempool) ? 'Pending' : 'Confirmed' + confirmationsString) + '</span></td>';
-		
-		//Fee
-		formattedResult += '<td><span class="d-lg-none"><strong>Fee: </strong></span>' + formatErgValueString(fee) + '</td>';
-
-		//Value
 		let totalTransferedAssets = {
 			value: 0,
 			assets: {}
@@ -318,7 +311,11 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 				
 				for (let k = 0; k < tokensArray.length; k++) {
 					if (totalTransferedAssets.assets[tokensArray[k].tokenId] == undefined) {
-						totalTransferedAssets.assets[tokensArray[k].tokenId] = tokensArray[k];
+						totalTransferedAssets.assets[tokensArray[k].tokenId] = {};
+						totalTransferedAssets.assets[tokensArray[k].tokenId].tokenId = tokensArray[k].tokenId;
+						totalTransferedAssets.assets[tokensArray[k].tokenId].decimals = tokensArray[k].decimals;
+						totalTransferedAssets.assets[tokensArray[k].tokenId].name = tokensArray[k].name;
+						totalTransferedAssets.assets[tokensArray[k].tokenId].amount = -tokensArray[k].amount;
 					} else {
 						totalTransferedAssets.assets[tokensArray[k].tokenId].amount -= tokensArray[k].amount;
 					}
@@ -326,50 +323,272 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 			}
 		}
 
+		let txInOut = getTxInOutType(totalTransferedAssets);
+
+		if ((txInOut == TxInOut.Out
+			|| txInOut == TxInOut.Mixed)
+			&& totalTransferedAssets.value == -fee) {
+			totalTransferedAssets.value = 0;
+		} else if (txType == TxType.Wallet2Wallet
+			&& txInOut == TxInOut.Out) {
+			totalTransferedAssets.value += fee;
+		} 
+
+		txInOut = getTxInOutType(totalTransferedAssets);
+
+		if (txInOut == TxInOut.In && txType != TxType.Origin) {
+			for (let j = 0; j < item.outputs.length; j++) {
+				let output = item.outputs[j];
+				if (output.address == walletAddress) {
+					toAddress = walletAddress;
+					fromAddress = item.inputs[0].address;
+					break;
+				}
+			}
+		}
+
+		//From/to address
+
+		console.log(item.id, txType, txInOut);
+
+		let fromAddress;
+		let toAddress;
+		if (txType == TxType.Origin) {
+			fromAddress = AddressType.NA;
+			toAddress = item.outputs[0].address;
+		} else if (txType == TxType.Wallet2Wallet) {
+			if (txInOut == TxInOut.In) {
+				//Input TX
+				fromAddress = item.inputs[0].address;
+				toAddress = walletAddress;
+			} else if (txInOut == TxInOut.Out
+				|| txInOut == TxInOut.Mixed) {
+				//Output TX
+				fromAddress = walletAddress;
+				toAddress = item.outputs[0].address;
+
+				//Handle multiple output addresses
+				if (fromAddress == toAddress) {
+					let otherAddresses = 0;
+					for (let j = 0; j < item.outputs.length; j++) {
+						let output = item.outputs[j];
+
+						if (output.address != fromAddress && isWalletAddress(output.address)) {
+							console.log(output.address);
+							otherAddresses++;
+						}
+					}
+
+					if (otherAddresses == 1) {
+						toAddress = item.outputs[1].address;
+					}
+
+					if (otherAddresses > 1) {
+						toAddress = AddressType.Multiple;
+					}
+				}
+			}
+		} else if (txType == TxType.Contract2Contract) {
+			//Is this contract
+			let isThisContract;
+			if (item.inputs[0].address == item.outputs[0].address
+				&& item.inputs[0].address == walletAddress) {
+				isThisContract = true;
+			} else {
+				isThisContract = false;
+			}
+
+			if (txInOut == TxInOut.In) {
+				//Input TX
+				if (isThisContract) {
+					if (item.inputs.length > 1) {
+						fromAddress = item.inputs[1].address;
+					} else {
+						fromAddress = item.inputs[0].address;
+					}
+
+					toAddress = walletAddress;
+				} else {
+					fromAddress = item.inputs[0].address;
+					toAddress = walletAddress;
+				}
+			} else if (txInOut == TxInOut.Out
+				|| txInOut == TxInOut.Mixed) {
+				//Output TX
+				if (isThisContract) {
+					if (txInOut == TxInOut.Mixed && item.inputs.length > 1) {
+						fromAddress = item.inputs[1].address;
+					} else {
+						fromAddress = item.inputs[0].address;
+					}
+
+					toAddress = walletAddress;
+				} else {
+					fromAddress = walletAddress;
+					toAddress = item.outputs[0].address;
+				}
+
+				if (fromAddress == toAddress || txInOut == TxInOut.Mixed) {
+					let otherAddresses = 0;
+					for (let j = 0; j < item.outputs.length; j++) {
+						let output = item.outputs[j];
+
+						if (output.address != fromAddress
+							&& output.address != FEE_ADDRESS) {
+							otherAddresses++;
+						}
+					}
+
+					if (otherAddresses > 1) {
+						toAddress = AddressType.Multiple;
+					} else {
+						if (item.outputs.length > 1) {
+							toAddress = item.outputs[1].address;
+						} else {
+							toAddress = item.outputs[0].address;
+						}
+					}
+				}
+			}
+		} else if (txType == TxType.Wallet2Contract) {
+			fromAddress = item.inputs[0].address;
+			toAddress = item.outputs[0].address;
+		} else if (txType == TxType.Contract2Wallet) {
+			fromAddress = item.inputs[0].address;
+			toAddress = walletAddress;
+		}
+
+		if (txInOut == undefined) {
+			fromAddress = toAddress = walletAddress;
+		}
+
+		//Tx
+		formattedResult += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionsUrl(item.id) + '"><i class="fas fa-link text-info"></i></a></td>';
+
+		//Timestamp
+		formattedResult += '<td><span class="d-lg-none"><strong>Time: </strong></span>' + formatDateString((isMempool) ? item.creationTimestamp : item.timestamp) + '</td>';
+
+		//Block nr.
+		let blockNr = item.inclusionHeight;
+		formattedResult += '<td><span class="d-lg-none"><strong>Block: </strong></span>' + ((isMempool) ? item.outputs[0].creationHeight : '<a href="' + getBlockUrl(item.blockId) + '">' + blockNr + '</a>') + '</td>';
+		
+		// In or Out tx.
+		let classString;
+		let inOutString;
+		if (txInOut == TxInOut.In) {
+			classString = 'text-success';
+			inOutString = 'In';
+		} else if (txInOut == TxInOut.Out) {
+			classString = 'text-danger';
+			inOutString = 'Out';
+		} else if (txInOut == TxInOut.Mixed) {
+			classString = 'text-warning';
+			inOutString = 'Mixed';
+		} else if (txInOut == undefined) {
+			classString = 'text-info';
+			inOutString = 'Consolidation';
+		}
+
+		let smartString = '<span class="text-info" title="Smart Contract interaction. Check transaction link for full details."> (SC)</span>';
+
+		if (txType == TxType.Contract2Contract) {
+			inOutString += smartString;
+		}
+
+		formattedResult += '<td class="' + classString + '">' + inOutString + '</td>';
+		
+		//From
+		addAddress(fromAddress);
+		let formattedAddressString = formatTxAddressString(fromAddress);
+		formattedResult += '<td><span class="d-lg-none"><strong>From: </strong></span>' + formattedAddressString + '</td>';
+		
+		//To
+		addAddress(toAddress);
+		formattedAddressString = formatTxAddressString(toAddress);
+		formattedResult += '<td><span class="d-lg-none"><strong>To: </strong></span>' + formattedAddressString + '</td>';
+
+		//Status
+		formattedResult += '<td><span class="d-lg-none"><strong>Status: </strong></span><span class="' + ((isMempool) ? 'text-warning' : 'text-success' ) + '">' + ((isMempool) ? 'Pending' : 'Confirmed') + '</span></td>';
+		
+		//Fee
+		formattedResult += '<td><span class="d-lg-none"><strong>Fee: </strong></span>' + formatErgValueString(fee) + '</td>';
+
+		//Value
+		if (txInOut != TxInOut.Mixed) {
+			if (totalTransferedAssets.value < 0) totalTransferedAssets.value *= -1;
+
+			let assetKeys = Object.keys(totalTransferedAssets.assets);
+			for (let k = 0; k < assetKeys.length; k++) {
+				let asset = totalTransferedAssets.assets[assetKeys[k]];
+				if (asset.amount < 0) asset.amount *= -1;
+			}
+		}
+
+		console.log(txInOut, totalTransferedAssets);
 
 		let assets = ' ';
 		let assetsFull = ' ';
 		let tokensToShow = 2;
 		let keys = Object.keys(totalTransferedAssets.assets)
+		let assetsI = 0;
+		let mixedPlus = '';
+		if (txInOut == TxInOut.Mixed || txInOut == TxInOut.In) {
+//			mixedPlus = '+';
+		}
+		let endAdd = '';
 		for (let j = 0; j < keys.length; j++) {
 			let asset = totalTransferedAssets.assets[keys[j]];
 
-			if (asset.amount <= 0) {
+			if (asset.amount == 0) {
 				continue;
 			}
 
-			let assetPrice = -1;
+			let assetPrice = undefined;
 			if (gotPrices && prices[asset.tokenId] != undefined) {
 				assetPrice = formatAssetDollarPriceString(asset.amount, asset.decimals, asset.tokenId);
 			}
 
-			let assetsString = '<br><strong><span class="text-white">' + formatAssetValueString(asset.amount, asset.decimals, 4) + '</span></strong> ' + getAssetTitle(asset, false) + (assetPrice == -1 ? '' : ' <span class="text-light">' + assetPrice +'</span>');
+			let assetsString = '<br><strong><span class="text-white">' + (asset.amount > 0 ? mixedPlus : '') + formatAssetValueString(asset.amount, asset.decimals, 4) + '</span></strong> ' + getAssetTitle(asset, false) + (assetPrice == undefined ? '' : ' <span class="text-light">' + assetPrice +'</span>');
 
 			assetsFull += assetsString;
 			
-			if (j > tokensToShow) continue;
+			if (assetsI > tokensToShow) {
+				assetsI++;
+				continue;
+			}
 
 			assets += assetsString;
 
-			if (j == tokensToShow && totalTransferedAssets.assets.length > tokensToShow + 1) {
+			if (assetsI == tokensToShow && keys.length > tokensToShow + 1) {
 				assets += '<p>...</p><p><strong><a href="#" onclick="showFullValue(event, ' + (i + mempoolIndexOffset) + ')">Show all</a></strong></p>';
+
+				endAdd = '<p> </p><p><strong><a href="#" onclick="hideFullValue(event, ' + (i + mempoolIndexOffset) + ')">Hide</a></strong></p>';
 			}
 
-			assetsFull += '<p> </p><p><strong><a href="#" onclick="hideFullValue(event, ' + (i + mempoolIndexOffset) + ')">Hide</a></strong></p>';
+			assetsI++;
 		}
 
-		let ergDollarValue = -1
+		if (endAdd != '') {
+			assetsFull += endAdd;
+		}
+
+		let ergDollarValue = undefined;
 		if (gotPrices) {
 			ergDollarValue = formatAssetDollarPrice(totalTransferedAssets.value, ERG_DECIMALS, 'ERG');
 		}
 
 		let ergValueString = '';
-		if (totalTransferedAssets.value > 0) {
-			ergValueString = formatErgValueString(totalTransferedAssets.value, 5) + (ergDollarValue == -1 ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>')
-formatErgValueString(totalTransferedAssets.value, 5) + (ergDollarValue == -1 ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>');
+		if (totalTransferedAssets.value != 0) {
+			ergValueString = (totalTransferedAssets.value > 0 ? mixedPlus : '') + formatErgValueString(totalTransferedAssets.value, 5) + (ergDollarValue == undefined ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>')
+formatErgValueString(totalTransferedAssets.value, 5) + (ergDollarValue == undefined ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>');
 		} else {
 			assets = assets.substr(5);
 			assetsFull = assets.substr(5);
+		}
+
+		if (totalTransferedAssets.value == 0 && assetsI == 0) {
+			assets = '/';
+			assetsFull = '/';
 		}
 
 		valueFields[i + mempoolIndexOffset] = ergValueString + assets;
@@ -627,7 +846,7 @@ function getTxsUrl() {
 }
 
 function getTxsDataUrl() {
-	if (params['filter'] == undefined) {
+	if (params['filterTxs'] == undefined) {
 		return API_HOST_2 + 'addresses/' + walletAddress + '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
 	} else {
 		let tokenId = params['tokenId'];
@@ -635,27 +854,32 @@ function getTxsDataUrl() {
 		let maxValue = params['maxValue'];
 		let fromDate = params['fromDate'];
 		let toDate = params['toDate'];
+		let txType = params['txType'];
 
 		let filterApiUrl = ERGEXPLORER_API_HOST + 'user/getUserTransactions?&address=' + walletAddress + '&offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
 
 		if (tokenId != undefined) {
-			filterApiUrl += "&tokenId=" + tokenId;
+			filterApiUrl += '&tokenId=' + tokenId;
 		}
 
 		if (minValue != undefined) {
-			filterApiUrl += "&minValue=" + minValue;
+			filterApiUrl += '&minValue=' + minValue;
 		}
 
 		if (maxValue != undefined) {
-			filterApiUrl += "&maxValue=" + maxValue;
+			filterApiUrl += '&maxValue=' + maxValue;
 		}
 
 		if (fromDate != undefined) {
-			filterApiUrl += "&fromDate=" + fromDate;
+			filterApiUrl += '&fromDate=' + fromDate;
 		}
 
 		if (toDate != undefined) {
-			filterApiUrl += "&toDate=" + toDate;
+			filterApiUrl += '&toDate=' + toDate;
+		}
+
+		if (txType != 'all') {
+			filterApiUrl += '&txType=' + txType;
 		}
 
 		return filterApiUrl;
@@ -812,7 +1036,15 @@ function setupDatePicker() {
 
     datePickerFrom.dates.formatInput = function(date) {
     	{
-    		return date.toLocaleDateString();
+    		if (date == undefined) {
+    			return '';
+    		}
+
+    		return date.toLocaleDateString(undefined,
+    			{  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+}) + ' 00:00 AM';
     	}
 	}
 
@@ -839,7 +1071,15 @@ function setupDatePicker() {
 
     datePickerTo.dates.formatInput = function(date) {
     	{
-    		return date.toLocaleDateString();
+    		if (date == undefined) {
+    			return '';
+    		}
+
+    		return date.toLocaleDateString(undefined,
+    			{  year: 'numeric',
+		  month: '2-digit',
+		  day: '2-digit',
+		}) + ' 11:59 PM';
     	}
 	}
 }
@@ -849,18 +1089,18 @@ function filterTransactions(e) {
 
 	clearFilterParams();
 
-	params['filter'] = "true";
+	params['filterTxs'] = 'true';
 
 	let tokenId = $('#tokenId').val();
-	if (tokenId.trim() != "") {
+	if (tokenId.trim() != '') {
 		params['tokenId'] = tokenId;
 	}
 	let minValue = $('#minValue').val();
-	if (minValue.trim() != "") {
+	if (minValue.trim() != '') {
 		params['minValue'] = minValue;
 	}
 	let maxValue = $('#maxValue').val();
-	if (maxValue.trim() != "") {
+	if (maxValue.trim() != '') {
 		params['maxValue'] = maxValue;
 	}
 
@@ -871,6 +1111,8 @@ function filterTransactions(e) {
 	if (datePickerTo.dates._dates.length > 0) {
 		params['toDate'] = datePickerTo.dates._dates[0].getTime();
 	}
+
+	params['txType'] = $('#txType').val();
 
 	window.location.assign(getCurrentUrlWithParams());
 }
@@ -884,12 +1126,13 @@ function clearFilter(e) {
 }
 
 function clearFilterParams() {
-	delete params['filter'];
+	delete params['filterTxs'];
 	delete params['tokenId'];
 	delete params['minValue'];
 	delete params['maxValue'];
 	delete params['fromDate'];
 	delete params['toDate'];
+	delete params['txType'];
 }
 
 function onGotIssuedNftInfo(nftInfos, message) {
