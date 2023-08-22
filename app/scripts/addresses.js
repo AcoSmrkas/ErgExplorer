@@ -23,6 +23,7 @@ var mempoolTxIds = new Array();
 var txNotification = undefined;
 var datePickerFrom = undefined;
 var datePickerTo = undefined;
+var tempDate = -1;
 
 $(function() {
 	walletAddress = getWalletAddressFromUrl();	
@@ -47,7 +48,7 @@ window.onfocus = (event) => {
 function printAddressSummary() {
 	let balanceUrl = getTxsUrl();
 
-	var jqxhr = $.get(balanceUrl,
+	$.get(balanceUrl,
 	function(data) {
 		//Total ERG value
 		$('#finalErgBalance').html('<strong class="erg-span">ERG</strong><span class="gray-color"> balance:</span> <strong>' + formatErgValueString(data.confirmed.nanoErgs, 2) + '</strong>');
@@ -329,7 +330,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 			|| txInOut == TxInOut.Mixed)
 			&& totalTransferedAssets.value == -fee) {
 			totalTransferedAssets.value = 0;
-		} else if (txType == TxType.Wallet2Wallet
+		} else if ((txType == TxType.Wallet2Wallet || txType == TxType.Wallet2Contract)
 			&& txInOut == TxInOut.Out) {
 			totalTransferedAssets.value += fee;
 		} 
@@ -349,8 +350,6 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 
 		//From/to address
 
-		console.log(item.id, txType, txInOut);
-
 		let fromAddress;
 		let toAddress;
 		if (txType == TxType.Origin) {
@@ -368,24 +367,23 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 				toAddress = item.outputs[0].address;
 
 				//Handle multiple output addresses
-				if (fromAddress == toAddress) {
-					let otherAddresses = 0;
-					for (let j = 0; j < item.outputs.length; j++) {
-						let output = item.outputs[j];
+				let otherAddresses = 0;
+				for (let j = 0; j < item.outputs.length; j++) {
+					let output = item.outputs[j];
 
-						if (output.address != fromAddress && isWalletAddress(output.address)) {
-							console.log(output.address);
-							otherAddresses++;
-						}
+					if (output.address != fromAddress && output.address != FEE_ADDRESS) {
+						otherAddresses++;
 					}
+				}
 
+				if (fromAddress == toAddress) {
 					if (otherAddresses == 1) {
 						toAddress = item.outputs[1].address;
 					}
+				}
 
-					if (otherAddresses > 1) {
-						toAddress = AddressType.Multiple;
-					}
+				if (otherAddresses > 1) {
+					toAddress = AddressType.Multiple;
 				}
 			}
 		} else if (txType == TxType.Contract2Contract) {
@@ -416,7 +414,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 				|| txInOut == TxInOut.Mixed) {
 				//Output TX
 				if (isThisContract) {
-					if (txInOut == TxInOut.Mixed && item.inputs.length > 1) {
+					if (txInOut == TxInOut.Mixed && item.inputs.length == 2) {
 						fromAddress = item.inputs[1].address;
 					} else {
 						fromAddress = item.inputs[0].address;
@@ -524,8 +522,6 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 			}
 		}
 
-		console.log(txInOut, totalTransferedAssets);
-
 		let assets = ' ';
 		let assetsFull = ' ';
 		let tokensToShow = 2;
@@ -536,6 +532,15 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 //			mixedPlus = '+';
 		}
 		let endAdd = '';
+		let assetITotal = 0;
+		for (let j = 0; j < keys.length; j++) {
+			let asset = totalTransferedAssets.assets[keys[j]];
+
+			if (asset.amount != 0) {
+				assetITotal++;
+			}
+		}
+
 		for (let j = 0; j < keys.length; j++) {
 			let asset = totalTransferedAssets.assets[keys[j]];
 
@@ -559,7 +564,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 
 			assets += assetsString;
 
-			if (assetsI == tokensToShow && keys.length > tokensToShow + 1) {
+			if (assetsI == tokensToShow && assetITotal > tokensToShow + 1) {
 				assets += '<p>...</p><p><strong><a href="#" onclick="showFullValue(event, ' + (i + mempoolIndexOffset) + ')">Show all</a></strong></p>';
 
 				endAdd = '<p> </p><p><strong><a href="#" onclick="hideFullValue(event, ' + (i + mempoolIndexOffset) + ')">Hide</a></strong></p>';
@@ -958,6 +963,117 @@ function onMempoolAndTransactionsDataFetched() {
 	$('#txLoading').hide();
 
 	getAddressesInfo();
+
+//	$('#filterHolder').show();
+//	getChart('ERG', 'chart1');
+//	getChart('9a06d9e545a41fd51eeffc5e20d818073bf820c635e2a9d922269913e0de369d', 'chart2');
+}
+
+function getChart(tokenId, canvasId) {
+	$.get(ERGEXPLORER_API_HOST + 'user/getAddressStats?address=' + walletAddress + '&tokenId=' + tokenId,
+		function(data) {
+	
+	data.items = data.items.filter(function (_, index) {
+		return data.items[index].type === 'total';
+	});
+
+	let step = 1;
+	if (data.items.length > 25) {
+		step = parseInt(data.items.length / 25);
+	}
+	let lastStep;
+	let diff = 0;
+	let diffI = 0;
+	let newData = [];
+	data.items = data.items.filter(function (_, index) {
+		let item = data.items[index];
+		if (index == 0) {
+			newData.push(item);
+			lastStep = item.value;
+			diff = 0;
+
+			return true;
+		}
+
+		if (index == data.items.length - 1) {
+			if (tokenId != 'ERG') {
+				for (let i = 0; i < tokensArray.length; i++) {
+					let token = tokensArray[i];
+					if (token.tokenId == tokenId) {
+						item.value = token.amount / Math.pow(10, token.decimals);
+					}
+				}
+			}
+
+			newData.push(item);
+
+			return true;
+		}
+
+		let temp = Math.abs(lastStep - item.value);
+		if (temp > diff) {
+			diff = temp;
+			diffI = index;
+		}
+
+		if (index % step === 0) {
+			data.items[index].value = data.items[diffI].value;
+
+			newData.push(item);
+			lastStep = item.value;
+			diff = 0;
+
+			return true;
+		}
+
+		return false;
+	});
+
+	const rootStyles = getComputedStyle(document.documentElement);
+
+	// Get the value of the global CSS variable
+	const primaryColor = rootStyles.getPropertyValue('--main-color').trim();
+
+	new Chart(
+	    document.getElementById(canvasId),
+	    {
+	      type: 'line',
+	      options: {
+	      	responsive: true,
+	        animation: true,
+	        fill: false,
+	        borderColor: primaryColor,
+	        plugins: {
+	          legend: {
+	            display: false
+	          },
+	          tooltip: {
+	            enabled: true
+	          }
+	        }
+	      },
+	      data: {
+	        labels: data.items.map(mapLabel),
+	        datasets: [
+	          {
+	            data: data.items.map(row => row.value)
+	          }
+	        ]
+	      }
+	    }
+	  );
+	});
+}
+
+function mapLabel(row, index) {
+	let dateString = new Date(parseInt(row.timestamp)).toLocaleDateString();
+
+	if (dateString != tempDate) {
+		tempDate = dateString;
+		return dateString;
+	} else {
+		return '';
+	}
 }
 
 function getOfficialExplorereAddressUrl(address) {
@@ -1112,7 +1228,12 @@ function filterTransactions(e) {
 		params['toDate'] = datePickerTo.dates._dates[0].getTime();
 	}
 
-	params['txType'] = $('#txType').val();
+	let txType = $('#txType').val();
+	if (txType == undefined) {
+		params['txType'] = 'all';
+	} else {
+		params['txType'] = txType;
+	}
 
 	window.location.assign(getCurrentUrlWithParams());
 }

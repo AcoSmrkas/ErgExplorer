@@ -1,6 +1,6 @@
 :root {
-	--orange-color: #fb5c16;
-	--orange-color-hover: #FF8418;
+	--main-color: #fb5c16;
+	--main-color-hover: #FF8418;
 }
 
 html[data-bs-theme="dark"] {

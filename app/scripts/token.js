@@ -13,7 +13,8 @@ $(function() {
 	tokenId = getWalletAddressFromUrl();
 
 	getNftInfo(tokenId, onGetNftInfoDone);
-	getPrices(getPriceHistory);
+	getPrices(getPriceHistory);	
+	setErgLogoImageColor('loadingImgHolders', 150);
 
 	setDocumentTitle(tokenId);
 });
@@ -429,6 +430,11 @@ function printGainersLosers(timeframe) {
 		chart.destroy();
 	}
 
+	const rootStyles = getComputedStyle(document.documentElement);
+
+	// Get the value of the global CSS variable
+	const primaryColor = rootStyles.getPropertyValue('--main-color').trim();
+
 	chart = new Chart(
 	    document.getElementById('chart'),
 	    {
@@ -437,7 +443,7 @@ function printGainersLosers(timeframe) {
 	      	responsive: true,
 	        animation: true,
 	        fill: false,
-	        borderColor: 'rgba(251, 92, 22, 1)',
+	        borderColor: primaryColor,
 	        plugins: {
 	          legend: {
 	            display: false

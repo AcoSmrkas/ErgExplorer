@@ -19,25 +19,27 @@ function printAddresses() {
 
         if (data.total > 0) {
     		for (let i = 0; i < items.length; i++) {
-                if (lastName == items[i].name) {
-                    formattedResult += printAddress(items[i]);
+                let item = items[i];
+
+                if (lastName == item.name) {
+                    formattedResult += printAddress(item);
                 } else {  
-                    lastName = items[i].name;
+                    lastName = item.name;
 
                     formattedResult += '<div class="col-12 mb-md-3"><div class="row div-cell-dark">';
                     formattedResult += '<div class="col-12 col-sm-12 col-lg-4 col-xl-3">';
                     
                     //Name
-                    formattedResult +='<p><strong>Name: </strong>' + items[i].name + '</p>';
+                    formattedResult +='<p><strong>Name: </strong>' + item.name + '</p>';
 
                      //Type
-                    let type = items[i].type;
+                    let type = item.type;
                     let spanClass = getOwnerTypeClass(type);
 
                     formattedResult += '<p><strong>Type: </strong><span class="' + spanClass + '">' + type + '</span></p>';
 
                     //Url
-                    formattedResult += '<p><strong>Url: </strong><a target="_new" href="' + items[i].url + '">' + items[i].url + '</a></p>';
+                    formattedResult += '<p><strong>Url: </strong><a target="_new" href="' + item.url + '">' + item.url + '</a></p>';
 
                     formattedResult += '</div>';
                     formattedResult += '<div class="col border-lg-start">';
@@ -45,10 +47,20 @@ function printAddresses() {
 
                     formattedResult += '<p><strong>Address:</strong></p>';
 
-                    formattedResult += printAddress(items[i]);
+                    formattedResult += printAddress(item);
                 }
 
                 if (i == items.length - 1 || lastName != items[i + 1].name) {
+                    if (data.tokens.length > 0) {
+                        for (let j = 0; j < data.tokens.length; j++) {
+                            let token = data.tokens[j];
+                            if (token.addressname == item.name) {
+                                formattedResult += '<br><p><strong>Token:</strong></p><a href="' + getTokenUrl(token.id) + '">' + token.id + '</a>';
+                                break;
+                            }
+                        }
+                    }
+
                     formattedResult += '</div>';
                     formattedResult += '</div></div>';
                 }

@@ -161,7 +161,7 @@
 			  <br>
 		  </div>
 
-		  <div>
+		  <div id="filterHolder" style="display: none;">
 		  <div class="row w-100 div-cell-dark">
 			<div id="search" class="row w-100 p-0 m-0">
 				<div class="col-12">
@@ -243,6 +243,18 @@
 		<br>
 		</div>
 
+		<div style="display: none;">
+		<div class="row w-100 div-cell-dark">
+			<div class="col-6">
+				<canvas style="width:100%;" id="chart1"></canvas>
+			</div>
+			<div class="col-6">
+				<canvas style="width:100%;" id="chart2"></canvas>
+			</div>
+		</div>
+		<br>
+		</div>
+
 		  <div id="txView" class="row w-100">
 			<table class="table table-dark table-striped">
 				<thead>
@@ -283,6 +295,7 @@
 	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" crossorigin="anonymous"></script>
 	<!-- Tempus Dominus JavaScript -->
 	<script src="https://cdn.jsdelivr.net/npm/@eonasdan/tempus-dominus@6.7.11/dist/js/tempus-dominus.min.js" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.3.1/chart.umd.min.js" integrity="sha512-UcCmTcAm3IkzrswF+WqvwWSjsnv8nsJpDL09KHCETWS0g0WjoIZDRUYXCeHeow1cEij0kqL9OwRwirv/xCQ6GA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	<script src="./scripts/common/prices.js?v=17"></script>
 	<script src="./scripts/common/pagination.js?v=17"></script>
 	<script src="./scripts/common/nft.js?v=17"></script>

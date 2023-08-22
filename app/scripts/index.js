@@ -7,6 +7,7 @@ var ergPriceHtml = undefined;
 $(function() {	
 	updatePrices();
 	getNetworkState();
+	setErgLogoImageColor('colorized-canvas', 50);
 
     $('#searchType').val('0');
 });

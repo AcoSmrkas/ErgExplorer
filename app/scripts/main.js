@@ -9,6 +9,7 @@ $(function() {
 	$('#searchInput').val('');
 
 	setOfficialLink();
+	setErgLogoImageColor('loadingImg', 150);
 
 	if (IS_DEV_ENVIRONMENT) {
 		ERGEXPLORER_API_HOST = 'https://localhost/ergexplorer-api/'
@@ -28,6 +29,55 @@ window.addEventListener('hashchange', () => {
 
 function setDocumentTitle(text) {
 	document.title = 'Erg Explorer - ' + text;
+}
+
+function setErgLogoImageColor(elementId, width) {
+	// Get references to the canvas and its context
+	const canvas = document.getElementById(elementId);
+	const ctx = canvas.getContext('2d');
+
+	// Load the image
+	const img = new Image();
+	img.src = '/images/logo-white.png'; // Replace with your image URL
+	img.onload = () => {
+	    // Set canvas size to match the image dimensions
+	    canvas.width = width;
+	    canvas.height = width;
+	    
+	    // Draw the image on the canvas
+	    ctx.drawImage(img, 0, 0, width, width);
+	    
+	    // Get the image data
+	    const imageData = ctx.getImageData(0, 0, img.width, img.height);
+	    const data = imageData.data;
+	    
+	    // Define the hex color to replace white
+	    // Get the computed styles of an element (can be any element, even hidden)
+		const rootStyles = getComputedStyle(document.documentElement);
+
+		// Get the value of the global CSS variable
+		const primaryColor = rootStyles.getPropertyValue('--main-color').trim();
+
+	    const hexColor = primaryColor; // Replace with the desired hex color
+	    
+	    // Loop through the image data and replace white pixels with the new color
+	    for (let i = 0; i < data.length; i += 4) {
+	        const red = data[i];
+	        const green = data[i + 1];
+	        const blue = data[i + 2];
+	        const alpha = data[i + 3];
+	        
+	        // Check if the pixel is white (255, 255, 255)
+	        if (alpha > 0) {
+	            data[i] = parseInt(hexColor.slice(1, 3), 16);
+	            data[i + 1] = parseInt(hexColor.slice(3, 5), 16);
+	            data[i + 2] = parseInt(hexColor.slice(5, 7), 16);
+	        }
+	    }
+	    
+	    // Put the modified image data back on the canvas
+	    ctx.putImageData(imageData, 0, 0);
+	};
 }
 
 function getWalletAddressFromUrl() {

@@ -92,9 +92,14 @@ gulp.task('styles-css', () => {
 });
 
 gulp.task('scripts-build', () => {
-  return gulp.src('app/scripts/**/*.js')
+  return gulp.src(['app/scripts/**/*.js', '!app/scripts/common/token-icons.js'])
       .pipe(terser({compress: {drop_console: true}}))
       .pipe(gulp.dest('dist/scripts'));
+});
+
+gulp.task('scripts-move', () => {
+  return gulp.src('app/scripts/common/token-icons.js')
+      .pipe(gulp.dest('dist/scripts/common'));
 });
 
 gulp.task('extras', () => {
@@ -186,7 +191,7 @@ gulp.task('wiredep', () => {
     .pipe(gulp.dest('app'));
 });
 
-gulp.task('build', ['lint', 'html', 'images', 'fonts', 'styles-css', 'scripts-build', 'extras'], () => {
+gulp.task('build', ['lint', 'html', 'images', 'fonts', 'styles-css', 'scripts-build', 'scripts-move', 'extras'], () => {
   return gulp.src('dist/**/*').pipe($.size({title: 'build', gzip: true}));
 });
 

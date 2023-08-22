@@ -26,6 +26,9 @@
 		<!-- endbuild -->
 				
 		
+			
+		<script src="./scripts/common/config.js?v=17"></script>
+		<script src="./scripts/common/params.js?v=17"></script>
 
         <script type="text/javascript">
         	var theme = 'dark';
@@ -47,6 +50,37 @@
         	}
 
         	updateTheme();
+
+        	function loadCustomColor() {
+				if (params['mainColor'] != undefined) {
+					if (params['mainColor'] == '') {
+						localStorage.removeItem('main-color');
+					} else {
+						localStorage.setItem('main-color', params['mainColor']);
+					}
+				}
+
+				if (params['mainColorHover'] != undefined) {
+					if (params['mainColorHover'] == '') {
+						localStorage.removeItem('main-color-hover');
+					} else {
+						localStorage.setItem('main-color-hover', params['mainColorHover']);
+					}
+				}
+
+				let mainColor = localStorage.getItem('main-color');
+				let mainColorHover = localStorage.getItem('main-color-hover');
+
+				if (mainColor != undefined) {
+					document.documentElement.style.setProperty('--main-color', mainColor);
+				}
+
+				if (mainColorHover != undefined) {
+					document.documentElement.style.setProperty('--main-color-hover', mainColorHover);
+				}
+			}
+
+			loadCustomColor();
         </script>
 
 		<!-- SEO -->
@@ -233,7 +267,7 @@
 
 	<div id="txLoading"> 
 	<div id="txLoadingInner">
-		<img id="loadingImg" src="./images/logo.png">
+		<canvas id="loadingImg" class="loadingImg" class="index-card-symbol" width="150" height="150"></canvas>
 	</div>
 </div>
 
@@ -283,9 +317,7 @@
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
 
 		<!-- Custom JavaScript -->
-		<script src="./scripts/common/config.js?v=17"></script>
 		<script src="./scripts/common/token-icons.js?v=17"></script>
-		<script src="./scripts/common/params.js?v=17"></script>
 		<script src="./scripts/main.js?v=17"></script>
 		
 	<script src="./scripts/common/pagination.js?v=17"></script>
