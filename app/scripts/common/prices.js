@@ -23,8 +23,15 @@ function getPrices(callback) {
 			}
 		}
 
+		$.get('https://api.coingecko.com/api/v3/simple/price?ids=ergo&vs_currencies=usd', function (data) {
+			prices['ERG'] = data.ergo.usd;
+			pricesNames['ERG'] = 'ERG';
+		}).always(function () {
+			callback();
+		});
+
 		gotPrices = true;
-	}).always(function () {
-		callback()
+	}).fail(function () {
+		callback();
 	});
 }

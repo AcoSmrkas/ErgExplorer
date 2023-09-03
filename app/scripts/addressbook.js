@@ -55,7 +55,7 @@ function printAddresses() {
                         for (let j = 0; j < data.tokens.length; j++) {
                             let token = data.tokens[j];
                             if (token.addressname == item.name) {
-                                formattedResult += '<br><p><strong>Token:</strong></p><a href="' + getTokenUrl(token.id) + '">' + token.id + '</a>';
+                                formattedResult += '<br><p><strong>Token:</strong></p><a style="word-wrap:break-word;" href="' + getTokenUrl(token.id) + '">' + token.id + '</a>';
                                 break;
                             }
                         }

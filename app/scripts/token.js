@@ -2,8 +2,10 @@ var tokenData = undefined;
 var tokenId = '';
 var nftType = undefined;
 var decimals = 0;
-var from24h = Date.now() - (24 * 60 * 60 * 1000);
-var from7d = Date.now() - (7 * 24 * 60 * 60 * 1000);
+var nowTime = Date.now();
+var from24h = nowTime - (24 * 60 * 60 * 1000);
+var from7d = nowTime - (7 * 24 * 60 * 60 * 1000);
+var from30d = nowTime - (30 * 24 * 60 * 60 * 1000);
 var priceData = undefined;
 var chart = undefined;
 var chartType = undefined;
@@ -21,7 +23,7 @@ $(function() {
 
 function getPriceHistory() {
 	$.post(ERGEXPLORER_API_HOST + 'tokens/getPriceHistory',
-		{from: from7d, ids : [tokenId]},
+		{from: from30d, ids : [tokenId]},
 		function(data) {
 		if (data.items.length == 0) {
 			return;
@@ -344,12 +346,24 @@ function onNftImageLoad() {
 	$('#nftInfoHolder').addClass('col-lg-8');
 }
 
+function printGainersLosers30d() {
+	printGainersLosers(from30d);
+	$('#showGainersLosers30d').removeClass('btn-primary');
+	$('#showGainersLosers30d').addClass('btn-info');
+	$('#showGainersLosers24h').removeClass('btn-info');
+	$('#showGainersLosers24h').addClass('btn-primary');
+	$('#showGainersLosers7d').removeClass('btn-info');
+	$('#showGainersLosers7d').addClass('btn-primary');
+}
+
 function printGainersLosers7d() {
 	printGainersLosers(from7d);
 	$('#showGainersLosers7d').removeClass('btn-primary');
 	$('#showGainersLosers7d').addClass('btn-info');
 	$('#showGainersLosers24h').removeClass('btn-info');
 	$('#showGainersLosers24h').addClass('btn-primary');
+	$('#showGainersLosers30d').removeClass('btn-info');
+	$('#showGainersLosers30d').addClass('btn-primary');
 }
 
 function printGainersLosers24h() {
@@ -358,6 +372,8 @@ function printGainersLosers24h() {
 	$('#showGainersLosers24h').addClass('btn-info');
 	$('#showGainersLosers7d').removeClass('btn-info');
 	$('#showGainersLosers7d').addClass('btn-primary');
+	$('#showGainersLosers30d').removeClass('btn-info');
+	$('#showGainersLosers30d').addClass('btn-primary');
 }
 
 function printGainersLosers(timeframe) {
@@ -365,6 +381,7 @@ function printGainersLosers(timeframe) {
 	chartType = timeframe;
 
 	let from7dset = false;
+	let from30dset = false;
 	for (var i = data.items.length - 1; i >= 0; i--) {
 		let item = data.items[i];
 
@@ -381,7 +398,12 @@ function printGainersLosers(timeframe) {
 			classString = 'text-danger';
 		}
 
-		if (from7dset == false && from7d <= item.timestamp && item.tokenid == tokenId) {
+		if (from30dset == false && from30d <= item.timestamp && item.tokenid == tokenId) {
+			$('#usdChange30d').html(difference + '%');
+			$('#usdChange30d').addClass(classString);
+
+			from30dset = true;
+		} else if (from7dset == false && from7d <= item.timestamp && item.tokenid == tokenId) {
 			$('#usdChange7d').html(difference + '%');
 			$('#usdChange7d').addClass(classString);
 
@@ -389,25 +411,73 @@ function printGainersLosers(timeframe) {
 		} else if (from7dset == true && from24h <= item.timestamp && item.tokenid == tokenId) {
 			$('#usdChange24h').html(difference + '%');
 			$('#usdChange24h').addClass(classString);
-
-			break;
 		}
 	}
 
 	 $('#usdPrice').html('$' + formatValue(prices[tokenId], 2, true));
 
-	 let tI = 0;
-	 let lastTimestamp = -1;
-	for (var i = data.items.length - 1; i >= 0; i--) {
+	 for (var i = data.items.length - 1; i >= 0; i--) {
 		if (timeframe > data.items[i].timestamp) {
 			data.items.splice(i, 1);
 			continue;
 		}
+	}
+
+	let tI = 0;
+	let lastTimestamp = -1;
+	let step = 1;
+	let lastStep;
+	let diff = 0;
+	let diffI = 0;
+	if (data.items.length > 25) {
+		step = parseInt(data.items.length / 25);
+	}
+	data.items = data.items.filter(function (_, index) {
+		let item = data.items[index];
+		if (index == 0) {
+			lastStep = item.value;
+			diff = 0;
+
+			return true;
+		}
+
+		if (index == data.items.length - 1) {
+			return true;
+		}
+
+		let temp = Math.abs(lastStep - item.value);
+		if (temp > diff) {
+			diff = temp;
+			diffI = index;
+		}
+
+		if (index % step === 0) {
+			data.items[index].value = data.items[diffI].value;
+
+			lastStep = item.value;
+			diff = 0;
+
+			return true;
+		}
+
+		return false;
+	});
+
+	/*
+	for (var i = data.items.length - 1; i >= 0; i--) {
+		let item = data.items[i];
 
 		if (timeframe == from7d
 			&& i != data.items.length - 1
 			&& i != 0
 			&& tI % 6 != 0) {
+			data.items.splice(i, 1);	
+		}
+
+		if (timeframe == from30d
+			&& i != data.items.length - 1
+			&& i != 0
+			&& tI % 13 != 0) {
 			data.items.splice(i, 1);	
 		}
 
@@ -418,6 +488,7 @@ function printGainersLosers(timeframe) {
 
 		tI++;
 	}
+	*/
 
 	 //Chart
 	data.items = data.items.reverse();
@@ -441,7 +512,9 @@ function printGainersLosers(timeframe) {
 	      type: 'line',
 	      options: {
 	      	responsive: true,
-	        animation: true,
+	        animation: {
+	        	duration: 1000
+	        },
 	        fill: false,
 	        borderColor: primaryColor,
 	        plugins: {
@@ -449,7 +522,15 @@ function printGainersLosers(timeframe) {
 	            display: false
 	          },
 	          tooltip: {
-	            enabled: true
+	            enabled: true,
+	            displayColors: false,
+	            callbacks: {
+	            	label: function (tooltip) {
+	            		let formattedValue = '$' + nFormatter(tooltip.parsed.y, getAutoDigits(tooltip.parsed.y));
+
+	            		return formattedValue;
+	            	}
+	            }
 	          }
 	        }
 	      },

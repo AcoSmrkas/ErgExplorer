@@ -1,8 +1,8 @@
-var from24h = Date.now() - (25 * 60 * 60 * 1000);
-var from7d = Date.now() - ((7 * 24 + 1) * 60 * 60 * 1000);
+var nowTime = Date.now();
+var from24h = nowTime - (24 * 60 * 60 * 1000);
+var from7d = nowTime - (7 * 24 * 60 * 60 * 1000);
+var from30d = nowTime - (30 * 24 * 60 * 60 * 1000);
 var priceData = undefined;
-var ergPriceSet = false;
-var ergPriceHtml = undefined;
 
 $(function() {	
 	updatePrices();
@@ -14,24 +14,31 @@ $(function() {
 
 function updatePrices() {
 	getPrices(onGotPrices);
+	getErgPrice();
 
 	setTimeout(updatePrices, 60000 * 5);
+}
+
+function getErgPrice() {
+	$.get('https://api.coingecko.com/api/v3/simple/price?ids=ergo&vs_currencies=usd&include_24hr_change=true', function (data) {
+		let difference = data.ergo.usd_24h_change;
+
+		let classString = 'text-success';
+		if (difference < 0) {
+			classString = 'text-danger';
+		}
+
+		let ergPriceHtml = '$' + formatValue(data.ergo.usd, 2);
+		$('#ergPrice').html(ergPriceHtml + ' (<span class="' + classString + '">' + formatValue(difference, 2) + '%</span> 24h)');
+	});
 }
 
 function onGotPrices() {
     getProtocolInfo();
     getStats();
 	getWhaleTxs();
-	getPoolStats();
-
-    if (gotPrices != undefined && gotPrices) {
-    	ergPriceHtml = '$' + formatValue(prices['ERG'], 2);
-
-    	if (!ergPriceSet) {
-    		$('#ergPrice').html(ergPriceHtml);
-    		ergPriceSet = true;
-		}
-	}
+	getPoolStats();	
+	getPriceHistory();
 }
 
 function getNetworkState() {
@@ -92,16 +99,15 @@ function getPoolStats() {
 		}
 
 		$('#tokensVolumeTableBody').html(formattedResult);
-
-		getPriceHistory();
 	});
 }
 
 function getPriceHistory() {
 	$.post(ERGEXPLORER_API_HOST + 'tokens/getPriceHistory',
 		{
-			'from': from7d,
-			'milestones': 'true'
+			'from': nowTime,
+			'milestones': 'true',
+			'period': '30d'
 		},
 	function(data) {
 		priceData = data;
@@ -111,12 +117,24 @@ function getPriceHistory() {
 	});
 }
 
+function printGainersLosers30d() {
+	printGainersLosers(from30d);
+	$('#showGainersLosers30d').removeClass('btn-primary');
+	$('#showGainersLosers30d').addClass('btn-info');
+	$('#showGainersLosers24h').removeClass('btn-info');
+	$('#showGainersLosers24h').addClass('btn-primary');
+	$('#showGainersLosers7d').removeClass('btn-info');
+	$('#showGainersLosers7d').addClass('btn-primary');
+}
+
 function printGainersLosers7d() {
 	printGainersLosers(from7d);
 	$('#showGainersLosers7d').removeClass('btn-primary');
 	$('#showGainersLosers7d').addClass('btn-info');
 	$('#showGainersLosers24h').removeClass('btn-info');
 	$('#showGainersLosers24h').addClass('btn-primary');
+	$('#showGainersLosers30d').removeClass('btn-info');
+	$('#showGainersLosers30d').addClass('btn-primary');
 }
 
 function printGainersLosers24h() {
@@ -125,22 +143,18 @@ function printGainersLosers24h() {
 	$('#showGainersLosers24h').addClass('btn-info');
 	$('#showGainersLosers7d').removeClass('btn-info');
 	$('#showGainersLosers7d').addClass('btn-primary');
+	$('#showGainersLosers30d').removeClass('btn-info');
+	$('#showGainersLosers30d').addClass('btn-primary');
 }
 
 function printGainersLosers(timeframe) {
 	let data = JSON.parse(JSON.stringify(priceData));
 
-	let lastTimestamp = -1;
-	for (var i = data.items.length - 1; i >= 0; i--) {
-		if (timeframe <= data.items[i].timestamp) {
-			lastTimestamp = data.items[i].timestamp;
-			break;
-		}
-	}
-
+	let lastTimestamp = timeframe;
 	for (var i = data.items.length - 1; i >= 0; i--) {
 		let item = data.items[i];
-		if (item.timestamp != lastTimestamp) {
+		if (item.originaltimestamp != lastTimestamp
+			|| item.ticker == 'ERG') {
 			data.items.splice(i, 1);
 			continue;
 		}
@@ -148,10 +162,20 @@ function printGainersLosers(timeframe) {
 		let oldPrice = item.price;
 		let newPrice = prices[item.tokenid];
 
+		if (newPrice == undefined) {
+			data.items.splice(i, 1);
+			continue;
+		}
+
+		console.log(prices);
+
+		console.log(item.tokenid, oldPrice, newPrice);
+
 		let difference = (newPrice * 100 / oldPrice) - 100;
 		if (difference === 0) {
 			difference = 0.000001;
 		}
+
 		difference = toFixed(difference, 2);
 
 		data.items[i].difference = difference;
@@ -176,9 +200,7 @@ function printGainersLosers(timeframe) {
 			classString = 'text-danger';
 		}	
 
-		if (item.tokenid == 'ERG') {
-			$('#ergPrice').html(ergPriceHtml + ' (<span class="' + classString + '">' + difference + '%</span> 24h)');
-
+		if (item.tokenid == 'ERG') {		
 			data.items.splice(i, 1);
 
 			break;

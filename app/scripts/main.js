@@ -5,6 +5,10 @@ var addressbook = new Array();
 
 setupMainnetTestnet();
 
+$.ajaxSetup({
+    cache: false
+});
+
 $(function() {
 	$('#searchInput').val('');
 
@@ -216,7 +220,15 @@ function formatTimeString(dateString, seconds) {
 function formatDateString(dateString) {
 	const date = new Date(dateString);
 
-	return zeroPad(date.getHours(), 2) + ':' + zeroPad(date.getMinutes(), 2) + ':' + zeroPad(date.getSeconds(), 2) + ', ' + date.toLocaleDateString();
+	return zeroPad(date.getHours(), 2) + ':' + zeroPad(date.getMinutes(), 2) + ':' + zeroPad(date.getSeconds(), 2) + ', ' + date.toLocaleDateString(getLang());
+}
+
+function getLang() {
+	if (navigator.languages != undefined) {
+		return navigator.languages[0];
+	}
+	
+	return navigator.language;
 }
 
 function formatKbSizeString(size) {
@@ -233,23 +245,34 @@ function formatHashRateString(value) {
 
 function formatValue(value, digits, autodigits = false) {
 	if (autodigits) {
-		let temp = value.toString().split('.');
-		if (temp.length > 1) {
-			let realSmall = temp[1].split('-');
-			if (realSmall.length > 1) {
-				digits = parseInt(realSmall[1]) + 1;
-			} else {
-				for (let j = 0; j < temp[1].length; j++) {
-					if (temp[1][j] != '0' && j > 1) {
-						digits = j + 2;
-						break;
+		digits = getAutoDigits(value, digits);
+	}
+
+	return '<span title="' + value.toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: 2 }) + '">' + nFormatter(value, digits) + '</span>';
+}
+
+function getAutoDigits(value, digits = 2, additionalDigits = 2) {
+	let temp = value.toString().split('.');
+	if (temp.length > 1) {
+		let realSmall = temp[1].split('-');
+		if (realSmall.length > 1) {
+			digits = parseInt(realSmall[1]) + 1;
+		} else {
+			for (let j = 0; j < temp[1].length; j++) {
+				if (temp[1][j] != '0' && j > 1) {
+					digits = j + additionalDigits;
+
+					if ((j + 1) < temp[1].length && temp[1][j] != '0') {
+						digits = j + additionalDigits + 1;
 					}
+
+					break;
 				}
 			}
 		}
 	}
 
-	return '<span title="' + value.toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: 2 }) + '">' + nFormatter(value, digits) + '</span>';
+	return digits;
 }
 
 function formatAssetValueString(value, decimals, digits = 2) {

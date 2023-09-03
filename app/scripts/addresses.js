@@ -3,6 +3,8 @@ var mempoolData = undefined;
 var transactionsData = undefined;
 var tokensContentFull = '';
 var tokensContent = '';
+var financialTokensContentFull = '';
+var financialTokensContent = '';
 var formattedResult = '';
 var totalTransactions = 0;
 var valueFields = new Array();
@@ -24,12 +26,15 @@ var txNotification = undefined;
 var datePickerFrom = undefined;
 var datePickerTo = undefined;
 var tempDate = -1;
+var publicUser = false;
+var checkedUser = false;
 
 $(function() {
 	walletAddress = getWalletAddressFromUrl();	
 
 	setDocumentTitle(walletAddress);
 	
+    getUser();
     getPrices(onInitRequestsFinished);
     getIssuedNfts(walletAddress, onGotIssuedNftInfo, false);
     getAddressInfo();
@@ -44,6 +49,22 @@ window.onfocus = (event) => {
 		location.reload();
 	}
 };
+
+function getUser() {
+	$.get(ERGEXPLORER_API_HOST + 'user/getUser?address=' + walletAddress,
+	function (data) {
+		if (data.items.length > 0) {
+			//if (data.items[0].public == 't') {
+			//$('#filterHolder').show();
+			//getChart('ERG', 'chart', '1chartHolder');
+
+//			publicUser = true;
+		}
+	}).always(function (data) {
+		checkedUser = true;
+		onInitRequestsFinished();
+	});
+}
 
 function printAddressSummary() {
 	let balanceUrl = getTxsUrl();
@@ -62,57 +83,24 @@ function printAddressSummary() {
 		if (data.confirmed.tokens.length > 0) {
 			$('#tokensHolder').show();
 
-			let totalVestingPrice = -1;
-			let tokensToShow = 4;
-			tokensContent = '';
-			tokensContentFull = '';
-
 			//Sort
 			tokensArray = sortTokens(data.confirmed.tokens);
 
+			let financialTokens = tokensArray.filter(separateFinancialTokens);
+			let otherTokens = tokensArray.filter(separateNonFinancialTokens);
+
 			//Format output
-			let i = 0;
-			let nftSearchTokens = [];
-			let totalAssetsValue = 0;
-			for (i = 0; i < tokensArray.length; i++) {
-				let tokensPrice = 0;
-				let tokensPriceString = '';
-				if (gotPrices && prices[tokensArray[i].tokenId] != undefined) {
-					tokensPrice = formatAssetDollarPrice(tokensArray[i].amount, tokensArray[i].decimals, tokensArray[i].tokenId);
-					tokensPriceString = formatDollarPriceString(tokensPrice);
-					totalAssetsValue += tokensPrice;
-				}
-
-				let tokensString = formatAssetNameAndValueString(getAssetTitle(tokensArray[i], true), formatAssetValueString(tokensArray[i].amount, tokensArray[i].decimals, 4) + (tokensPrice == 0 ? '' : '<span class="text-light"> ' + tokensPriceString + '</span>'), tokensArray[i].tokenId);
-
-				tokensContentFull += tokensString;
-
-				nftSearchTokens[i] = tokensArray[i].tokenId;
-
-				if (i > tokensToShow) continue;
-
-				tokensContent += tokensString;
-
-				if (i == tokensToShow && tokensArray.length > tokensToShow + 1) {
-					tokensContent += '<p>...</p><p><strong><a href="#" onclick="showAllTokens(event)">Show all</a></strong></p>';
-				}
+			if (financialTokens.length > 0) {
+				let financialTokensHtmlString = formatFinancialTokensHtmlString(financialTokens, ergDollarValue);
+				$('#financialTokens').html(financialTokensHtmlString);
+				$('#financialAssetsHolder').show();
 			}
 
-			if (i > tokensToShow && tokensArray.length > tokensToShow + 1) {
-				tokensContentFull += '<br><p><strong><a href="#" onclick="hideAllTokens(event)">Hide</a></strong></p>';
+			if (otherTokens.length > 0) {
+				let otherTokensHtmlString = formatOtherTokensHtmlString(otherTokens, ergDollarValue);
+				$('#otherTokens').html(otherTokensHtmlString);
+				$('#otherTokensHolder').show();
 			}
-
-			if (totalAssetsValue > 0) {
-				$('#finalAssetsBalance').html('<span class="gray-color">Tokens balance:</span> $' + formatValue(totalAssetsValue, 2) + '');
-				$('#finalAssetsBalance').show();
-
-				$('#finalBalance').html('<span class="grey-color"><b>Total:</b></span> $' + formatValue(ergDollarValue + totalAssetsValue, 2) + '');
-				$('#finalBalance').show();
-			}
-
-			getNftsInfo(nftSearchTokens, onGotOwnedNftInfo);
-
-			$('#tokens').html(tokensContent);
 		}
 
 		let walletAddressString = walletAddress;
@@ -133,6 +121,121 @@ function printAddressSummary() {
     	$('#txLoading').hide();
     	showLoadError('No results matching your query.');
     });
+}
+
+function formatOtherTokensHtmlString(tokensArray) {
+	let i = 0;
+	let nftSearchTokens = [];
+	let totalAssetsValue = 0;	
+	let tokensToShow = 2;
+	let totalVestingPrice = -1;
+	tokensContent = '';
+	tokensContentFull = '';
+
+	if (publicUser) {
+		tokensToShow = 15;
+	}
+
+	for (i = 0; i < tokensArray.length; i++) {
+		let tokensString = formatAssetNameAndValueString(getAssetTitle(tokensArray[i], true), formatAssetValueString(tokensArray[i].amount, tokensArray[i].decimals, 4), tokensArray[i].tokenId);
+
+		tokensContentFull += tokensString;
+
+		nftSearchTokens[i] = tokensArray[i].tokenId;
+
+		if (i > tokensToShow) continue;
+
+		tokensContent += tokensString;
+
+		if (i == tokensToShow && tokensArray.length > tokensToShow + 1) {
+			tokensContent += '<p>...</p><p><strong><a href="#" onclick="showAllTokens(event)">Show all</a></strong></p>';
+		}
+	}
+
+	getNftsInfo(nftSearchTokens, onGotOwnedNftInfo);
+
+	if (i > tokensToShow && tokensArray.length > tokensToShow + 1) {
+		tokensContentFull += '<br><p><strong><a href="#" onclick="hideAllTokens(event)">Hide</a></strong></p>';
+	}
+
+	return tokensContent;
+}
+
+function formatFinancialTokensHtmlString(tokensArray, ergDollarValue) {
+	let i = 0;
+	let totalAssetsValue = 0;	
+	let tokensToShow = 6;
+	let totalVestingPrice = -1;
+	financialTokensContent = '';
+	financialTokensContentFull = '';
+
+	if (publicUser) {
+		tokensToShow = 15;
+	}
+
+	for (i = 0; i < tokensArray.length; i++) {
+		let tokensPrice = 0;
+		let tokensPriceString = '';
+		if (gotPrices && prices[tokensArray[i].tokenId] != undefined) {
+			tokensPrice = formatAssetDollarPrice(tokensArray[i].amount, tokensArray[i].decimals, tokensArray[i].tokenId);
+			tokensPriceString = formatDollarPriceString(tokensPrice);
+			totalAssetsValue += tokensPrice;
+		}
+
+		let tokensString = formatAssetNameAndValueString(getAssetTitle(tokensArray[i], true), formatAssetValueString(tokensArray[i].amount, tokensArray[i].decimals, 4) + (tokensPrice == 0 ? '' : '<span class="text-light"> ' + tokensPriceString + '</span>'), tokensArray[i].tokenId);
+
+		financialTokensContentFull += tokensString;
+
+		if (i > tokensToShow) continue;
+
+		financialTokensContent += tokensString;
+
+		if (i == tokensToShow && tokensArray.length > tokensToShow + 1) {
+			financialTokensContent += '<p>...</p><p><strong><a href="#" onclick="showAllFinancialTokens(event)">Show all</a></strong></p>';
+		}
+	}
+
+	if (i > tokensToShow && tokensArray.length > tokensToShow + 1) {
+		financialTokensContentFull += '<br><p><strong><a href="#" onclick="hideAllFinancialTokens(event)">Hide</a></strong></p>';
+	}
+
+	if (totalAssetsValue > 0) {
+		$('#finalAssetsBalance').html('<span class="gray-color">Tokens balance:</span> $' + formatValue(totalAssetsValue, 2) + '');
+		$('#finalAssetsBalance').show();
+
+		$('#finalBalance').html('<span class="grey-color"><b>Total:</b></span> $' + formatValue(ergDollarValue + totalAssetsValue, 2) + '');
+		$('#finalBalance').show();
+	}
+
+	return financialTokensContent;
+}
+
+function separateFinancialTokens(_, index, array) {
+	let pricesKeys = Object.keys(prices);
+	for (let i = 0; i < pricesKeys.length; i++) {
+		let priceId = pricesKeys[i];
+		let token = array[index];
+
+		if (priceId == token.tokenId) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+function separateNonFinancialTokens(_, index, array) {
+	let pricesKeys = Object.keys(prices);
+	for (let i = 0; i < pricesKeys.length; i++) {
+		let priceId = pricesKeys[i];
+		let token = array[index];
+
+		if (priceId == token.tokenId) {
+			return false;
+		}
+	}
+
+	return true;
 }
 
 const TxType = {
@@ -453,7 +556,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 			toAddress = item.outputs[0].address;
 		} else if (txType == TxType.Contract2Wallet) {
 			fromAddress = item.inputs[0].address;
-			toAddress = walletAddress;
+			toAddress = item.outputs[0].address;
 		}
 
 		if (txInOut == undefined) {
@@ -861,7 +964,7 @@ function getTxsDataUrl() {
 		let toDate = params['toDate'];
 		let txType = params['txType'];
 
-		let filterApiUrl = ERGEXPLORER_API_HOST + 'user/getUserTransactions?&address=' + walletAddress + '&offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
+		let filterApiUrl = ERGEXPLORER_API_HOST + 'user/getUserTransactions?filterTx&address=' + walletAddress + '&offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
 
 		if (tokenId != undefined) {
 			filterApiUrl += '&tokenId=' + tokenId;
@@ -958,110 +1061,124 @@ function onMempoolAndTransactionsDataFetched() {
 	if (totalTransactions > 0) {
 		$('#transactionsTableBody').html(formattedResult);
 		$('#txView').show();
+	} else {
+		showLoadError('No transactions.');
 	}
 
 	$('#txLoading').hide();
 
 	getAddressesInfo();
-
-//	$('#filterHolder').show();
-//	getChart('ERG', 'chart1');
-//	getChart('9a06d9e545a41fd51eeffc5e20d818073bf820c635e2a9d922269913e0de369d', 'chart2');
 }
 
-function getChart(tokenId, canvasId) {
-	$.get(ERGEXPLORER_API_HOST + 'user/getAddressStats?address=' + walletAddress + '&tokenId=' + tokenId,
-		function(data) {
-	
-	data.items = data.items.filter(function (_, index) {
-		return data.items[index].type === 'total';
-	});
+function getChart(tokenId, canvasId, holderId) {
+	let url = ERGEXPLORER_API_HOST + 'user/getAddressStats?address=' + walletAddress + '&tokenId=' + tokenId + '&type=1';
 
-	let step = 1;
-	if (data.items.length > 25) {
-		step = parseInt(data.items.length / 25);
+	if (params['fromDate'] != undefined) {
+		url += '&fromDate=' + params['fromDate'];
 	}
-	let lastStep;
-	let diff = 0;
-	let diffI = 0;
-	let newData = [];
-	data.items = data.items.filter(function (_, index) {
-		let item = data.items[index];
-		if (index == 0) {
-			newData.push(item);
-			lastStep = item.value;
-			diff = 0;
 
-			return true;
+	if (params['toDate'] != undefined) {
+		url += '&toDate=' + params['toDate'];
+	}
+
+	$.get(url, function(data) {
+		if (data.items.length < 2) {
+			return;
 		}
 
-		if (index == data.items.length - 1) {
-			if (tokenId != 'ERG') {
-				for (let i = 0; i < tokensArray.length; i++) {
-					let token = tokensArray[i];
-					if (token.tokenId == tokenId) {
-						item.value = token.amount / Math.pow(10, token.decimals);
-					}
-				}
+		let step = 1;
+		if (data.items.length > 25) {
+			step = parseInt(data.items.length / 25);
+		}
+
+		let lastStep;
+		let diff = 0;
+		let diffI = 0;
+		let newData = [];
+		data.items = data.items.filter(function (_, index) {
+			let item = data.items[index];
+			if (index == 0) {
+				newData.push(item);
+				lastStep = item.value;
+				diff = 0;
+
+				return true;
 			}
 
-			newData.push(item);
+			if (index == data.items.length - 1) {
+				if (tokenId != 'ERG') {
+					for (let i = 0; i < tokensArray.length; i++) {
+						let token = tokensArray[i];
+						if (token.tokenId == tokenId) {
+							item.value = token.amount / Math.pow(10, token.decimals);
+						}
+					}
+				}
 
-			return true;
-		}
+				newData.push(item);
 
-		let temp = Math.abs(lastStep - item.value);
-		if (temp > diff) {
-			diff = temp;
-			diffI = index;
-		}
+				return true;
+			}
 
-		if (index % step === 0) {
-			data.items[index].value = data.items[diffI].value;
+			let temp = Math.abs(lastStep - item.value);
+			if (temp > diff) {
+				diff = temp;
+				diffI = index;
+			}
 
-			newData.push(item);
-			lastStep = item.value;
-			diff = 0;
+			if (index % step === 0) {
+				data.items[index].value = data.items[diffI].value;
 
-			return true;
-		}
+				newData.push(item);
+				lastStep = item.value;
+				diff = 0;
 
-		return false;
-	});
+				return true;
+			}
 
-	const rootStyles = getComputedStyle(document.documentElement);
+			return false;
+		});
 
-	// Get the value of the global CSS variable
-	const primaryColor = rootStyles.getPropertyValue('--main-color').trim();
+		const rootStyles = getComputedStyle(document.documentElement);
 
-	new Chart(
-	    document.getElementById(canvasId),
-	    {
-	      type: 'line',
-	      options: {
-	      	responsive: true,
-	        animation: true,
-	        fill: false,
-	        borderColor: primaryColor,
-	        plugins: {
-	          legend: {
-	            display: false
-	          },
-	          tooltip: {
-	            enabled: true
-	          }
-	        }
-	      },
-	      data: {
-	        labels: data.items.map(mapLabel),
-	        datasets: [
-	          {
-	            data: data.items.map(row => row.value)
-	          }
-	        ]
-	      }
-	    }
-	  );
+		// Get the value of the global CSS variable
+		const primaryColor = rootStyles.getPropertyValue('--main-color').trim();
+
+		new Chart(
+		    document.getElementById(canvasId),
+		    {
+		      type: 'line',
+		      options: {
+		      	responsive: true,
+		        animation: true,
+		        fill: false,
+		        borderColor: primaryColor,
+		        plugins: {
+		          legend: {
+		            display: false
+		          },
+		          tooltip: {
+		            enabled: true
+		          }
+		        },
+		        scales: {
+			        y: {
+			            beginAtZero: true
+			        }
+			    }
+		      },
+		      data: {
+		        labels: data.items.map(mapLabel),
+		        datasets: [
+		          {
+		            data: data.items.map(row => row.value)
+		          }
+		        ]
+		      }
+		    }
+		  );
+
+		$('#' + holderId).show();
 	});
 }
 
@@ -1085,14 +1202,28 @@ function getOfficialExplorereAddressUrl(address) {
 }
 
 function showAllTokens(e) {
-	$('#tokens').html(tokensContentFull);
+	$('#otherTokens').html(tokensContentFull);
 	scrollToElement($('#tokensHolder'));
 
 	e.preventDefault();
 }
 
 function hideAllTokens(e) {
-	$('#tokens').html(tokensContent);
+	$('#otherTokens').html(tokensContent);
+	scrollToElement($('#tokensHolder'));
+
+	e.preventDefault();
+}
+
+function showAllFinancialTokens(e) {
+	$('#financialTokens').html(financialTokensContentFull);
+	scrollToElement($('#tokensHolder'));
+
+	e.preventDefault();
+}
+
+function hideAllFinancialTokens(e) {
+	$('#financialTokens').html(financialTokensContent);
 	scrollToElement($('#tokensHolder'));
 
 	e.preventDefault();
@@ -1254,6 +1385,8 @@ function clearFilterParams() {
 	delete params['fromDate'];
 	delete params['toDate'];
 	delete params['txType'];
+
+	params['offset'] = 0;
 }
 
 function onGotIssuedNftInfo(nftInfos, message) {
@@ -1443,6 +1576,10 @@ function getErgopadStaking() {
 }
 
 function onInitRequestsFinished() {
+	if (!checkedUser) {
+		return;
+	}
+
     printAddressSummary();
 	printTransactions();
 }
@@ -1471,4 +1608,36 @@ function getAddressInfo() {
 			$('#addressNameHolder').show();
 		}
 	});
+}
+
+function exportTxs(exportType) {
+	if (exportType == 1) {
+		exportType = 'csv';
+		$('#csvSpinner').show();
+	} else {
+		exportType = 'xlsx';
+		$('#xlsxSpinner').show();
+	}
+
+	$('#csvButton').prop('disabled', true);
+	$('#xlsxButton').prop('disabled', true);
+
+	fetch(ERGEXPLORER_API_HOST + '/user/getTxsCSV?address=' + walletAddress + '&fileType=' + exportType)
+	.then(resp => resp.blob())
+	.then(blob => {
+		const timeNow = new Date(Date.now());
+		const url = window.URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.style.display = 'none';
+		a.href = url;
+		a.download = 'tx-' + walletAddress + '-' + timeNow.toLocaleDateString(getLang()) + ' ' + zeroPad(timeNow.getHours(), 2) + '-' + zeroPad(timeNow.getMinutes(), 2) + '-' + zeroPad(timeNow.getSeconds(), 2) + '.' + exportType;
+		document.body.appendChild(a);
+		a.click();
+		window.URL.revokeObjectURL(url);
+
+		$('#csvSpinner').hide();
+		$('#xlsxSpinner').hide();
+		$('#csvButton').prop('disabled', false);
+		$('#xlsxButton').prop('disabled', false);
+	})
 }

@@ -111,7 +111,7 @@ gulp.task('extras', () => {
   }).pipe(gulp.dest('dist'));
 });
 
-gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
+gulp.task('clean', del.bind(null, ['.tmp', 'dist', 'app/*.html']));
 
 gulp.task('serve', () => {
   runSequence(['clean', 'wiredep'], ['nunjucks', 'styles', 'styles-css', 'scripts', 'fonts'], () => {
