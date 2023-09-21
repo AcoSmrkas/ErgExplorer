@@ -2,7 +2,7 @@
 
 ### What is this repository for? ###
 
-Erg Explorer (Alpha) project repo
+Erg Explorer project repo
 
 ### How do I get set up? ###
 
