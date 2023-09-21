@@ -28,6 +28,7 @@ var datePickerTo = undefined;
 var tempDate = -1;
 var publicUser = false;
 var checkedUser = false;
+var printed = false;
 
 $(function() {
 	walletAddress = getWalletAddressFromUrl();	
@@ -180,9 +181,25 @@ function formatFinancialTokensHtmlString(tokensArray, ergDollarValue) {
 			tokensPrice = formatAssetDollarPrice(tokensArray[i].amount, tokensArray[i].decimals, tokensArray[i].tokenId);
 			tokensPriceString = formatDollarPriceString(tokensPrice);
 			totalAssetsValue += tokensPrice;
+			tokensArray[i].usdPrice = tokensPrice;
 		}
 
-		let tokensString = formatAssetNameAndValueString(getAssetTitle(tokensArray[i], true), formatAssetValueString(tokensArray[i].amount, tokensArray[i].decimals, 4) + (tokensPrice == 0 ? '' : '<span class="text-light"> ' + tokensPriceString + '</span>'), tokensArray[i].tokenId);
+		tokensArray[i].tokensString = formatAssetNameAndValueString(getAssetTitle(tokensArray[i], true), formatAssetValueString(tokensArray[i].amount, tokensArray[i].decimals, 4) + (tokensPrice == 0 ? '' : '<span class="text-light"> ' + tokensPriceString + '</span>'), tokensArray[i].tokenId);
+	}
+
+	if (gotPrices) {
+		tokensArray.sort((a, b) => {
+			let aAmount = a.usdPrice;
+			let bAmount = b.usdPrice;
+
+			if (aAmount === bAmount) return 0;
+
+			return aAmount > bAmount ? -1 : 1;
+		});
+	}
+
+	for (i = 0; i < tokensArray.length; i++) {
+		let tokensString = tokensArray[i].tokensString;
 
 		financialTokensContentFull += tokensString;
 
@@ -428,14 +445,15 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		}
 
 		let txInOut = getTxInOutType(totalTransferedAssets);
-
+		let fromAddress;
+		let toAddress;
 		if ((txInOut == TxInOut.Out
 			|| txInOut == TxInOut.Mixed)
 			&& totalTransferedAssets.value == -fee) {
-			totalTransferedAssets.value = 0;
+//			totalTransferedAssets.value = 0;
 		} else if ((txType == TxType.Wallet2Wallet || txType == TxType.Wallet2Contract)
 			&& txInOut == TxInOut.Out) {
-			totalTransferedAssets.value += fee;
+//			totalTransferedAssets.value += fee;
 		} 
 
 		txInOut = getTxInOutType(totalTransferedAssets);
@@ -452,9 +470,6 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		}
 
 		//From/to address
-
-		let fromAddress;
-		let toAddress;
 		if (txType == TxType.Origin) {
 			fromAddress = AddressType.NA;
 			toAddress = item.outputs[0].address;
@@ -653,7 +668,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 
 			let assetPrice = undefined;
 			if (gotPrices && prices[asset.tokenId] != undefined) {
-				assetPrice = formatAssetDollarPriceString(asset.amount, asset.decimals, asset.tokenId);
+			//	assetPrice = formatAssetDollarPriceString(asset.amount, asset.decimals, asset.tokenId);
 			}
 
 			let assetsString = '<br><strong><span class="text-white">' + (asset.amount > 0 ? mixedPlus : '') + formatAssetValueString(asset.amount, asset.decimals, 4) + '</span></strong> ' + getAssetTitle(asset, false) + (assetPrice == undefined ? '' : ' <span class="text-light">' + assetPrice +'</span>');
@@ -682,7 +697,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 
 		let ergDollarValue = undefined;
 		if (gotPrices) {
-			ergDollarValue = formatAssetDollarPrice(totalTransferedAssets.value, ERG_DECIMALS, 'ERG');
+		//	ergDollarValue = formatAssetDollarPrice(totalTransferedAssets.value, ERG_DECIMALS, 'ERG');
 		}
 
 		let ergValueString = '';
@@ -1051,6 +1066,10 @@ function onMempoolAndTransactionsDataFetched() {
 		return;
 	}
 
+	if (printed) {
+		return;
+	}
+
 	formattedResult += getFormattedTransactionsString(mempoolData, true);
 	formattedResult += getFormattedTransactionsString(transactionsData, false);
 
@@ -1068,6 +1087,8 @@ function onMempoolAndTransactionsDataFetched() {
 	$('#txLoading').hide();
 
 	getAddressesInfo();
+
+	printed = true;
 }
 
 function getChart(tokenId, canvasId, holderId) {
@@ -1608,36 +1629,4 @@ function getAddressInfo() {
 			$('#addressNameHolder').show();
 		}
 	});
-}
-
-function exportTxs(exportType) {
-	if (exportType == 1) {
-		exportType = 'csv';
-		$('#csvSpinner').show();
-	} else {
-		exportType = 'xlsx';
-		$('#xlsxSpinner').show();
-	}
-
-	$('#csvButton').prop('disabled', true);
-	$('#xlsxButton').prop('disabled', true);
-
-	fetch(ERGEXPLORER_API_HOST + '/user/getTxsCSV?address=' + walletAddress + '&fileType=' + exportType)
-	.then(resp => resp.blob())
-	.then(blob => {
-		const timeNow = new Date(Date.now());
-		const url = window.URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.style.display = 'none';
-		a.href = url;
-		a.download = 'tx-' + walletAddress + '-' + timeNow.toLocaleDateString(getLang()) + ' ' + zeroPad(timeNow.getHours(), 2) + '-' + zeroPad(timeNow.getMinutes(), 2) + '-' + zeroPad(timeNow.getSeconds(), 2) + '.' + exportType;
-		document.body.appendChild(a);
-		a.click();
-		window.URL.revokeObjectURL(url);
-
-		$('#csvSpinner').hide();
-		$('#xlsxSpinner').hide();
-		$('#csvButton').prop('disabled', false);
-		$('#xlsxButton').prop('disabled', false);
-	})
 }

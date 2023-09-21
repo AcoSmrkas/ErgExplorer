@@ -382,12 +382,16 @@ function printGainersLosers(timeframe) {
 
 	let from7dset = false;
 	let from30dset = false;
+	let from24hset = false;
 	for (var i = data.items.length - 1; i >= 0; i--) {
 		let item = data.items[i];
 
 		let oldPrice = item.price;
 		let newPrice = prices[item.tokenid];
 		let difference = (newPrice * 100 / oldPrice) - 100;
+
+		console.log(newPrice, oldPrice);
+
 		difference = toFixed(difference, 2);
 
 		let classString = 'text-success';
@@ -398,19 +402,21 @@ function printGainersLosers(timeframe) {
 			classString = 'text-danger';
 		}
 
-		if (from30dset == false && from30d <= item.timestamp && item.tokenid == tokenId) {
+		if (from30dset == false && from30d <= item.timestamp) {
 			$('#usdChange30d').html(difference + '%');
 			$('#usdChange30d').addClass(classString);
 
 			from30dset = true;
-		} else if (from7dset == false && from7d <= item.timestamp && item.tokenid == tokenId) {
+		} else if (from7dset == false && from7d <= item.timestamp) {
 			$('#usdChange7d').html(difference + '%');
 			$('#usdChange7d').addClass(classString);
 
 			from7dset = true;
-		} else if (from7dset == true && from24h <= item.timestamp && item.tokenid == tokenId) {
+		} else if (from7dset == true && from24hset == false && from24h <= item.timestamp) {
 			$('#usdChange24h').html(difference + '%');
 			$('#usdChange24h').addClass(classString);
+
+			from24hset = true;
 		}
 	}
 

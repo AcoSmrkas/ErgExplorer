@@ -87,3 +87,40 @@ select:not(:focus):not(:active):not(:hover) {
 select:hover {
 	border: 1px solid var(--bs-border-color);
 }
+
+.carousel-item img {
+	width: 100% !important;
+	height: auto !important;
+	margin: 0;
+	overflow: hidden;
+}
+
+#carouselExampleCaptions {
+	height: 100%;
+	max-height: 200px;
+	max-width: 350px;
+	border: 1px solid var(--main-color);
+}
+
+.carousel-caption {
+	padding: 8px 0;
+	color: var(--main-color) !important;
+	width: 100%;
+	margin: 0;
+	background-color: #000000CC;
+	left: 0;
+	bottom: 0;
+}
+
+.carousel-inner {
+	height: 100%;
+}
+
+.carousel-item {
+	height: 100%;
+	position: relative;
+}
+
+.carousel-control-next-icon, .carousel-control-prev-icon {
+	filter: invert(49%) sepia(49%) saturate(3923%) hue-rotate(348deg) brightness(96%) contrast(105%) !important;
+}

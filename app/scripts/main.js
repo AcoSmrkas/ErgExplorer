@@ -228,7 +228,7 @@ function getLang() {
 		return navigator.languages[0];
 	}
 	
-	return navigator.language;
+	return 'en-GB';
 }
 
 function formatKbSizeString(size) {
