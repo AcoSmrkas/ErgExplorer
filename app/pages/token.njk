@@ -1,4 +1,4 @@
-{% extends "layout.njk" %}
+`{% extends "layout.njk" %}
 
 {% block styles %}
 	<!-- build:css styles/token.css -->
@@ -164,7 +164,7 @@
 		<div id="priceInfo" style="display: none;">		
 			<h3 class="p-2">Finance</h3>
 			<div class="div-cell-dark row w-100 p-0">
-				<div class="col border-end pt-2">
+				<div class="col border-end pt-2 pb-3">
 					<div style="padding-bottom: 5px !important;" class="row w-100 p-2 div-striped-holder">
 						<div class="text-md-center col-md-3 p-1">
 							<p><strong>Price USD:</strong> <span class="text-light" id="usdPrice"></span></p>
@@ -192,6 +192,9 @@
 					</div>
 					<canvas style="width:100%;padding-bottom:10px;" id="chart"></canvas>
 
+					<p>Trade now on <a target="_new" id="spectrumLink" href="">Spectrum Finance <i class="erg-span fa-solid fa-up-right-from-square"></i></a></p>
+					<p>View on <a target="_new" id="cruxLink" href="">Crux Finance <i class="erg-span fa-solid fa-up-right-from-square"></i></a></p>
+
 					<hr class="my-3 d-lg-none">
 				</div>
 				<div class="p-0 col-xl-5 col-lg-12 col-md-12 col-sm-12 col-12">
@@ -215,6 +218,19 @@
 						</tbody>
 					</table>
 				</div>
+			</div>
+		</div>
+
+		<div id="addressbookInfo" style="display: none;">
+		<br>
+			<h3 class="p-2">Address book</h3>
+			<div class="div-cell-dark row w-100 p-0">
+				<div id="addressbookUrl" style="display: none;" class="col-12 p-2">
+					
+				</div>
+				<div id="addressbookInfoHolder" class="div-striped-holder col-lg-12 p-0">
+
+				</div>				
 			</div>
 		</div>
 	</div>

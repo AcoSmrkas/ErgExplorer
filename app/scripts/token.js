@@ -17,9 +17,53 @@ $(function() {
 	getNftInfo(tokenId, onGetNftInfoDone);
 	getPrices(getPriceHistory);	
 	setErgLogoImageColor('loadingImgHolders', 150);
+	setLinks();
+	checkAddressbook();
 
 	setDocumentTitle(tokenId);
 });
+
+function checkAddressbook() {
+	$.get(ERGEXPLORER_API_HOST + 'addressbook/getTokenAddresses?tokenId=' + tokenId,
+	function (data) {
+		if (data.total > 0) {
+			let formattedData = '';
+
+			for (var i = 0; i < data.items.length; i++) {
+				let addressData = data.items[i];
+				formattedData += printAddressbookAddress(addressData, i == 0, i == data.items.length - 1);
+			}
+
+			$('#addressbookInfoHolder').html(formattedData);
+
+			$('#addressbookInfo').show();
+
+			if (data.items[0].url != '') {
+				$('#addressbookUrl').html('<strong class="">URL:</strong> <a target="_new" href="' + data.items[0].url + '">' + data.items[0].url + '</a>');
+				$('#addressbookUrl').show();
+			}
+		}
+	});
+}
+
+function printAddressbookAddress(item, first, last) {
+	let classString = '';
+
+	if (first && last) {
+		classString = ' border-no-flat';
+	} else if (first && !last) {
+		classString = ' border-bottom-flat';
+	} else if (!first && last) {
+		classString = ' border-top-flat';
+	}
+
+    return '<div class="' + classString + '"><div class="p-2' + classString + '"><p><a href="' + getWalletAddressUrl(item.address) + '">' + formatAddressString(item.address, 35) + '</a>' + (item.urltype == '' ? '' : ' <span class="text-light">(' + item.urltype + ')</span>') + '</p></div></div>';
+}
+
+function setLinks() {
+	$('#spectrumLink').attr('href', 'https://app.spectrum.fi/ergo/swap?base=0000000000000000000000000000000000000000000000000000000000000000&quote=9a06d9e545a41fd51eeffc5e20d818073bf820c635e2a9d922269913e0de369d&initialPoolId=' + tokenId);
+	$('#cruxLink').attr('href', 'https://cruxfinance.io/tokens/' + tokenId);
+}
 
 function getPriceHistory() {
 	$.post(ERGEXPLORER_API_HOST + 'tokens/getPriceHistory',
@@ -232,7 +276,7 @@ function onGetNftInfoDone(nftInfo, message) {
 		}
 
 		if (networkType == 'mainnet') {
-			$('#nftAuction').html('<p>See on <a  target="_new" href="https://www.skyharbor.io/token/' + tokenData.id + '">SkyHarbor.io</a></p><p>See on <a  target="_new" href="https://ergoauctions.org/artwork/' + tokenData.id + '">Ergoauctions.org</a></p>');
+			$('#nftAuction').html('<p>View on <a  target="_new" href="https://www.skyharbor.io/token/' + tokenData.id + '">SkyHarbor.io</a></p><p>View on <a  target="_new" href="https://ergoauctions.org/artwork/' + tokenData.id + '">Ergoauctions.org</a></p>');
 		} else {
 			$('#marketplaceHolder').remove();
 		}
@@ -389,8 +433,6 @@ function printGainersLosers(timeframe) {
 		let oldPrice = item.price;
 		let newPrice = prices[item.tokenid];
 		let difference = (newPrice * 100 / oldPrice) - 100;
-
-		console.log(newPrice, oldPrice);
 
 		difference = toFixed(difference, 2);
 

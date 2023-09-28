@@ -404,6 +404,10 @@ select, option {
 	color: var(--main-color);
 }
 
+.border-no-flat {
+	border-radius: 5px 5px;
+}
+
 .div-cell {
 	border: 1px solid var(--borders);
 	border-radius: 5px 5px;
@@ -611,4 +615,8 @@ select, option {
 	.navbar-toggler-icon {
 		filter: sepia(100%) saturate(300%) brightness(0%) hue-rotate(180deg)
 	}
+}
+
+.div-striped-holder > div:nth-child(odd) > div {
+  	background-color: var(--striped-1);
 }
