@@ -93,12 +93,34 @@ function getHolders() {
 	});
 }
 
+function getHolderCount() {
+	let timeout = setTimeout(getHolderCountFallback, 2000);
+
+	$.ajax({
+		url: 'https://api.ergo.watch/p2pk/count?token_id=' + tokenId,
+		success: function(data) {
+			if (timeout) {
+				clearTimeout(timeout);
+			}
+
+			printHolderCount(data);
+		}
+	});
+}
+
 function getHoldersFallback() {
 	$.get(ERGEXPLORER_API_HOST + 'tokens/getHolders?id=' + tokenId,
 		function(data) {
 			printHolders(data.items);
 		}
 	);
+}
+
+function getHolderCountFallback() {
+	$.get(ERGEXPLORER_API_HOST + 'tokens/getHolderCount?id=' + tokenId,
+		function(data) {
+
+		});
 }
 
 function printHolders(data) {
@@ -126,6 +148,11 @@ function printHolders(data) {
 	$('#holdersTable').show();
 
     getAddressesInfo();
+}
+
+function printHolderCount(data) {
+	console.log(data);
+	$('#totalHolderCount').html(`(of total ${nFormatter(data)})`);
 }
 
 function onGetNftInfoDone(nftInfo, message) {
@@ -301,6 +328,7 @@ function onGetNftInfoDone(nftInfo, message) {
 	}
 
 	getHolders();
+	getHolderCount();
 }
 
 function getCurrentAddress() {
@@ -449,12 +477,16 @@ function printGainersLosers(timeframe) {
 			$('#usdChange30d').addClass(classString);
 
 			from30dset = true;
-		} else if (from7dset == false && from7d <= item.timestamp) {
+		}
+
+		if (from7dset == false && from7d <= item.timestamp) {
 			$('#usdChange7d').html(difference + '%');
 			$('#usdChange7d').addClass(classString);
 
 			from7dset = true;
-		} else if (from7dset == true && from24hset == false && from24h <= item.timestamp) {
+		}
+
+		if (from7dset == true && from24hset == false && from24h <= item.timestamp) {
 			$('#usdChange24h').html(difference + '%');
 			$('#usdChange24h').addClass(classString);
 

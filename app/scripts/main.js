@@ -750,8 +750,14 @@ function getDecimals(value, additional = 2) {
 		value *= -1;
 	}
 
+	value = value.toString();
+    if (value.includes('e-')) {
+        let eIndex = value.indexOf('e-');
+        return value.substr(eIndex + 2);
+    }
+
 	let decimals = 2;
-	value = value.toString().split('.');
+	value = value.split('.');
 	if (value.length > 1) {
 		let realSmall = value[1].split('-');
 		if (realSmall.length > 1) {

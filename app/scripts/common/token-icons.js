@@ -1,5 +1,11 @@
 var tokenIcons = [];
 //TokenIconsArrayStart
+tokenIcons['00b42b41cb438c41d0139aa8432eb5eeb70d5a02d3df891f880d5fe08670c365'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/00b42b41cb438c41d0139aa8432eb5eeb70d5a02d3df891f880d5fe08670c365.svg';
+tokenIcons['cbd75cfe1a4f37f9a22eaee516300e36ea82017073036f07a09c1d2e10277cda'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/cbd75cfe1a4f37f9a22eaee516300e36ea82017073036f07a09c1d2e10277cda.svg';
+tokenIcons['5a34d53ca483924b9a6aa0c771f11888881b516a8d1a9cdc535d063fe26d065e'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/5a34d53ca483924b9a6aa0c771f11888881b516a8d1a9cdc535d063fe26d065e.svg';
+tokenIcons['8b08cdd5449a9592a9e79711d7d79249d7a03c535d17efaee83e216e80a44c4b'] = 'https://github.com/rosen-bridge/statics/blob/7307d12c0e594ed1a6fbda827d8827776d10fcf7/logorosentwitter.png?raw=true';
+tokenIcons['52f4544ce8a420d484ece16f9b984d81c23e46971ef5e37c29382ac50f80d5bd'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/52f4544ce8a420d484ece16f9b984d81c23e46971ef5e37c29382ac50f80d5bd.svg';
+tokenIcons['7ba2a85fdb302a181578b1f64cb4a533d89b3f8de4159efece75da41041537f9'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/7ba2a85fdb302a181578b1f64cb4a533d89b3f8de4159efece75da41041537f9.svg';
 tokenIcons['3e0b62c7bc36bc7abf2bf76303722c31788aa579d771e427a0b2c8357da160ba'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/3e0b62c7bc36bc7abf2bf76303722c31788aa579d771e427a0b2c8357da160ba.svg';
 tokenIcons['91289d5cefb9d78e3ea248d4e9c5b0e3c3de54f64bfae85c0070580961995262'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/91289d5cefb9d78e3ea248d4e9c5b0e3c3de54f64bfae85c0070580961995262.svg';
 tokenIcons['36aba4b4a97b65be491cf9f5ca57b5408b0da8d0194f30ec8330d1e8946161c1'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/36aba4b4a97b65be491cf9f5ca57b5408b0da8d0194f30ec8330d1e8946161c1.svg';

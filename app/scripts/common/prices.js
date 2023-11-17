@@ -3,8 +3,9 @@ var pricesNames = new Array();
 var gotPrices = false;
 
 function getPrices(callback) {
-	$.get('https://api.coingecko.com/api/v3/simple/price?ids=ergo&vs_currencies=usd', function (data) {
-		prices['ERG'] = data.ergo.usd;
+	$.get('https://api.ergexplorer.com/tokens/getErgPrice', function (data) {
+		erg24hDiff = data.items[0].difference;
+		prices['ERG'] = data.items[0].value;
 		pricesNames['ERG'] = 'ERG';
 
 		$.get('https://api.spectrum.fi/v1/price-tracking/markets',

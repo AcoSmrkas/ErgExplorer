@@ -29,6 +29,8 @@ var tempDate = -1;
 var publicUser = false;
 var checkedUser = false;
 var printed = false;
+var loadingOwnedNfts = false;
+var loadingIssuedNfts = false;
 
 $(function() {
 	walletAddress = getWalletAddressFromUrl();	
@@ -44,12 +46,25 @@ $(function() {
     setupDatePicker();
 });
 
-window.onfocus = (event) => {
-	if (txNotification != undefined) {
-		txNotification.close();
-		location.reload();
+const resizeObserver = new ResizeObserver((entries) => {
+	let windowWidth = window.innerWidth;
+
+	if (windowWidth <= 992) {
+		return;
 	}
-};
+
+	let element = $('#tokensHolder');
+
+	if (element) {
+		let heightStr = element.css('height');
+		let height = parseInt(heightStr);
+		let newHeight = (height / 2) - 50;
+
+		$('.tokensContainer').css('max-height', newHeight + 'px');
+	}
+});
+
+resizeObserver.observe(document.getElementById('tokensHolder'));
 
 function getUser() {
 	$.get(ERGEXPLORER_API_HOST + 'user/getUser?address=' + walletAddress,
@@ -155,11 +170,7 @@ function formatOtherTokensHtmlString(tokensArray) {
 
 	getNftsInfo(nftSearchTokens, onGotOwnedNftInfo);
 
-	if (i > tokensToShow && tokensArray.length > tokensToShow + 1) {
-		tokensContentFull += '<br><p><strong><a href="#" onclick="hideAllTokens(event)">Hide</a></strong></p>';
-	}
-
-	return tokensContent;
+	return tokensContentFull;
 }
 
 function formatFinancialTokensHtmlString(tokensArray, ergDollarValue) {
@@ -212,10 +223,6 @@ function formatFinancialTokensHtmlString(tokensArray, ergDollarValue) {
 		}
 	}
 
-	if (i > tokensToShow && tokensArray.length > tokensToShow + 1) {
-		financialTokensContentFull += '<br><p><strong><a href="#" onclick="hideAllFinancialTokens(event)">Hide</a></strong></p>';
-	}
-
 	if (totalAssetsValue > 0) {
 		$('#finalAssetsBalance').html('<span class="gray-color">Tokens balance:</span> $' + formatValue(totalAssetsValue, 2) + '');
 		$('#finalAssetsBalance').show();
@@ -224,7 +231,7 @@ function formatFinancialTokensHtmlString(tokensArray, ergDollarValue) {
 		$('#finalBalance').show();
 	}
 
-	return financialTokensContent;
+	return financialTokensContentFull;
 }
 
 function separateFinancialTokens(_, index, array) {
@@ -309,6 +316,8 @@ function formatTxAddressString(address) {
 	} else if (address == AddressType.Multiple) {
 		addressString = '<span class="text-light" title="This transaction has multiple receiving addresses. Check transaction link for more details.">' + AddressType.Multiple + '</span>';
 	}
+
+	addressString = '<a title="' + address + '" onclick="copyAddress(event, this)" href="Copy to clipboard!">&#128203;</a> ' + addressString;
 
 	return addressString;
 }
@@ -685,7 +694,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 			if (assetsI == tokensToShow && assetITotal > tokensToShow + 1) {
 				assets += '<p>...</p><p><strong><a href="#" onclick="showFullValue(event, ' + (i + mempoolIndexOffset) + ')">Show all</a></strong></p>';
 
-				endAdd = '<p> </p><p><strong><a href="#" onclick="hideFullValue(event, ' + (i + mempoolIndexOffset) + ')">Hide</a></strong></p>';
+				endAdd = '';
 			}
 
 			assetsI++;
@@ -717,7 +726,7 @@ formatErgValueString(totalTransferedAssets.value, 5) + (ergDollarValue == undefi
 		valueFields[i + mempoolIndexOffset] = ergValueString + assets;
 		valueFieldsFull[i + mempoolIndexOffset] = ergValueString + assetsFull;
 
-		formattedResult += '<td><span class="d-lg-none"><strong>Value: </strong></span><span id="txValue' + (i + mempoolIndexOffset) + '">' + valueFields[i + mempoolIndexOffset] + '</span></td></tr>';
+		formattedResult += '<td><span class="d-lg-none"><strong>Value: </strong></span><span id="txValue' + (i + mempoolIndexOffset) + '">' + valueFieldsFull[i + mempoolIndexOffset] + '</span></td></tr>';
 	}
 
 	if (isMempool) {
@@ -729,6 +738,8 @@ formatErgValueString(totalTransferedAssets.value, 5) + (ergDollarValue == undefi
 
 function onGotOwnedNftInfo(nftInfos, message) {
 	if (nftInfos == undefined || nftInfos == null || nftInfos.length == 0) return;
+
+	console.log('got');
 
 	nftInfos.sort((a, b) => {
 		return a.data.isBurned == 't' ? 1 : -1;
@@ -753,6 +764,7 @@ function onGotOwnedNftInfo(nftInfos, message) {
 	});
 
 	let html = [];
+	nftsCount = 0;
 	html['token'] = '';
 	html[NFT_TYPE.Image] = '';
 	html[NFT_TYPE.Audio] = '';
@@ -764,12 +776,14 @@ function onGotOwnedNftInfo(nftInfos, message) {
 		if (!nftInfos[i].isNft) continue;
 
 		let imgSrc = '';
+		let cSrc = '';
 		let nftHolderId = '';
 		let nftContentHolderId = '';
 
 		switch (nftInfos[i].type) {
 			case NFT_TYPE.Image:
-				imgSrc = nftInfos[i].link;
+				cSrc = nftInfos[i].link;
+				imgSrc = './images/nft-image.png';
 				nftHolderId = '#nftImagesHolder';
 				nftContentHolderId = '#nftImagesContentHolder';
 				break;
@@ -800,7 +814,7 @@ function onGotOwnedNftInfo(nftInfos, message) {
 				break;
 		}
 
-		html[nftInfos[i].type] += '<a href="' + getTokenUrl(nftInfos[i].data.id) + '"><div class="card m-1" style="width: 100px;"><div class="cardImgHolder"><img src="' + imgSrc + '" class="card-img-top' + ((nftInfos[i].type == NFT_TYPE.Image) ? '' : ' p-4') + '"></div><div class="card-body p-2"><p class="card-text">' + nftInfos[i].data.name + '</p></div></div></a>';
+		html[nftInfos[i].type] += '<a href="' + getTokenUrl(nftInfos[i].data.id) + '"><div class="card m-1" style="width: 100px;"><div class="cardImgHolder"><img onload="onNftImageLoaded(this, \'nft-img-owned\')" onerror="onNftImageLoaded(this, \'nft-img-owned\')" csrc="' + cSrc + '" src="' + imgSrc + '" class="nft-img-owned card-img-top p-4"></div><div class="card-body p-2"><p class="card-text">' + nftInfos[i].data.name + '</p></div></div></a>';
 
 		$(nftHolderId).show();
 
@@ -821,6 +835,52 @@ function onGotOwnedNftInfo(nftInfos, message) {
 	}
 }
 
+function loadOwnedNfts() {
+	if (!loadingOwnedNfts) {
+		loadingOwnedNfts = true;
+
+		loadMoreNfts(10, 'nft-img-owned');
+	}
+}
+
+function loadIssuedNfts() {
+	if (!loadingIssuedNfts) {
+		loadingIssuedNfts = true;
+
+		loadMoreNfts(10, 'nft-img-issued');
+	}
+}
+
+function loadMoreNfts(amount, type) {
+	let loadIndex = 0;
+	$('.' + type).each(function (index, element) {
+		let cSrc = $(element).attr('csrc');
+		let src = $(element).attr('src');
+
+		if (loadIndex >= amount) {
+			return;
+		}
+
+		if (cSrc && cSrc != src) {
+			$(element).attr('src', cSrc);
+
+			loadIndex++;
+		}
+	});
+}
+
+function onNftImageLoaded(element, type) {
+	let cSrc = $(element).attr('csrc');
+	let src = $(element).attr('src');
+
+	if (cSrc == src) {
+		$(element).removeClass('p-4');
+		$(element).attr('csrc', '');
+		
+		setTimeout(loadMoreNfts, 50, 1, type);
+	}
+}
+
 function showNfts(e) {
 	$('#nftsShowAll').show();
 	$('#showAllNftsAction').hide();
@@ -828,6 +888,8 @@ function showNfts(e) {
 	$('#nftsTitle').html('<strong>Owned NFTs</strong>');
 
 	scrollToElement($('#nftsTitle'));
+
+	loadOwnedNfts();
 
 	e.preventDefault();
 }
@@ -1267,6 +1329,10 @@ function copyWalletAddress(e) {
 	copyToClipboard(e, walletAddress);
 }
 
+function copyAddress(e, element) {
+	copyToClipboard(e, $(element).attr('title'));
+}
+
 function setupQrCode() {
 	$('#showQRcodeBtn').on('click', function () {
 		showQRcode(walletAddress);
@@ -1436,6 +1502,7 @@ function onGotIssuedNftInfo(nftInfos, message) {
 	});
 
 	let html = [];
+	issuedNftsCount = 0;
 	html['token'] = '';
 	html[NFT_TYPE.Image] = '';
 	html[NFT_TYPE.Audio] = '';
@@ -1449,10 +1516,12 @@ function onGotIssuedNftInfo(nftInfos, message) {
 
 		if (nftInfos[i].isNft) {
 			let imgSrc = '';
+			let cSrc = '';
 
 			switch (nftInfos[i].type) {
 				case NFT_TYPE.Image:
-					imgSrc = nftInfos[i].link;
+					cSrc = nftInfos[i].link;
+					imgSrc = './images/nft-image.png';
 					nftHolderId = '#issuedNftImagesHolder';
 					nftContentHolderId = '#issuedNftImagesContentHolder';
 					break;
@@ -1483,7 +1552,7 @@ function onGotIssuedNftInfo(nftInfos, message) {
 					break;
 			}
 
-			html[nftInfos[i].type] += '<a href="' + getTokenUrl(nftInfos[i].data.id) + '"><div class="card m-1" style="width: 100px;' + (nftInfos[i].data.isBurned == 't' ? 'border:1.5px solid red;' : '') + '"><div class="cardImgHolder"><img ' + (nftInfos[i].data.isBurned == 't' ? 'style="opacity: 0.4;"' : '') + 'src="' + imgSrc + '" class="card-img-top' + ((nftInfos[i].type == NFT_TYPE.Image) ? '' : ' p-4') + '"></div><div class="card-body p-2"><p class="card-text">' + nftInfos[i].data.name + '</p></div></div></a>';
+			html[nftInfos[i].type] += '<a href="' + getTokenUrl(nftInfos[i].data.id) + '"><div class="card m-1" style="width: 100px;' + (nftInfos[i].data.isBurned == 't' ? 'border:1.5px solid red;' : '') + '"><div class="cardImgHolder"><img onload="onNftImageLoaded(this, \'nft-img-issued\')" onerror="onNftImageLoaded(this, \'nft-img-issued\')" csrc="' + cSrc + '" ' + (nftInfos[i].data.isBurned == 't' ? 'style="opacity: 0.4;"' : '') + 'src="' + imgSrc + '" class="nft-img-issued card-img-top p-4"></div><div class="card-body p-2"><p class="card-text">' + nftInfos[i].data.name + '</p></div></div></a>';
 		} else {
 			nftHolderId = '#issuedTokenHolder';
 			nftContentHolderId = '#issuedTokenContentHolder';
@@ -1516,6 +1585,8 @@ function showIssuedNfts(e) {
 	$('#issuedNftsTitle').html('<strong>Issued Assets</strong>');
 
 	scrollToElement($('#issuedNftsTitle'));
+
+	loadIssuedNfts();
 
 	e.preventDefault();
 }

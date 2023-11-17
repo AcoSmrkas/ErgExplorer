@@ -107,7 +107,7 @@ select:hover {
 	color: var(--main-color) !important;
 	width: 100%;
 	margin: 0;
-	background-color: #000000CC;
+	background-color: #000000AA;
 	left: 0;
 	bottom: 0;
 }
@@ -123,4 +123,25 @@ select:hover {
 
 .carousel-control-next-icon, .carousel-control-prev-icon {
 	filter: invert(49%) sepia(49%) saturate(3923%) hue-rotate(348deg) brightness(96%) contrast(105%) !important;
+}
+
+#nftsHolder > div > div > div > div > div,
+#issuedNftsHolder > div > div > div > div > div {
+	max-height: 400px;
+	overflow-y: auto;
+}
+
+.tokensContainer {
+	max-height: 200px;
+	overflow-y: auto;
+}
+
+#tokensHolder {
+	min-height: 400px;
+}
+
+#transactionsTableBody > tr > td:last-child > span:last-child {
+	display: block;
+	max-height: 110px;
+	overflow-y: auto;	
 }
