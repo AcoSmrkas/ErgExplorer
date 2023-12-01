@@ -95,6 +95,7 @@ function printTransaction(data, mempool) {
 
 	//Id
 	$('#txHeader').html('<p><a href="Copy to clipboard!" onclick="copyTransactionAddress(event)">' + data.id + ' &#128203;</a></p>');
+	$('#txHeaderMobile').html('<p><a href="Copy to clipboard!" onclick="copyTransactionAddress(event)">' + data.id.substr(0, 8) + '...' + data.id.substr(data.id.length - 4) + ' &#128203;</a></p>');
 
 	//Time
 	if (mempool) {
@@ -170,6 +171,7 @@ function printTransaction(data, mempool) {
 
     $('#txLoading').hide();
    
+	$('#infoBottom').html($('#infoTop').html());
 }
 
 function checkMempoolChanged() {

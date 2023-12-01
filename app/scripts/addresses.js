@@ -714,8 +714,8 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 			ergValueString = (totalTransferedAssets.value > 0 ? mixedPlus : '') + formatErgValueString(totalTransferedAssets.value, 5) + (ergDollarValue == undefined ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>')
 formatErgValueString(totalTransferedAssets.value, 5) + (ergDollarValue == undefined ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>');
 		} else {
-			assets = assets.substr(5);
 			assetsFull = assets.substr(5);
+			assets = assets.substr(5);
 		}
 
 		if (totalTransferedAssets.value == 0 && assetsI == 0) {

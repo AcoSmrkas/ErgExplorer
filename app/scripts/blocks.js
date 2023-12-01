@@ -107,7 +107,7 @@ function printBlockTransactions() {
 		//Inputs
 		formattedData += formatInputsOutputs(transactionData.inputs);
 
-		formattedData += '</div></div><div class="col-md-6 div-cell-dark p-0 mt-4 mt-md-0"><h2 class="p-3">Outputs</h2><div class="block-tx-holder">';
+		formattedData += '</div></div><div class="col-md-6 div-cell-dark p-0 mt-4 mt-md-0" style="border-radius: 0 0 5px 5px;"><h2 class="p-3">Outputs</h2><div class="block-tx-holder">';
 
 		//Outputs
 		formattedData += formatInputsOutputs(transactionData.outputs);

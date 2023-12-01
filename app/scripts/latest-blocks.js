@@ -5,7 +5,7 @@ $(function() {
 });
 
 function printLatestBlocks() {
-	var jqxhr = $.get(API_HOST + '/blocks?limit=' + ITEMS_PER_PAGE + '&sortBy=height&sortDirection=desc&offset=' + offset, function(data) {
+	var jqxhr = $.get(API_HOST + 'blocks?limit=' + ITEMS_PER_PAGE + '&sortBy=height&sortDirection=desc&offset=' + offset, function(data) {
 		let formattedResult = '';
 		let totalBlocks = data.total;
 		let items = data.items;

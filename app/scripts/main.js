@@ -110,6 +110,14 @@ function goToTransactionUrl(txId) {
     window.location.assign(getSearchQueryPage('transactions', txId));
 }
 
+function getBoxUrl(txId) {
+	return getSearchQueryPage('boxes', txId);
+}
+
+function goToBoxUrl(txId) {
+    window.location.assign(getSearchQueryPage('boxes', txId));
+}
+
 function getBlockUrl(blockId) {
 	return getSearchQueryPage('blocks', blockId);
 }
@@ -186,6 +194,9 @@ function searchAddress() {
 			break;
 		case '3':
 			goToBlockUrl(searchQuery);
+			break;
+		case '4':
+			goToBoxUrl(searchQuery);
 			break;
 
 		default:
@@ -505,35 +516,62 @@ function formatInputsOutputs(data) {
 	let formattedData = '';
 
 	for (let i = 0; i < data.length; i++) {
-		formattedData += '<div class="row div-cell border-flat">';
-		
-		//Address
-		addAddress(data[i].address);
-		formattedData += '<div class="col-9"><span><strong>Address: </strong></span><a class="address-string" addr="' + data[i].address + '" href="' + getWalletAddressUrl(data[i].address) + '" >' + formatAddressString(data[i].address, 15) + '</a></div>';
-
-		//Status
-		formattedData += '<div class="col-3 d-flex justify-content-end">' + (data[i].spentTransactionId === undefined ? '' : data[i].spentTransactionId === null ? '<span class="text-success">Unspent' : '<span class="text-danger">Spent') + '</span></div>';
-
-		//Value
-		formattedData += '<div style="padding-bottom:10px;" class="col-10"><span><strong>Value: </strong></span><span class="">' + formatErgValueString(data[i].value, 5) + ' <span class="text-light">' + formatAssetDollarPriceString(data[i].value, ERG_DECIMALS, 'ERG') + '</span></span></div>';
-		
-		//Output transaction
-		if (data[i].outputTransactionId != undefined) {
-			formattedData += '<div class="col-2 d-flex justify-content-end"><a href="' + getTransactionsUrl(data[i].outputTransactionId) + '" >Output</a></div>';
-		}
-	
-		//Assets
-		if (data[i].assets != undefined && data[i].assets.length > 0 ) {
-			formattedData += '<h5><strong>Tokens:</strong></h5>';
-			for (let j = 0; j < data[i].assets.length; j++) {
-				let asset = data[i].assets[j];
-				let assetPrice = formatAssetDollarPrice(asset.amount, asset.decimals, asset.tokenId);
-				formattedData += '<p><strong>' + getAssetTitle(asset, true) + '</strong>: <span class="text-white">' + formatAssetValueString(asset.amount, asset.decimals, 4) + ' ' + (assetPrice == -1 ? '' : '<span class="text-light">' + formatDollarPriceString(assetPrice) + '</span>') + '</span></p>';
-			}
-		}
-
-		formattedData += '</div>';
+		formattedData += formatBox(data[i]);
 	}
+
+	return formattedData;
+}
+
+function formatBox(box, trueBox = false) {
+	let formattedData = '<div class="row div-cell border-flat p-2">';
+		
+	let customIdString = '';
+	if (box.boxId) {
+		customIdString = '<p><strong class="text-white">Box Id: </strong><a href=" ' + getBoxUrl(box.boxId) + '">'+box.boxId.substr(0, 15) + '...' + box.boxId.substr(box.boxId.length - 4)+'</a> <a title="' + box.boxId + '" onclick="copyId(event, this)" href="Copy to clipboard!">&#128203;</a></p>';
+	}
+
+	//Address
+	addAddress(box.address);
+	formattedData += '<div class="col-9">' + customIdString + '<span><strong>Address: </strong></span><a class="address-string" addr="' + box.address + '" href="' + getWalletAddressUrl(box.address) + '" >' + formatAddressString(box.address, 15) + '</a> <a title="' + box.address + '" onclick="copyId(event, this)" href="Copy to clipboard!">&#128203;</a></p>';
+
+
+	if (trueBox) {
+		formattedData += '<p><strong class="text-white">Transaction Id: </strong><a href=" ' + getTransactionsUrl(box.transactionId) + '">'+box.transactionId+'</a> <a title="' + box.transactionId + '" onclick="copyId(event, this)" href="Copy to clipboard!">&#128203;</a></p>';
+	}
+
+	//Status
+
+	if (trueBox) {
+		formattedData += '<p><strong class="text-white">Spent Transaction Id: </strong><a href=" ' + getTransactionsUrl(box.spentTransactionId) + '">'+box.spentTransactionId+'</a> <a title="' + box.spentTransactionId + '" onclick="copyId(event, this)" href="Copy to clipboard!">&#128203;</a></p>';
+		formattedData += '<p><strong class="text-white">Creation height</strong>: ' + box.creationHeight + '</p><p> </p>';
+		formattedData += '<p><strong class="text-white">Settlement height</strong>: ' + box.settlementHeight + '</p>';
+	}
+
+	formattedData += '</div><div class="col-3 d-flex justify-content-end">' + (box.spentTransactionId === undefined ? '' : box.spentTransactionId === null ? '<span class="text-success">Unspent' : '<span class="text-danger">Spent') + '</span></div>';
+
+	//Value
+	formattedData += '<div style="padding-bottom:10px;" class="col-10"><span><strong>Value: </strong></span><span class="">' + formatErgValueString(box.value, 5) + ' <span class="text-light">' + formatAssetDollarPriceString(box.value, ERG_DECIMALS, 'ERG') + '</span></span></div>';
+	
+	//Output transaction
+	if (box.outputTransactionId != undefined) {
+		formattedData += '<div class="col-2 d-flex justify-content-end"><a href="' + getTransactionsUrl(box.outputTransactionId) + '" >Output</a></div>';
+	}
+
+	//Assets
+	if (box.assets != undefined && box.assets.length > 0 ) {
+		formattedData += '<h5><strong>Tokens:</strong></h5>';
+		for (let j = 0; j < box.assets.length; j++) {
+			let asset = box.assets[j];
+			let assetPrice = formatAssetDollarPrice(asset.amount, asset.decimals, asset.tokenId);
+			formattedData += '<p><strong>' + getAssetTitle(asset, true) + '</strong>: <span class="text-white">' + formatAssetValueString(asset.amount, asset.decimals, 4) + ' ' + (assetPrice == -1 ? '' : '<span class="text-light">' + formatDollarPriceString(assetPrice) + '</span>') + '</span></p>';
+		}
+	}
+
+	if (trueBox) {		
+		formattedData += '<p> </p><p style="margin-bottom:5px;"><strong class="text-white">Ergo tree:</strong></p> <div style="word-wrap:break-word;background: var(--striped-1);" class="div-cell-dark">' + box.ergoTree + '</div>';
+	}
+
+	formattedData += '</div>';
 
 	return formattedData;
 }
@@ -785,4 +823,8 @@ function getDecimals(value, additional = 2) {
 	}
 
 	return decimals;
+}
+
+function copyId(e, element) {
+	copyToClipboard(e, $(element).attr('title'));
 }
