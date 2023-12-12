@@ -587,6 +587,29 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 			fromAddress = toAddress = walletAddress;
 		}
 
+		if (txInOut == TxInOut.Out && txType == TxType.Contract2Wallet) {
+			let minDiff = 9999999999;
+			let minDiffIndex = -1;
+			
+			for (let i = 0; i < item.outputs.length; i++) {
+				let output = item.outputs[i];
+
+				if (output.address == FEE_ADDRESS) continue;
+
+				let transferVal = Math.abs(totalTransferedAssets.value);
+
+				let newDiff = Math.abs(transferVal - output.value);
+				if (newDiff < minDiff) {
+					minDiff = newDiff
+					minDiffIndex = i;
+				}
+			}
+
+			if (minDiffIndex > -1) {
+				toAddress = item.outputs[minDiffIndex].address;
+			}
+		}
+
 		//Tx
 		formattedResult += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionsUrl(item.id) + '"><i class="fas fa-link text-info"></i></a></td>';
 
@@ -738,8 +761,6 @@ formatErgValueString(totalTransferedAssets.value, 5) + (ergDollarValue == undefi
 
 function onGotOwnedNftInfo(nftInfos, message) {
 	if (nftInfos == undefined || nftInfos == null || nftInfos.length == 0) return;
-
-	console.log('got');
 
 	nftInfos.sort((a, b) => {
 		return a.data.isBurned == 't' ? 1 : -1;
