@@ -58,8 +58,11 @@
 		<br>
 
 		<div id="issuedTokensHolder" style="display: none;">
+			
+			{% include "partials/pagination.njk" %}
+
 			<div class="row w-100">
-				<table class="table table-dark table-striped">
+				<table class="table table-dark table-striped table-mobile">
 					<thead>
 						<tr>
 							<th scope="col">Id</th>
@@ -85,7 +88,7 @@
 {% endblock %}
 
 {% block scripts %}
-	<script src="./scripts/common/pagination.js?v=22"></script>
+	<script src="./scripts/common/pagination.js?v=30"></script>
 	<script src="./scripts/common/nft.js?.v=5"></script>
-	<script src="./scripts/issued-tokens.js?v=22"></script>
+	<script src="./scripts/issued-tokens.js?v=30"></script>
 {% endblock %}

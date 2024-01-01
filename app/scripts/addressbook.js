@@ -73,8 +73,8 @@ function printAddresses() {
 		$('#addressbookContentHolder').html(formattedResult);
         
         $('#addressbookHolder').show();
-
-       setupPagination(data.total);
+        
+        setupPagination(data.total);
     })
     .fail(function() {
         showLoadError('Failed to fetch the address book entries.');
@@ -82,6 +82,17 @@ function printAddresses() {
     .always(function() {        
         $('#txLoading').hide();
     });
+}
+
+function countUniqueNames(arr) {
+  const uniqueNames = new Set(); // Using Set to store unique names
+
+  // Iterate through each object in the array
+  arr.forEach(obj => {
+    uniqueNames.add(obj.name); // Add each name to the Set
+  });
+
+  return uniqueNames.size; // Return the size of the Set (number of unique names)
 }
 
 function printAddress(item) {

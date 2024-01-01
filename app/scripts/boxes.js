@@ -82,8 +82,6 @@ function getTransaction(mempool) {
 }
 
 function printTransaction(data, mempool) {	
-	console.log(data);
-
 	//Id
 	$('#txHeader').html('<p><a href="Copy to clipboard!" onclick="copyTransactionAddress(event)">' + data.boxId + ' &#128203;</a></p>');
 	$('#txHeaderMobile').html('<p><a href="Copy to clipboard!" onclick="copyTransactionAddress(event)">' + data.boxId.substr(0, 8) + '...' + data.boxId.substr(data.boxId.length - 4) + ' &#128203;</a></p>');

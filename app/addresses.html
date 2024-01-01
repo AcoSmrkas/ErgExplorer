@@ -34,8 +34,8 @@
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@eonasdan/tempus-dominus@6.7.11/dist/css/tempus-dominus.min.css" crossorigin="anonymous">
 
 			
-		<script src="./scripts/common/config.js?v=22"></script>
-		<script src="./scripts/common/params.js?v=22"></script>
+		<script src="./scripts/common/config.js?v=30"></script>
+		<script src="./scripts/common/params.js?v=30"></script>
 
         <script type="text/javascript">
         	var theme = 'dark';
@@ -166,7 +166,7 @@
                 </div>
                 </li>
                 <li class="nav-item">
-                    <a style="line-height:36px;" class="nav-link" href="#" onclick="switchTheme(event);" id="themeSwitch"><i class="fas fa-moon"></i></a>
+                    <a style="line-height:36px;text-align:center;" class="nav-link" href="#" onclick="switchTheme(event);" id="themeSwitch"><i class="fas fa-moon"></i></a>
                 </li>
             </ul>
         </div>
@@ -177,13 +177,14 @@
 
 		<!-- Page Content -->
 		<div class="container p-0">
+
 			<br>
 
 			<!-- Search Box -->
 <div class="d-flex justify-content-center align-items-center h-100">
 	<div class="row w-100">
     	<div class="col-sm-12 col-md-10 mx-auto">
-    		<div class="input-group mb-3 w-100">
+    		<div class="input-group mb-0 w-100">
 				<input id="searchInput" type="text" class="form-control form-control-lg" placeholder="Search for" onkeydown="submitSearch(event)">
 				<select id="searchType" class="form-select form-control form-control-lg" >
 				  <option value="0">Address</option>
@@ -216,7 +217,7 @@
 			<div class="row w-100 div-cell-dark border-top-flat">
 				<div class="col-md p-0">
 					<div class="row w-100">
-						<div class="col-lg-6 col-md-12">
+						<div class="ps-0 pe-0 ps-md-2 pe-md-2 col-lg-6 col-md-12">
 							<h4><strong>Summary</strong></h4>
 							<p id="verifiedOwnerHolder" style="display: none;"><strong>Verified owner: </strong><span id="verifiedOwner"></span></p>
 							<p id="addressNameHolder" style="display: none;"><strong>Name: </strong><span id="addressName"></span></p>
@@ -225,7 +226,7 @@
 							<button id="showQRcodeBtn" type="button" class="btn btn-info">Show QR Code</button>
 							<hr class="my-3 d-lg-none">
 						</div>
-						<div class="col-lg-6 col-md-12 border-lg-start">
+						<div class="ps-0 pe-0 ps-md-2 pe-md-2 col-lg-6 col-md-12 border-lg-start">
 							<h4><strong>Balance</strong></h4>
 							<h5 id="finalErgBalance"></h5>
 							<h5 style="display: none" id="finalAssetsBalance"></h5>
@@ -249,7 +250,7 @@
 						</div>
 					</div>
 					<div class="row w-100">
-						<div id="nftsHolder" class="row w-100" style="display: none;">
+						<div id="nftsHolder" class="ps-0 pe-0 ps-md-2 pe-md-2 row w-100" style="display: none;">
 							<div class="col-12 p-0">
 								<hr class="my-3">
 								<h4 style="display:inline-block;" id="nftsTitle"><strong>Owned NFTs</strong></h4><a id="showAllNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="showNfts(event)">Show</a>
@@ -294,7 +295,7 @@
 								</div>
 							</div>
 						</div>
-						<div id="issuedNftsHolder" class="row w-100" style="display: none;">
+						<div id="issuedNftsHolder" class="ps-0 pe-0 ps-md-2 pe-md-2 row w-100" style="display: none;">
 							<div class="col-12 p-0">
 							<hr class="my-3">
 							<h4 style="display:inline-block;" id="issuedNftsTitle"><strong>Issued assets</strong></h4><a id="showIssuedNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="showIssuedNfts(event)">Show</a>
@@ -347,7 +348,7 @@
 						</div>
 					</div>					
 				</div>
-				<div class="col-lg-4 col-md-12 border-lg-start" id="tokensHolder" style="display:none">
+				<div class="ps-0 pe-0 ps-md-2 pe-md-2 col-lg-4 col-md-12 border-lg-start" id="tokensHolder" style="display:none">
 					<hr class="my-3 d-lg-none">
 					<div style="display: none;" id="financialAssetsHolder">
 						<h4><strong>Financial assets</strong></h4>
@@ -382,7 +383,7 @@
 		<div id="myExplorer">
 			<div class="row w-100 div-summary">
 				<div class="row w-100 p-0 m-0">
-					<div class="col-md-6 col-lg-8">
+					<div class="ps-0 pe-0 ps-md-2 pe-md-2 col-md-6 col-lg-8">
 					<h3><strong>Premium Offer</strong></h3>
 					<p>Welcome to the next level of blockchain analysis! Our premium offering is packed with unbeatable features. Craft custom charts, navigate transactions effortlessly with smart filters, and transform data into CSV or XLSX formats with a breeze. Join now and take charge of your blockchain insights!</p>
 					<br>
@@ -531,7 +532,34 @@
 		</div>
 
 		  <div id="txView" class="row w-100">
-			<table class="table table-dark table-striped">
+
+			<nav id="pagination" aria-label="Page navigation">
+	<ul class="pagination justify-content-center">
+		<li id="" class="page-item firstPageHolder">
+			<a id="" class="page-link firstPage" href="#" aria-label="Previous">
+				<span aria-hidden="true">&laquo;</span>
+			</a>
+		</li>
+		<li id="" class="page-item previousPageHolder">
+			<a id ="" class="page-link previousPage" href="#" aria-label="Previous">
+				<span aria-hidden="true">&lsaquo;</span>
+			</a>
+		</li>
+		<li style="cursor: pointer;" class="page-item"><a id="" class="page-link pageNum" onclick="enterPageNum(event)">1 of 1</a></li>
+		<li id="" class="page-item nextPageHolder">
+			<a id="" class="page-link nextPage" href="#" aria-label="Next">
+				<span aria-hidden="true">&rsaquo;</span>
+			</a>
+		</li>
+		<li id="" class="page-item lastPageHolder">
+			<a id="" class="page-link lastPage" href="#" aria-label="Next">
+				<span aria-hidden="true">&raquo;</span>
+			</a>
+		</li>
+	</ul>
+</nav>
+		  
+			<table class="table table-dark table-striped table-mobile">
 				<thead>
 					<tr>
 						<th scope="col">Tx</th>
@@ -552,24 +580,24 @@
 
 			<nav id="pagination" aria-label="Page navigation">
 	<ul class="pagination justify-content-center">
-		<li id="firstPageHolder" class="page-item">
-			<a id="firstPage" class="page-link" href="#" aria-label="Previous">
+		<li id="" class="page-item firstPageHolder">
+			<a id="" class="page-link firstPage" href="#" aria-label="Previous">
 				<span aria-hidden="true">&laquo;</span>
 			</a>
 		</li>
-		<li id="previousPageHolder" class="page-item">
-			<a id ="previousPage" class="page-link" href="#" aria-label="Previous">
+		<li id="" class="page-item previousPageHolder">
+			<a id ="" class="page-link previousPage" href="#" aria-label="Previous">
 				<span aria-hidden="true">&lsaquo;</span>
 			</a>
 		</li>
-		<li style="cursor: pointer;" class="page-item"><a id="pageNum" class="page-link" onclick="enterPageNum(event)">1 of 1</a></li>
-		<li id="nextPageHolder" class="page-item">
-			<a id="nextPage" class="page-link" href="#" aria-label="Next">
+		<li style="cursor: pointer;" class="page-item"><a id="" class="page-link pageNum" onclick="enterPageNum(event)">1 of 1</a></li>
+		<li id="" class="page-item nextPageHolder">
+			<a id="" class="page-link nextPage" href="#" aria-label="Next">
 				<span aria-hidden="true">&rsaquo;</span>
 			</a>
 		</li>
-		<li id="lastPageHolder" class="page-item">
-			<a id="lastPage" class="page-link" href="#" aria-label="Next">
+		<li id="" class="page-item lastPageHolder">
+			<a id="" class="page-link lastPage" href="#" aria-label="Next">
 				<span aria-hidden="true">&raquo;</span>
 			</a>
 		</li>
@@ -604,7 +632,7 @@
 		<!-- Footer -->
 		<footer class="footer">
     <div class="container text-center">
-        &copy; Erg Explorer 2023
+        &copy; Erg Explorer 2024
     </div>
 </footer>
 
@@ -645,19 +673,20 @@
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
 
 		<!-- Custom JavaScript -->
-		<script src="./scripts/common/token-icons.js?v=22"></script>
-		<script src="./scripts/main.js?v=22"></script>
+		<script src="https://cdn.jsdelivr.net/npm/json-bigint-parser-browser@1.0.4/json-bigint-browser.min.js"></script>
+		<script src="./scripts/common/token-icons.js?v=30"></script>
+		<script src="./scripts/main.js?v=30"></script>
 			
 	<!-- Popperjs -->
 	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" crossorigin="anonymous"></script>
 	<!-- Tempus Dominus JavaScript -->
 	<script src="https://cdn.jsdelivr.net/npm/@eonasdan/tempus-dominus@6.7.11/dist/js/tempus-dominus.min.js" crossorigin="anonymous"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.3.1/chart.umd.min.js" integrity="sha512-UcCmTcAm3IkzrswF+WqvwWSjsnv8nsJpDL09KHCETWS0g0WjoIZDRUYXCeHeow1cEij0kqL9OwRwirv/xCQ6GA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-	<script src="./scripts/common/prices.js?v=22"></script>
-	<script src="./scripts/common/pagination.js?v=22"></script>
-	<script src="./scripts/common/nft.js?v=22"></script>
-	<script src="./scripts/addresses.js?v=22"></script>
-	<script src="./scripts/3rd-party/qrcode.min.js?v=22"></script>
+	<script src="./scripts/common/prices.js?v=30"></script>
+	<script src="./scripts/common/pagination.js?v=30"></script>
+	<script src="./scripts/common/nft.js?v=30"></script>
+	<script src="./scripts/addresses.js?v=30"></script>
+	<script src="./scripts/3rd-party/qrcode.min.js?v=30"></script>
 
 	</body>
 </html>

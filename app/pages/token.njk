@@ -115,6 +115,10 @@
 						<div class="col-md-3"><strong><p>Current address</p></strong></div>
 						<div id="nftCurrentAddress" class="col"></div>
 					</div>
+					<div id="ipfsCidHolder" class="row w-100 p-2">
+						<div class="col-md-3"><strong><p>IPFS CID</p></strong></div>
+						<div id="ipfsCid" class="col"></div>
+					</div>
 					<div class="row w-100 p-2">
 						<div class="col-md-3"><strong><p>URL</p></strong></div>
 						<div id="nftLink" class="col"></div>
@@ -162,10 +166,10 @@
 		<br>
 
 		<div id="priceInfo" style="display: none;">		
-			<h3 class="p-2">Finance</h3>
+			<h3 id="financeHeader" class="p-2">Finance</h3>
 			<div class="div-cell-dark row w-100 p-0">
-				<div class="col border-end pt-2 pb-3">
-					<div style="padding-bottom: 5px !important;" class="row w-100 p-2 div-striped-holder">
+				<div id="chartColumn" class="col border-end pt-2 pb-3">
+					<div style="padding-bottom: 5px !important;" class="row w-100 p-0 p-md-2 div-striped-holder">
 						<div class="text-md-center col-md-3 p-1">
 							<p><strong>Price USD:</strong> <span class="text-light" id="usdPrice"></span></p>
 						</div>
@@ -180,14 +184,14 @@
 						</div>
 					</div>
 					<hr class="my-3">
-					<div class="row w-100 p-2">
+					<div class="row w-100 p-0 p-md-2">
 						<div class="col-6 p-0 pb-1">
 							<h4>Price chart USD</h4>
 						</div>
 						<div class="col-6 p-0">
-							<input id="showGainersLosers30d" onclick="printGainersLosers30d()" style="display:inline-block;" class="btn btn-primary float-end" type="button" value="30d">
-							<input id="showGainersLosers7d" onclick="printGainersLosers7d()" style="margin-right:5px;display:inline-block;" class="btn btn-primary float-end" type="button" value="7d">
-							<input id="showGainersLosers24h" onclick="printGainersLosers24h()" style="margin-right:5px;display:inline-block;" class="btn btn-info float-end" type="button" value="24h">
+							<input id="showGainersLosers30d" onclick="printGainersLosers30d()" style="display:inline-block;" class="p-2 p-sm-2 btn btn-primary float-end" type="button" value="30d">
+							<input id="showGainersLosers7d" onclick="printGainersLosers7d()" style="margin-right:5px;display:inline-block;" class="p-2 p-sm-2 btn btn-primary float-end" type="button" value="7d">
+							<input id="showGainersLosers24h" onclick="printGainersLosers24h()" style="margin-right:5px;display:inline-block;" class="p-2 p-sm-2 btn btn-info float-end" type="button" value="24h">
 						</div>
 					</div>
 					<canvas style="width:100%;padding-bottom:10px;" id="chart"></canvas>
@@ -197,14 +201,14 @@
 
 					<hr class="my-3 d-lg-none">
 				</div>
-				<div class="p-0 col-xl-5 col-lg-12 col-md-12 col-sm-12 col-12">
+				<div id="holdersColumn" class="p-0 col-xl-5 col-lg-12 col-md-12 col-sm-12 col-12">
 					<h4 style="display: inline-block;padding-right:10px !important;" class="p-3">Top 10 holders</h4><span id="totalHolderCount" class="text-light"></span>
 					<div id="holdersLoading"> 
 						<div id="holdersLoadingInner">
 							<canvas id="loadingImgHolders" class="loadingImg" width="150" height="150"></canvas>
 						</div>
 					</div>
-					<table id="holdersTable" style="display:none; border-left: 0 !important;" class="table table-dark table-striped m-0">
+					<table id="holdersTable" style="display:none; border-left: 0 !important;" class="table table-dark table-striped table-mobile m-0">
 						<thead>
 							<tr>
 								<th scope="col">Address</th>
@@ -250,7 +254,7 @@
 
 {% block scripts %}
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.3.1/chart.umd.min.js" integrity="sha512-UcCmTcAm3IkzrswF+WqvwWSjsnv8nsJpDL09KHCETWS0g0WjoIZDRUYXCeHeow1cEij0kqL9OwRwirv/xCQ6GA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-	<script src="./scripts/common/prices.js?v=22"></script>
-	<script src="./scripts/common/nft.js?v=22"></script>
-	<script src="./scripts/token.js?v=22"></script>
+	<script src="./scripts/common/prices.js?v=30"></script>
+	<script src="./scripts/common/nft.js?v=30"></script>
+	<script src="./scripts/token.js?v=30"></script>
 {% endblock %}

@@ -4,7 +4,7 @@
 }
 
 html[data-bs-theme="dark"] {
-	--striped-1: #2a2a2a;
+	--striped-1: #262626;
 	--text-color: #AAA;
 	--forms-bg: #333;
 	--borders: #4f4f4f;
@@ -20,5 +20,5 @@ html[data-bs-theme="light"] {
 	--borders: #CCC;
 	--text-light: #444;
 	--text-strong: #222;
-	--background: #f8f8f8;
+	--background: #f4f4f4;
 }

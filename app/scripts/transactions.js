@@ -54,26 +54,34 @@ function getTransaction(mempool) {
 
 	$.get(txUrl, function(txData) {
 		if (mempool) {
-			let walletAddress = txData.inputs[0].address;
+			let walletAddress = 'N/A'
 
-			let addressMempoolUrl = API_HOST_2 + 'mempool/transactions/byAddress/' + walletAddress;
+			if (txData.inputs.length > 0) {
+				walletAddress = txData.inputs[0].address;
+			}
 
-		    if (networkType == 'testnet') {
-		        addressMempoolUrl = API_HOST_2 + 'api/v1/mempool/transactions/byAddress/' + walletAddress
-		    }
+			if (walletAddress != 'N/A') {
+				let addressMempoolUrl = API_HOST_2 + 'mempool/transactions/byAddress/' + walletAddress;
 
-			$.get(addressMempoolUrl, function(data) {
-				for (let i = 0; i < data.items.length; i++) {
-					if (data.items[i].id == txId) {
-						printTransaction(data.items[i], mempool);
-						break;
+			    if (networkType == 'testnet') {
+			        addressMempoolUrl = API_HOST_2 + 'api/v1/mempool/transactions/byAddress/' + walletAddress
+			    }
+
+				$.get(addressMempoolUrl, function(data) {
+					for (let i = 0; i < data.items.length; i++) {
+						if (data.items[i].id == txId) {
+							printTransaction(data.items[i], mempool);
+							break;
+						}
 					}
-				}
 
+					printTransaction(txData, mempool);
+				}).fail(function() {
+					printTransaction(txData, mempool);
+				});
+			} else {
 				printTransaction(txData, mempool);
-			}).fail(function() {
-				printTransaction(txData, mempool);
-			});
+			}
 		} else {
 			printTransaction(txData, mempool);
 		}

@@ -1,9 +1,12 @@
 var tokenIcons = [];
 //TokenIconsArrayStart
+tokenIcons['e023c5f382b6e96fbd878f6811aac73345489032157ad5affb84aefd4956c297'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/2dee6788e99d2420a41447139db9afdc4b442948/logos/ergo/token-ada.svg';
+tokenIcons['2ba9a2d640eb3b0a5e4d498f8f2579b852e6e06c747f84fdf9c7beed64611fe5'] = 'images/tokens/santakey.png';
+tokenIcons['4ffdbf1bcc96c97fa0eb139d37469fa884d38cfc0f34681dd0b2da2b9a4e5016'] = 'images/tokens/coal.png';
 tokenIcons['00b42b41cb438c41d0139aa8432eb5eeb70d5a02d3df891f880d5fe08670c365'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/00b42b41cb438c41d0139aa8432eb5eeb70d5a02d3df891f880d5fe08670c365.svg';
 tokenIcons['cbd75cfe1a4f37f9a22eaee516300e36ea82017073036f07a09c1d2e10277cda'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/cbd75cfe1a4f37f9a22eaee516300e36ea82017073036f07a09c1d2e10277cda.svg';
 tokenIcons['5a34d53ca483924b9a6aa0c771f11888881b516a8d1a9cdc535d063fe26d065e'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/5a34d53ca483924b9a6aa0c771f11888881b516a8d1a9cdc535d063fe26d065e.svg';
-tokenIcons['8b08cdd5449a9592a9e79711d7d79249d7a03c535d17efaee83e216e80a44c4b'] = 'https://github.com/rosen-bridge/statics/blob/7307d12c0e594ed1a6fbda827d8827776d10fcf7/logorosentwitter.png?raw=true';
+tokenIcons['8b08cdd5449a9592a9e79711d7d79249d7a03c535d17efaee83e216e80a44c4b'] = 'https://spectrum.fi/logos/ergo/8b08cdd5449a9592a9e79711d7d79249d7a03c535d17efaee83e216e80a44c4b.svg';
 tokenIcons['52f4544ce8a420d484ece16f9b984d81c23e46971ef5e37c29382ac50f80d5bd'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/52f4544ce8a420d484ece16f9b984d81c23e46971ef5e37c29382ac50f80d5bd.svg';
 tokenIcons['7ba2a85fdb302a181578b1f64cb4a533d89b3f8de4159efece75da41041537f9'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/7ba2a85fdb302a181578b1f64cb4a533d89b3f8de4159efece75da41041537f9.svg';
 tokenIcons['3e0b62c7bc36bc7abf2bf76303722c31788aa579d771e427a0b2c8357da160ba'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/3e0b62c7bc36bc7abf2bf76303722c31788aa579d771e427a0b2c8357da160ba.svg';

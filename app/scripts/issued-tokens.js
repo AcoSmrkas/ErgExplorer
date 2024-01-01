@@ -63,7 +63,7 @@ function printIssuedTokens() {
                     tokenData.data.name = '';
                 }
 
-        		formattedResult += '<td><span class="d-lg-none"><strong>Name: </strong></span>' + tokenData.data.name + '</td>';
+        		formattedResult += '<td style="word-break:break-all;"><span class="d-lg-none"><strong>Name: </strong></span>' + tokenData.data.name + '</td>';
 
                 //Type
                 let type = '<span class="text-info">Token</span>';
@@ -90,7 +90,7 @@ function printIssuedTokens() {
                 //Description
                 let asciiArt = isAsciiArt(tokenData.data.description);
 
-        		formattedResult += '<td><pre class="tokenDescriptionPre' + (asciiArt ? ' pre-ascii' : '') + '">' + formatNftDescription(tokenData.data.description) + '</pre></td>';
+        		formattedResult += '<td><span class="d-lg-none"><strong>Description: </strong></span><pre class="tokenDescriptionPre' + (asciiArt ? ' pre-ascii' : '') + '" style="max-height:100px;overflow-y:auto;">' + formatNftDescription(tokenData.data.description) + '</pre></td>';
 
     			formattedResult += '</tr>';	
     		}

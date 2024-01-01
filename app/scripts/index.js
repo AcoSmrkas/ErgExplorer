@@ -7,7 +7,6 @@ var priceData = undefined;
 $(function() {	
 	updatePrices();
 	getNetworkState();
-	setErgLogoImageColor('colorized-canvas', 50);
 
     $('#searchType').val('0');
 });
@@ -20,15 +19,14 @@ function updatePrices() {
 }
 
 function getErgPrice() {
-	$.get('https://api.coingecko.com/api/v3/simple/price?ids=ergo&vs_currencies=usd&include_24hr_change=true', function (data) {
-		let difference = data.ergo.usd_24h_change;
-
+	$.get('https://api.ergexplorer.com/tokens/getErgPrice', function (data) {
+		let difference = parseFloat(data.items[0].difference);
 		let classString = 'text-success';
 		if (difference < 0) {
 			classString = 'text-danger';
 		}
 
-		let ergPriceHtml = '$' + formatValue(data.ergo.usd, 2);
+		let ergPriceHtml = '$' + formatValue(parseFloat(data.items[0].value), 2);
 		$('#ergPrice').html(ergPriceHtml + ' (<span class="' + classString + '">' + formatValue(difference, 2) + '%</span> 24h)');
 	});
 }
@@ -90,10 +88,10 @@ function getPoolStats() {
 			formattedResult += '<tr>';
 
 			//Token
-			formattedResult += '<td><span class="d-lg-none"><strong>Token: </strong></span><a href="' + getTokenUrl(poolStat.lockedY.id) + '">' + getAssetTitleParams(poolStat.lockedY.id, poolStat.lockedY.ticker, true) + '</a></td>';
+			formattedResult += '<td><a href="' + getTokenUrl(poolStat.lockedY.id) + '">' + getAssetTitleParams(poolStat.lockedY.id, poolStat.lockedY.ticker, true) + '</a></td>';
 			
 			//Volume
-			formattedResult += '<td><span class="d-lg-none"><strong>Volume: </strong></span>$' + formatValue(poolStat.volume.value, 2) + '</td>';
+			formattedResult += '<td>$' + formatValue(poolStat.volume.value, 2) + '</td>';
 
 			formattedResult += '</tr>';
 		}
@@ -167,10 +165,6 @@ function printGainersLosers(timeframe) {
 			continue;
 		}
 
-		console.log(prices);
-
-		console.log(item.tokenid, oldPrice, newPrice);
-
 		let difference = (newPrice * 100 / oldPrice) - 100;
 		if (difference === 0) {
 			difference = 0.000001;
@@ -228,15 +222,15 @@ function printGainersLosers(timeframe) {
 		formattedResult += '<tr>';
 
 		//Token
-		formattedResult += '<td><span class="d-lg-none"><strong>Token: </strong></span><a href="' + getTokenUrl(item.tokenid) + '">' + getAssetTitleParams(item.tokenid, item.ticker, true) + '</a></td>';
+		formattedResult += '<td><a href="' + getTokenUrl(item.tokenid) + '">' + getAssetTitleParams(item.tokenid, item.ticker, true) + '</a></td>';
 		
 		//Price			
 		let decimals = getDecimals(prices[item.tokenid]);
 
-		formattedResult += '<td><span class="d-lg-none"><strong>Price: </strong></span>$' + formatValue(prices[item.tokenid], decimals) + '</td>';
+		formattedResult += '<td>$' + formatValue(prices[item.tokenid], decimals) + '</td>';
 
 		//Change
-		formattedResult += '<td><span class="d-lg-none"><strong>Change: </strong></span><span class="' + classString + '">' + difference + '%</span></td>';
+		formattedResult += '<td><span class="' + classString + '">' + difference + '%</span></td>';
 
 		formattedResult += '</tr>';
 
@@ -268,10 +262,10 @@ function getWhaleTxs() {
 			formattedResult += '<tr>';
 
 			//Tx
-			formattedResult += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionsUrl(item.txid) + '"><i class="fas fa-link text-info"></i></a></td>';
+			formattedResult += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionsUrl(item.txid) + '"><i class="fas fa-link text-info"></i></a><span class="d-inline d-lg-none text-white float-end">' + formatDateString(parseInt(item.time)) + '</span></td>';
 			
 			//Time
-			formattedResult += '<td><span class="d-lg-none"><strong>Time: </strong></span>' + formatDateString(parseInt(item.time)) + '</td>';
+			formattedResult += '<td class="d-none d-lg-table-cell"><span class="d-lg-none"><strong>Time: </strong></span>' + formatDateString(parseInt(item.time)) + '</td>';
 
 			//From
 			let fromAddress = item.fromaddress;

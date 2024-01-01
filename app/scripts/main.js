@@ -13,7 +13,6 @@ $(function() {
 	$('#searchInput').val('');
 
 	setOfficialLink();
-	setErgLogoImageColor('loadingImg', 150);
 
 	if (IS_DEV_ENVIRONMENT) {
 		ERGEXPLORER_API_HOST = 'https://localhost/ergexplorer-api/'
@@ -254,12 +253,63 @@ function formatHashRateString(value) {
 	return (value / 1000000000000).toLocaleString('en-US') + ' TH/s'
 }
 
+function formatIpfsCidHtmlString(cid) {
+	let urlHtml = '';
+
+	for (let i = 0; i < IPFS_PROVIDER_HOSTS.length; i++) {
+		let mirrorUrl = IPFS_PROVIDER_HOSTS[i] + '/ipfs/' + cid;
+		let linkString = mirrorUrl;
+		
+		if (mirrorUrl.length > NFT_LINK_MAX_LENGTH) {
+			linkString = formatAddressString(mirrorUrl, NFT_LINK_MAX_LENGTH);
+		}
+
+		urlHtml += `<p>Mirror 0${i+1}: <a  target="_new" href="` + 
+		mirrorUrl + '">' + linkString + '</a></p>'
+	}
+
+	return urlHtml;
+}
+
 function formatValue(value, digits, autodigits = false) {
 	if (autodigits) {
 		digits = getAutoDigits(value, digits);
 	}
 
-	return '<span title="' + value.toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: 2 }) + '">' + nFormatter(value, digits) + '</span>';
+	let vstring = '';
+	if (!isFloat(value) && isLargerThanMaxSafeInteger(value)) {
+		vstring = formatBigIntToLocaleString(value);
+	} else {
+		vstring = value.toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: 2 });
+	}
+
+	return '<span title="' + vstring + '">' + nFormatter(value, digits) + '</span>';
+}
+
+function isFloat(value) {
+  return typeof value === 'number' && !Number.isInteger(value) && !isNaN(value);
+}
+
+function isLargerThanMaxSafeInteger(numberAsString) {
+  let parsedNumber = BigInt(numberAsString);
+  return parsedNumber > Number.MAX_SAFE_INTEGER;
+}
+
+function formatBigIntToLocaleString(bigIntNumber) {
+  // Convert BigInt to a string
+  let bigIntAsString = bigIntNumber.toString();
+
+  // Split the string into chunks of 3 digits (for formatting)
+  let chunks = [];
+  while (bigIntAsString.length > 0) {
+    chunks.unshift(bigIntAsString.slice(-3));
+    bigIntAsString = bigIntAsString.slice(0, -3);
+  }
+
+  // Join the chunks with the appropriate locale-specific separator
+  let formattedString = chunks.join(',');
+
+  return formattedString;
 }
 
 function getAutoDigits(value, digits = 2, additionalDigits = 2) {
@@ -404,7 +454,11 @@ function getAssetTitleParams(tokenId, name, iconIsToTheLeft) {
 }
 
 function getAssetValue(amount, decimals) {
-	return amount / Math.pow(10, decimals);
+	if (!isFloat(amount) && isLargerThanMaxSafeInteger(amount)) {
+		return (BigInt(amount) / (BigInt(Math.pow(10, decimals)))).toString();
+	} else {
+		return amount / Math.pow(10, decimals);
+	}
 }
 
 function onTokenIconLoad(element) {
@@ -527,12 +581,12 @@ function formatBox(box, trueBox = false) {
 		
 	let customIdString = '';
 	if (box.boxId) {
-		customIdString = '<p><strong class="text-white">Box Id: </strong><a href=" ' + getBoxUrl(box.boxId) + '">'+box.boxId.substr(0, 15) + '...' + box.boxId.substr(box.boxId.length - 4)+'</a> <a title="' + box.boxId + '" onclick="copyId(event, this)" href="Copy to clipboard!">&#128203;</a></p>';
+		customIdString = '<p><strong class="text-white">Box Id: </strong><a href=" ' + getBoxUrl(box.boxId) + '">'+box.boxId.substr(0, 8) + '...' + box.boxId.substr(box.boxId.length - 4)+'</a> <a title="' + box.boxId + '" onclick="copyId(event, this)" href="Copy to clipboard!">&#128203;</a></p>';
 	}
 
 	//Address
 	addAddress(box.address);
-	formattedData += '<div class="col-9">' + customIdString + '<span><strong>Address: </strong></span><a class="address-string" addr="' + box.address + '" href="' + getWalletAddressUrl(box.address) + '" >' + formatAddressString(box.address, 15) + '</a> <a title="' + box.address + '" onclick="copyId(event, this)" href="Copy to clipboard!">&#128203;</a></p>';
+	formattedData += '<div class="ps-0 pe-0 pe-md-2 ps-md-2 col-9">' + customIdString + '<span><strong>Address: </strong></span><a class="address-string" addr="' + box.address + '" href="' + getWalletAddressUrl(box.address) + '" >' + formatAddressString(box.address, 8) + '</a> <a title="' + box.address + '" onclick="copyId(event, this)" href="Copy to clipboard!">&#128203;</a></p>';
 
 
 	if (trueBox) {
@@ -540,31 +594,33 @@ function formatBox(box, trueBox = false) {
 	}
 
 	//Status
-
 	if (trueBox) {
-		formattedData += '<p><strong class="text-white">Spent Transaction Id: </strong><a href=" ' + getTransactionsUrl(box.spentTransactionId) + '">'+box.spentTransactionId+'</a> <a title="' + box.spentTransactionId + '" onclick="copyId(event, this)" href="Copy to clipboard!">&#128203;</a></p>';
-		formattedData += '<p><strong class="text-white">Creation height</strong>: ' + box.creationHeight + '</p><p> </p>';
+		if (box.spentTransactionId) {
+			formattedData += '<p><strong class="text-white">Spent Transaction Id: </strong><a href=" ' + getTransactionsUrl(box.spentTransactionId) + '">'+box.spentTransactionId+'</a> <a title="' + box.spentTransactionId + '" onclick="copyId(event, this)" href="Copy to clipboard!">&#128203;</a></p>';
+		}
+		formattedData += '<p><strong class="text-white">Creation height</strong>: ' + box.creationHeight + '</p>';
 		formattedData += '<p><strong class="text-white">Settlement height</strong>: ' + box.settlementHeight + '</p>';
 	}
 
-	formattedData += '</div><div class="col-3 d-flex justify-content-end">' + (box.spentTransactionId === undefined ? '' : box.spentTransactionId === null ? '<span class="text-success">Unspent' : '<span class="text-danger">Spent') + '</span></div>';
+	formattedData += '</div><div class="ps-0 pe-0 pe-md-2 ps-md-2 col-3 d-flex justify-content-end">' + (box.spentTransactionId === undefined ? '' : box.spentTransactionId === null ? '<span class="text-success">Unspent' : '<span class="text-danger">Spent') + '</span></div>';
 
 	//Value
-	formattedData += '<div style="padding-bottom:10px;" class="col-10"><span><strong>Value: </strong></span><span class="">' + formatErgValueString(box.value, 5) + ' <span class="text-light">' + formatAssetDollarPriceString(box.value, ERG_DECIMALS, 'ERG') + '</span></span></div>';
+	formattedData += '<div style="padding-bottom:10px;" class="ps-0 pe-0 pe-md-2 ps-md-2 col-10"><span><strong>Value: </strong></span><span class="">' + formatErgValueString(box.value, 5) + ' <span class="text-light">' + formatAssetDollarPriceString(box.value, ERG_DECIMALS, 'ERG') + '</span></span></div>';
 	
 	//Output transaction
 	if (box.outputTransactionId != undefined) {
-		formattedData += '<div class="col-2 d-flex justify-content-end"><a href="' + getTransactionsUrl(box.outputTransactionId) + '" >Output</a></div>';
+		formattedData += '<div class="ps-0 pe-0 pe-md-2 ps-md-2 col-2 d-flex justify-content-end"><a href="' + getTransactionsUrl(box.outputTransactionId) + '" >Output</a></div>';
 	}
 
 	//Assets
 	if (box.assets != undefined && box.assets.length > 0 ) {
-		formattedData += '<h5><strong>Tokens:</strong></h5>';
+		formattedData += '<h5 class="ps-0 pe-0 pe-md-2 ps-md-2"><strong>Tokens:</strong></h5><div style="max-height:300px;overflow-y:auto;" class="ps-0 pe-0 pe-md-2 ps-md-2">';
 		for (let j = 0; j < box.assets.length; j++) {
 			let asset = box.assets[j];
 			let assetPrice = formatAssetDollarPrice(asset.amount, asset.decimals, asset.tokenId);
 			formattedData += '<p><strong>' + getAssetTitle(asset, true) + '</strong>: <span class="text-white">' + formatAssetValueString(asset.amount, asset.decimals, 4) + ' ' + (assetPrice == -1 ? '' : '<span class="text-light">' + formatDollarPriceString(assetPrice) + '</span>') + '</span></p>';
 		}
+		formattedData += '</div>'
 	}
 
 	if (trueBox) {		

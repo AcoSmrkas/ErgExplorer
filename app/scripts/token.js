@@ -10,13 +10,13 @@ var priceData = undefined;
 var chart = undefined;
 var chartType = undefined;
 var tempDate = -1;
+var hasPrice = false;
 
 $(function() {
 	tokenId = getWalletAddressFromUrl();
 
 	getNftInfo(tokenId, onGetNftInfoDone);
-	getPrices(getPriceHistory);	
-	setErgLogoImageColor('loadingImgHolders', 150);
+	getPrices(getPriceHistory);
 	setLinks();
 	checkAddressbook();
 
@@ -61,7 +61,7 @@ function printAddressbookAddress(item, first, last) {
 }
 
 function setLinks() {
-	$('#spectrumLink').attr('href', 'https://app.spectrum.fi/ergo/swap?base=0000000000000000000000000000000000000000000000000000000000000000&quote=9a06d9e545a41fd51eeffc5e20d818073bf820c635e2a9d922269913e0de369d&initialPoolId=' + tokenId);
+	$('#spectrumLink').attr('href', 'https://app.spectrum.fi/ergo/swap?base=0000000000000000000000000000000000000000000000000000000000000000&quote=' + tokenId);
 	$('#cruxLink').attr('href', 'https://cruxfinance.io/tokens/' + tokenId);
 }
 
@@ -69,12 +69,17 @@ function getPriceHistory() {
 	$.post(ERGEXPLORER_API_HOST + 'tokens/getPriceHistory',
 		{from: from30d, ids : [tokenId]},
 		function(data) {
+
+		getHolders();
+		getHolderCount();
+
 		if (data.items.length == 0) {
 			return;
 		}
 
 		priceData = data;
 		printGainersLosers(from24h);
+		hasPrice = true;
 	});
 }
 
@@ -124,6 +129,7 @@ function getHolderCountFallback() {
 }
 
 function printHolders(data) {
+	console.log(data);
 	let formattedResult = '';
 
 	for (let i = 0; i < data.length; i++) {
@@ -131,14 +137,19 @@ function printHolders(data) {
 
 		//Address
 		addAddress(data[i].address);
-		formattedResult += '<td><span class="d-lg-none"><strong>Address: </strong></span><a class="address-string" addr="' + data[i].address + '" href="' + getWalletAddressUrl(data[i].address) + '">' + formatAddressString(data[i].address, 10) + '</a></td>';
+		formattedResult += '<td><a class="address-string" addr="' + data[i].address + '" href="' + getWalletAddressUrl(data[i].address) + '">' + formatAddressString(data[i].address, 4) + '</a></td>';
 
 		//Balance
-		formattedResult += '<td class=""><span class="d-lg-none"><strong>Balance: </strong></span>' + formatAssetValueString(data[i].balance, decimals) + ' ' + getAssetTitleParams(tokenData.id, tokenData.name, false) + ' <span class="text-light">' + formatDollarPriceString(data[i].balance / Math.pow(10, tokenData.decimals) * prices[tokenData.id]) + '</span></td>';
+		let dollarPrice = '';
+		if (hasPrice) {
+			dollarPrice = formatDollarPriceString(data[i].balance / Math.pow(10, tokenData.decimals) * prices[tokenData.id])
+		}
+
+		let percent = formatValue(data[i].balance * 100 / tokenData.emissionAmount, 2);
+		formattedResult += '<td class="">' + formatAssetValueString(data[i].balance, decimals) + ' ' + getAssetTitleParams(tokenData.id, tokenData.name, false) + ' <span class="text-light">' + dollarPrice + '</span><span style="text-align:right;float:right;" class="d-inline d-lg-none text-white"> ' + percent + '%</span></td>';
 
 		//Percent
-		let percent = formatValue(data[i].balance * 100 / tokenData.emissionAmount, 2);
-		formattedResult += '<td><span class="d-lg-none"><strong>Percent: </strong></span>' + percent + '%</td>';
+		formattedResult += '<td class="d-none d-lg-block">' + percent + '%</td>';
 
 		formattedResult += '</tr>';
 	}
@@ -148,10 +159,16 @@ function printHolders(data) {
 	$('#holdersTable').show();
 
     getAddressesInfo();
+
+    if (!hasPrice) {
+    	$('#financeHeader').hide();
+    	$('#chartColumn').hide();
+    	$('#holdersColumn').removeClass('col-xl-5');
+    	$('#priceInfo').show();
+    }
 }
 
 function printHolderCount(data) {
-	console.log(data);
 	$('#totalHolderCount').html(`(of total ${nFormatter(data)})`);
 }
 
@@ -199,7 +216,7 @@ function onGetNftInfoDone(nftInfo, message) {
 	//Description
 	let asciiArt = isAsciiArt(tokenData.description);
 
-	$('#tokenDescription').html('<pre class="tokenDescriptionPre' + (asciiArt ? ' pre-ascii' : '') + '">' + formatNftDescription(tokenData.description) + '</pre>');
+	$('#tokenDescription').html('<pre style="max-height:200px;overflow-y:auto;" class="tokenDescriptionPre' + (asciiArt ? ' pre-ascii' : '') + '">' + formatNftDescription(tokenData.description) + '</pre>');
 
 	//Icon
 	let tImg = getIcon(tokenData.id);
@@ -240,39 +257,73 @@ function onGetNftInfoDone(nftInfo, message) {
 		$('#nftMintedTransaction').html('<p><a href="' + getTransactionsUrl(tokenData.transactionId) + '">' + tokenData.transactionId + '</a></p>');
 		$('#nftCreationHeight').html('<p><a href="' + getBlockUrl(tokenData.blockId) + '">' + tokenData.creationHeight + '</a></p>');
 
-		let linkString = nftInfo.link;
-		if (linkString.length > 100) {
-			linkString = formatAddressString(linkString, 95);
+		let fullUrl = '';
+		if (!nftInfo.link.ipfsCid) {
+			fullUrl = nftInfo.link.url;
 		}
-		if (nftInfo.additionalLinks.length > 0) {
+		let additionalFullUrl = Array();
 
-			let formattedLinksHtml = '<p>Link 01: <a  target="_new" href="' + nftInfo.link + '">' + linkString + '</a></p>';
+		let linkString = fullUrl;
+		if (linkString.length > NFT_LINK_MAX_LENGTH) {
+			linkString = formatAddressString(linkString, NFT_LINK_MAX_LENGTH);
+		}
+
+		let urlHtml = '';
+		let cidHtml = '';
+
+		if (nftInfo.link.ipfsCid) {
+			urlHtml = formatIpfsCidHtmlString(nftInfo.link.url);
+			fullUrl = IPFS_PROVIDER_HOSTS[0] + '/ipfs/' + nftInfo.link.url;
+			cidHtml = `<p>CID 1: ${nftInfo.link.url}</p>`;
+		} else {
+			urlHtml = '<p><a  target="_new" href="' + fullUrl + '">' + linkString + '</a></p>';
+			$('#ipfsCidHolder').remove();
+		}
+
+		if (nftInfo.additionalLinks.length > 0) {
+			let formattedLinksHtml = '<p>URL 1:</p>' + urlHtml;
 
 			for (let i = 0; i < nftInfo.additionalLinks.length; i++) {
-				linkString = nftInfo.additionalLinks[i];
-				if (linkString.length > 100) {
-					linkString = formatAddressString(linkString, 95);
+				let additionalLink = nftInfo.additionalLinks[i];
+
+				let fullAdditionalUrlString = '';
+				if (additionalLink.ipfsCid) {
+					fullAdditionalUrlString = formatIpfsCidHtmlString(additionalLink.url);
+					additionalFullUrl.push(IPFS_PROVIDER_HOSTS[0] + '/ipfs/' + additionalLink.url);
+					cidHtml += `<p>CID ${i + 2}: ${additionalLink.url}</p>`
+				} else {
+					fullAdditionalUrlString = '<a  target="_new" href="' + additionalLink.url + '">' + linkString + '</a>';
+					additionalFullUrl.push(additionalLink.url);
 				}
 
-				formattedLinksHtml += '<p>Link ' + i + 2 + ': <a  target="_new" href="' + nftInfo.additionalLinks[i] + '">' + linkString + '</a></p>'
+				formattedLinksHtml += '<br><p>URL ' + (i + 2) + ': </p>' + fullAdditionalUrlString;
+
+
 			}
 
+			fullUrl = IPFS_PROVIDER_HOSTS[0] + '/ipfs/' + nftInfo.link.url;
+
 			$('#nftLink').html(formattedLinksHtml);
+			$('#ipfsCid').html(cidHtml);
 		} else {
-			$('#nftLink').html('<p><a  target="_new" href="' + nftInfo.link + '">' + linkString + '</a></p>');
+			$('#nftLink').html(urlHtml);
+
+			if (nftInfo.link.ipfsCid) {
+				$('#ipfsCid').html(`<p>${nftInfo.link.url}</p>`);
+			}
 		}
 
 		if (nftInfo.type == NFT_TYPE.Image) {
-			$('#nftPreviewImg').attr('src', nftInfo.link);
-			$('#nftImageFull').attr('src', nftInfo.link);
+			$('#nftPreviewImg').attr('src', fullUrl);
+			$('#nftImageFull').attr('src', fullUrl);
 			$('#nftPreviewImg').show();
 
-			if (nftInfo.link.substr(0, 19) == 'data:image/svg+xml;') {
+			if (nftInfo.link.url.substr(0, 19) == 'data:image/svg+xml;') {
 				$('#nftPreviewImg').css('width', '200px');
 				$('#nftImageFull').css('width', '400px');
 			}
 		} else if (nftInfo.type == NFT_TYPE.Audio) {
-			$('#nftPreviewAudioSource').attr('src', nftInfo.link);
+			$('#nftPreviewAudioSource').attr('src', fullUrl);
 			$('#nftPreviewAudio').show();
 			document.getElementById('nftAudio').load();
 
@@ -281,11 +332,11 @@ function onGetNftInfoDone(nftInfo, message) {
 			$('#nftInfoHolder').removeClass('col-lg-9');
 
 			if (nftInfo.additionalLinks.length > 0) {
-				$('#nftPreviewImg').attr('src', nftInfo.additionalLinks[0]);
-			$('#nftImageFull').attr('src', nftInfo.additionalLinks[0]);
+				$('#nftPreviewImg').attr('src', additionalFullUrl[0]);
+				$('#nftImageFull').attr('src', additionalFullUrl[0]);
 			}
 		} else if (nftInfo.type == NFT_TYPE.Video) {
-			$('#nftPreviewVideoSource').attr('src', nftInfo.link);
+			$('#nftPreviewVideoSource').attr('src', fullUrl);
 			$('#nftPreviewVideo').show();
 			document.getElementById('nftPreviewVideo').load();
 
@@ -326,9 +377,6 @@ function onGetNftInfoDone(nftInfo, message) {
 
 		$('#tokenHolder').show();
 	}
-
-	getHolders();
-	getHolderCount();
 }
 
 function getCurrentAddress() {
@@ -457,7 +505,6 @@ function printGainersLosers(timeframe) {
 	let from24hset = false;
 	for (var i = data.items.length - 1; i >= 0; i--) {
 		let item = data.items[i];
-
 		let oldPrice = item.price;
 		let newPrice = prices[item.tokenid];
 		let difference = (newPrice * 100 / oldPrice) - 100;
@@ -471,6 +518,9 @@ function printGainersLosers(timeframe) {
 			difference = difference;
 			classString = 'text-danger';
 		}
+
+		console.log(difference);
+		console.log(item.timestamp);
 
 		if (from30dset == false && from30d <= item.timestamp) {
 			$('#usdChange30d').html(difference + '%');
@@ -585,6 +635,8 @@ function printGainersLosers(timeframe) {
 
 	// Get the value of the global CSS variable
 	const primaryColor = rootStyles.getPropertyValue('--main-color').trim();
+
+	console.log(data);
 
 	chart = new Chart(
 	    document.getElementById('chart'),

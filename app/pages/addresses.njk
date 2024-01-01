@@ -31,7 +31,7 @@
 			<div class="row w-100 div-cell-dark border-top-flat">
 				<div class="col-md p-0">
 					<div class="row w-100">
-						<div class="col-lg-6 col-md-12">
+						<div class="ps-0 pe-0 ps-md-2 pe-md-2 col-lg-6 col-md-12">
 							<h4><strong>Summary</strong></h4>
 							<p id="verifiedOwnerHolder" style="display: none;"><strong>Verified owner: </strong><span id="verifiedOwner"></span></p>
 							<p id="addressNameHolder" style="display: none;"><strong>Name: </strong><span id="addressName"></span></p>
@@ -40,7 +40,7 @@
 							<button id="showQRcodeBtn" type="button" class="btn btn-info">Show QR Code</button>
 							<hr class="my-3 d-lg-none">
 						</div>
-						<div class="col-lg-6 col-md-12 border-lg-start">
+						<div class="ps-0 pe-0 ps-md-2 pe-md-2 col-lg-6 col-md-12 border-lg-start">
 							<h4><strong>Balance</strong></h4>
 							<h5 id="finalErgBalance"></h5>
 							<h5 style="display: none" id="finalAssetsBalance"></h5>
@@ -64,7 +64,7 @@
 						</div>
 					</div>
 					<div class="row w-100">
-						<div id="nftsHolder" class="row w-100" style="display: none;">
+						<div id="nftsHolder" class="ps-0 pe-0 ps-md-2 pe-md-2 row w-100" style="display: none;">
 							<div class="col-12 p-0">
 								<hr class="my-3">
 								<h4 style="display:inline-block;" id="nftsTitle"><strong>Owned NFTs</strong></h4><a id="showAllNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="showNfts(event)">Show</a>
@@ -109,7 +109,7 @@
 								</div>
 							</div>
 						</div>
-						<div id="issuedNftsHolder" class="row w-100" style="display: none;">
+						<div id="issuedNftsHolder" class="ps-0 pe-0 ps-md-2 pe-md-2 row w-100" style="display: none;">
 							<div class="col-12 p-0">
 							<hr class="my-3">
 							<h4 style="display:inline-block;" id="issuedNftsTitle"><strong>Issued assets</strong></h4><a id="showIssuedNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="showIssuedNfts(event)">Show</a>
@@ -162,7 +162,7 @@
 						</div>
 					</div>					
 				</div>
-				<div class="col-lg-4 col-md-12 border-lg-start" id="tokensHolder" style="display:none">
+				<div class="ps-0 pe-0 ps-md-2 pe-md-2 col-lg-4 col-md-12 border-lg-start" id="tokensHolder" style="display:none">
 					<hr class="my-3 d-lg-none">
 					<div style="display: none;" id="financialAssetsHolder">
 						<h4><strong>Financial assets</strong></h4>
@@ -197,7 +197,7 @@
 		<div id="myExplorer">
 			<div class="row w-100 div-summary">
 				<div class="row w-100 p-0 m-0">
-					<div class="col-md-6 col-lg-8">
+					<div class="ps-0 pe-0 ps-md-2 pe-md-2 col-md-6 col-lg-8">
 					<h3><strong>Premium Offer</strong></h3>
 					<p>Welcome to the next level of blockchain analysis! Our premium offering is packed with unbeatable features. Craft custom charts, navigate transactions effortlessly with smart filters, and transform data into CSV or XLSX formats with a breeze. Join now and take charge of your blockchain insights!</p>
 					<br>
@@ -346,7 +346,10 @@
 		</div>
 
 		  <div id="txView" class="row w-100">
-			<table class="table table-dark table-striped">
+
+			{% include "partials/pagination.njk" %}
+		  
+			<table class="table table-dark table-striped table-mobile">
 				<thead>
 					<tr>
 						<th scope="col">Tx</th>
@@ -386,9 +389,9 @@
 	<!-- Tempus Dominus JavaScript -->
 	<script src="https://cdn.jsdelivr.net/npm/@eonasdan/tempus-dominus@6.7.11/dist/js/tempus-dominus.min.js" crossorigin="anonymous"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.3.1/chart.umd.min.js" integrity="sha512-UcCmTcAm3IkzrswF+WqvwWSjsnv8nsJpDL09KHCETWS0g0WjoIZDRUYXCeHeow1cEij0kqL9OwRwirv/xCQ6GA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-	<script src="./scripts/common/prices.js?v=22"></script>
-	<script src="./scripts/common/pagination.js?v=22"></script>
-	<script src="./scripts/common/nft.js?v=22"></script>
-	<script src="./scripts/addresses.js?v=22"></script>
-	<script src="./scripts/3rd-party/qrcode.min.js?v=22"></script>
+	<script src="./scripts/common/prices.js?v=30"></script>
+	<script src="./scripts/common/pagination.js?v=30"></script>
+	<script src="./scripts/common/nft.js?v=30"></script>
+	<script src="./scripts/addresses.js?v=30"></script>
+	<script src="./scripts/3rd-party/qrcode.min.js?v=30"></script>
 {% endblock %}

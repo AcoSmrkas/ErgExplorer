@@ -1,7 +1,14 @@
 //https://nftstorage.link
 //https://cloudflare-ipfs.com
 //https://gateway.ipfs.io
-const IPFS_PROVIDER_HOST = 'https://gateway.ipfs.io';
+//https://gateway.pinata.cloud
+const NFT_LINK_MAX_LENGTH = 40;
+const IPFS_PROVIDER_HOSTS = [
+	'https://cloudflare-ipfs.com',
+	'https://gateway.pinata.cloud',
+	'https://nftstorage.link'
+];
+const IPFS_PROVIDER_HOST = 'https://cloudflare-ipfs.com';
 const NFT_TYPE = {
 	Image: 'Image',
 	Audio: 'Audio',
@@ -136,7 +143,7 @@ function processNftData(nftData) {
 	}
 
 	if (link == undefined) {
-		link = 'None';
+		link = formatLink(undefined);
 	} else {
 		link = formatLink(link);
 	}
@@ -177,15 +184,27 @@ function getNftType(typeString) {
 }
 
 function formatLink(link) {
+	out = {
+		url: 'None',
+		ipfsCid: false
+	}
+
+	if (link == undefined) {
+		return out;
+	}
+
 	link = hex2a(link);
 
 	if (link.includes('ipfs://')) {
-		link = link.replace('ipfs://', IPFS_PROVIDER_HOST + '/ipfs/');
+		out.url = link.replace('ipfs://', '');
+		out.ipfsCid = true;
 	} else if (link.includes('https://ipfs.infura.io')) {
 		link = link.replace('https://ipfs.infura.io', IPFS_PROVIDER_HOST);
+	} else {
+		out.url = link;
 	}
 
-	return link;
+	return out;
 }
 
 function hex2a(hexx) {

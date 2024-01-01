@@ -24,20 +24,20 @@ function setupPagination(totalItems) {
 		currentPageNum = 1;
 	}
 
-	$('#pageNum').html(currentPageNum + ' of ' + numPages);
-	$('#firstPage').attr('href', getUrlWithOffset(0));
-	$('#previousPage').attr('href', getUrlWithOffset((currentPageNum - 2) * ITEMS_PER_PAGE));
-	$('#nextPage').attr('href', getUrlWithOffset(currentPageNum * ITEMS_PER_PAGE));
-	$('#lastPage').attr('href', getUrlWithOffset((numPages - 1) * ITEMS_PER_PAGE));
+	$('.pageNum').html(currentPageNum + ' of ' + numPages);
+	$('.firstPage').attr('href', getUrlWithOffset(0));
+	$('.previousPage').attr('href', getUrlWithOffset((currentPageNum - 2) * ITEMS_PER_PAGE));
+	$('.nextPage').attr('href', getUrlWithOffset(currentPageNum * ITEMS_PER_PAGE));
+	$('.lastPage').attr('href', getUrlWithOffset((numPages - 1) * ITEMS_PER_PAGE));
 
 	if (currentPageNum <= 1) {
-		$('#firstPageHolder').addClass('disabled');
-		$('#previousPageHolder').addClass('disabled');
+		$('.firstPageHolder').addClass('disabled');
+		$('.previousPageHolder').addClass('disabled');
 	}
 
 	if (currentPageNum >= numPages) {
-		$('#nextPageHolder').addClass('disabled');
-		$('#lastPageHolder').addClass('disabled');
+		$('.nextPageHolder').addClass('disabled');
+		$('.lastPageHolder').addClass('disabled');
 	}
 }
 

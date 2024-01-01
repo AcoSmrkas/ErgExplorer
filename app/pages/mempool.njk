@@ -16,8 +16,11 @@
 		<br>
 
 		<div id="mempoolHolder" style="display: none;">
+		
+			{% include "partials/pagination.njk" %}
+
 			<div class="row w-100">
-				<table class="table table-dark table-striped">
+				<table class="table table-dark table-striped table-mobile">
 					<thead>
 						<tr>
 							<th scope="col">Id</th>
@@ -34,6 +37,7 @@
 			</div>
 
 			{% include "partials/pagination.njk" %}
+			
 		</div>
 		
 		{% include "partials/error-message.njk" %}
@@ -43,6 +47,6 @@
 {% endblock %}
 
 {% block scripts %}
-	<script src="./scripts/common/pagination.js?v=22"></script>
-	<script src="./scripts/mempool.js?v=22"></script>
+	<script src="./scripts/common/pagination.js?v=30"></script>
+	<script src="./scripts/mempool.js?v=30"></script>
 {% endblock %}

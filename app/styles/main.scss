@@ -309,16 +309,17 @@ select, option {
 
 //Tables
 @media only screen and (max-width: 992px) {
-  .table>tbody>tr>td,
-  .table>tbody>tr>th,
-  .table>tfoot>tr>td,
-  .table>tfoot>tr>th,
-  .table>thead>tr>td,
-  .table>thead>tr>th {
+  .table-mobile>tbody>tr>td,
+  .table-mobile>tbody>tr>th,
+  .table-mobile>tfoot>tr>td,
+  .table-mobile>tfoot>tr>th,
+  .table-mobile>thead>tr>td,
+  .table-mobile>thead>tr>th {
     display: block;
     min-width: 100%!important;
   }
-  .table>thead>tr>th {
+
+  .table-mobile>thead>tr>th {
     display: none;
   }
 }
@@ -619,4 +620,41 @@ select, option {
 
 .div-striped-holder > div:nth-child(odd) > div {
   	background-color: var(--striped-1);
+}
+
+//baner
+@media only screen and (min-width: 0px) {
+	.baner {
+		width: 100%;
+	}
+}
+
+@media only screen and (min-width: 576px) {
+	.baner {
+		width: 100%;
+	}
+}
+
+@media only screen and (min-width: 768px) {
+	.baner {
+		width: 100%;
+	}
+}
+
+@media only screen and (min-width: 992px) {
+	.baner {
+		width: 75%;
+	}
+}
+
+@media only screen and (min-width: 1200px) {
+	.baner {
+		width: 80%;
+	}
+}
+
+@media only screen and (min-width: 1400px) {
+	.baner {
+		width: 80%;
+	}
 }

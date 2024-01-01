@@ -38,12 +38,13 @@
 					</select>
 				</div>
 			</div>
-
 			<br>
+			{% include "partials/pagination.njk" %}
 
-			<div class="row w-100 div-striped-holder" id="addressbookContentHolder">
+			<div class="row w-100 div-striped-holder" style="margin-bottom:0px !important;" id="addressbookContentHolder">
 
 		 	</div>
+		 	<hr class="my-2 d-block d-md-none" style="border:0;">
 
 			{% include "partials/pagination.njk" %}
 		</div>
@@ -55,7 +56,7 @@
 {% endblock %}
 
 {% block scripts %}
-	<script src="./scripts/common/prices.js?v=22"></script>
-	<script src="./scripts/common/pagination.js?v=22"></script>
-	<script src="./scripts/addressbook.js?v=22"></script>
+	<script src="./scripts/common/prices.js?v=30"></script>
+	<script src="./scripts/common/pagination.js?v=30"></script>
+	<script src="./scripts/addressbook.js?v=30"></script>
 {% endblock %}

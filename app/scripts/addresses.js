@@ -459,13 +459,32 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		if ((txInOut == TxInOut.Out
 			|| txInOut == TxInOut.Mixed)
 			&& totalTransferedAssets.value == -fee) {
+			let hasOtherAddresses = false;
+			let oneaddress = walletAddress;
+			for (let j = 0; j < item.inputs.length; j++) {
+				let input = item.inputs[j];
+
+				if (input.address != oneaddress && input.address != FEE_ADDRESS) {
+					console.log(input.address);
+					hasOtherAddresses = true;
+				}
+			}
+			for (let j = 0; j < item.outputs.length; j++) {
+				let output = item.outputs[j];
+
+				if (output.address != oneaddress && output.address != FEE_ADDRESS) {
+					console.log(output.address);
+					hasOtherAddresses = true;
+				}
+			}
+			if (!hasOtherAddresses) {
+				txInOut = undefined;
+			}
 //			totalTransferedAssets.value = 0;
 		} else if ((txType == TxType.Wallet2Wallet || txType == TxType.Wallet2Contract)
 			&& txInOut == TxInOut.Out) {
 //			totalTransferedAssets.value += fee;
 		} 
-
-		txInOut = getTxInOutType(totalTransferedAssets);
 
 		if (txInOut == TxInOut.In && txType != TxType.Origin) {
 			for (let j = 0; j < item.outputs.length; j++) {
@@ -505,7 +524,14 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 
 				if (fromAddress == toAddress) {
 					if (otherAddresses == 1) {
-						toAddress = item.outputs[1].address;
+						for (let j = 0; j < item.outputs.length; j++) {
+							let output = item.outputs[j];
+
+							if (output.address != fromAddress && output.address != FEE_ADDRESS) {
+								toAddress = output.address;
+								break;
+							}
+						}
 					}
 				}
 
@@ -611,16 +637,14 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		}
 
 		//Tx
-		formattedResult += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionsUrl(item.id) + '"><i class="fas fa-link text-info"></i></a></td>';
+		formattedResult += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionsUrl(item.id) + '"><i class="fas fa-link text-info"></i></a><span class="d-inline d-lg-none text-white float-end">' + formatDateString((isMempool) ? item.creationTimestamp : item.timestamp) + '</span></td>';
 
 		//Timestamp
-		formattedResult += '<td><span class="d-lg-none"><strong>Time: </strong></span>' + formatDateString((isMempool) ? item.creationTimestamp : item.timestamp) + '</td>';
+		formattedResult += '<td class="d-none d-lg-table-cell"><span class="d-lg-none"><strong>Time: </strong></span>' + formatDateString((isMempool) ? item.creationTimestamp : item.timestamp) + '</td>';
 
 		//Block nr.
 		let blockNr = item.inclusionHeight;
-		formattedResult += '<td><span class="d-lg-none"><strong>Block: </strong></span>' + ((isMempool) ? item.outputs[0].creationHeight : '<a href="' + getBlockUrl(item.blockId) + '">' + blockNr + '</a>') + '</td>';
-		
-		// In or Out tx.
+
 		let classString;
 		let inOutString;
 		if (txInOut == TxInOut.In) {
@@ -643,7 +667,10 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 			inOutString += smartString;
 		}
 
-		formattedResult += '<td class="' + classString + '">' + inOutString + '</td>';
+		formattedResult += '<td><span class="d-lg-none"><strong>Block: </strong></span>' + ((isMempool) ? item.outputs[0].creationHeight : '<a href="' + getBlockUrl(item.blockId) + '">' + blockNr + '</a>') + '<span class="d-inline d-lg-none float-end"><strong>Type: </strong><span class="' + classString + '">' + inOutString + '</span></span></td>';
+		
+		// In or Out tx.
+		formattedResult += '<td class="d-none d-lg-table-cell"><span class="d-lg-none"><strong>Type: </strong></span><span class="' + classString + '">' + inOutString + '</span></td>';
 		
 		//From
 		addAddress(fromAddress);
@@ -656,10 +683,10 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		formattedResult += '<td><span class="d-lg-none"><strong>To: </strong></span>' + formattedAddressString + '</td>';
 
 		//Status
-		formattedResult += '<td><span class="d-lg-none"><strong>Status: </strong></span><span class="' + ((isMempool) ? 'text-warning' : 'text-success' ) + '">' + ((isMempool) ? 'Pending' : 'Confirmed') + '</span></td>';
+		formattedResult += '<td><span class="d-lg-none"><strong>Status: </strong></span><span class="' + ((isMempool) ? 'text-warning' : 'text-success' ) + '">' + ((isMempool) ? 'Pending' : 'Confirmed') + '</span><span class="d-inline d-lg-none text-white float-end"><strong>Fee: </strong>' + formatErgValueString(fee) + '</span></td>';
 		
 		//Fee
-		formattedResult += '<td><span class="d-lg-none"><strong>Fee: </strong></span>' + formatErgValueString(fee) + '</td>';
+		formattedResult += '<td class="d-none d-lg-table-cell"><span class="d-lg-none"><strong>Fee: </strong></span>' + formatErgValueString(fee) + '</td>';
 
 		//Value
 		if (txInOut != TxInOut.Mixed) {
@@ -803,7 +830,11 @@ function onGotOwnedNftInfo(nftInfos, message) {
 
 		switch (nftInfos[i].type) {
 			case NFT_TYPE.Image:
-				cSrc = nftInfos[i].link;
+				if (nftInfos[i].link.ipfsCid) {
+					cSrc = IPFS_PROVIDER_HOSTS[0] + '/ipfs/' + nftInfos[i].link.url;
+				} else {
+					cSrc = nftInfos[i].link.url;
+				}
 				imgSrc = './images/nft-image.png';
 				nftHolderId = '#nftImagesHolder';
 				nftContentHolderId = '#nftImagesContentHolder';
@@ -1541,7 +1572,11 @@ function onGotIssuedNftInfo(nftInfos, message) {
 
 			switch (nftInfos[i].type) {
 				case NFT_TYPE.Image:
-					cSrc = nftInfos[i].link;
+					if (nftInfos[i].link.ipfsCid) {
+						cSrc = IPFS_PROVIDER_HOSTS[0] + '/ipfs/' + nftInfos[i].link.url;
+					} else {
+						cSrc = nftInfos[i].link.url;
+					}
 					imgSrc = './images/nft-image.png';
 					nftHolderId = '#issuedNftImagesHolder';
 					nftContentHolderId = '#issuedNftImagesContentHolder';
