@@ -13,7 +13,7 @@ function getPrices(callback) {
 			for (let i = 0; i < data.length; i++) {
 				if (data[i]['baseSymbol'] == 'ERG') {
 					if (prices[data[i]['quoteId']] != undefined) continue;
-					if (data[i]['baseVolume']['value'] / Math.pow(10, 9) < 1000) continue;
+					if (data[i]['baseVolume']['value'] / Math.pow(10, 9) < 700) continue;
 
 					let price = prices['ERG'] / data[i]['lastPrice'];
 					prices[data[i]['quoteId']] = price;

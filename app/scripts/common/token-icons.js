@@ -1,5 +1,6 @@
 var tokenIcons = [];
 //TokenIconsArrayStart
+tokenIcons['6ad70cdbf928a2bdd397041a36a5c2490a35beb4d20eabb5666f004b103c7189'] = 'https://hosky.io/wp-content/uploads/2022/05/Front-768x768.png';
 tokenIcons['e023c5f382b6e96fbd878f6811aac73345489032157ad5affb84aefd4956c297'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/2dee6788e99d2420a41447139db9afdc4b442948/logos/ergo/token-ada.svg';
 tokenIcons['2ba9a2d640eb3b0a5e4d498f8f2579b852e6e06c747f84fdf9c7beed64611fe5'] = 'images/tokens/santakey.png';
 tokenIcons['4ffdbf1bcc96c97fa0eb139d37469fa884d38cfc0f34681dd0b2da2b9a4e5016'] = 'images/tokens/coal.png';

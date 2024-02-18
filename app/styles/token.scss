@@ -6,6 +6,10 @@ video {
 	width: 100%;
 }
 
+table > tbody > tr > td {
+	padding:6px !important;
+}
+
 #tokenDataLeft > div:nth-child(odd), #nftInfoHolder > div:nth-child(odd) {
 	background-color: var(--striped-1);
 }

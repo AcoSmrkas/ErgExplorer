@@ -576,7 +576,7 @@ function formatInputsOutputs(data) {
 	return formattedData;
 }
 
-function formatBox(box, trueBox = false) {
+function formatBox(box, trueBox = false, unspent = false) {
 	let formattedData = '<div class="row div-cell border-flat p-2">';
 		
 	let customIdString = '';
@@ -602,7 +602,11 @@ function formatBox(box, trueBox = false) {
 		formattedData += '<p><strong class="text-white">Settlement height</strong>: ' + box.settlementHeight + '</p>';
 	}
 
-	formattedData += '</div><div class="ps-0 pe-0 pe-md-2 ps-md-2 col-3 d-flex justify-content-end">' + (box.spentTransactionId === undefined ? '' : box.spentTransactionId === null ? '<span class="text-success">Unspent' : '<span class="text-danger">Spent') + '</span></div>';
+	formattedData += '</div>';
+
+	if (!unspent) {
+		formattedData += '<div class="ps-0 pe-0 pe-md-2 ps-md-2 col-3 d-flex justify-content-end">' + (box.spentTransactionId === undefined ? '' : box.spentTransactionId === null ? '<span class="text-success">Unspent' : '<span class="text-danger">Spent') + '</span></div>';
+	}
 
 	//Value
 	formattedData += '<div style="padding-bottom:10px;" class="ps-0 pe-0 pe-md-2 ps-md-2 col-10"><span><strong>Value: </strong></span><span class="">' + formatErgValueString(box.value, 5) + ' <span class="text-light">' + formatAssetDollarPriceString(box.value, ERG_DECIMALS, 'ERG') + '</span></span></div>';
@@ -623,8 +627,29 @@ function formatBox(box, trueBox = false) {
 		formattedData += '</div>'
 	}
 
-	if (trueBox) {		
-		formattedData += '<p> </p><p style="margin-bottom:5px;"><strong class="text-white">Ergo tree:</strong></p> <div style="word-wrap:break-word;background: var(--striped-1);" class="div-cell-dark">' + box.ergoTree + '</div>';
+	if (trueBox) {
+		let registerKeys = Object.keys(box.additionalRegisters);
+		let shownRegisters = false;
+		if (registerKeys.length > 0) {
+			for (let i = 0; i < registerKeys.length; i++) {
+				let register = box.additionalRegisters[registerKeys[i]];
+
+				if (register.sigmaType == 'Coll[SByte]') {
+					if (!shownRegisters) {
+						formattedData += '<div style="padding-bottom:10px;" class="ps-0 pe-0 pe-md-2 ps-md-2 col-10"><p style="margin-bottom:5px;"><strong class="text-white">Additional registers:</strong></p>'
+						shownRegisters = true;
+					}
+
+					formattedData += `<p><strong>${registerKeys[i]}</strong>: ${hex2a(register.renderedValue)}</p>`
+				}
+			}
+
+			if (shownRegisters) {
+				formattedData += '</div><p> </p>';
+			}
+		}
+
+		formattedData += '<p style="margin-bottom:5px;"><strong class="text-white">Ergo tree:</strong></p> <div style="word-wrap:break-word;background: var(--striped-1);" class="div-cell-dark">' + box.ergoTree + '</div>';
 	}
 
 	formattedData += '</div>';
@@ -883,4 +908,19 @@ function getDecimals(value, additional = 2) {
 
 function copyId(e, element) {
 	copyToClipboard(e, $(element).attr('title'));
+}
+
+function hex2a(hexx) {
+	if (hexx == undefined) {
+		return undefined;
+	}
+
+    let hex = hexx.toString();//force conversion
+    let str = '';
+    
+    for (let i = 0; i < hex.length; i += 2) {
+        str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+    }
+
+    return str;
 }

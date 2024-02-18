@@ -37,7 +37,8 @@
 							<p id="addressNameHolder" style="display: none;"><strong>Name: </strong><span id="addressName"></span></p>
 							<p id="totalTransactions"></p>
 							<br>
-							<button id="showQRcodeBtn" type="button" class="btn btn-info">Show QR Code</button>
+							<button id="showQRcodeBtn" type="button" class="btn btn-info mb-2 me-2">Show QR Code</button>
+							<button id="showUnspenBoxesBtn" type="button" class="btn btn-info mb-2 d-none">Show Unspent Boxes</button>
 							<hr class="my-3 d-lg-none">
 						</div>
 						<div class="ps-0 pe-0 ps-md-2 pe-md-2 col-lg-6 col-md-12 border-lg-start">
@@ -174,6 +175,18 @@
 						<p class="tokensContainer" id="otherTokens"></p>
 					</div>
 				</div>
+
+			<hr class="my-3 d-block d-md-none" style="border: 0;">
+			<div class="row w-100 ps-0 pe-0 ps-md-2 pe-md-2" >
+				<div class="col-12 p-0">
+				<h4 style="display:inline-block;" id="unspentBoxesHeading"><strong>Unspent boxes</strong></h4>
+				<a id="showUnspentBoxesAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="showUnspentBoxes(event)">Show</a>
+				<a id="hideUnspentBoxesAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="hideUnspentBoxes(event)">Hide</a>
+				</div>
+				<div style="margin-top:15px !important;" class="row p-0" id="unspentBoxesHolder">
+					
+				</div>				
+			</div>
 			  </div>
 			  <br>
 		  </div>
@@ -389,9 +402,9 @@
 	<!-- Tempus Dominus JavaScript -->
 	<script src="https://cdn.jsdelivr.net/npm/@eonasdan/tempus-dominus@6.7.11/dist/js/tempus-dominus.min.js" crossorigin="anonymous"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.3.1/chart.umd.min.js" integrity="sha512-UcCmTcAm3IkzrswF+WqvwWSjsnv8nsJpDL09KHCETWS0g0WjoIZDRUYXCeHeow1cEij0kqL9OwRwirv/xCQ6GA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-	<script src="./scripts/common/prices.js?v=30"></script>
-	<script src="./scripts/common/pagination.js?v=30"></script>
-	<script src="./scripts/common/nft.js?v=30"></script>
-	<script src="./scripts/addresses.js?v=30"></script>
-	<script src="./scripts/3rd-party/qrcode.min.js?v=30"></script>
+	<script src="./scripts/common/prices.js?v=32"></script>
+	<script src="./scripts/common/pagination.js?v=32"></script>
+	<script src="./scripts/common/nft.js?v=32"></script>
+	<script src="./scripts/addresses.js?v=32"></script>
+	<script src="./scripts/3rd-party/qrcode.min.js?v=32"></script>
 {% endblock %}

@@ -1,51 +1,42 @@
 var totalCoinsTransferred = 0;
-var txId = '';
-var mempoolInterval = undefined;
-var txNotification = undefined;
+var boxId = '';
 
 $(function() {
-	txId = getWalletAddressFromUrl();
+	boxId = getWalletAddressFromUrl();
 
 	getPrices(onGotPrices);
 
-	setDocumentTitle(txId);
+	setDocumentTitle(boxId);
 
     $('#searchType').val('1');
 });
 
-window.onfocus = (event) => {
-	if (txNotification != undefined) {
-		txNotification.close();
-		location.reload();
-	}
-};
-
 function onGotPrices() {
-	getTransaction(false);
+	getBox(false);
 }
 
-function getTxUrl(mempool) {
-	let txUrl = API_HOST_2 + 'boxes/' + txId;
+function getBoxUrl(mempool) {
+	let boxUrl = API_HOST_2 + 'boxes/' + boxId;
 
 	if (networkType == 'testnet') {
-		txUrl = API_HOST_2 + 'api/v1/boxes/' + txId;
+		boxUrl = API_HOST_2 + 'api/v1/boxes/' + boxId;
 	}
 
 	if (mempool) {
-		txUrl = 'https://api.ergoplatform.com/boxes/unconfirmed/' + txId;
+		boxUrl = 'https://api.ergoplatform.com/boxes/unconfirmed/' + boxId;
 
 		if (networkType == 'testnet') {
-			txUrl = 'https://api-testnet.ergoplatform.com/boxes/unconfirmed/' + txId;
+			boxUrl = 'https://api-testnet.ergoplatform.com/boxes/unconfirmed/' + boxId;
 		}		
 	}
 
-	return txUrl;
+	return boxUrl;
 }
 
-function getTransaction(mempool) {
-	let txUrl = getTxUrl(mempool);
+function getBox(mempool) {
+	let boxUrl = getBoxUrl(mempool);
 
-	$.get(txUrl, function(txData) {
+	$.get(boxUrl, function(txData) {
 		if (mempool) {
 			let walletAddress = txData.inputs[0].address;
 
@@ -57,18 +48,18 @@ function getTransaction(mempool) {
 
 			$.get(addressMempoolUrl, function(data) {
 				for (let i = 0; i < data.items.length; i++) {
-					if (data.items[i].id == txId) {
-						printTransaction(data.items[i], mempool);
+					if (data.items[i].id == boxId) {
+						printBox(data.items[i], mempool);
 						break;
 					}
 				}
 
-				printTransaction(txData, mempool);
+				printBox(txData, mempool);
 			}).fail(function() {
-				printTransaction(txData, mempool);
+				printBox(txData, mempool);
 			});
 		} else {
-			printTransaction(txData, mempool);
+			printBox(txData, mempool);
 		}
 	})
     .fail(function() {
@@ -76,21 +67,28 @@ function getTransaction(mempool) {
     		showLoadError('No results matching your query.');
 	        $('#txLoading').hide();
     	} else {
-    		getTransaction(true);
+    		getBox(true);
     	}
     });
 }
 
-function printTransaction(data, mempool) {	
+function printBox(data, mempool) {	
 	//Id
-	$('#txHeader').html('<p><a href="Copy to clipboard!" onclick="copyTransactionAddress(event)">' + data.boxId + ' &#128203;</a></p>');
-	$('#txHeaderMobile').html('<p><a href="Copy to clipboard!" onclick="copyTransactionAddress(event)">' + data.boxId.substr(0, 8) + '...' + data.boxId.substr(data.boxId.length - 4) + ' &#128203;</a></p>');
+	$('#boxHeader').html('<p><a href="Copy to clipboard!" onclick="copyTransactionAddress(event)">' + data.boxId + ' &#128203;</a></p>');
+	$('#boxHeaderMobile').html('<p><a href="Copy to clipboard!" onclick="copyTransactionAddress(event)">' + data.boxId.substr(0, 8) + '...' + data.boxId.substr(data.boxId.length - 4) + ' &#128203;</a></p>');
+
+	const rawData = JSON.stringify(data, null, 4);
 
 	delete data.boxId;
 
-	$('#boxHolder').html($('#boxHolder').html() + formatBox(data, true));
+	let html = $('#boxHolder').html() + formatBox(data, true);
 
-	$('#txDataHolder').show();
+	html += `<div class="row div-cell border-flat p-2"><p style="margin-bottom:5px;"><strong class="text-white">Raw:</strong></p><div style="word-wrap:break-word;background: var(--striped-1);" class="div-cell-dark"><pre style="overflow-wrap: anywhere;
+  white-space: break-spaces; margin: 0;">${rawData}</pre></div></div>`;
+
+	$('#boxHolder').html(html);
+
+	$('#boxDataHolder').show();
 
 	getAddressesInfo();
 
@@ -99,62 +97,6 @@ function printTransaction(data, mempool) {
 	$('#infoBottom').html($('#infoTop').html());
 }
 
-function checkMempoolChanged() {
-	var jqxhr = $.get(getTxUrl(false), function(data) {
-		onMempoolTxConfirmed();
-	});
-}
-
-function onMempoolTxConfirmed() {
-	if (Notification.permission === 'granted') {
-		const img = 'https://ergexplorer.com/images/logo.png';
-		const text = 'Transaction  ' + txId + ' has been confirmed.';
-		txNotification = new Notification('Transaction confirmed', { body: text, icon: img });
-		
-		txNotification.onclick = function(x) {
-			window.focus();
-			this.close();
-			location.reload();
-		};
-	}
-
-	if (mempoolInterval != undefined) {
-		clearInterval(mempoolInterval);
-	}
-
-	if (document.hasFocus()) {
-		location.reload();
-	}
-}
-
-function trackTransaction() {
-	if (Notification.permission !== 'granted') {
-		return;
-	}
-
-	if (mempoolInterval != undefined) {
-		return;
-	}
-
-	showCustomToast('Monitoring mempool<span id="dots">...</span>');
-	setInterval(animateDots, 300);
-
-	mempoolInterval = setInterval(checkMempoolChanged, 30000);
-}
-
-function onNotificationToastYes() {
-	requestNotificationPermission(() => {
-		trackTransaction();
-	});
-
-	hideNotificationPermissionToast();	
-	trackTransaction();
-}
-
-function onNotificationToastNo() {
-	hideNotificationPermissionToast();
-}
-
 function copyTransactionAddress(e) {
-	copyToClipboard(e, txId);
+	copyToClipboard(e, boxId);
 }

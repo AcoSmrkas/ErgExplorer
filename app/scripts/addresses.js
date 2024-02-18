@@ -31,6 +31,18 @@ var checkedUser = false;
 var printed = false;
 var loadingOwnedNfts = false;
 var loadingIssuedNfts = false;
+var unspentBoxesCount = 0;
+
+const N2T_SWAP_SELL_TEMPLATE_ERG = 'd803d6017300d602b2a4730100d6037302eb027201d195ed92b1a4730393b1db630872027304d804d604db63087202d605b2a5730500d606b2db63087205730600d6077e8c72060206edededededed938cb2720473070001730893c27205d07201938c72060173099272077e730a06927ec172050699997ec1a7069d9c72077e730b067e730c067e720306909c9c7e8cb27204730d0002067e7203067e730e069c9a7207730f9a9c7ec17202067e7310067e9c73117e7312050690b0ada5d90108639593c272087313c1720873147315d90108599a8c7208018c72080273167317'
+const N2T_SWAP_SELL_TEMPLATE_SPF = 'd804d601b2a4730000d6027301d6037302d6049c73037e730405eb027305d195ed92b1a4730693b1db630872017307d806d605db63087201d606b2a5730800d607db63087206d608b27207730900d6098c720802d60a95730a9d9c7e997209730b067e7202067e7203067e720906edededededed938cb27205730c0001730d93c27206730e938c720801730f92720a7e7310069573117312d801d60b997e7313069d9c720a7e7203067e72020695ed91720b731492b172077315d801d60cb27207731600ed938c720c017317927e8c720c0206720b7318909c7e8cb2720573190002067e7204069c9a720a731a9a9c7ec17201067e731b067e72040690b0ada5d9010b639593c2720b731cc1720b731d731ed9010b599a8c720b018c720b02731f7320'
+const N2T_SWAP_BUY_TEMPLATE_ERG = 'd802d6017300d602b2a4730100eb027201d195ed92b1a4730293b1db630872027303d804d603db63087202d604b2a5730400d6059d9c7e99c17204c1a7067e7305067e730606d6068cb2db6308a773070002edededed938cb2720373080001730993c27204d072019272057e730a06909c9c7ec17202067e7206067e730b069c9a7205730c9a9c7e8cb27203730d0002067e730e067e9c72067e730f050690b0ada5d90107639593c272077310c1720773117312d90107599a8c7207018c72070273137314'
+const N2T_SWAP_BUY_TEMPLATE_SPF = 'd802d601b2a4730000d6029c73017e730205eb027303d195ed92b1a4730493b1db630872017305d804d603db63087201d604b2a5730600d60599c17204c1a7d606997e7307069d9c7e7205067e7308067e730906ededededed938cb27203730a0001730b93c27204730c927205730d95917206730ed801d607b2db63087204730f00ed938c7207017310927e8c7207020672067311909c7ec17201067e7202069c7e9a72057312069a9c7e8cb2720373130002067e7314067e72020690b0ada5d90107639593c272077315c1720773167317d90107599a8c7207018c72070273187319'
+const T2T_SWAP_TEMPLATE_ERG = 'd805d6017300d602b2a4730100d6037302d6047303d6057304eb027201d195ed92b1a4730593b1db630872027306d80ad606db63087202d607b2a5730700d608b2db63087207730800d6098c720802d60a7e720906d60bb27206730900d60c7e8c720b0206d60d7e8cb2db6308a7730a000206d60e7e8cb27206730b000206d60f9a720a730cedededededed938cb27206730d0001730e93c27207d07201938c7208017203927209730f927ec1720706997ec1a7069d9c720a7e7310067e73110695938c720b017203909c9c720c720d7e7204069c720f9a9c720e7e7205069c720d7e720406909c9c720e720d7e7204069c720f9a9c720c7e7205069c720d7e72040690b0ada5d90110639593c272107312c1721073137314d90110599a8c7210018c72100273157316'
+const T2T_SWAP_TEMPLATE_SPF = 'd805d601b2a4730000d6027301d6037302d6049c73037e730405d6057305eb027306d195ed92b1a4730793b1db630872017308d80ad606db63087201d607b2a5730900d608db63087207d609b27208730a00d60a8c720902d60b95730b9d9c7e99720a730c067e7203067e730d067e720a06d60cb27206730e00d60d7e8c720c0206d60e7e8cb27206730f000206d60f9a720b7310ededededededed938cb2720673110001731293c272077313938c720901720292720a731492c17207c1a79573157316d801d610997e7317069d9c720b7e7318067e72030695ed917210731992b17208731ad801d611b27208731b00ed938c721101731c927e8c721102067210731d95938c720c017202909c720d7e7204069c720f9a9c720e7e7205067e720406909c720e7e7204069c720f9a9c720d7e7205067e72040690b0ada5d90110639593c27210731ec17210731f7320d90110599a8c7210018c72100273217322'
+const SPECTRUM_LP_DEPOSIT = 'd802d601b2a4730000d6027301eb027302d195ed92b1a4730393b1db630872017304d80bd603db63087201d604b2a5730500d605b27203730600d6067e9973078c72050206d6077ec1720106d6089d9c7e72020672067207d609b27203730800d60a7e8c72090206d60b9d9c7e7309067206720ad60cdb63087204d60db2720c730a00ededededed938cb27203730b0001730c93c27204730d95ed8f7208720b93b1720c730ed801d60eb2720c730f00eded92c1720499c1a77310938c720e018c720901927e8c720e02069d9c99720b7208720a720695927208720b927ec1720406997ec1a706997e7202069d9c997208720b720772067311938c720d018c720501927e8c720d0206a17208720b90b0ada5d9010e639593c2720e7312c1720e73137314d9010e599a8c720e018c720e0273157316';
+const SPECTRUM_YF_DEPOSIT = 'd803d601b2a4730000d6027301d6037302eb027303d195ed92b1a4730493b1db630872017305d805d604db63087201d605b2a5730600d606c57201d607b2a5730700d6088cb2db6308a773080002ededed938cb27204730900017202ed93c2720572039386027206730ab2db63087205730b00ededededed93cbc27207730c93d0e4c672070608720393e4c67207070e72029386028cb27204730d00017208b2db63087207730e009386028cb27204730f00019c72087e731005b2db6308720773110093860272067312b2db6308720773130090b0ada5d90109639593c272097314c1720973157316d90109599a8c7209018c72090273177318';
+const SPECTRUM_YF_REDEEM = 'd802d601b2a5730400d60290b0ada5d90102639593c272027305c1720273067307d90102599a8c7202018c7202027308ededed93c272017309938602730a730bb2db63087201730c0072027202730d';
+const SPECTRUM_LP_REDEEM = 'd806d602db63087201d603b2a5730400d604b2db63087203730500d605b27202730600d6067e8cb2db6308a77307000206d6077e9973088cb272027309000206ededededed938cb27202730a0001730b93c27203730c938c7204018c720501927e99c17203c1a7069d9c72067ec17201067207927e8c720402069d9c72067e8c72050206720790b0ada5d90108639593c27208730dc17208730e730fd90108599a8c7208018c72080273107311';
 
 $(function() {
 	walletAddress = getWalletAddressFromUrl();	
@@ -301,12 +313,10 @@ function isWalletAddress(address) {
 	return address.substring(0, 1) == walletAddressPrefix;
 }
 
-function formatTxAddressString(address) {
-	let formattedAddress;
-	
+function formatTxAddressString(address, formattedAddress = null) {	
 	if (address == walletAddress) {
 		formattedAddress = 'This Address';
-	} else {
+	} else if (formattedAddress == null) {
 		formattedAddress = formatAddressString(address, 10);
 	}
 
@@ -604,6 +614,12 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		} else if (txType == TxType.Wallet2Contract) {
 			fromAddress = item.inputs[0].address;
 			toAddress = item.outputs[0].address;
+
+			if (toAddress == FEE_ADDRESS) {
+				if (item.outputs.length > 1) {
+					toAddress = item.outputs[1].address;
+				}
+			}
 		} else if (txType == TxType.Contract2Wallet) {
 			fromAddress = item.inputs[0].address;
 			toAddress = item.outputs[0].address;
@@ -634,6 +650,68 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 			if (minDiffIndex > -1) {
 				toAddress = item.outputs[minDiffIndex].address;
 			}
+		}
+
+		let fromAddressIndex = 0;
+		let originalFromAddressIndex = 0;
+		for (let i = 0; i < item.inputs.length; i++) {
+			if (item.inputs[i].address == fromAddress) {
+				fromAddressIndex = i;
+				originalFromAddressIndex = i;
+				break;
+			}
+		}
+
+		if (txType != TxInOut.In) {			
+			let hasEnough = true;
+			do {
+				hasEnough = true;
+
+				let totalSentFrom = {};
+				totalSentFrom.value = 0;
+				totalSentFrom.assets = {};
+
+				for (let i = 0; i < item.inputs.length; i++) {
+					let input = item.inputs[i];
+					if (input.address != fromAddress) continue;
+
+					totalSentFrom.value += input.value;
+					for (let j = 0; j < input.assets.length; j++) {
+						let asset = input.assets[j];
+						if (totalSentFrom.assets[asset.tokenId] == undefined) {
+							totalSentFrom.assets[asset.tokenId] = {};
+							totalSentFrom.assets[asset.tokenId].amount = 0;
+							totalSentFrom.assets[asset.tokenId].decimals = asset.decimals;
+							totalSentFrom.assets[asset.tokenId].tokenId = asset.tokenId;
+						}
+
+						totalSentFrom.assets[asset.tokenId].amount += asset.amount;
+					}
+				}
+
+				if (totalSentFrom.value < totalTransferedAssets.value) hasEnough = false;
+				for (let i = 0; i < totalTransferedAssets.assets.length; i++) {
+					let asset = totalTransferedAssets.assets[i];
+					for (let j = 0; j < totalSentFrom.assets.length; j++) {
+						let sentAsset = totalSentFrom.assets[j];
+						if (sentAsset.tokenId == asset.tokenId &&
+							sentAsset.amount < totalTransferedAssets.amount) {
+							hasEnough = false;
+						}
+					}
+				}
+
+				if (!hasEnough) {
+					fromAddressIndex++;
+					if (fromAddressIndex < item.inputs.length) {
+						fromAddress = item.inputs[fromAddressIndex].address;
+					} else {
+						fromAddress = item.inputs[originalFromAddressIndex].address;
+						break;
+					}
+				}
+
+			} while (!hasEnough);
 		}
 
 		//Tx
@@ -667,7 +745,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 			inOutString += smartString;
 		}
 
-		formattedResult += '<td><span class="d-lg-none"><strong>Block: </strong></span>' + ((isMempool) ? item.outputs[0].creationHeight : '<a href="' + getBlockUrl(item.blockId) + '">' + blockNr + '</a>') + '<span class="d-inline d-lg-none float-end"><strong>Type: </strong><span class="' + classString + '">' + inOutString + '</span></span></td>';
+		formattedResult += '<td><span class="d-inline d-lg-none"><strong>Type: </strong><span class="' + classString + '">' + inOutString + '</span></span><span class="d-inline d-lg-none float-end"><strong>Block: </strong>' + ((isMempool) ? item.outputs[0].creationHeight : '<a href="' + getBlockUrl(item.blockId) + '">' + blockNr + '</a>') + '</span><span class="d-none d-lg-inline">' + ((isMempool) ? item.outputs[0].creationHeight : '<a href="' + getBlockUrl(item.blockId) + '">' + blockNr + '</a>') + '</span></td>';
 		
 		// In or Out tx.
 		formattedResult += '<td class="d-none d-lg-table-cell"><span class="d-lg-none"><strong>Type: </strong></span><span class="' + classString + '">' + inOutString + '</span></td>';
@@ -675,11 +753,81 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		//From
 		addAddress(fromAddress);
 		let formattedAddressString = formatTxAddressString(fromAddress);
+
+		if (txType == TxType.Wallet2Contract || txType == TxType.Contract2Wallet) {
+			if (item.inputs[0].ergoTree.substring(item.inputs[0].ergoTree.length - N2T_SWAP_SELL_TEMPLATE_ERG.length) == N2T_SWAP_SELL_TEMPLATE_ERG
+				||
+				item.inputs[0].ergoTree.substring(item.inputs[0].ergoTree.length - N2T_SWAP_SELL_TEMPLATE_SPF.length) == N2T_SWAP_SELL_TEMPLATE_SPF
+				||
+				item.inputs[0].ergoTree.substring(item.inputs[0].ergoTree.length - N2T_SWAP_BUY_TEMPLATE_ERG.length) == N2T_SWAP_BUY_TEMPLATE_ERG
+				||
+				item.inputs[0].ergoTree.substring(item.inputs[0].ergoTree.length - N2T_SWAP_BUY_TEMPLATE_SPF.length) == N2T_SWAP_BUY_TEMPLATE_SPF) {
+				formattedAddressString = formatTxAddressString(fromAddress, 'Spectrum Finance N2T Swap Contract');
+			}
+
+			if (item.inputs[0].ergoTree.substring(item.inputs[0].ergoTree.length - T2T_SWAP_TEMPLATE_ERG.length) == T2T_SWAP_TEMPLATE_ERG
+				||
+				item.inputs[0].ergoTree.substring(item.inputs[0].ergoTree.length - T2T_SWAP_TEMPLATE_SPF.length) == T2T_SWAP_TEMPLATE_SPF) {
+				formattedAddressString = formatTxAddressString(fromAddress, 'Spectrum Finance T2T Swap Contract');
+			}
+
+			if (item.inputs[0].ergoTree.substring(item.inputs[0].ergoTree.length - SPECTRUM_LP_DEPOSIT.length) == SPECTRUM_LP_DEPOSIT) {
+				formattedAddressString = formatTxAddressString(fromAddress, 'Spectrum Finance LP Deposit Contract');
+			}
+
+			if (item.inputs[0].ergoTree.substring(item.inputs[0].ergoTree.length - SPECTRUM_LP_REDEEM.length) == SPECTRUM_LP_REDEEM) {
+				formattedAddressString = formatTxAddressString(fromAddress, 'Spectrum Finance LP Redeem Contract');
+			}
+
+			if (item.inputs[0].ergoTree.substring(item.inputs[0].ergoTree.length - SPECTRUM_YF_DEPOSIT.length) == SPECTRUM_YF_DEPOSIT) {
+				formattedAddressString = formatTxAddressString(fromAddress, 'Spectrum Finance YF Deposit Contract');
+			}
+
+			if (item.inputs[0].ergoTree.substring(item.inputs[0].ergoTree.length - SPECTRUM_YF_REDEEM.length) == SPECTRUM_YF_REDEEM) {
+				formattedAddressString = formatTxAddressString(fromAddress, 'Spectrum Finance YF Redeem Contract');
+			}
+		}
+
 		formattedResult += '<td><span class="d-lg-none"><strong>From: </strong></span>' + formattedAddressString + '</td>';
 		
 		//To
 		addAddress(toAddress);
 		formattedAddressString = formatTxAddressString(toAddress);
+
+		if (txType == TxType.Wallet2Contract || txType == TxType.Contract2Wallet) {
+			if (item.outputs[0].ergoTree.substring(item.outputs[0].ergoTree.length - N2T_SWAP_SELL_TEMPLATE_ERG.length) == N2T_SWAP_SELL_TEMPLATE_ERG
+				||
+				item.outputs[0].ergoTree.substring(item.outputs[0].ergoTree.length - N2T_SWAP_SELL_TEMPLATE_SPF.length) == N2T_SWAP_SELL_TEMPLATE_SPF
+				||
+				item.outputs[0].ergoTree.substring(item.outputs[0].ergoTree.length - N2T_SWAP_BUY_TEMPLATE_ERG.length) == N2T_SWAP_BUY_TEMPLATE_ERG
+				||
+				item.outputs[0].ergoTree.substring(item.outputs[0].ergoTree.length - N2T_SWAP_BUY_TEMPLATE_SPF.length) == N2T_SWAP_BUY_TEMPLATE_SPF) {
+				formattedAddressString = formatTxAddressString(toAddress, 'Spectrum Finance N2T Swap Contract');
+			}
+
+			if (item.outputs[0].ergoTree.substring(item.outputs[0].ergoTree.length - T2T_SWAP_TEMPLATE_ERG.length) == T2T_SWAP_TEMPLATE_ERG
+				||
+				item.outputs[0].ergoTree.substring(item.outputs[0].ergoTree.length - T2T_SWAP_TEMPLATE_SPF.length) == T2T_SWAP_TEMPLATE_SPF) {
+				formattedAddressString = formatTxAddressString(toAddress, 'Spectrum Finance T2T Swap Contract');
+			}
+
+			if (item.outputs[0].ergoTree.substring(item.outputs[0].ergoTree.length - SPECTRUM_LP_DEPOSIT.length) == SPECTRUM_LP_DEPOSIT) {
+				formattedAddressString = formatTxAddressString(toAddress, 'Spectrum Finance LP Deposit Contract');
+			}
+
+			if (item.outputs[0].ergoTree.substring(item.outputs[0].ergoTree.length - SPECTRUM_LP_REDEEM.length) == SPECTRUM_LP_REDEEM) {
+				formattedAddressString = formatTxAddressString(toAddress, 'Spectrum Finance LP Redeem Contract');
+			}
+
+			if (item.outputs[0].ergoTree.substring(item.outputs[0].ergoTree.length - SPECTRUM_YF_DEPOSIT.length) == SPECTRUM_YF_DEPOSIT) {
+				formattedAddressString = formatTxAddressString(toAddress, 'Spectrum Finance YF Deposit Contract');
+			}
+
+			if (item.outputs[0].ergoTree.substring(item.outputs[0].ergoTree.length - SPECTRUM_YF_REDEEM.length) == SPECTRUM_YF_REDEEM) {
+				formattedAddressString = formatTxAddressString(toAddress, 'Spectrum Finance YF Redeem Contract');
+			}
+		}
+
 		formattedResult += '<td><span class="d-lg-none"><strong>To: </strong></span>' + formattedAddressString + '</td>';
 
 		//Status
@@ -882,7 +1030,7 @@ function onGotOwnedNftInfo(nftInfos, message) {
 		$('#nftMembershipContentHolder').html(html[NFT_TYPE.MembershipToken]);
 
 		$('#nftsHolder').show();
-		$('#nftsTitle').html('<strong>Owned NFTs</strong> (+' + nftsCount + ') ');
+		$('#nftsTitle').html('<strong>Owned NFTs</strong> (' + nftsCount + ') ');
 		$('#hideAllNftsAction').hide();
 	}
 }
@@ -950,7 +1098,7 @@ function hideNfts(e) {
 	$('#nftsShowAll').hide();
 	$('#showAllNftsAction').show();
 	$('#hideAllNftsAction').hide();
-	$('#nftsTitle').html('<strong>Owned NFTs</strong> (+' + nftsCount + ') ');
+	$('#nftsTitle').html('<strong>Owned NFTs</strong> (' + nftsCount + ') ');
 
 	scrollToElement($('#nftsTitle'));
 
@@ -1080,6 +1228,15 @@ function getTxsUrl() {
 	}
 
 	return balanceUrl;
+}
+
+function getUnspentBoxesDataUrl() {
+	let balanceUrl = API_HOST_2 + 'boxes/unspent/byAddress/' + walletAddress;
+	if (networkType == 'testnet') {
+		balanceUrl = API_HOST + 'api/v1/boxes/unspent/byAddress/' + walletAddress;
+	}
+
+	return balanceUrl;	
 }
 
 function getTxsDataUrl() {
@@ -1630,7 +1787,7 @@ function onGotIssuedNftInfo(nftInfos, message) {
 	$('#issuedNftMembershipContentHolder').html(html[NFT_TYPE.MembershipToken]);
 
 	$('#issuedNftsHolder').show();
-	$('#issuedNftsTitle').html('<strong>Issued Assets</strong> (+' + issuedNftsCount + ') ');
+	$('#issuedNftsTitle').html('<strong>Issued Assets</strong> (' + issuedNftsCount + ') ');
 	$('#hideIssuedNftsAction').hide();
 }
 
@@ -1651,7 +1808,7 @@ function hideIssuedNfts(e) {
 	$('#nftsShowIssued').hide();
 	$('#showIssuedNftsAction').show();
 	$('#hideIssuedNftsAction').hide();
-	$('#issuedNftsTitle').html('<strong>Issued Assets</strong> (+' + issuedNftsCount + ') ');
+	$('#issuedNftsTitle').html('<strong>Issued Assets</strong> (' + issuedNftsCount + ') ');
 
 	scrollToElement($('#issuedNftsTitle'));
 
@@ -1730,6 +1887,55 @@ function onInitRequestsFinished() {
 
     printAddressSummary();
 	printTransactions();
+	printUnspentBoxes();
+}
+
+function printUnspentBoxes() {
+	hideUnspentBoxes(null);
+
+	var jqxhr = $.get(getUnspentBoxesDataUrl(), function(data) {
+		let html = '';
+        for (let i = 0; i < data.items.length; i++) {
+        	html += formatBox(data.items[i], false, true).replace('row', 'col-6');
+        }
+
+        unspentBoxesCount = data.total;
+
+        $('#unspentBoxesHolder').html(html);
+        $('#unspentBoxesHeading').html('<strong>Unspent Boxes</strong> (' + unspentBoxesCount + ') ');
+
+        $('#hideUnspentBoxesAction').hide();
+    })
+    .fail(function() {
+        console.log('Unspent boxes fetch failed.');
+    })
+    .always(function() {
+    	//onMempoolAndTransactionsDataFetched();
+    });
+}
+
+function showUnspentBoxes(e) {
+	$('#unspentBoxesHolder').show();
+	$('#showUnspentBoxesAction').hide();
+	$('#hideUnspentBoxesAction').show();
+	$('#unspentBoxesHeading').html('<strong>Unspent Boxes </strong>');
+
+	scrollToElement($('#unspentBoxesHeading'));
+
+	e.preventDefault();
+}
+
+function hideUnspentBoxes(e) {
+	$('#unspentBoxesHolder').hide();
+	$('#showUnspentBoxesAction').show();
+	$('#hideUnspentBoxesAction').hide();
+	$('#unspentBoxesHeading').html('<strong>Unspent Boxes</strong> (' + unspentBoxesCount + ') ');
+
+	if (e) {
+		scrollToElement($('#unspentBoxesHeading'));
+
+		e.preventDefault();
+	}
 }
 
 function getAddressInfo() {

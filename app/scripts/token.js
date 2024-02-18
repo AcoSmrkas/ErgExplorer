@@ -137,7 +137,7 @@ function printHolders(data) {
 
 		//Address
 		addAddress(data[i].address);
-		formattedResult += '<td><a class="address-string" addr="' + data[i].address + '" href="' + getWalletAddressUrl(data[i].address) + '">' + formatAddressString(data[i].address, 4) + '</a></td>';
+		formattedResult += '<td>#' + (i+1) + ' <a class="address-string" addr="' + data[i].address + '" href="' + getWalletAddressUrl(data[i].address) + '">' + formatAddressString(data[i].address, 4) + '</a></td>';
 
 		//Balance
 		let dollarPrice = '';
@@ -149,7 +149,7 @@ function printHolders(data) {
 		formattedResult += '<td class="">' + formatAssetValueString(data[i].balance, decimals) + ' ' + getAssetTitleParams(tokenData.id, tokenData.name, false) + ' <span class="text-light">' + dollarPrice + '</span><span style="text-align:right;float:right;" class="d-inline d-lg-none text-white"> ' + percent + '%</span></td>';
 
 		//Percent
-		formattedResult += '<td class="d-none d-lg-block">' + percent + '%</td>';
+		formattedResult += '<td class="d-none d-lg-table-cell" style="text-align:right;">' + percent + '%</td>';
 
 		formattedResult += '</tr>';
 	}
@@ -509,6 +509,10 @@ function printGainersLosers(timeframe) {
 		let newPrice = prices[item.tokenid];
 		let difference = (newPrice * 100 / oldPrice) - 100;
 
+		if (!difference || isNaN(difference)) {
+			continue;
+		}
+
 		difference = toFixed(difference, 2);
 
 		let classString = 'text-success';
@@ -518,9 +522,6 @@ function printGainersLosers(timeframe) {
 			difference = difference;
 			classString = 'text-danger';
 		}
-
-		console.log(difference);
-		console.log(item.timestamp);
 
 		if (from30dset == false && from30d <= item.timestamp) {
 			$('#usdChange30d').html(difference + '%');
@@ -544,7 +545,13 @@ function printGainersLosers(timeframe) {
 		}
 	}
 
-	 $('#usdPrice').html('$' + formatValue(prices[tokenId], 2, true));
+	if (prices[tokenId]) {
+		console.log(prices[tokenId]);
+	 	$('#usdPrice').html('$' + formatValue(prices[tokenId], 2, true));
+	} else if (data.items.length > 0) {
+		console.log(data.items[0].price);
+		$('#usdPrice').html('$' + formatValue(parseFloat(data.items[0].price), 2, true));
+	}
 
 	 for (var i = data.items.length - 1; i >= 0; i--) {
 		if (timeframe > data.items[i].timestamp) {

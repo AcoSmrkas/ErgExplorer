@@ -101,7 +101,7 @@ function getPoolStats() {
 }
 
 function getPriceHistory() {
-	$.post(ERGEXPLORER_API_HOST + 'tokens/getPriceHistory',
+	$.post(ERGEXPLORER_API_HOST + 'tokens/getPriceHistory?cache',
 		{
 			'from': nowTime,
 			'milestones': 'true',
@@ -109,6 +109,9 @@ function getPriceHistory() {
 		},
 	function(data) {
 		priceData = data;
+
+		handleCachedTimeframes(data);
+
 		printGainersLosers(from24h);
 	}).fail(function (data) {
 		$('#tokenLoading').hide();
@@ -145,10 +148,29 @@ function printGainersLosers24h() {
 	$('#showGainersLosers30d').addClass('btn-primary');
 }
 
+function handleCachedTimeframes(data) {
+	let hasLastTimestamp = false;
+	for (let i = 0; i < data.items.length; i++) {
+		if (data.items[i].originaltimestamp == from24h) {
+			hasLastTimestamp = true;
+			break;
+		}
+	}
+
+	if (!hasLastTimestamp) {
+		from24h = data.items[0].originaltimestamp;
+
+		nowTime = from24h + (24 * 60 * 60 * 1000)
+		from7d = nowTime - (7 * 24 * 60 * 60 * 1000);
+		from30d = nowTime - (30 * 24 * 60 * 60 * 1000);
+	}
+}
+
 function printGainersLosers(timeframe) {
 	let data = JSON.parse(JSON.stringify(priceData));
 
-	let lastTimestamp = timeframe;
+	let lastTimestamp = timeframe;	
+
 	for (var i = data.items.length - 1; i >= 0; i--) {
 		let item = data.items[i];
 		if (item.originaltimestamp != lastTimestamp
