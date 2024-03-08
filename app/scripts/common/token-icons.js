@@ -1,9 +1,11 @@
 var tokenIcons = [];
 //TokenIconsArrayStart
+tokenIcons['2fa00fccb10e61818964b42833b26906d0bc64f1837b919b33e59c7b0a85a0de'] = 'https://ergexplorer.com/images/tokens/degenpad.png';
+tokenIcons['0fdb7ff8b37479b6eb7aab38d45af2cfeefabbefdc7eebc0348d25dd65bc2c91'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/0fdb7ff8b37479b6eb7aab38d45af2cfeefabbefdc7eebc0348d25dd65bc2c91.svg';
 tokenIcons['6ad70cdbf928a2bdd397041a36a5c2490a35beb4d20eabb5666f004b103c7189'] = 'https://hosky.io/wp-content/uploads/2022/05/Front-768x768.png';
 tokenIcons['e023c5f382b6e96fbd878f6811aac73345489032157ad5affb84aefd4956c297'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/2dee6788e99d2420a41447139db9afdc4b442948/logos/ergo/token-ada.svg';
-tokenIcons['2ba9a2d640eb3b0a5e4d498f8f2579b852e6e06c747f84fdf9c7beed64611fe5'] = 'images/tokens/santakey.png';
-tokenIcons['4ffdbf1bcc96c97fa0eb139d37469fa884d38cfc0f34681dd0b2da2b9a4e5016'] = 'images/tokens/coal.png';
+tokenIcons['2ba9a2d640eb3b0a5e4d498f8f2579b852e6e06c747f84fdf9c7beed64611fe5'] = 'https://ergexplorer.com/images/tokens/santakey.png';
+tokenIcons['4ffdbf1bcc96c97fa0eb139d37469fa884d38cfc0f34681dd0b2da2b9a4e5016'] = 'https://ergexplorer.com/images/tokens/coal.png';
 tokenIcons['00b42b41cb438c41d0139aa8432eb5eeb70d5a02d3df891f880d5fe08670c365'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/00b42b41cb438c41d0139aa8432eb5eeb70d5a02d3df891f880d5fe08670c365.svg';
 tokenIcons['cbd75cfe1a4f37f9a22eaee516300e36ea82017073036f07a09c1d2e10277cda'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/cbd75cfe1a4f37f9a22eaee516300e36ea82017073036f07a09c1d2e10277cda.svg';
 tokenIcons['5a34d53ca483924b9a6aa0c771f11888881b516a8d1a9cdc535d063fe26d065e'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/5a34d53ca483924b9a6aa0c771f11888881b516a8d1a9cdc535d063fe26d065e.svg';
@@ -37,9 +39,9 @@ tokenIcons['00bd762484086cf560d3127eb53f0769d76244d9737636b2699d55c56cd470bf'] =
 tokenIcons['18c938e1924fc3eadc266e75ec02d81fe73b56e4e9f4e268dffffcb30387c42d'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/18c938e1924fc3eadc266e75ec02d81fe73b56e4e9f4e268dffffcb30387c42d.svg';
 tokenIcons['01dce8a5632d19799950ff90bca3b5d0ca3ebfa8aaafd06f0cc6dd1e97150e7f'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/01dce8a5632d19799950ff90bca3b5d0ca3ebfa8aaafd06f0cc6dd1e97150e7f.svg';
 tokenIcons['0cd8c9f416e5b1ca9f986a7f10a84191dfb85941619e49e53c0dc30ebf83324b'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/0cd8c9f416e5b1ca9f986a7f10a84191dfb85941619e49e53c0dc30ebf83324b.svg';
-tokenIcons['ba553573f83c61be880d79db0f4068177fa75ab7c250ce3543f7e7aeb471a9d2'] = 'images/tokens/ba553573f83c61be880d79db0f4068177fa75ab7c250ce3543f7e7aeb471a9d2.png';
+tokenIcons['ba553573f83c61be880d79db0f4068177fa75ab7c250ce3543f7e7aeb471a9d2'] = 'https://ergexplorer.com/images/tokens/ba553573f83c61be880d79db0f4068177fa75ab7c250ce3543f7e7aeb471a9d2.png';
 tokenIcons['d1d2ae2ac0456aa43550dd4fda45e4f866d523be9170d3a3e4cab43a83926334'] = 'https://ergcube.com/uploads/posts/2023-04/gcel1-sp.png';
-tokenIcons['91289d5cefb9d78e3ea248d4e9c5b0e3c3de54f64bfae85c0070580961995262'] = 'images/tokens/peperg.png';
+tokenIcons['91289d5cefb9d78e3ea248d4e9c5b0e3c3de54f64bfae85c0070580961995262'] = 'https://ergexplorer.com/images/tokens/peperg.png';
 tokenIcons['00bd762484086cf560d3127eb53f0769d76244d9737636b2699d55c56cd470bf'] = 'https://www.tabbylab.io/upload/tabbyposlogo.png';
 tokenIcons['00b1e236b60b95c2c6f8007a9d89bc460fc9e78f98b09faec9449007b40bccf3'] = 'https://i.ibb.co/rM43NVy/EGIO.png';
 tokenIcons['59ee24951ce668f0ed32bdb2e2e5731b6c36128748a3b23c28407c5f8ccbf0f6'] = 'https://lh5.googleusercontent.com/gfd3pTcy2I7F3th8rwhn6s8GmQa9h7nJDVm_GBxqDhpCQiZHU3E-_XdqEcaD2euj61MClyL0MEZ4kjwy4XiPTv8=w16383';

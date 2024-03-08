@@ -39,8 +39,10 @@ function printAddresses() {
                     formattedResult += '<p><strong>Type: </strong><span class="' + spanClass + '">' + type + '</span></p>';
 
                     //Url
-                    formattedResult += '<p><strong>Url: </strong><a target="_new" href="' + item.url + '">' + item.url + '</a></p>';
-
+                    if (item.url) {
+                        formattedResult += '<p><strong>Url: </strong><a target="_new" href="' + item.url + '">' + item.url + '</a></p>';
+                    }
+                    
                     formattedResult += '</div>';
                     formattedResult += '<div class="col border-lg-start">';
                     formattedResult += '<hr class="my-3 d-lg-none">';

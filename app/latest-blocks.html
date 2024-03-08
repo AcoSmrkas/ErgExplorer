@@ -122,7 +122,10 @@
 <!-- Navigation Menu -->
 <nav class="navbar navbar-expand-md navbar-dark p-1">
     <div class="container-fluid">
-        <a class="navbar-brand" href="/"><img src="./images/logo.png" alt="Erg" height="30"></a>
+        <ul class="navbar-nav ms-auto navbar-nav ms-auto d-none d-md-block" style="position: absolute; left: 15px;">
+            <a class="navbar-brand" href="/"><img src="./images/logo.png" alt="Erg" height="30"></a>
+        </ul>
+        <a class="navbar-brand d-block d-md-none" href="/"><img src="./images/logo.png" alt="Logo" height="35"></a></a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -146,17 +149,29 @@
                 <li class="nav-item">
                     <a class="nav-link " href="about">About</a>
                 </li>
+                <li class="nav-item d-block d-md-none">
+                    <div id="dropdown" class="dropdown nav-link">
+                        <a class="btn nav-link dropdown-toggle text-light p-0 p-md-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><span id="networkType">Mainnet</span></a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="switchToMainnet(event)">Mainnet</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="switchToTestnet(event)">Testnet</a></li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="nav-item d-block d-md-none">
+                    <a style="line-height:36px;text-align:center;" class="nav-link" href="#" onclick="switchTheme(event);" id="themeSwitch"><i class="fas fa-moon"></i></a>
+                </li>
             </ul>
             <div id="rightNav" class="d-none d-lg-block"><span></span></div>
-            <ul class="navbar-nav ms-auto">
+            <ul class="navbar-nav ms-auto"  style="position: absolute; right: 15px;">
                 <li class="nav-item">
-                <div id="dropdown" class="dropdown nav-link">
-                    <a class="btn nav-link dropdown-toggle text-light p-0 p-md-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><span id="networkType">Mainnet</span></a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#" onclick="switchToMainnet(event)">Mainnet</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="switchToTestnet(event)">Testnet</a></li>
-                    </ul>
-                </div>
+                    <div id="dropdown" class="dropdown nav-link">
+                        <a class="btn nav-link dropdown-toggle text-light p-0 p-md-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><span id="networkType">Mainnet</span></a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="switchToMainnet(event)">Mainnet</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="switchToTestnet(event)">Testnet</a></li>
+                        </ul>
+                    </div>
                 </li>
                 <li class="nav-item">
                     <a style="line-height:36px;text-align:center;" class="nav-link" href="#" onclick="switchTheme(event);" id="themeSwitch"><i class="fas fa-moon"></i></a>
@@ -170,6 +185,14 @@
 
 		<!-- Page Content -->
 		<div class="container p-0">
+
+<!--
+			<br>
+
+			<div class="row baner text-center p-0" style="margin: 0 auto !important;">
+				<a class="p-0" href="https://ergoraffle.com/raffle/show/1f11c264bcc43d49f6cfd3d28fdcb58a23cffd405e102ca173ac3b5add1ca643" target="_new"><img src="./images/ad.png" alt="Ad" style="max-height: 80px; width: auto; max-width:100%; margin: 0 auto;"></a>
+			</div>
+-->
 
 			<br>
 

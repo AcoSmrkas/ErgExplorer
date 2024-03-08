@@ -287,8 +287,14 @@ function getTxType(tx) {
 		return TxType.Origin;
 	}
 
+	let outputAddress = tx.outputs[0].address;
+
+	if (outputAddress == FEE_ADDRESS) {
+		outputAddress = tx.outputs[1].address;
+	}
+
 	let input0isWallet = isWalletAddress(tx.inputs[0].address);
-	let output0isWallet = isWalletAddress(tx.outputs[0].address);
+	let output0isWallet = isWalletAddress(outputAddress);
 
 	if (input0isWallet && output0isWallet) {
 		return TxType.Wallet2Wallet;
@@ -418,6 +424,22 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		let outputsAddress = walletAddress;
 		let txType = getTxType(item);
 
+		let minted = undefined;
+		let mintId = item.inputs[0].boxId;
+		for (let j = 0; j < item.outputs.length; j++) {
+			if (item.outputs[j].address == outputsAddress) {
+				
+				//Sort
+				let tokensArray = sortTokens(item.outputs[j].assets);
+				
+				for (let k = 0; k < tokensArray.length; k++) {
+					if (tokensArray[k].tokenId == mintId) {
+						minted = tokensArray[k];
+					}
+				}
+			}
+		}
+
 		let totalTransferedAssets = {
 			value: 0,
 			assets: {}
@@ -433,7 +455,11 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 				
 				for (let k = 0; k < tokensArray.length; k++) {
 					if (totalTransferedAssets.assets[tokensArray[k].tokenId] == undefined) {
-						totalTransferedAssets.assets[tokensArray[k].tokenId] = tokensArray[k];
+						totalTransferedAssets.assets[tokensArray[k].tokenId] = {};
+						totalTransferedAssets.assets[tokensArray[k].tokenId].tokenId = tokensArray[k].tokenId;
+						totalTransferedAssets.assets[tokensArray[k].tokenId].decimals = tokensArray[k].decimals;
+						totalTransferedAssets.assets[tokensArray[k].tokenId].name = tokensArray[k].name;
+						totalTransferedAssets.assets[tokensArray[k].tokenId].amount = tokensArray[k].amount;
 					} else {
 						totalTransferedAssets.assets[tokensArray[k].tokenId].amount += tokensArray[k].amount;
 					}
@@ -448,7 +474,6 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 				
 				//Sort
 				let tokensArray = sortTokens(item.inputs[j].assets);
-				
 				for (let k = 0; k < tokensArray.length; k++) {
 					if (totalTransferedAssets.assets[tokensArray[k].tokenId] == undefined) {
 						totalTransferedAssets.assets[tokensArray[k].tokenId] = {};
@@ -464,6 +489,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		}
 
 		let txInOut = getTxInOutType(totalTransferedAssets);
+
 		let fromAddress;
 		let toAddress;
 		if ((txInOut == TxInOut.Out
@@ -475,7 +501,6 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 				let input = item.inputs[j];
 
 				if (input.address != oneaddress && input.address != FEE_ADDRESS) {
-					console.log(input.address);
 					hasOtherAddresses = true;
 				}
 			}
@@ -483,7 +508,6 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 				let output = item.outputs[j];
 
 				if (output.address != oneaddress && output.address != FEE_ADDRESS) {
-					console.log(output.address);
 					hasOtherAddresses = true;
 				}
 			}
@@ -516,6 +540,34 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 				//Input TX
 				fromAddress = item.inputs[0].address;
 				toAddress = walletAddress;
+
+				//Handle multiple input addresses
+				let otherAddresses = Array();
+				for (let j = 0; j < item.inputs.length; j++) {
+					let input = item.inputs[j];
+
+					if (input.address != toAddress && !otherAddresses.includes(input.address)) {
+						otherAddresses.push(input.address);
+					}
+				}
+
+				if (fromAddress == toAddress) {
+					if (otherAddresses.length == 1) {
+						for (let j = 0; j < item.inputs.length; j++) {
+							let output = item.inputs[j];
+
+							if (output.address != toAddress) {
+								fromAddress = output.address;
+								break;
+							}
+						}
+					}
+				}
+
+				if (otherAddresses.length > 1) {
+					fromAddress = AddressType.Multiple;
+				}
+
 			} else if (txInOut == TxInOut.Out
 				|| txInOut == TxInOut.Mixed) {
 				//Output TX
@@ -523,17 +575,17 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 				toAddress = item.outputs[0].address;
 
 				//Handle multiple output addresses
-				let otherAddresses = 0;
+				let otherAddresses = Array();
 				for (let j = 0; j < item.outputs.length; j++) {
 					let output = item.outputs[j];
 
-					if (output.address != fromAddress && output.address != FEE_ADDRESS) {
-						otherAddresses++;
+					if (output.address != fromAddress && output.address != FEE_ADDRESS && !otherAddresses.includes(output.address)) {
+						otherAddresses.push(output.address);
 					}
 				}
 
 				if (fromAddress == toAddress) {
-					if (otherAddresses == 1) {
+					if (otherAddresses.length == 1) {
 						for (let j = 0; j < item.outputs.length; j++) {
 							let output = item.outputs[j];
 
@@ -545,7 +597,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 					}
 				}
 
-				if (otherAddresses > 1) {
+				if (otherAddresses.length > 1) {
 					toAddress = AddressType.Multiple;
 				}
 			}
@@ -590,17 +642,18 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 				}
 
 				if (fromAddress == toAddress || txInOut == TxInOut.Mixed) {
-					let otherAddresses = 0;
+					let otherAddresses = Array();
 					for (let j = 0; j < item.outputs.length; j++) {
 						let output = item.outputs[j];
 
 						if (output.address != fromAddress
-							&& output.address != FEE_ADDRESS) {
-							otherAddresses++;
+							&& output.address != FEE_ADDRESS
+							&& !otherAddresses.includes(output.address)) {
+							otherAddresses.push(output.address);
 						}
 					}
 
-					if (otherAddresses > 1) {
+					if (otherAddresses.length > 1) {
 						toAddress = AddressType.Multiple;
 					} else {
 						if (item.outputs.length > 1) {
@@ -662,7 +715,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 			}
 		}
 
-		if (txType != TxInOut.In) {			
+		if (txInOut != TxInOut.In) {			
 			let hasEnough = true;
 			do {
 				hasEnough = true;
@@ -676,16 +729,18 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 					if (input.address != fromAddress) continue;
 
 					totalSentFrom.value += input.value;
-					for (let j = 0; j < input.assets.length; j++) {
-						let asset = input.assets[j];
-						if (totalSentFrom.assets[asset.tokenId] == undefined) {
-							totalSentFrom.assets[asset.tokenId] = {};
-							totalSentFrom.assets[asset.tokenId].amount = 0;
-							totalSentFrom.assets[asset.tokenId].decimals = asset.decimals;
-							totalSentFrom.assets[asset.tokenId].tokenId = asset.tokenId;
-						}
+					if (input.assets) {
+						for (let j = 0; j < input.assets.length; j++) {
+							let asset = input.assets[j];
+							if (totalSentFrom.assets[asset.tokenId] == undefined) {
+								totalSentFrom.assets[asset.tokenId] = {};
+								totalSentFrom.assets[asset.tokenId].amount = 0;
+								totalSentFrom.assets[asset.tokenId].decimals = asset.decimals;
+								totalSentFrom.assets[asset.tokenId].tokenId = asset.tokenId;
+							}
 
-						totalSentFrom.assets[asset.tokenId].amount += asset.amount;
+							totalSentFrom.assets[asset.tokenId].amount += asset.amount;
+						}
 					}
 				}
 
@@ -712,6 +767,52 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 				}
 
 			} while (!hasEnough);
+		}
+
+		//check burn for single emissions
+		let burnedAssets = {};
+
+		for (let j = 0; j < item.inputs.length; j++) {
+			let tokensArray = sortTokens(item.inputs[j].assets);
+			for (let k = 0; k < tokensArray.length; k++) {
+				if (burnedAssets[tokensArray[k].tokenId] == undefined) {
+					burnedAssets[tokensArray[k].tokenId] = {};
+					burnedAssets[tokensArray[k].tokenId].tokenId = tokensArray[k].tokenId;
+					burnedAssets[tokensArray[k].tokenId].decimals = tokensArray[k].decimals;
+					burnedAssets[tokensArray[k].tokenId].name = tokensArray[k].name;
+					burnedAssets[tokensArray[k].tokenId].amount = tokensArray[k].amount;
+				} else {
+					burnedAssets[tokensArray[k].tokenId].amount += tokensArray[k].amount;
+				}
+			}
+		}
+
+		for (let j = 0; j < item.outputs.length; j++) {				
+			//Sort
+			let tokensArray = sortTokens(item.outputs[j].assets);
+			for (let k = 0; k < tokensArray.length; k++) {
+				if (burnedAssets[tokensArray[k].tokenId] == undefined) {
+					burnedAssets[tokensArray[k].tokenId] = {};
+					burnedAssets[tokensArray[k].tokenId].tokenId = tokensArray[k].tokenId;
+					burnedAssets[tokensArray[k].tokenId].decimals = tokensArray[k].decimals;
+					burnedAssets[tokensArray[k].tokenId].name = tokensArray[k].name;
+					burnedAssets[tokensArray[k].tokenId].amount = -tokensArray[k].amount;
+				} else {
+					burnedAssets[tokensArray[k].tokenId].amount -= tokensArray[k].amount;
+				}
+			}
+		}
+
+		let burnedAssetKeys = Object.keys(burnedAssets);
+		let hasBurnedAssets = false;
+		for (let i = 0; i < burnedAssetKeys.length; i++) {
+			let asset = burnedAssets[burnedAssetKeys[i]];
+
+			if (asset.amount == 0) {
+				delete burnedAssets[burnedAssetKeys[i]];
+			} else if (asset.amount > 0) {
+				hasBurnedAssets = true;
+			}
 		}
 
 		//Tx
@@ -836,11 +937,22 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		//Fee
 		formattedResult += '<td class="d-none d-lg-table-cell"><span class="d-lg-none"><strong>Fee: </strong></span>' + formatErgValueString(fee) + '</td>';
 
+		//Burn setup		
+		let assetKeys = Object.keys(totalTransferedAssets.assets);
+		for (let k = 0; k < assetKeys.length; k++) {
+			let asset = totalTransferedAssets.assets[assetKeys[k]];
+			asset.isBurned = false;
+			if (asset.amount == -1
+				&& burnedAssets[asset.tokenId] != undefined) {
+				asset.isBurned = true;
+			}
+		}
+			
+
 		//Value
 		if (txInOut != TxInOut.Mixed) {
 			if (totalTransferedAssets.value < 0) totalTransferedAssets.value *= -1;
 
-			let assetKeys = Object.keys(totalTransferedAssets.assets);
 			for (let k = 0; k < assetKeys.length; k++) {
 				let asset = totalTransferedAssets.assets[assetKeys[k]];
 				if (asset.amount < 0) asset.amount *= -1;
@@ -878,7 +990,14 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 			//	assetPrice = formatAssetDollarPriceString(asset.amount, asset.decimals, asset.tokenId);
 			}
 
-			let assetsString = '<br><strong><span class="text-white">' + (asset.amount > 0 ? mixedPlus : '') + formatAssetValueString(asset.amount, asset.decimals, 4) + '</span></strong> ' + getAssetTitle(asset, false) + (assetPrice == undefined ? '' : ' <span class="text-light">' + assetPrice +'</span>');
+			let isMinted = false;
+			if (minted) {
+				if (minted.tokenId == asset.tokenId) {
+					isMinted = true;
+				}
+			}
+
+			let assetsString = '<br><strong>'+(isMinted ? '<span title="Minted">✨</span>' : '')+''+(asset.isBurned ? '<span title="Burned">🔥</span>' : '')+'<span class="text-white">' + (asset.amount > 0 ? mixedPlus : '') + formatAssetValueString(asset.amount, asset.decimals, 4) + '</span></strong> ' + getAssetTitle(asset, false) + (assetPrice == undefined ? '' : ' <span class="text-light">' + assetPrice +'</span>');
 
 			assetsFull += assetsString;
 			
@@ -919,6 +1038,11 @@ formatErgValueString(totalTransferedAssets.value, 5) + (ergDollarValue == undefi
 		if (totalTransferedAssets.value == 0 && assetsI == 0) {
 			assets = '/';
 			assetsFull = '/';
+		}
+
+		if (minted) {
+		//	let assetPrice = undefined;
+		//	assetsFull += '<br><strong><span class="text-white">' + (minted.amount > 0 ? mixedPlus : '') + formatAssetValueString(minted.amount, minted.decimals, 4) + '</span></strong> ' + getAssetTitle(minted, false) + (assetPrice == undefined ? '' : ' <span class="text-light">' + assetPrice +'</span>')
 		}
 
 		valueFields[i + mempoolIndexOffset] = ergValueString + assets;
@@ -1962,4 +2086,129 @@ function getAddressInfo() {
 			$('#addressNameHolder').show();
 		}
 	});
+}
+
+function findOtherAddress(item, totalTransferred, txInOut, firstAddress) {
+	let addresses = Array();
+	let totalTransferedAssets = {};
+
+	for (let j = 0; j < item.outputs.length; j++) {
+		let newAddress = item.outputs[j].address;
+		if (!addresses.includes(newAddress)) {
+			addresses.push(newAddress);
+			totalTransferedAssets[newAddress] = {
+				value: 0,
+				assets: {}
+			};
+		}
+	}
+
+	for (let j = 0; j < item.inputs.length; j++) {
+		let newAddress = item.inputs[j].address;
+		if (!addresses.includes(newAddress)) {
+			addresses.push(newAddress);
+			totalTransferedAssets[newAddress] = {
+				value: 0,
+				assets: {}
+			};
+		}
+	}
+
+	for (let i = 0; i < addresses.length; i++) {
+		let address = addresses[i];
+
+		for (let j = 0; j < item.inputs.length; j++) {
+			if (item.inputs[j].address == address) {
+
+				totalTransferedAssets[address].value += item.inputs[j].value;
+				
+				//Sort
+				let tokensArray = sortTokens(item.inputs[j].assets);
+				
+				for (let k = 0; k < tokensArray.length; k++) {
+					if (totalTransferedAssets[address].assets[tokensArray[k].tokenId] == undefined) {
+						totalTransferedAssets[address].assets[tokensArray[k].tokenId] = tokensArray[k];
+					} else {
+						totalTransferedAssets[address].assets[tokensArray[k].tokenId].amount += tokensArray[k].amount;
+					}
+				}
+			}
+		}
+
+		for (let j = 0; j < item.outputs.length; j++) {
+			if (item.outputs[j].address == add) {
+				totalTransferedAssets[address].value -= item.outputs[j].value;
+				
+				//Sort
+				let tokensArray = sortTokens(item.outputs[j].assets);
+				
+				for (let k = 0; k < tokensArray.length; k++) {
+					if (totalTransferedAssets[address].assets[tokensArray[k].tokenId] == undefined) {
+						totalTransferedAssets[address].assets[tokensArray[k].tokenId] = {};
+						totalTransferedAssets[address].assets[tokensArray[k].tokenId].tokenId = tokensArray[k].tokenId;
+						totalTransferedAssets[address].assets[tokensArray[k].tokenId].decimals = tokensArray[k].decimals;
+						totalTransferedAssets[address].assets[tokensArray[k].tokenId].name = tokensArray[k].name;
+						totalTransferedAssets[address].assets[tokensArray[k].tokenId].amount = -tokensArray[k].amount;
+					} else {
+						totalTransferedAssets[address].assets[tokensArray[k].tokenId].amount -= tokensArray[k].amount;
+					}
+				}
+			}
+		}
+	}
+
+	for (let i = 0; i < addresses.length; i++) {
+		let exactMatch = true;
+		let address = addresses[i];
+
+				if (address == firstAddress || address != '2JowFgqdee4yFVaXNsYuiAh1ge7HGxNSaDLiXQRKhtCYYRKgwMCeqMPi54qxpovt5TtjRVNNRabtZ7awzrcnqnmALG2Hjkwe2okjFn9odM7M3uhA9RQ2uBkkVsrY1P3FW8bUTx6qRjy4yHdtdS8YUzFCvmGZVHLteknL6RN9dueHbpLYRkyV2e5mYEzptufdxy81DwNpJphyJa9Y21ELHo75vk2t24kZS5Lgt5GDByQHRu3G4GTnPb4vMvew4wUFJh8xAwM1ffoEG946YZaWkSu48UUV4tw6Y5a4uDxZPEEiSDM36wookGfTixFeWVfM9YApPytQm8y1L1bsbcocQ9JTvBjixevx1BRagnvaJrwduuDbKYr3wwpo9PfK85xXprxrFgHBVwEof9gQs5TQFJ3ddKf1pftx6SJrHyNygX6CS4Vm3TG9dU32bs8inxSn4eVdwfRdhNiECZavPBBrzgfa9ismVpkwrcNbFZrAdNSFUpoKfiuFcsP6Be5tsE4ZsPD9sWEArhbGPqya88U8TftP9DqoD3xVPUmhMsB6pb6GfwQ1QxsenMhynSMBZ4fc6eyjdZWvzWeBKKs6AbVMX6EsSoptPvsbvpd664kBq99DsZ5Br6rQGjPDM1zPYsCpGUSW849qigHzHyNmYUCoVkDgfQA26TYKwFPLi7rxsJbSfAEhwQj5czRmfg11HafTYMcuSgryKP8ZzxTfTj5LxZFsXVjY9JWScT1tA5ZFjXZHxGENBporNPMbqWzusqMKvmyzTkZDwwyJV6nzcAFRDEjHd4MjzzsHbztt9XoYtWcYyKCYyMiAxsEqvc7VvuKXvTMEyzHnR1dSpqoP6bKpCwNKKZvrYX35GdxNdEKzQS6ccbNe98zvFQPrgQPa7BjYs1hgCWv6LLLWmqhhy9J6ca332st262t1BYjVLhYLEHSvLbsmM36hDtDjyoniTuW3zVmN51nV7bkZU1L1PQobFqp7uLvdieFt234Pz2RBgezeVTqkKqJLv7D2xKveVTUGJqsM8P7BghcLTyzEY9CZ3dXZRQVh2sXbhQEFqHdKpXL92eZTLZbg1AQYRpfL2p8AVVrbeWEuha3gmA5mv95zkmi5MPbDtxEekDaTLc9KXoWtSEPSy8zRMyhiws5') {
+			continue;
+		}
+
+		console.log(totalTransferedAssets[address].value, totalTransferred.value);
+		if (totalTransferedAssets[address].value != totalTransferred.value) {
+			exactMatch = false;
+			continue;
+		}
+
+		console.log(`Value match for address ${address}`);
+
+		let assetKeys1 = Object.keys(totalTransferedAssets[address].assets);
+		let assetKeys2 = Object.keys(totalTransferred.assets);
+
+		if (assetKeys1.length != assetKeys2.length) {
+			exactMatch = false;
+			continue;
+		}
+
+		console.log(`Asset length match for address ${address}`);
+
+		for (let j = 0; j < assetKeys1.length; j++) {
+			let asset1 = totalTransferedAssets[address].assets[assetKeys1[j]];		
+			let foundAsset = false;
+			for (let k = 0; k < assetKeys2.length; k++) {
+				let asset2 = totalTransferred.assets[assetKeys2[k]];
+				if (asset2 && asset1.tokenId == asset2.tokenId) {
+					foundAsset = true;
+					if (asset1.amount != asset2.amount) {
+						exactMatch = false;
+					}
+					break;
+				}
+			}
+
+			if (!foundAsset || !exactMatch) {
+				exactMatch = false;
+				break;
+			}
+		}
+
+		if (exactMatch) {
+			console.log(`Exact match: ${address}`);	
+		}
+	}
+}
+
+function findMinDiffBox(totalTransferred, boxes) {
+
 }

@@ -627,29 +627,40 @@ function formatBox(box, trueBox = false, unspent = false) {
 		formattedData += '</div>'
 	}
 
-	if (trueBox) {
+	//Registers
+	if (box.additionalRegisters) {
 		let registerKeys = Object.keys(box.additionalRegisters);
 		let shownRegisters = false;
 		if (registerKeys.length > 0) {
 			for (let i = 0; i < registerKeys.length; i++) {
 				let register = box.additionalRegisters[registerKeys[i]];
 
-				if (register.sigmaType == 'Coll[SByte]') {
+				if (register.sigmaType == 'Coll[SByte]'
+					|| register.sigmaType == 'SLong'
+					|| register.sigmaType == 'SInt'
+					) {
 					if (!shownRegisters) {
-						formattedData += '<div style="padding-bottom:10px;" class="ps-0 pe-0 pe-md-2 ps-md-2 col-10"><p style="margin-bottom:5px;"><strong class="text-white">Additional registers:</strong></p>'
+						formattedData += '<div style="margin-top:5px;" class="ps-0 pe-0 pe-md-2 ps-md-2 col-10"><p style="margin-bottom:5px;"><strong class="text-white">Additional registers:</strong></p>'
 						shownRegisters = true;
 					}
+				}
 
-					formattedData += `<p><strong>${registerKeys[i]}</strong>: ${hex2a(register.renderedValue)}</p>`
+				if (register.sigmaType == 'Coll[SByte]') {
+					formattedData += `<p><strong>${registerKeys[i]}</strong>: ${hex2a(register.renderedValue)}</p>`;
+				} else if (register.sigmaType == 'SLong' ||
+					register.sigmaType == 'SInt') {
+					formattedData += `<p><strong>${registerKeys[i]}</strong>: ${register.renderedValue}</p>`;
 				}
 			}
 
 			if (shownRegisters) {
-				formattedData += '</div><p> </p>';
+				formattedData += '</div>';
 			}
 		}
+	}
 
-		formattedData += '<p style="margin-bottom:5px;"><strong class="text-white">Ergo tree:</strong></p> <div style="word-wrap:break-word;background: var(--striped-1);" class="div-cell-dark">' + box.ergoTree + '</div>';
+	if (trueBox) {
+		formattedData += '<p> </p><p style="margin-bottom:5px;"><strong class="text-white">Ergo tree:</strong></p> <div style="word-wrap:break-word;background: var(--striped-1);" class="div-cell-dark">' + box.ergoTree + '</div>';
 	}
 
 	formattedData += '</div>';
@@ -826,7 +837,9 @@ function getAddressesInfo() {
 		addressbook = data.items;
 
 		$('.address-string').each(function(index) {
-			$(this).html(getOwner($(this).attr('addr')));
+			if ($(this).html() != 'This Address') {
+				$(this).html(getOwner($(this).attr('addr')));
+			}
 		});
 	});
 }
@@ -849,7 +862,7 @@ function getOwner(address) {
 			if (addressbook[i]['urltype'] != '') {
 				owner += ' (' + addressbook[i]['urltype'] + ')';
 			} else {
-				owner += ' (' + addressbook[i]['address'].substr(-4) + ')';
+				owner += ' (' + addressbook[i]['address'].substr(0, 4) + ')';
 			}
 
 			return owner;

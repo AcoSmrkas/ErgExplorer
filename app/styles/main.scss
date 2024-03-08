@@ -445,6 +445,31 @@ select, option {
 .navbar {
 	background-color: var(--forms-bg);
 	border-bottom: 1px solid var(--main-color);
+	min-height: 55px;
+}
+
+.navbar-nav {
+	padding-top: 0px;
+	padding-right: 0px;
+}
+
+.nav-item {
+	text-align: right;
+}
+
+@media only screen and (max-width: 768px) {
+	.baner {
+		width: 100%;
+	}
+
+	.navbar-nav {
+		padding-top: 15px;
+		padding-right: 15px;
+	}
+
+	.nav-item {
+		text-align: right;
+	}
 }
 
 .navbar-brand span {

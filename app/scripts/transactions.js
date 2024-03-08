@@ -101,6 +101,52 @@ function printTransaction(data, mempool) {
 		showNotificationPermissionToast();
 	}
 
+	//Check burn
+	let burnedAssets = {};
+
+	for (let j = 0; j < data.inputs.length; j++) {
+		let tokensArray = sortTokens(data.inputs[j].assets);
+		for (let k = 0; k < tokensArray.length; k++) {
+			if (burnedAssets[tokensArray[k].tokenId] == undefined) {
+				burnedAssets[tokensArray[k].tokenId] = {};
+				burnedAssets[tokensArray[k].tokenId].tokenId = tokensArray[k].tokenId;
+				burnedAssets[tokensArray[k].tokenId].decimals = tokensArray[k].decimals;
+				burnedAssets[tokensArray[k].tokenId].name = tokensArray[k].name;
+				burnedAssets[tokensArray[k].tokenId].amount = tokensArray[k].amount;
+			} else {
+				burnedAssets[tokensArray[k].tokenId].amount += tokensArray[k].amount;
+			}
+		}
+	}
+
+	for (let j = 0; j < data.outputs.length; j++) {				
+		//Sort
+		let tokensArray = sortTokens(data.outputs[j].assets);
+		for (let k = 0; k < tokensArray.length; k++) {
+			if (burnedAssets[tokensArray[k].tokenId] == undefined) {
+				burnedAssets[tokensArray[k].tokenId] = {};
+				burnedAssets[tokensArray[k].tokenId].tokenId = tokensArray[k].tokenId;
+				burnedAssets[tokensArray[k].tokenId].decimals = tokensArray[k].decimals;
+				burnedAssets[tokensArray[k].tokenId].name = tokensArray[k].name;
+				burnedAssets[tokensArray[k].tokenId].amount = -tokensArray[k].amount;
+			} else {
+				burnedAssets[tokensArray[k].tokenId].amount -= tokensArray[k].amount;
+			}
+		}
+	}
+
+	let burnedAssetKeys = Object.keys(burnedAssets);
+	let hasBurnedAssets = false;
+	for (let i = 0; i < burnedAssetKeys.length; i++) {
+		let asset = burnedAssets[burnedAssetKeys[i]];
+
+		if (asset.amount == 0) {
+			delete burnedAssets[burnedAssetKeys[i]];
+		} else if (asset.amount > 0) {
+			hasBurnedAssets = true;
+		}
+	}
+
 	//Id
 	$('#txHeader').html('<p><a href="Copy to clipboard!" onclick="copyTransactionAddress(event)">' + data.id + ' &#128203;</a></p>');
 	$('#txHeaderMobile').html('<p><a href="Copy to clipboard!" onclick="copyTransactionAddress(event)">' + data.id.substr(0, 8) + '...' + data.id.substr(data.id.length - 4) + ' &#128203;</a></p>');
@@ -117,6 +163,27 @@ function printTransaction(data, mempool) {
 
 	//Outputs
 	$('#txOutputs').html(formatInputsOutputs(data.outputs));
+
+	//Burned
+	if (hasBurnedAssets) {
+		let burnedHtml = '';
+
+		burnedHtml += '';
+
+		burnedAssetKeys = Object.keys(burnedAssets);
+		for (let j = 0; j < burnedAssetKeys.length; j++) {
+			let asset = burnedAssets[burnedAssetKeys[j]];
+			let assetPrice = formatAssetDollarPrice(asset.amount, asset.decimals, asset.tokenId);
+			burnedHtml += '<p><strong>' + getAssetTitle(asset, true) + '</strong>: <span class="text-white">' + formatAssetValueString(asset.amount, asset.decimals, 4) + ' ' + (assetPrice == -1 ? '' : '<span class="text-light">' + formatDollarPriceString(assetPrice) + '</span>') + '</span></p>';
+		}
+
+		$('#burnedData').html(burnedHtml);
+
+		$('#burnedHolder').removeClass('d-none');
+		$('#burnedHolder').show();
+	} else {
+		$('#burnedSpacer').hide();
+	}
 
 	//Size
 	$('#txSize').html(formatKbSizeString(data.size));
