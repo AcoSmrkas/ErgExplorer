@@ -17,7 +17,6 @@ $(function() {
 
 	getNftInfo(tokenId, onGetNftInfoDone);
 	getPrices(getPriceHistory);
-	setLinks();
 	checkAddressbook();
 
 	setDocumentTitle(tokenId);
@@ -61,7 +60,12 @@ function printAddressbookAddress(item, first, last) {
 }
 
 function setLinks() {
-	$('#spectrumLink').attr('href', 'https://app.spectrum.fi/ergo/swap?base=0000000000000000000000000000000000000000000000000000000000000000&quote=' + tokenId);
+	if (tokenData.isMeme == 't') {
+		$('#spectrumLink').attr('href', 'https://dex.crooks-fi.com/ergo/swap?base=0000000000000000000000000000000000000000000000000000000000000000&quote=' + tokenId);
+		$('#spectrumLink').html('Crooks Finance <i class="erg-span fa-solid fa-up-right-from-square"></i>');
+	} else {
+		$('#spectrumLink').attr('href', 'https://app.spectrum.fi/ergo/swap?base=0000000000000000000000000000000000000000000000000000000000000000&quote=' + tokenId);
+	}
 	$('#cruxLink').attr('href', 'https://cruxfinance.io/tokens/' + tokenId);
 }
 
@@ -129,7 +133,6 @@ function getHolderCountFallback() {
 }
 
 function printHolders(data) {
-	console.log(data);
 	let formattedResult = '';
 
 	for (let i = 0; i < data.length; i++) {
@@ -377,6 +380,8 @@ function onGetNftInfoDone(nftInfo, message) {
 
 		$('#tokenHolder').show();
 	}
+
+	setLinks();
 }
 
 function getCurrentAddress() {
@@ -546,10 +551,8 @@ function printGainersLosers(timeframe) {
 	}
 
 	if (prices[tokenId]) {
-		console.log(prices[tokenId]);
 	 	$('#usdPrice').html('$' + formatValue(prices[tokenId], 2, true));
 	} else if (data.items.length > 0) {
-		console.log(data.items[0].price);
 		$('#usdPrice').html('$' + formatValue(parseFloat(data.items[0].price), 2, true));
 	}
 
@@ -642,8 +645,6 @@ function printGainersLosers(timeframe) {
 
 	// Get the value of the global CSS variable
 	const primaryColor = rootStyles.getPropertyValue('--main-color').trim();
-
-	console.log(data);
 
 	chart = new Chart(
 	    document.getElementById('chart'),

@@ -1,5 +1,9 @@
 var tokenIcons = [];
 //TokenIconsArrayStart
+tokenIcons['1f649a7560f9d1b697d4225c57c9040c9101e4181dae134541ee8afec92944c5'] = 'https://cloudflare-ipfs.com/ipfs/bafkreicxoj4b4s5qbrf5sghfowpopagdkkzwq7z5kqxkyeu2vs5fqcchv4?SwbiFssczh';
+tokenIcons['9f15831d0d1d86b84c0fbf656411d3218d42ce4c4b1bd1e504ac98d3919bdbd5'] = 'https://ergexplorer.com/images/tokens/ninja.gif';
+tokenIcons['e39089d132e80331631c443c8b086f6c3c0e25d892c15e49cd38b7ec10818d45'] = 'https://ergexplorer.com/images/tokens/ergod.png';
+tokenIcons['0d9ef46408f11aed2a7f840d3928baefaf8153032f42296cbe9d640845d4082c'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/0d9ef46408f11aed2a7f840d3928baefaf8153032f42296cbe9d640845d4082c.svg';
 tokenIcons['2fa00fccb10e61818964b42833b26906d0bc64f1837b919b33e59c7b0a85a0de'] = 'https://ergexplorer.com/images/tokens/degenpad.png';
 tokenIcons['0fdb7ff8b37479b6eb7aab38d45af2cfeefabbefdc7eebc0348d25dd65bc2c91'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/0fdb7ff8b37479b6eb7aab38d45af2cfeefabbefdc7eebc0348d25dd65bc2c91.svg';
 tokenIcons['6ad70cdbf928a2bdd397041a36a5c2490a35beb4d20eabb5666f004b103c7189'] = 'https://hosky.io/wp-content/uploads/2022/05/Front-768x768.png';
@@ -44,7 +48,7 @@ tokenIcons['d1d2ae2ac0456aa43550dd4fda45e4f866d523be9170d3a3e4cab43a83926334'] =
 tokenIcons['91289d5cefb9d78e3ea248d4e9c5b0e3c3de54f64bfae85c0070580961995262'] = 'https://ergexplorer.com/images/tokens/peperg.png';
 tokenIcons['00bd762484086cf560d3127eb53f0769d76244d9737636b2699d55c56cd470bf'] = 'https://www.tabbylab.io/upload/tabbyposlogo.png';
 tokenIcons['00b1e236b60b95c2c6f8007a9d89bc460fc9e78f98b09faec9449007b40bccf3'] = 'https://i.ibb.co/rM43NVy/EGIO.png';
-tokenIcons['59ee24951ce668f0ed32bdb2e2e5731b6c36128748a3b23c28407c5f8ccbf0f6'] = 'https://lh5.googleusercontent.com/gfd3pTcy2I7F3th8rwhn6s8GmQa9h7nJDVm_GBxqDhpCQiZHU3E-_XdqEcaD2euj61MClyL0MEZ4kjwy4XiPTv8=w16383';
+tokenIcons['59ee24951ce668f0ed32bdb2e2e5731b6c36128748a3b23c28407c5f8ccbf0f6'] = 'https://ergexplorer.com/images/tokens/walrus.png';
 tokenIcons['e8b20745ee9d18817305f32eb21015831a48f02d40980de6e849f886dca7f807'] = 'https://raw.githubusercontent.com/RunOnFlux/press/master/Flux_Asset_SVG/Flux%20Logo/Symbol/Round%20Symbol/SVG/Flux_symbol_blue-white.svg';
 //TokenIconsArrayStop
 

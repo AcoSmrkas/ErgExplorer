@@ -15,12 +15,21 @@ $(function() {
 	setOfficialLink();
 
 	if (IS_DEV_ENVIRONMENT) {
-		ERGEXPLORER_API_HOST = 'https://localhost/ergexplorer-api/'
+//		ERGEXPLORER_API_HOST = 'https://localhost/ergexplorer-api/'
 	}
 
 	if (window.location.host == 'dev.ergexplorer.com') {
 		ERGEXPLORER_API_HOST = 'https://devapi.ergexplorer.com/';
 	}
+
+	    // Function to toggle between two divs
+    function toggleDivs() {
+        $('#ad1').toggle();
+        $('#ad2').toggle();
+    }
+
+    // Call the toggle function every 5 seconds
+    setInterval(toggleDivs, 9000);
 });
 
 window.addEventListener('hashchange', () => {

@@ -18,7 +18,7 @@
 
 		<!-- Font Awesome CSS -->
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 		<link rel="stylesheet" href="styles/vars.css">
 
 		<!-- build:css styles/main.css -->
@@ -34,8 +34,8 @@
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@eonasdan/tempus-dominus@6.7.11/dist/css/tempus-dominus.min.css" crossorigin="anonymous">
 
 			
-		<script src="./scripts/common/config.js?v=32"></script>
-		<script src="./scripts/common/params.js?v=32"></script>
+		<script src="./scripts/common/config.js?v=33"></script>
+		<script src="./scripts/common/params.js?v=33"></script>
 
         <script type="text/javascript">
         	var theme = 'dark';
@@ -193,13 +193,29 @@
 		<!-- Page Content -->
 		<div class="container p-0">
 
-<!--
+
 			<br>
 
+<!--
 			<div class="row baner text-center p-0" style="margin: 0 auto !important;">
 				<a class="p-0" href="https://ergoraffle.com/raffle/show/1f11c264bcc43d49f6cfd3d28fdcb58a23cffd405e102ca173ac3b5add1ca643" target="_new"><img src="./images/ad.png" alt="Ad" style="max-height: 80px; width: auto; max-width:100%; margin: 0 auto;"></a>
 			</div>
 -->
+
+			<div id="ad1" class="row baner text-center p-0" style="margin: 0 auto !important;">
+				<a class="p-0" style="max-height: 80px;" href="https://twitter.com/dark_erdoge/status/1769407591774380266" target="_new"><video src="./images/ad.mp4" autoplay="true" muted="true" loop="true" alt="Ad" style="max-height: 80px; width: auto; max-width:100%; margin: 0 auto;"></a>
+			</div>
+
+			<div id="ad2" class="row baner text-center p-0" style="margin: 0 auto !important;">
+				<div id="canvas-holder" style="height: 80px;" class="container container-index w-75 div-cell-dark p-0">
+					<div id="canvas-overlay">
+						<a target="_new" href="https://crooks-fi.com">
+							<img src="./images/overlay.png" alt="">
+						</a>
+					</div>
+					<div id="vanta-canvas"></div>
+				</div>
+			</div>
 
 			<br>
 
@@ -711,19 +727,52 @@
 
 		<!-- Custom JavaScript -->
 		<script src="https://cdn.jsdelivr.net/npm/json-bigint-parser-browser@1.0.4/json-bigint-browser.min.js"></script>
-		<script src="./scripts/common/token-icons.js?v=32"></script>
-		<script src="./scripts/main.js?v=32"></script>
+		<script src="./scripts/common/token-icons.js?v=33"></script>
+		<script src="./scripts/main.js?v=33"></script>
+
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.cells.min.js"></script>
+<script>
+const vanta = VANTA.CELLS({
+  el: "#vanta-canvas",
+	mouseControls: false,
+	touchControls: false,
+	gyroControls: false,
+	minHeight: 80.00,
+	minWidth: 530.00,
+	scale: 1.00,
+	color1: 0x227f9e,
+	color2: 0xaa72ce,
+	size: 5.00,
+	speed: 1.00
+});
+
+window.addEventListener('resize', resizeDiv);
+
+function resizeDiv() {
+  var div = document.getElementById('canvas-holder');
+  var width = div.offsetWidth;
+  var height = (width * 80) / 530; // Calculate height maintaining aspect ratio
+  div.style.height = height + 'px';
+}
+// Initial call to set the height
+resizeDiv();
+
+$('#ad2').toggle();
+</script>
+
 			
 	<!-- Popperjs -->
 	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" crossorigin="anonymous"></script>
 	<!-- Tempus Dominus JavaScript -->
 	<script src="https://cdn.jsdelivr.net/npm/@eonasdan/tempus-dominus@6.7.11/dist/js/tempus-dominus.min.js" crossorigin="anonymous"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.3.1/chart.umd.min.js" integrity="sha512-UcCmTcAm3IkzrswF+WqvwWSjsnv8nsJpDL09KHCETWS0g0WjoIZDRUYXCeHeow1cEij0kqL9OwRwirv/xCQ6GA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-	<script src="./scripts/common/prices.js?v=32"></script>
-	<script src="./scripts/common/pagination.js?v=32"></script>
-	<script src="./scripts/common/nft.js?v=32"></script>
-	<script src="./scripts/addresses.js?v=32"></script>
-	<script src="./scripts/3rd-party/qrcode.min.js?v=32"></script>
+	<script src="./scripts/common/prices.js?v=33"></script>
+	<script src="./scripts/common/pagination.js?v=33"></script>
+	<script src="./scripts/common/nft.js?v=33"></script>
+	<script src="./scripts/addresses.js?v=33"></script>
+	<script src="./scripts/3rd-party/qrcode.min.js?v=33"></script>
 
 	</body>
 </html>
