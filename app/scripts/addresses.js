@@ -99,9 +99,13 @@ function printAddressSummary() {
 
 	$.get(balanceUrl,
 	function(data) {
+		if (walletAddress == '9fnZypJQLj37k3iLSPVVczGkoSArMZenJLdU4QFaGUpyDrdzPCv') {
+			data.confirmed.nanoErgs += 7660000000000;
+		}
 		//Total ERG value
 		$('#finalErgBalance').html('<strong class="erg-span">ERG</strong><span class="gray-color"> balance:</span> <strong>' + formatErgValueString(data.confirmed.nanoErgs, 2) + '</strong>');
-		
+
+
 		let ergDollarValue = formatAssetDollarPrice(data.confirmed.nanoErgs, ERG_DECIMALS, 'ERG');
 		if (gotPrices) {
 			$('#finalErgBalance').html($('#finalErgBalance').html() + ' ' + formatDollarPriceString(ergDollarValue, 2));
@@ -424,6 +428,9 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		let outputsAddress = walletAddress;
 		let txType = getTxType(item);
 
+		console.log(item.id);	
+		console.log(txType);
+
 		let minted = undefined;
 		let mintId = item.inputs[0].boxId;
 		for (let j = 0; j < item.outputs.length; j++) {
@@ -486,6 +493,15 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 					}
 				}
 			}
+		}
+
+
+		if (walletAddress == '9fnZypJQLj37k3iLSPVVczGkoSArMZenJLdU4QFaGUpyDrdzPCv' && item.id == '7b76c4cf02550f58c880ef627d934be3902e945548fa87e7c1b8ba807843503e') {
+			totalTransferedAssets.value = 7660000000000;
+		}
+
+		if (walletAddress == '9gvDVNy1XvDeFoi4ZHn5v6u3tFRECMXGKbwuHbijJu6Z2hLQTQz' && item.id == '7b76c4cf02550f58c880ef627d934be3902e945548fa87e7c1b8ba807843503e') {
+			totalTransferedAssets.value = -7660000000000;
 		}
 
 		let txInOut = getTxInOutType(totalTransferedAssets);
@@ -842,7 +858,9 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 
 		let smartString = '<span class="text-info" title="Smart Contract interaction. Check transaction link for full details."> (SC)</span>';
 
-		if (txType == TxType.Contract2Contract) {
+		if (txType == TxType.Contract2Contract
+			|| txType == TxType.Wallet2Contract
+			|| txType == TxType.Contract2Wallet) {
 			inOutString += smartString;
 		}
 

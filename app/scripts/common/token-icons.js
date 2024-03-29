@@ -1,5 +1,10 @@
 var tokenIcons = [];
 //TokenIconsArrayStart
+tokenIcons['3b433c0d8abee627b947dce3ce780c02217313ab3e7aa8f77915877fc570104a'] = 'https://ergexplorer.com/images/tokens/cock.png';
+tokenIcons['b0b312cde931c8bbdac0dac5bfd8e2c03bf4611275dc967988c8d15bd5ec20e0'] = 'https://ergexplorer.com/images/tokens/bober.png';
+tokenIcons['d49defd8becfb4a5601314f9f815a6dff67df093b3a0483173b47705af49bc3f'] = 'https://images.emojiterra.com/google/android-12l/512px/1f4c8.png';
+tokenIcons['0f604d3d5e20d6ea5bc1eee9117230f8679fc36603468c79c8246df462893ae7'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/0f604d3d5e20d6ea5bc1eee9117230f8679fc36603468c79c8246df462893ae7.svg';
+tokenIcons['f19ec440fd7eeaa4cd2f31b2ada9c6f7aceabea487cf5a6a060c0fca7789e303'] = 'https://images.emojiterra.com/google/android-12l/512px/1f4c9.png';
 tokenIcons['1f649a7560f9d1b697d4225c57c9040c9101e4181dae134541ee8afec92944c5'] = 'https://cloudflare-ipfs.com/ipfs/bafkreicxoj4b4s5qbrf5sghfowpopagdkkzwq7z5kqxkyeu2vs5fqcchv4?SwbiFssczh';
 tokenIcons['9f15831d0d1d86b84c0fbf656411d3218d42ce4c4b1bd1e504ac98d3919bdbd5'] = 'https://ergexplorer.com/images/tokens/ninja.gif';
 tokenIcons['e39089d132e80331631c443c8b086f6c3c0e25d892c15e49cd38b7ec10818d45'] = 'https://ergexplorer.com/images/tokens/ergod.png';

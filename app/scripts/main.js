@@ -2,6 +2,7 @@ var qrCode = null;
 var networkType = 'mainnet';
 var addresses = new Array();
 var addressbook = new Array();
+var shownNotificationPermissionToast = false;
 
 setupMainnetTestnet();
 
@@ -24,12 +25,12 @@ $(function() {
 
 	    // Function to toggle between two divs
     function toggleDivs() {
-        $('#ad1').toggle();
-        $('#ad2').toggle();
+    //    $('#ad1').toggle();
+    //    $('#ad2').toggle();
     }
 
     // Call the toggle function every 5 seconds
-    setInterval(toggleDivs, 9000);
+    //setInterval(toggleDivs, 9000);
 });
 
 window.addEventListener('hashchange', () => {
@@ -701,10 +702,16 @@ function showToast() {
 }
 
 function showNotificationPermissionToast() {
+	if (shownNotificationPermissionToast) {
+		return;
+	}
+
 	const toastLiveExample = document.getElementById('notificationToast');
 	const toast = new bootstrap.Toast(toastLiveExample);
 
 	toast.show();
+
+	shownNotificationPermissionToast = true;
 }
 
 function hideNotificationPermissionToast() {

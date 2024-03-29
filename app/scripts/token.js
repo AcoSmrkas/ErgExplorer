@@ -167,12 +167,17 @@ function printHolders(data) {
     	$('#financeHeader').hide();
     	$('#chartColumn').hide();
     	$('#holdersColumn').removeClass('col-xl-5');
-    	$('#priceInfo').show();
     }
 }
 
 function printHolderCount(data) {
 	$('#totalHolderCount').html(`(of total ${nFormatter(data)})`);
+
+	if (data == 0) {
+		$('#priceInfo').hide();
+	} else {
+		$('#priceInfo').show();
+	}
 }
 
 function onGetNftInfoDone(nftInfo, message) {

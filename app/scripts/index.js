@@ -101,7 +101,6 @@ function getPoolStats() {
 }
 
 function getPriceHistory() {
-	console.log('hi');
 	$.post(ERGEXPLORER_API_HOST + 'tokens/getPriceHistory?cache',
 		{
 			'from': nowTime,
@@ -115,7 +114,6 @@ function getPriceHistory() {
 
 		printGainersLosers(from24h);
 	}).fail(function (data) {
-		console.log(data);
 		$('#tokenLoading').hide();
 	});
 }
