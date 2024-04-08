@@ -428,9 +428,6 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		let outputsAddress = walletAddress;
 		let txType = getTxType(item);
 
-		console.log(item.id);	
-		console.log(txType);
-
 		let minted = undefined;
 		let mintId = item.inputs[0].boxId;
 		for (let j = 0; j < item.outputs.length; j++) {

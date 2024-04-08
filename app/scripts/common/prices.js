@@ -1,8 +1,14 @@
 var prices = new Array();
 var pricesNames = new Array();
 var gotPrices = false;
+var callbackCalled = false;
+var theCallback = undefined;
+var pricesData = undefined;
+var poolsData = undefined;
 
 function getPrices(callback) {
+	theCallback = callback;
+
 	$.get('https://api.ergexplorer.com/tokens/getErgPrice', function (data) {
 		erg24hDiff = data.items[0].difference;
 		prices['ERG'] = data.items[0].value;
@@ -10,22 +16,63 @@ function getPrices(callback) {
 
 		$.get('https://api.spectrum.fi/v1/price-tracking/markets',
 		function(data) {
-			for (let i = 0; i < data.length; i++) {
-				if (data[i]['baseSymbol'] == 'ERG') {
-					if (prices[data[i]['quoteId']] != undefined) continue;
-					if (data[i]['baseVolume']['value'] / Math.pow(10, 9) < 700) continue;
+			pricesData = data;
 
-					let price = prices['ERG'] / data[i]['lastPrice'];
-					prices[data[i]['quoteId']] = price;
-					pricesNames[data[i]['quoteSymbol']] = price;
-				}
-			}
+			handlePrices();
+		}).fail(function () {
+			doCallback();
+		});
 
-			gotPrices = true;
-		}).always(function () {
-			callback();
+		$.get('https://api.spectrum.fi/v1/amm/pools/stats',
+		function(data) {
+			poolsData = data;
+
+			handlePrices();
+		}).fail(function () {
+			doCallback();
 		});
 	}).fail(function () {
-		callback();
+		doCallback();
 	});
+}
+
+function handlePrices() {
+	if (poolsData == undefined || pricesData == undefined) {
+		return;
+	}
+
+	for (let i = 0; i < pricesData.length; i++) {
+		let pairData = pricesData[i];
+		if (pairData['baseSymbol'] == 'ERG') {
+			if (prices[pairData['quoteId']] != undefined) continue;
+
+			let skip = true;
+			for (let j = 0; j < poolsData.length; j++) {
+				let poolData = poolsData[j];
+
+				if (poolData.lockedX.id == pairData['baseId']
+					&& poolData.lockedY.id == pairData['quoteId']
+					&& poolData.lockedX.amount / Math.pow(10, 9) >= 1000) {
+					skip = false;
+					break;
+				}
+			}
+			if (skip) continue;
+			
+			let price = prices['ERG'] / pairData['lastPrice'];
+			prices[pairData['quoteId']] = price;
+			pricesNames[pairData['quoteSymbol']] = price;
+		}
+	}
+	console.log(pricesNames);
+	gotPrices = true;
+	doCallback();
+}
+
+function doCallback() {
+	if (callbackCalled) {
+		return;
+	}
+
+	theCallback();
 }

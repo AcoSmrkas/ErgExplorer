@@ -11,16 +11,27 @@ var chart = undefined;
 var chartType = undefined;
 var tempDate = -1;
 var hasPrice = false;
+var amountsData = undefined;
 
 $(function() {
 	tokenId = getWalletAddressFromUrl();
 
 	getNftInfo(tokenId, onGetNftInfoDone);
-	getPrices(getPriceHistory);
+	getCruxData();
 	checkAddressbook();
 
 	setDocumentTitle(tokenId);
 });
+
+function getCruxData() {
+	$.get('https://api.cruxfinance.io/crux/token_info/' + tokenId,
+		function (data) {
+
+		amountsData = data;
+
+		getPrices(getPriceHistory);
+	});
+}
 
 function checkAddressbook() {
 	$.get(ERGEXPLORER_API_HOST + 'addressbook/getTokenAddresses?tokenId=' + tokenId,
@@ -148,7 +159,7 @@ function printHolders(data) {
 			dollarPrice = formatDollarPriceString(data[i].balance / Math.pow(10, tokenData.decimals) * prices[tokenData.id])
 		}
 
-		let percent = formatValue(data[i].balance * 100 / tokenData.emissionAmount, 2);
+		let percent = formatValue(data[i].balance * 100 / ((amountsData.liquid_supply + amountsData.locked_supply) * Math.pow(10, tokenData.decimals)), 2);
 		formattedResult += '<td class="">' + formatAssetValueString(data[i].balance, decimals) + ' ' + getAssetTitleParams(tokenData.id, tokenData.name, false) + ' <span class="text-light">' + dollarPrice + '</span><span style="text-align:right;float:right;" class="d-inline d-lg-none text-white"> ' + percent + '%</span></td>';
 
 		//Percent
@@ -231,6 +242,11 @@ function onGetNftInfoDone(nftInfo, message) {
 	if (tImg == undefined) {
 		tImg = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/' + tokenData.id + '.svg';
 	}
+
+	if (tokenData.name == 'Crooks Finance Stake Key') {
+		tImg = 'https://crooks-fi.com/images/logo.png';
+	}
+
 	$('#tokenIconImg').attr('src', tImg);
 
 	$('#tokenDataHolder').show();

@@ -16,7 +16,7 @@ $(function() {
 	setOfficialLink();
 
 	if (IS_DEV_ENVIRONMENT) {
-//		ERGEXPLORER_API_HOST = 'https://localhost/ergexplorer-api/'
+		ERGEXPLORER_API_HOST = 'https://localhost/ergexplorer-api/'
 	}
 
 	if (window.location.host == 'dev.ergexplorer.com') {
@@ -452,6 +452,10 @@ function getAssetTitleParams(tokenId, name, iconIsToTheLeft) {
 	let imgSrc = '';
 	if (hasIcon(tokenId)) {
 		imgSrc = getIcon(tokenId);
+	}
+
+	if (name == 'Crooks Finance Stake Key') {
+		imgSrc = 'https://crooks-fi.com/images/logo.png';
 	}
 
 	let iconHtml = '<img style="display: none;" onload="onTokenIconLoad(this)"  class="token-icon" src="' + imgSrc + '"/>';

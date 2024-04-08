@@ -1,7 +1,9 @@
 var tokenIcons = [];
 //TokenIconsArrayStart
+tokenIcons['6fd53a3b6baa760a91af9f5ceb4200e9d3c23548b2df89333adede65a272c893'] = 'https://ergexplorer.com/images/tokens/heisenberg.png';
+tokenIcons['4f792b75a0f1a46083824cfd6b4766d094698d71c37f7f5083bf09dec3d0fbcd'] = 'https://ergexplorer.com/images/tokens/dude.png';
 tokenIcons['3b433c0d8abee627b947dce3ce780c02217313ab3e7aa8f77915877fc570104a'] = 'https://ergexplorer.com/images/tokens/cock.png';
-tokenIcons['b0b312cde931c8bbdac0dac5bfd8e2c03bf4611275dc967988c8d15bd5ec20e0'] = 'https://ergexplorer.com/images/tokens/bober.png';
+tokenIcons['b0b312cde931c8bbdac0dac5bfd8e2c03bf4611275dc967988c8d15bd5ec20e0'] = 'https://i.imgur.com/jGbzNci.png';
 tokenIcons['d49defd8becfb4a5601314f9f815a6dff67df093b3a0483173b47705af49bc3f'] = 'https://images.emojiterra.com/google/android-12l/512px/1f4c8.png';
 tokenIcons['0f604d3d5e20d6ea5bc1eee9117230f8679fc36603468c79c8246df462893ae7'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/0f604d3d5e20d6ea5bc1eee9117230f8679fc36603468c79c8246df462893ae7.svg';
 tokenIcons['f19ec440fd7eeaa4cd2f31b2ada9c6f7aceabea487cf5a6a060c0fca7789e303'] = 'https://images.emojiterra.com/google/android-12l/512px/1f4c9.png';
