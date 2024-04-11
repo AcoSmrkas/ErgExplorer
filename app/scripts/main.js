@@ -882,7 +882,12 @@ function getOwner(address) {
 			if (addressbook[i]['urltype'] != '') {
 				owner += ' (' + addressbook[i]['urltype'] + ')';
 			} else {
-				owner += ' (' + addressbook[i]['address'].substr(0, 4) + ')';
+				let shortAdd = addressbook[i]['address'].substr(0, 4);
+				if (shortAdd == '88dh') {
+					shortAdd = addressbook[i]['address'].substr(addressbook[i]['address'].length - 4);
+				}
+
+				owner += ' (' + shortAdd + ')';
 			}
 
 			return owner;
