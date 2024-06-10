@@ -1,5 +1,20 @@
 var tokenIcons = [];
 //TokenIconsArrayStart
+tokenIcons['ca0ed0092eaaa22b6bfcc407d221b3aaa5c8f643e843cb6aafff6af955947675'] = 'https://ergopad-public.s3.us-west-2.amazonaws.com/assets.PandaVlogoColor1024x1024.1715103773336896.jpg';
+tokenIcons['8e0cd39c6fba31c419df790a99f2a70d1d81dc549c9f9d09ea2d17b1dfb8c097'] = 'https://i.ibb.co/8D7QMg8/zangao.png';
+tokenIcons['ccaac3de4098aa63de90c56973bb1bff7563e8c58594b2075dd04005dac13ae6'] = 'https://ergexplorer.com/images/tokens/ketchup.png'; //ketchup
+tokenIcons['a9beb1e13364cbbbdac4a456658477862f140725854803dfdcd8e0f4863e7a26'] = 'https://ergexplorer.com/images/tokens/mustard.png'; //mustard
+tokenIcons['abe0a3c2f646dcd430aac9c29d80feee865bd8b5231edb545a41105d4c8e4985'] = 'https://ergexplorer.com/images/tokens/buns.png'; //buns
+tokenIcons['843b5a2a0658550339c38f29827861fe459ce5206edaf17163113cccafc77af1'] = 'https://ergexplorer.com/images/tokens/glizzy.png';
+tokenIcons['573e91563cc54ec69946a336610b75033d5a19e6de5134f2d2b6af21dcf97173'] = 'https://images.emojiterra.com/google/android-12l/512px/1f36f.png';
+tokenIcons['e435effe2e72ccf34fe69a92cce682de13f708bb3a91d601a050074ec1f653b5'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/e435effe2e72ccf34fe69a92cce682de13f708bb3a91d601a050074ec1f653b5.svg';
+tokenIcons['e276e1238ba5efdbc2b938d6c258b380a151eb3fe847762ae8fb9fce14944bcf'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/e276e1238ba5efdbc2b938d6c258b380a151eb3fe847762ae8fb9fce14944bcf.svg';
+tokenIcons['66049380260e259bf196a038ec59e00d1c9f43590a2d86f745f61e58781d61cc'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/66049380260e259bf196a038ec59e00d1c9f43590a2d86f745f61e58781d61cc.svg';
+tokenIcons['0071fa8f1faa25b82b44e89b917d4ec7670ed42f457a59aa048a7855c1e048a1'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/0071fa8f1faa25b82b44e89b917d4ec7670ed42f457a59aa048a7855c1e048a1.svg';
+tokenIcons['4b5d687d5c21be906f74a265bc9ede7af0a399548c58ce5c02a432a88825f1a3'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/4b5d687d5c21be906f74a265bc9ede7af0a399548c58ce5c02a432a88825f1a3.svg';
+tokenIcons['89589d5d4456cc6b1ae90cc4b4e7398bbdd540cdcfaf18a00bb1e361c38021b2'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/89589d5d4456cc6b1ae90cc4b4e7398bbdd540cdcfaf18a00bb1e361c38021b2.svg';
+tokenIcons['cbbbc2d730b86d7f2d6708b1969b9d0a9475ccca25a7b2ee1434e67ec6d04341'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/cbbbc2d730b86d7f2d6708b1969b9d0a9475ccca25a7b2ee1434e67ec6d04341.svg';
+tokenIcons['185e217d80d797800bfa699afda708ee101ae664f8ea237d9fc3a3824b7c3ecb'] = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/185e217d80d797800bfa699afda708ee101ae664f8ea237d9fc3a3824b7c3ecb.svg';
 tokenIcons['6fd53a3b6baa760a91af9f5ceb4200e9d3c23548b2df89333adede65a272c893'] = 'https://ergexplorer.com/images/tokens/heisenberg.png';
 tokenIcons['4f792b75a0f1a46083824cfd6b4766d094698d71c37f7f5083bf09dec3d0fbcd'] = 'https://ergexplorer.com/images/tokens/dude.png';
 tokenIcons['3b433c0d8abee627b947dce3ce780c02217313ab3e7aa8f77915877fc570104a'] = 'https://ergexplorer.com/images/tokens/cock.png';

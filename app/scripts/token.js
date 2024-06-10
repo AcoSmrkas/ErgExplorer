@@ -12,6 +12,7 @@ var chartType = undefined;
 var tempDate = -1;
 var hasPrice = false;
 var amountsData = undefined;
+var imageUrl = null;
 
 $(function() {
 	tokenId = getWalletAddressFromUrl();
@@ -200,6 +201,10 @@ function onGetNftInfoDone(nftInfo, message) {
 	}
 
 	tokenData = nftInfo.data;
+	
+	if (tokenData.scam) {
+		$('#tokenScamHolder').show();
+	}
 
 	//Id
 	$('#tokenHeader').html('<p><a href="Copy to clipboard!" onclick="copyTokenAddress(event)">' + tokenData.id + ' &#128203;</a></p>');
@@ -276,7 +281,7 @@ function onGetNftInfoDone(nftInfo, message) {
 		}
 
 		addAddress(mintAddress);
-		$('#nftMintedAddress').html('<p><a class="address-string" addr="' + mintAddress + '" href="' + getWalletAddressUrl(mintAddress) + '">' + mintAddress + '</a></p>');
+		$('#nftMintedAddress').html('<p><a class="address-string" addr="' + mintAddress + '" href="' + getWalletAddressUrl(mintAddress) + '">' + formatLongAddressString(mintAddress) + '</a></p>');
 
 		$('#nftMintedTransaction').html('<p><a href="' + getTransactionsUrl(tokenData.transactionId) + '">' + tokenData.transactionId + '</a></p>');
 		$('#nftCreationHeight').html('<p><a href="' + getBlockUrl(tokenData.blockId) + '">' + tokenData.creationHeight + '</a></p>');
@@ -337,9 +342,17 @@ function onGetNftInfoDone(nftInfo, message) {
 			}
 		}
 
+		imageUrl = fullUrl;
+
 		if (nftInfo.type == NFT_TYPE.Image) {
-			$('#nftPreviewImg').attr('src', fullUrl);
-			$('#nftImageFull').attr('src', fullUrl);
+			if (!nftInfo.data.nsfw) {
+				$('#nftPreviewImg').attr('src', fullUrl);
+				$('#nftImageFull').attr('src', fullUrl);
+			} else {
+				$('#nftPreviewImgNsfw').attr('src', 'https://thumbs.dreamstime.com/b/nsfw-sign-not-safe-work-censorship-vector-stock-illustration-nsfw-sign-not-safe-work-censorship-vector-stock-illustration-245733305.jpg');
+				$('#nftPreviewImgNsfw').show();
+			}
+
 			$('#nftPreviewImg').show();
 
 			if (nftInfo.link.url.substr(0, 19) == 'data:image/svg+xml;') {
@@ -417,7 +430,7 @@ function getCurrentAddress() {
 			let currentAddress = data.items[0].address;
 
 			addAddress(currentAddress);
-			$('#nftCurrentAddress').html('<p><a class="address-string" addr="' + currentAddress + '" href="' + getWalletAddressUrl(currentAddress) + '">' + currentAddress + '</a></p>');
+			$('#nftCurrentAddress').html('<p><a class="address-string" addr="' + currentAddress + '" href="' + getWalletAddressUrl(currentAddress) + '">' + formatLongAddressString(currentAddress) + '</a></p>');
 			$('#nftCurrentAddressHolder').show();
 
 			getAddressesInfo();
@@ -476,6 +489,12 @@ function hideFullImgPreview() {
 	$('body').css('overflow-y', 'auto');
 
 	scrollToElement($('#nftPreviewImg'));
+}
+
+function showImage() {
+	$('#nftPreviewImg').attr('src', imageUrl);
+	$('#nftImageFull').attr('src', imageUrl);
+	$('#nftPreviewImgNsfw').hide();
 }
 
 function onNftImageLoad() {

@@ -429,6 +429,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		let txType = getTxType(item);
 
 		let minted = undefined;
+		if (item.inputs[0]) {
 		let mintId = item.inputs[0].boxId;
 		for (let j = 0; j < item.outputs.length; j++) {
 			if (item.outputs[j].address == outputsAddress) {
@@ -442,6 +443,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 					}
 				}
 			}
+		}
 		}
 
 		let totalTransferedAssets = {
@@ -1012,7 +1014,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 				}
 			}
 
-			let assetsString = '<br><strong>'+(isMinted ? '<span title="Minted">✨</span>' : '')+''+(asset.isBurned ? '<span title="Burned">🔥</span>' : '')+'<span class="text-white">' + (asset.amount > 0 ? mixedPlus : '') + formatAssetValueString(asset.amount, asset.decimals, 4) + '</span></strong> ' + getAssetTitle(asset, false) + (assetPrice == undefined ? '' : ' <span class="text-light">' + assetPrice +'</span>');
+			let assetsString = '<br><strong>'+(isMinted ? '<span title="Minted">✨</span>' : '')+''+(asset.isBurned ? '<span title="Burned">🔥</span>' : '')+'<span class="text-white">' + (asset.amount > 0 ? mixedPlus : '') + (txInOut == TxInOut.Out ? '-' : '') + formatAssetValueString(asset.amount, asset.decimals, 4) + '</span></strong> ' + getAssetTitle(asset, false) + (assetPrice == undefined ? '' : ' <span class="text-light">' + assetPrice +'</span>');
 
 			assetsFull += assetsString;
 			
@@ -1043,7 +1045,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 
 		let ergValueString = '';
 		if (totalTransferedAssets.value != 0) {
-			ergValueString = (totalTransferedAssets.value > 0 ? mixedPlus : '') + formatErgValueString(totalTransferedAssets.value, 5) + (ergDollarValue == undefined ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>')
+			ergValueString = (totalTransferedAssets.value > 0 ? mixedPlus : '') + (txInOut == TxInOut.Out ? '-' : '') + formatErgValueString(totalTransferedAssets.value, 5) + (ergDollarValue == undefined ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>')
 formatErgValueString(totalTransferedAssets.value, 5) + (ergDollarValue == undefined ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>');
 		} else {
 			assetsFull = assets.substr(5);
@@ -1122,6 +1124,11 @@ function onGotOwnedNftInfo(nftInfos, message) {
 				} else {
 					cSrc = nftInfos[i].link.url;
 				}
+
+				if (nftInfos[i].data.nsfw) {
+					cSrc = '';
+				}
+
 				imgSrc = './images/nft-image.png';
 				nftHolderId = '#nftImagesHolder';
 				nftContentHolderId = '#nftImagesContentHolder';
@@ -1873,6 +1880,11 @@ function onGotIssuedNftInfo(nftInfos, message) {
 					} else {
 						cSrc = nftInfos[i].link.url;
 					}
+
+					if (nftInfos[i].data.nsfw) {
+						cSrc = '';
+					}
+
 					imgSrc = './images/nft-image.png';
 					nftHolderId = '#issuedNftImagesHolder';
 					nftContentHolderId = '#issuedNftImagesContentHolder';

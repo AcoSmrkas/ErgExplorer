@@ -64,7 +64,7 @@ function handlePrices() {
 			pricesNames[pairData['quoteSymbol']] = price;
 		}
 	}
-	console.log(pricesNames);
+	
 	gotPrices = true;
 	doCallback();
 }

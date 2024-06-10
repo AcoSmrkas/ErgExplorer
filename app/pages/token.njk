@@ -14,6 +14,14 @@
 {% block content %}
 	<h2 class="main-heading p-2">Token</h2>
 
+	<div id="tokenScamHolder" style="display: none;" class="col-md-12">
+		<div id="tokenScam" class="border-danger row w-100 div-cell-dark p-3">
+			<div class="col-12"><h5>⚠️ Possible <b>SCAM</b> ⚠️</h5></div>
+			<div class="col-12"><b>Warning:</b> This token has been flagged by the community as a potential scam. Proceed with caution.</div>
+		</div>
+		<br>
+	</div>
+
 	<div id="tokenDataHolder" style="display: none;" class="col-md-12">
 		<div class="row w-100 div-cell-dark p-3 border-bottom-flat">
 			<div id="tokenHeader" class="col"></div>
@@ -85,7 +93,11 @@
 					<audio id="nftAudio" class="border-bottom-flat" controls crossorigin loop name="media"><source id="nftPreviewAudioSource" src="" type="audio/mp3"></audio>
 				</div>
 				<div id="nftPreviewImgHolder" class="col-lg-3 p-0" style="border-radius: 5px 0 0 5px;">
-					<img id="nftPreviewImg" onclick="showFullImgPreview()" style="display: none;" onload="onNftImageLoad()" src="">
+					<img id="nftPreviewImg" onclick="showFullImgPreview()" style="display: none;" onload="onNftImageLoad()" src="">					
+					<div id="nftPreviewImgNsfw" onclick="showImage()" style="display: none;">
+						<p><b>NSFW content</b></p>
+						<p>Click to show</p>
+					</div>
 					<video style="display: none;" id="nftPreviewVideo" controls crossorigin allowfullscreen name="media"><source id="nftPreviewVideoSource" src="" type="video/mp4"></video>
 				</div>
 				<div id="nftInfoHolder" class="col-lg-9 p-0">
@@ -254,7 +266,7 @@
 
 {% block scripts %}
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.3.1/chart.umd.min.js" integrity="sha512-UcCmTcAm3IkzrswF+WqvwWSjsnv8nsJpDL09KHCETWS0g0WjoIZDRUYXCeHeow1cEij0kqL9OwRwirv/xCQ6GA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-	<script src="./scripts/common/prices.js?v=34"></script>
-	<script src="./scripts/common/nft.js?v=34"></script>
-	<script src="./scripts/token.js?v=34"></script>
+	<script src="./scripts/common/prices.js?v=35"></script>
+	<script src="./scripts/common/nft.js?v=35"></script>
+	<script src="./scripts/token.js?v=35"></script>
 {% endblock %}

@@ -16,7 +16,7 @@ $(function() {
 	setOfficialLink();
 
 	if (IS_DEV_ENVIRONMENT) {
-		ERGEXPLORER_API_HOST = 'https://localhost/ergexplorer-api/'
+//		ERGEXPLORER_API_HOST = 'https://localhost/ergexplorer-api/'
 	}
 
 	if (window.location.host == 'dev.ergexplorer.com') {
@@ -253,6 +253,10 @@ function getLang() {
 
 function formatKbSizeString(size) {
 	return (size / 1000).toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 }) + ' kB';
+}
+
+function formatLongAddressString(address, length = 15) {
+	return (address.length > 64 ? address.substring(0, length) + '...' + address.substring(address.length - 4) : address);
 }
 
 function formatAddressString(address, length = 15) {
