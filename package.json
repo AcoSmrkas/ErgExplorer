@@ -1,59 +1,34 @@
 {
   "private": true,
-  "engines": {
-    "node": ">=4"
-  },
-  "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-preset-es2015": "^6.3.13",
-    "babel-register": "^6.5.2",
-    "browser-sync": "^2.29.3",
-    "del": "^2.2.0",
-    "gulp": "^3.9.1",
-    "gulp-autoprefixer": "^3.0.1",
-    "gulp-babel": "^6.1.3",
-    "gulp-cache": "^0.4.2",
-    "gulp-concat": "^2.6.1",
+  "name": "ergexplorer",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "browser-sync": "^3.0.2",
+    "del": "^6.1.1",
+    "gulp": "^5.0.0",
+    "gulp-autoprefixer": "^8.0.0",
+    "gulp-babel": "^8.0.0",
+    "gulp-cache": "^1.1.3",
+    "gulp-cli": "^3.0.0",
     "gulp-cssnano": "^2.1.3",
-    "gulp-eslint": "^3.0.0",
-    "gulp-filter": "^4.0.0",
-    "gulp-htmlmin": "^3.0.0",
-    "gulp-if": "^2.0.2",
-    "gulp-imagemin": "^6.2.0",
-    "gulp-load-plugins": "^1.6.0",
+    "gulp-eslint": "^6.0.0",
+    "gulp-filter": "^7.0.0",
+    "gulp-htmlmin": "^5.0.1",
+    "gulp-if": "^3.0.0",
+    "gulp-imagemin": "^7.1.0",
+    "gulp-load-plugins": "^2.0.8",
     "gulp-nunjucks-render": "^2.2.3",
     "gulp-plumber": "^1.2.1",
-    "gulp-sass": "^3.2.1",
-    "gulp-size": "^2.1.0",
-    "gulp-sourcemaps": "^2.6.5",
+    "gulp-sass": "^5.1.0",
+    "gulp-sourcemaps": "^3.0.0",
     "gulp-terser": "^2.1.0",
-    "gulp-useref": "^3.1.6",
-    "main-bower-files": "^2.13.3",
-    "run-sequence": "^1.2.2",
-    "wiredep": "^4.0.0"
-  },
-  "eslintConfig": {
-    "env": {
-      "es6": true,
-      "node": true,
-      "browser": true
-    },
-    "rules": {
-      "quotes": [
-        2,
-        "single"
-      ]
-    }
-  },
-  "dependencies": {
-    "bower": "^1.8.14",
-    "natives": "^1.1.6",
-    "readable-stream": "^4.4.2"
-  },
-  "scripts": {
-    "preinstall": "npx npm-force-resolutions"
-  },
-  "resolutions": {
-    "graceful-fs": "^4.2.4"
+    "gulp-useref": "^5.0.0",
+    "gulp-wiredep": "^1.2.0",
+    "readable-stream": "^4.4.2",
+    "sass": "^1.77.6"
   }
 }
