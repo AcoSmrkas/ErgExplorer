@@ -273,9 +273,21 @@ function getWhaleTxs() {
 		return;
 	}
 
-	var jqxhr = $.get(ERGEXPLORER_API_HOST + 'transactions/getWhaleTxs',
-	function(data) {
-		let formattedResult = '';
+	fetch(ERGEXPLORER_API_HOST + 'transactions/getWhaleTxs') // Replace with your URL
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.arrayBuffer(); // Convert the response to an ArrayBuffer
+    })
+    .then(arrayBuffer => {
+        // Handle the ArrayBuffer here
+        console.log(arrayBuffer); // This will log the ArrayBuffer
+        const buffer = new TextDecoder("utf-8").decode(arrayBuffer);
+        const stringFromBuffer = buffer.toString('utf8');
+
+        let data = JSONbig.parse(stringFromBuffer);
+        let formattedResult = '';
 		let items = data.items;
 
 		for (var i = 0; i < items.length; i++) {
@@ -309,6 +321,9 @@ function getWhaleTxs() {
 		$('#txView').show();	
 
 		getAddressesInfo();
+    })
+    .catch(error => {
+        console.error('Fetch error:', error); // Handle errors here
     });
 }
 

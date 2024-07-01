@@ -375,7 +375,7 @@ function formatAssetDollarPriceString(tokenAmount, tokenDecimals, tokenId) {
 }
 
 function formatDollarPriceString(value, digits = 5) {
-	if (gotPrices == undefined || !gotPrices) {
+	if (gotPrices == undefined || !gotPrices || isNaN(value)) {
 		return '';
 	}
 
