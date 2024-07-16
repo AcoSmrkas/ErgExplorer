@@ -157,6 +157,7 @@ function extras() {
     	'app/*',
     	'!app/*.html'
 	], {
+		encoding: false,
  		dot: true
 	}).pipe(gulp.dest('dist'));
 }

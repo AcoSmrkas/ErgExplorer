@@ -22,16 +22,13 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {%if activePage == 'addressbook' %} active {% endif %}" href="addressbook">Address book</a>
-                </li>                
-                <li class="nav-item">
-                    <a target="_new" class="nav-link" href="https://my.ergexplorer.com"><span style="color:#ecab32;">Premium</span></a>
-                </li>
+                </li> 
                 <li class="nav-item">
                     <a class="nav-link {%if activePage == 'about' %} active {% endif %}" href="about">About</a>
                 </li>
                 <li class="nav-item d-block d-md-none">
                     <div id="dropdown" class="dropdown nav-link">
-                        <a class="btn nav-link dropdown-toggle text-light p-0 p-md-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><span id="networkType">Mainnet</span></a>
+                        <a class="btn nav-link dropdown-toggle text-light p-0 p-md-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><span class="networkType">Mainnet</span></a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="#" onclick="switchToMainnet(event)">Mainnet</a></li>
                             <li><a class="dropdown-item" href="#" onclick="switchToTestnet(event)">Testnet</a></li>
@@ -46,7 +43,7 @@
             <ul class="navbar-nav ms-auto"  style="position: absolute; right: 15px;">
                 <li class="nav-item">
                     <div id="dropdown" class="dropdown nav-link">
-                        <a class="btn nav-link dropdown-toggle text-light p-0 p-md-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><span id="networkType">Mainnet</span></a>
+                        <a class="btn nav-link dropdown-toggle text-light p-0 p-md-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><span class="networkType">Mainnet</span></a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="#" onclick="switchToMainnet(event)">Mainnet</a></li>
                             <li><a class="dropdown-item" href="#" onclick="switchToTestnet(event)">Testnet</a></li>

@@ -872,7 +872,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		addAddress(fromAddress);
 		let formattedAddressString = formatTxAddressString(fromAddress);
 
-		if (txType == TxType.Wallet2Contract || txType == TxType.Contract2Wallet) {
+		if (networkType != 'testnet' && (txType == TxType.Wallet2Contract || txType == TxType.Contract2Wallet)) {
 			if (item.inputs[0].ergoTree.substring(item.inputs[0].ergoTree.length - N2T_SWAP_SELL_TEMPLATE_ERG.length) == N2T_SWAP_SELL_TEMPLATE_ERG
 				||
 				item.inputs[0].ergoTree.substring(item.inputs[0].ergoTree.length - N2T_SWAP_SELL_TEMPLATE_SPF.length) == N2T_SWAP_SELL_TEMPLATE_SPF

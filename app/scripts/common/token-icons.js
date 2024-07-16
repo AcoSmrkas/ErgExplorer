@@ -1,5 +1,6 @@
 var tokenIcons = [];
 //TokenIconsArrayStart
+tokenIcons['fe40fc4215230c23e2bb2684ed2816b40daf2d6a8b14c34a405064e661afed05'] = 'https://i.imgur.com/PZp8hUf.jpeg';
 tokenIcons['7a51950e5f548549ec1aa63ffdc38279505b11e7e803d01bcf8347e0123c88b0'] = 'https://cryptologos.cc/logos/bitcoin-btc-logo.png';
 tokenIcons['ca0ed0092eaaa22b6bfcc407d221b3aaa5c8f643e843cb6aafff6af955947675'] = 'https://ergopad-public.s3.us-west-2.amazonaws.com/assets.PandaVlogoColor1024x1024.1715103773336896.jpg';
 tokenIcons['8e0cd39c6fba31c419df790a99f2a70d1d81dc549c9f9d09ea2d17b1dfb8c097'] = 'https://i.ibb.co/8D7QMg8/zangao.png';

@@ -496,14 +496,14 @@ function setupMainnetTestnet() {
 	}
 
 	if (networkType == 'testnet') {
-		$('#networkType').html('Testnet')
-		$('#networkType').removeClass('text-light');
-		$('#networkType').addClass('erg-span-important');
+		$('.networkType').html('Testnet')
+		$('.networkType').removeClass('text-light');
+		$('.networkType').addClass('erg-span-important');
 		localStorage.setItem('network', 'testnet');
 		API_HOST = API_HOST_2 = 'https://api-testnet.ergoplatform.com/';
 		FEE_ADDRESS = 'Bf1X9JgQTUtgntaer91B24n6kP8L2kqEiQqNf1z97BKo9UbnW3WRP9VXu8BXd1LsYCiYbHJEdWKxkF5YNx5n7m31wsDjbEuB3B13ZMDVBWkepGmWfGa71otpFViHDCuvbw1uNicAQnfuWfnj8fbCa4';
 	} else {
-		$('#networkType').html('Mainnet')
+		$('.networkType').html('Mainnet')
 	}
 }
 
