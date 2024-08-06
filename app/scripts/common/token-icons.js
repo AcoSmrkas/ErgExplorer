@@ -1,5 +1,8 @@
 var tokenIcons = [];
 //TokenIconsArrayStart
+tokenIcons['9944ff273ff169f32b851b96bbecdbb67f223101c15ae143de82b3e7f75b19d2'] = 'https://ergexplorer.com/images/tokens/gauc.svg';
+tokenIcons['886b7721bef42f60c6317d37d8752da8aca01898cae7dae61808c4a14225edc8'] = 'https://ergexplorer.com/images/tokens/gau.svg';
+tokenIcons['2e59555f055c1341e64d51267a381f6dbbe572cb725cfc471b35e84bbc258b75'] = 'https://ergexplorer.com/images/tokens/hodlcomet10.svg';
 tokenIcons['24c380b40c934db2273affc782e091df28c965f1e513f8f5f09fc1d12646ecf2'] = 'https://ergexplorer.com/images/tokens/OINK.png';
 tokenIcons['fe40fc4215230c23e2bb2684ed2816b40daf2d6a8b14c34a405064e661afed05'] = 'https://i.imgur.com/PZp8hUf.jpeg';
 tokenIcons['7a51950e5f548549ec1aa63ffdc38279505b11e7e803d01bcf8347e0123c88b0'] = 'https://cryptologos.cc/logos/bitcoin-btc-logo.png';
