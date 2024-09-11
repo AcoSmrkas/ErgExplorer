@@ -16,7 +16,7 @@ $(function() {
 	setOfficialLink();
 
 	if (IS_DEV_ENVIRONMENT) {
-//		ERGEXPLORER_API_HOST = 'https://localhost/ergexplorer-api/'
+		ERGEXPLORER_API_HOST = 'https://localhost/ergexplorer-api/'
 	}
 
 	if (window.location.host == 'dev.ergexplorer.com') {

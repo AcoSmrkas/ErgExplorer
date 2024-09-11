@@ -4,11 +4,11 @@
 //https://gateway.pinata.cloud
 const NFT_LINK_MAX_LENGTH = 40;
 const IPFS_PROVIDER_HOSTS = [
+	'https://nftstorage.link',
 	'https://cloudflare-ipfs.com',
-	'https://gateway.pinata.cloud',
-	'https://nftstorage.link'
+	'https://gateway.pinata.cloud'
 ];
-const IPFS_PROVIDER_HOST = 'https://cloudflare-ipfs.com';
+const IPFS_PROVIDER_HOST = 'https://nftstorage.link';
 const NFT_TYPE = {
 	Image: 'Image',
 	Audio: 'Audio',
