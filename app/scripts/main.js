@@ -147,7 +147,7 @@ function getIssuedTokensSearchUrl(query) {
 	if (query.trim() == '') {
 		delete(params['query']);
 	} else {
-		params['query'] = query;
+		params['query'] = query.replace(/#/g, '%23');
 	}
 
 	delete(params['offset']);

@@ -15,7 +15,7 @@ $(function() {
     printIssuedTokens();
 
     $('#searchType').val('2');
-    $('#searchInput').val(query);
+    $('#searchInput').val(decodeURIComponent(query));
 
     setup = false;
 });

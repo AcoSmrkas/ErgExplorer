@@ -32,6 +32,7 @@ var printed = false;
 var loadingOwnedNfts = false;
 var loadingIssuedNfts = false;
 var unspentBoxesCount = 0;
+var printedAddressSummary = false;
 
 const N2T_SWAP_SELL_TEMPLATE_ERG = 'd803d6017300d602b2a4730100d6037302eb027201d195ed92b1a4730393b1db630872027304d804d604db63087202d605b2a5730500d606b2db63087205730600d6077e8c72060206edededededed938cb2720473070001730893c27205d07201938c72060173099272077e730a06927ec172050699997ec1a7069d9c72077e730b067e730c067e720306909c9c7e8cb27204730d0002067e7203067e730e069c9a7207730f9a9c7ec17202067e7310067e9c73117e7312050690b0ada5d90108639593c272087313c1720873147315d90108599a8c7208018c72080273167317'
 const N2T_SWAP_SELL_TEMPLATE_SPF = 'd804d601b2a4730000d6027301d6037302d6049c73037e730405eb027305d195ed92b1a4730693b1db630872017307d806d605db63087201d606b2a5730800d607db63087206d608b27207730900d6098c720802d60a95730a9d9c7e997209730b067e7202067e7203067e720906edededededed938cb27205730c0001730d93c27206730e938c720801730f92720a7e7310069573117312d801d60b997e7313069d9c720a7e7203067e72020695ed91720b731492b172077315d801d60cb27207731600ed938c720c017317927e8c720c0206720b7318909c7e8cb2720573190002067e7204069c9a720a731a9a9c7ec17201067e731b067e72040690b0ada5d9010b639593c2720b731cc1720b731d731ed9010b599a8c720b018c720b02731f7320'
@@ -52,7 +53,6 @@ $(function() {
     getUser();
     getPrices(onInitRequestsFinished);
     getIssuedNfts(walletAddress, onGotIssuedNftInfo, false);
-    getAddressInfo();
 
     setupQrCode();
     setupDatePicker();
@@ -95,6 +95,10 @@ function getUser() {
 }
 
 function printAddressSummary() {
+	if (printedAddressSummary) return;
+
+	printedAddressSummary = true;
+
 	let balanceUrl = getTxsUrl();
 
 	$.get(balanceUrl,
@@ -139,6 +143,7 @@ function printAddressSummary() {
 		if (walletAddressString.length > 70) {
 			walletAddressString = formatAddressString(walletAddressString, 58);
 		}
+
 		$('#address').html(walletAddressString + ' &#128203;');
 		$('#officialLink').html(getOfficialExplorereAddressUrl(walletAddressString));
 		$('#officialLink').attr('href', getOfficialExplorereAddressUrl(walletAddress));
@@ -873,37 +878,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		let formattedAddressString = formatTxAddressString(fromAddress);
 
 		if (networkType != 'testnet' && (txType == TxType.Wallet2Contract || txType == TxType.Contract2Wallet)) {
-			if (item.inputs[0].ergoTree.substring(item.inputs[0].ergoTree.length - N2T_SWAP_SELL_TEMPLATE_ERG.length) == N2T_SWAP_SELL_TEMPLATE_ERG
-				||
-				item.inputs[0].ergoTree.substring(item.inputs[0].ergoTree.length - N2T_SWAP_SELL_TEMPLATE_SPF.length) == N2T_SWAP_SELL_TEMPLATE_SPF
-				||
-				item.inputs[0].ergoTree.substring(item.inputs[0].ergoTree.length - N2T_SWAP_BUY_TEMPLATE_ERG.length) == N2T_SWAP_BUY_TEMPLATE_ERG
-				||
-				item.inputs[0].ergoTree.substring(item.inputs[0].ergoTree.length - N2T_SWAP_BUY_TEMPLATE_SPF.length) == N2T_SWAP_BUY_TEMPLATE_SPF) {
-				formattedAddressString = formatTxAddressString(fromAddress, 'Spectrum Finance N2T Swap Contract');
-			}
-
-			if (item.inputs[0].ergoTree.substring(item.inputs[0].ergoTree.length - T2T_SWAP_TEMPLATE_ERG.length) == T2T_SWAP_TEMPLATE_ERG
-				||
-				item.inputs[0].ergoTree.substring(item.inputs[0].ergoTree.length - T2T_SWAP_TEMPLATE_SPF.length) == T2T_SWAP_TEMPLATE_SPF) {
-				formattedAddressString = formatTxAddressString(fromAddress, 'Spectrum Finance T2T Swap Contract');
-			}
-
-			if (item.inputs[0].ergoTree.substring(item.inputs[0].ergoTree.length - SPECTRUM_LP_DEPOSIT.length) == SPECTRUM_LP_DEPOSIT) {
-				formattedAddressString = formatTxAddressString(fromAddress, 'Spectrum Finance LP Deposit Contract');
-			}
-
-			if (item.inputs[0].ergoTree.substring(item.inputs[0].ergoTree.length - SPECTRUM_LP_REDEEM.length) == SPECTRUM_LP_REDEEM) {
-				formattedAddressString = formatTxAddressString(fromAddress, 'Spectrum Finance LP Redeem Contract');
-			}
-
-			if (item.inputs[0].ergoTree.substring(item.inputs[0].ergoTree.length - SPECTRUM_YF_DEPOSIT.length) == SPECTRUM_YF_DEPOSIT) {
-				formattedAddressString = formatTxAddressString(fromAddress, 'Spectrum Finance YF Deposit Contract');
-			}
-
-			if (item.inputs[0].ergoTree.substring(item.inputs[0].ergoTree.length - SPECTRUM_YF_REDEEM.length) == SPECTRUM_YF_REDEEM) {
-				formattedAddressString = formatTxAddressString(fromAddress, 'Spectrum Finance YF Redeem Contract');
-			}
+			formattedAddressString = getAddressFromErgotree(item.inputs[0].ergoTree, fromAddress, formattedAddressString);
 		}
 
 		formattedResult += '<td><span class="d-lg-none"><strong>From: </strong></span>' + formattedAddressString + '</td>';
@@ -913,37 +888,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		formattedAddressString = formatTxAddressString(toAddress);
 
 		if (txType == TxType.Wallet2Contract || txType == TxType.Contract2Wallet) {
-			if (item.outputs[0].ergoTree.substring(item.outputs[0].ergoTree.length - N2T_SWAP_SELL_TEMPLATE_ERG.length) == N2T_SWAP_SELL_TEMPLATE_ERG
-				||
-				item.outputs[0].ergoTree.substring(item.outputs[0].ergoTree.length - N2T_SWAP_SELL_TEMPLATE_SPF.length) == N2T_SWAP_SELL_TEMPLATE_SPF
-				||
-				item.outputs[0].ergoTree.substring(item.outputs[0].ergoTree.length - N2T_SWAP_BUY_TEMPLATE_ERG.length) == N2T_SWAP_BUY_TEMPLATE_ERG
-				||
-				item.outputs[0].ergoTree.substring(item.outputs[0].ergoTree.length - N2T_SWAP_BUY_TEMPLATE_SPF.length) == N2T_SWAP_BUY_TEMPLATE_SPF) {
-				formattedAddressString = formatTxAddressString(toAddress, 'Spectrum Finance N2T Swap Contract');
-			}
-
-			if (item.outputs[0].ergoTree.substring(item.outputs[0].ergoTree.length - T2T_SWAP_TEMPLATE_ERG.length) == T2T_SWAP_TEMPLATE_ERG
-				||
-				item.outputs[0].ergoTree.substring(item.outputs[0].ergoTree.length - T2T_SWAP_TEMPLATE_SPF.length) == T2T_SWAP_TEMPLATE_SPF) {
-				formattedAddressString = formatTxAddressString(toAddress, 'Spectrum Finance T2T Swap Contract');
-			}
-
-			if (item.outputs[0].ergoTree.substring(item.outputs[0].ergoTree.length - SPECTRUM_LP_DEPOSIT.length) == SPECTRUM_LP_DEPOSIT) {
-				formattedAddressString = formatTxAddressString(toAddress, 'Spectrum Finance LP Deposit Contract');
-			}
-
-			if (item.outputs[0].ergoTree.substring(item.outputs[0].ergoTree.length - SPECTRUM_LP_REDEEM.length) == SPECTRUM_LP_REDEEM) {
-				formattedAddressString = formatTxAddressString(toAddress, 'Spectrum Finance LP Redeem Contract');
-			}
-
-			if (item.outputs[0].ergoTree.substring(item.outputs[0].ergoTree.length - SPECTRUM_YF_DEPOSIT.length) == SPECTRUM_YF_DEPOSIT) {
-				formattedAddressString = formatTxAddressString(toAddress, 'Spectrum Finance YF Deposit Contract');
-			}
-
-			if (item.outputs[0].ergoTree.substring(item.outputs[0].ergoTree.length - SPECTRUM_YF_REDEEM.length) == SPECTRUM_YF_REDEEM) {
-				formattedAddressString = formatTxAddressString(toAddress, 'Spectrum Finance YF Redeem Contract');
-			}
+			formattedAddressString = getAddressFromErgotree(item.outputs[0].ergoTree, toAddress, formattedAddressString);
 		}
 
 		formattedResult += '<td><span class="d-lg-none"><strong>To: </strong></span>' + formattedAddressString + '</td>';
@@ -1486,6 +1431,8 @@ function onMempoolAndTransactionsDataFetched() {
 	if (printed) {
 		return;
 	}
+
+    getAddressInfo();
 
 	formattedResult += getFormattedTransactionsString(mempoolData, true);
 	formattedResult += getFormattedTransactionsString(transactionsData, false);
@@ -2092,7 +2039,31 @@ function hideUnspentBoxes(e) {
 function getAddressInfo() {
 	var jqxhr = $.get(ERGEXPLORER_API_HOST + 'addressbook/getAddressInfo?address=' + walletAddress,
 	function (data) {
-		if (data.total == 0) return;
+		if (data.total == 0) {
+			let newName = "";
+
+			for (let i = 0; i < transactionsData.items[0].inputs.length; i++) {
+				let box = transactionsData.items[0].inputs[i];
+				if (box.address == walletAddress) {
+					newName = getAddressFromErgotree(box.ergoTree, "", newName);
+					break;
+				}
+			}
+
+			for (let i = 0; i < transactionsData.items[0].outputs.length; i++) {
+				let box = transactionsData.items[0].outputs[i];
+				if (box.address == walletAddress) {
+					newName = getAddressFromErgotree(box.ergoTree, "", newName);
+					break;
+				}
+			}
+
+			if (newName != "") {
+				$('#address').html(newName);
+			}
+
+			return;
+		}
 
 		let title = data.items[0].name;
 		let type = ''
@@ -2238,4 +2209,40 @@ function findOtherAddress(item, totalTransferred, txInOut, firstAddress) {
 
 function findMinDiffBox(totalTransferred, boxes) {
 
+}
+
+function getAddressFromErgotree(ergoTree, fromAddress, formattedAddress) {
+				if (ergoTree.substring(ergoTree.length - N2T_SWAP_SELL_TEMPLATE_ERG.length) == N2T_SWAP_SELL_TEMPLATE_ERG
+				||
+				ergoTree.substring(ergoTree.length - N2T_SWAP_SELL_TEMPLATE_SPF.length) == N2T_SWAP_SELL_TEMPLATE_SPF
+				||
+				ergoTree.substring(ergoTree.length - N2T_SWAP_BUY_TEMPLATE_ERG.length) == N2T_SWAP_BUY_TEMPLATE_ERG
+				||
+				ergoTree.substring(ergoTree.length - N2T_SWAP_BUY_TEMPLATE_SPF.length) == N2T_SWAP_BUY_TEMPLATE_SPF) {
+				return formatTxAddressString(fromAddress, 'Spectrum Finance N2T Swap Contract');
+			}
+
+			if (ergoTree.substring(ergoTree.length - T2T_SWAP_TEMPLATE_ERG.length) == T2T_SWAP_TEMPLATE_ERG
+				||
+				ergoTree.substring(ergoTree.length - T2T_SWAP_TEMPLATE_SPF.length) == T2T_SWAP_TEMPLATE_SPF) {
+				return formatTxAddressString(fromAddress, 'Spectrum Finance T2T Swap Contract');
+			}
+
+			if (ergoTree.substring(ergoTree.length - SPECTRUM_LP_DEPOSIT.length) == SPECTRUM_LP_DEPOSIT) {
+				return formatTxAddressString(fromAddress, 'Spectrum Finance LP Deposit Contract');
+			}
+
+			if (ergoTree.substring(ergoTree.length - SPECTRUM_LP_REDEEM.length) == SPECTRUM_LP_REDEEM) {
+				return formatTxAddressString(fromAddress, 'Spectrum Finance LP Redeem Contract');
+			}
+
+			if (ergoTree.substring(ergoTree.length - SPECTRUM_YF_DEPOSIT.length) == SPECTRUM_YF_DEPOSIT) {
+				return formatTxAddressString(fromAddress, 'Spectrum Finance YF Deposit Contract');
+			}
+
+			if (ergoTree.substring(ergoTree.length - SPECTRUM_YF_REDEEM.length) == SPECTRUM_YF_REDEEM) {
+				return formatTxAddressString(fromAddress, 'Spectrum Finance YF Redeem Contract');
+			}
+
+			return formattedAddress;
 }
