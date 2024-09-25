@@ -1,5 +1,7 @@
 var tokenIcons = [];
 //TokenIconsArrayStart
+tokenIcons['f0d5bdf474fcbd4249608e6dc6e9cf34a327b218f66445ea545b4c711b4676e3'] = 'https://cupofsugar.io/icon.png';
+tokenIcons['6c35aa395c7c75b0f67f7804d6930f0e11ef93c3387dc1faa86498d54af7962c'] = 'https://ergexplorer.com/images/tokens/mew.png';
 tokenIcons['9944ff273ff169f32b851b96bbecdbb67f223101c15ae143de82b3e7f75b19d2'] = 'https://ergexplorer.com/images/tokens/gauc.svg';
 tokenIcons['886b7721bef42f60c6317d37d8752da8aca01898cae7dae61808c4a14225edc8'] = 'https://ergexplorer.com/images/tokens/gau.svg';
 tokenIcons['2e59555f055c1341e64d51267a381f6dbbe572cb725cfc471b35e84bbc258b75'] = 'https://ergexplorer.com/images/tokens/hodlcomet10.svg';

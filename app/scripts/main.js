@@ -448,11 +448,11 @@ function formatNftDescriptonJson(key, value, indent) {
 	return tab + '<strong>' + key + '</strong>: ' + value;
 }
 
-function getAssetTitle(asset, iconIsToTheLeft) {
-	return getAssetTitleParams(asset.tokenId, asset.name, iconIsToTheLeft);
+function getAssetTitle(asset, iconIsToTheLeft, scam = false) {
+	return getAssetTitleParams(asset.tokenId, asset.name, iconIsToTheLeft, scam);
 }
 
-function getAssetTitleParams(tokenId, name, iconIsToTheLeft) {
+function getAssetTitleParams(tokenId, name, iconIsToTheLeft, scam = false) {
 	let imgSrc = '';
 	if (hasIcon(tokenId)) {
 		imgSrc = getIcon(tokenId);
@@ -468,7 +468,7 @@ function getAssetTitleParams(tokenId, name, iconIsToTheLeft) {
 		return name;
 	}
 
-	return '<a href="' + getTokenUrl(tokenId) + '">' + (iconIsToTheLeft ? iconHtml + ' ' : '') + ((name == '' || name == null) ? formatAddressString(tokenId, 15) : name) + (iconIsToTheLeft ? '' : ' ' + iconHtml) + '</a>';
+	return '<a title="' + (scam ? 'Reported as suspicious by users.' : '') + '" class="' + (scam ? 'text-danger' : '') + '" href="' + getTokenUrl(tokenId) + '">' + (iconIsToTheLeft ? iconHtml + ' ' : '') + ((name == '' || name == null) ? formatAddressString(tokenId, 15) : name) + (iconIsToTheLeft ? '' : ' ' + iconHtml) + '</a>';
 }
 
 function getAssetValue(amount, decimals) {

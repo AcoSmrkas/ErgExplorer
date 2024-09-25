@@ -69,7 +69,7 @@ a {
 }
 
 a:hover {
-	color: var(--main-color);
+	color: var(--main-color) !important;
 }
 
 .two-column-holder-top-flat-md > div:first-of-type,

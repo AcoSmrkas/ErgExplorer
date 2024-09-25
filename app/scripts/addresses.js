@@ -33,6 +33,7 @@ var loadingOwnedNfts = false;
 var loadingIssuedNfts = false;
 var unspentBoxesCount = 0;
 var printedAddressSummary = false;
+var scamList = [];
 
 const N2T_SWAP_SELL_TEMPLATE_ERG = 'd803d6017300d602b2a4730100d6037302eb027201d195ed92b1a4730393b1db630872027304d804d604db63087202d605b2a5730500d606b2db63087205730600d6077e8c72060206edededededed938cb2720473070001730893c27205d07201938c72060173099272077e730a06927ec172050699997ec1a7069d9c72077e730b067e730c067e720306909c9c7e8cb27204730d0002067e7203067e730e069c9a7207730f9a9c7ec17202067e7310067e9c73117e7312050690b0ada5d90108639593c272087313c1720873147315d90108599a8c7208018c72080273167317'
 const N2T_SWAP_SELL_TEMPLATE_SPF = 'd804d601b2a4730000d6027301d6037302d6049c73037e730405eb027305d195ed92b1a4730693b1db630872017307d806d605db63087201d606b2a5730800d607db63087206d608b27207730900d6098c720802d60a95730a9d9c7e997209730b067e7202067e7203067e720906edededededed938cb27205730c0001730d93c27206730e938c720801730f92720a7e7310069573117312d801d60b997e7313069d9c720a7e7203067e72020695ed91720b731492b172077315d801d60cb27207731600ed938c720c017317927e8c720c0206720b7318909c7e8cb2720573190002067e7204069c9a720a731a9a9c7ec17201067e731b067e72040690b0ada5d9010b639593c2720b731cc1720b731d731ed9010b599a8c720b018c720b02731f7320'
@@ -51,6 +52,7 @@ $(function() {
 	setDocumentTitle(walletAddress);
 	
     getUser();
+    getScamList();
     getPrices(onInitRequestsFinished);
     getIssuedNfts(walletAddress, onGotIssuedNftInfo, false);
 
@@ -78,6 +80,15 @@ const resizeObserver = new ResizeObserver((entries) => {
 
 resizeObserver.observe(document.getElementById('tokensHolder'));
 
+function getScamList(callback) {
+	$.get(ERGEXPLORER_API_HOST + 'tokens/getScam',
+	function (data) {
+		scamList = data.items.map(t => t.tokenId);
+	}).always(function (data) {
+		onInitRequestsFinished();
+	});
+}
+
 function getUser() {
 	$.get(ERGEXPLORER_API_HOST + 'user/getUser?address=' + walletAddress,
 	function (data) {
@@ -95,7 +106,7 @@ function getUser() {
 }
 
 function printAddressSummary() {
-	if (printedAddressSummary) return;
+	if (!gotPrices || printedAddressSummary) return;
 
 	printedAddressSummary = true;
 
@@ -174,7 +185,7 @@ function formatOtherTokensHtmlString(tokensArray) {
 	}
 
 	for (i = 0; i < tokensArray.length; i++) {
-		let tokensString = formatAssetNameAndValueString(getAssetTitle(tokensArray[i], true), formatAssetValueString(tokensArray[i].amount, tokensArray[i].decimals, 4), tokensArray[i].tokenId);
+		let tokensString = formatAssetNameAndValueString(getAssetTitle(tokensArray[i], true, scamList.includes(tokensArray[i].tokenId)), formatAssetValueString(tokensArray[i].amount, tokensArray[i].decimals, 4), tokensArray[i].tokenId);
 
 		tokensContentFull += tokensString;
 
@@ -216,7 +227,7 @@ function formatFinancialTokensHtmlString(tokensArray, ergDollarValue) {
 			tokensArray[i].usdPrice = tokensPrice;
 		}
 
-		tokensArray[i].tokensString = formatAssetNameAndValueString(getAssetTitle(tokensArray[i], true), formatAssetValueString(tokensArray[i].amount, tokensArray[i].decimals, 4) + (tokensPrice == 0 ? '' : '<span class="text-light"> ' + tokensPriceString + '</span>'), tokensArray[i].tokenId);
+		tokensArray[i].tokensString = formatAssetNameAndValueString(getAssetTitle(tokensArray[i], true, scamList.includes(tokensArray[i].tokenId)), formatAssetValueString(tokensArray[i].amount, tokensArray[i].decimals, 4) + (tokensPrice == 0 ? '' : '<span class="text-light"> ' + tokensPriceString + '</span>'), tokensArray[i].tokenId);
 	}
 
 	if (gotPrices) {
@@ -959,7 +970,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 				}
 			}
 
-			let assetsString = '<br><strong>'+(isMinted ? '<span title="Minted">✨</span>' : '')+''+(asset.isBurned ? '<span title="Burned">🔥</span>' : '')+'<span class="text-white">' + (asset.amount > 0 ? mixedPlus : '') + (txInOut == TxInOut.Out ? '-' : '') + formatAssetValueString(asset.amount, asset.decimals, 4) + '</span></strong> ' + getAssetTitle(asset, false) + (assetPrice == undefined ? '' : ' <span class="text-light">' + assetPrice +'</span>');
+			let assetsString = '<br><strong>'+(isMinted ? '<span title="Minted">✨</span>' : '')+''+(asset.isBurned ? '<span title="Burned">🔥</span>' : '')+'<span class="">' + (asset.amount > 0 ? mixedPlus : '') + (txInOut == TxInOut.Out ? '-' : '') + formatAssetValueString(asset.amount, asset.decimals, 4) + '</span></strong> ' + getAssetTitle(asset, false, scamList.includes(asset.tokenId)) + (assetPrice == undefined ? '' : ' <span class="text-light">' + assetPrice +'</span>');
 
 			assetsFull += assetsString;
 			
