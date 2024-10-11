@@ -50,6 +50,18 @@ tbody {
 	border-top: 2px solid var(--main-color) !important;
 }
 
+.bg-forms {
+  background-color: var(--forms-bg) !important;
+}
+
+.bg-footer {
+  background-color: var(--footer) !important;
+}
+
+.bg-background {
+  background-color: var(--background) !important;
+}
+
 .table > :not(caption) > * > * {
 	background-color: var(--forms-bg) !important;
 }

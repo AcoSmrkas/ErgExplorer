@@ -143,6 +143,28 @@
 						<div class="col-md-3"><strong><p>Marketplace</p></strong></div>
 						<div id="nftAuction" class="col"></div>
 					</div>
+					<div id="royaltyHolder" style="display: none;" class="row w-100 p-2 border-top-flat">
+						<div class="col-md-3"><strong><p>Royalty</p></strong></div>
+						<div id="nftRoyalty" class="col"></div>
+					</div>
+				</div>
+				<div id="nftPropertiesHolder" style="display: none; padding-bottom: 15px;">
+				<h3 style="margin-top:10px;margin-bottom: 10px;">Properties</h3>
+				<div id="nftProperties" style="display: grid;
+  grid-template-columns:  repeat(auto-fill, minmax(150px, 1fr)); /* Creates 3 equal-width columns */
+  gap: 10px; /* Space between grid items */"></div>
+				</div>
+				<div id="nftStatsHolder" style="display: none; padding-bottom: 15px;">
+				<h3 style="margin-top:10px;margin-bottom: 10px;">Stats</h3>
+				<div id="nftStats" style="display: grid;
+  grid-template-columns:  repeat(auto-fill, minmax(150px, 1fr)); /* Creates 3 equal-width columns */
+  gap: 10px; /* Space between grid items */"></div>
+				</div>
+				<div id="nftLevelsHolder" style="display: none; padding-bottom: 15px;">
+				<h3 style="margin-top:10px;margin-bottom: 10px;">Levels</h3>
+				<div id="nftLevels" style="display: grid;
+  grid-template-columns:  repeat(auto-fill, minmax(150px, 1fr)); /* Creates 3 equal-width columns */
+  gap: 10px; /* Space between grid items */"></div>
 				</div>
 			</div>
 		</div>
@@ -208,7 +230,7 @@
 					</div>
 					<canvas style="width:100%;padding-bottom:10px;" id="chart"></canvas>
 
-					<p>Trade now on <a target="_new" id="spectrumLink" href="">Spectrum Finance <i class="erg-span fa-solid fa-up-right-from-square"></i></a></p>
+					<p>Trade now on <a target="_new" id="spectrumLink" href="">Mew Finance <i class="erg-span fa-solid fa-up-right-from-square"></i></a></p>
 					<p>View on <a target="_new" id="cruxLink" href="">Crux Finance <i class="erg-span fa-solid fa-up-right-from-square"></i></a></p>
 
 					<hr class="my-3 d-lg-none">
@@ -268,5 +290,6 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.3.1/chart.umd.min.js" integrity="sha512-UcCmTcAm3IkzrswF+WqvwWSjsnv8nsJpDL09KHCETWS0g0WjoIZDRUYXCeHeow1cEij0kqL9OwRwirv/xCQ6GA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	<script src="./scripts/common/prices.js?v=35"></script>
 	<script src="./scripts/common/nft.js?v=35"></script>
+	<script src="./scripts/3rd-party/fleet.js?v=35"></script>
 	<script src="./scripts/token.js?v=35"></script>
 {% endblock %}

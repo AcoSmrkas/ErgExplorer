@@ -66,7 +66,7 @@ function handlePrices() {
 	}
 	
 	gotPrices = true;
-	console.log(prices);
+	
 	doCallback();
 }
 

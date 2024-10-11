@@ -21,7 +21,7 @@ $(function() {
 });
 
 function updateUi() {
-    query = params['query'].replace(/#/g, '%23');
+    query = params['query']?.replace(/#/g, '%23');
     if (query == undefined) {
         query = '';
     }

@@ -206,6 +206,11 @@ function onGetNftInfoDone(nftInfo, message) {
 		$('#tokenScamHolder').show();
 	}
 
+	if (tokenData.royaltypercent && tokenData.royaltypercent > 0) {
+		$('#royaltyHolder').show();
+		$('#nftRoyalty').html(tokenData.royaltypercent + "%");
+	}
+
 	//Id
 	$('#tokenHeader').html('<p><a href="Copy to clipboard!" onclick="copyTokenAddress(event)">' + tokenData.id + ' &#128203;</a></p>');
 
@@ -416,6 +421,78 @@ function onGetNftInfoDone(nftInfo, message) {
 	}
 
 	setLinks();
+
+	$.get(`${API_HOST}transactions/${tokenData.transactionId}`,
+	function (data) {
+		const Constant = qfleetSDK.SConstant;
+
+		function hexToBytes(hex) {
+		    return Uint8Array.from(hex.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)));
+		}
+
+		function bytesToString(bytes) {
+		    return new TextDecoder().decode(bytes);
+		}
+
+		function deserializeHex(hex) {
+		    const bytes = hexToBytes(hex);
+		    const constant = Constant.from(bytes);
+
+		    let properties = '';
+		    let stats = '';
+		    let levels = '';
+
+		    console.log(constant);
+
+		    if (constant && constant.data && (
+		    	constant.data[0] || (constant.data[1] && (constant.data[1][0] || constant.data[1][1]))
+		    	)) {
+
+			    if (constant.data[0] && constant.data[0].length > 0) {			    	
+				    for (let array of constant.data[0]) {
+				    	properties += `<div class="bg-background" style="padding:5px; border-radius:5px;box-sizing: border-box;
+  place-content: space-between;text-align:center;">`
+				    	properties += `<p class="erg-span">${bytesToString(array[0])}</p>`;
+				    	properties += `<p>${bytesToString(array[1])}</p>`;
+				    	properties += '</div>';
+				    }
+
+			    	$('#nftPropertiesHolder').show();
+			    	$('#nftProperties').html(properties);
+			  	}
+
+			    if (constant.data[1] && constant.data[1][0] && constant.data[1][0].length > 0) {			    	
+				    for (let array of constant.data[1][0]) {
+				    	stats += `<div class="bg-background" style="padding:5px; border-radius:5px;box-sizing: border-box;
+  place-content: space-between;text-align:center;">`
+				    	stats += `<p class="erg-span">${bytesToString(array[0])}</p>`;
+				    	stats += `<p>${array[1][0]} of ${array[1][1]}</p>`;
+				    	stats += '</div>';
+				    }
+
+			    	$('#nftStatsHolder').show();
+			    	$('#nftStats').html(stats);
+			  	}
+
+			    if (constant.data[0] && constant.data[1][1] && constant.data[1][1].length > 0) {			    	
+				    for (let array of constant.data[1][1]) {
+				    	levels += `<div class="bg-background" style="padding:5px; border-radius:5px;box-sizing: border-box;
+  place-content: space-between;text-align:center;">`
+				    	levels += `<p class="erg-span">${bytesToString(array[0])}</p>`;
+				    	levels += `<p>${array[1][0]} of ${array[1][1]}</p>`;
+				    	levels += '</div>';
+				    }
+
+			    	$('#nftLevelsHolder').show();
+			    	$('#nftLevels').html(levels);
+			  	}
+			  }
+		}
+
+		const hexString = data.inputs[0].additionalRegisters?.R6?.serializedValue;
+
+		if (hexString) deserializeHex(hexString);
+	});
 }
 
 function getCurrentAddress() {
