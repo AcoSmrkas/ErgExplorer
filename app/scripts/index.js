@@ -282,7 +282,6 @@ function getWhaleTxs() {
     })
     .then(arrayBuffer => {
         // Handle the ArrayBuffer here
-        console.log(arrayBuffer); // This will log the ArrayBuffer
         const buffer = new TextDecoder("utf-8").decode(arrayBuffer);
         const stringFromBuffer = buffer.toString('utf8');
 

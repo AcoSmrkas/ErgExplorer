@@ -11,6 +11,7 @@ html[data-bs-theme="dark"] {
 	--text-light: #999;
 	--text-strong: #CCC;
 	--background: #222;
+	--footer: var(--forms-bg);
 }
 
 html[data-bs-theme="light"] {
@@ -21,4 +22,51 @@ html[data-bs-theme="light"] {
 	--text-light: #444;
 	--text-strong: #222;
 	--background: #f4f4f4;
+ 	--footer: var(--forms-bg);
+}
+
+html[data-bs-theme="mew"] {
+ 	--info-color: #04dfff;
+	--text-color: #ffffff88;
+	--forms-bg: #271843;
+	--borders: #ffffff22;
+	--text-light: #ffffff77;
+	--text-strong: #CCC;
+	--background: #160d25;
+  	--footer: #0e0917;
+	--striped-1: var(--background);
+	--main-color: #f9d72d;
+	--main-color-hover: var(--info-color);
+
+	.page-link {
+		background-color: var(--forms-bg);
+	}
+
+	.page-item.disabled .page-link {
+		background-color: var(--footer);
+	}
+
+	body {
+		color: #eee;
+	}
+
+	.networkType {
+		color: var(--text-light);
+	}
+
+	.btn {
+		color: var(--background) !important;
+	}
+
+	.btn-primary:hover {
+		background: var(--info-color) !important;
+	}
+
+	.btn-primary {
+		background: #fff !important;
+	}
+
+	table > :not(caption) > * > * {
+		background-color: var(--forms-bg) !important;
+	}
 }

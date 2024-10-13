@@ -12,6 +12,15 @@ body {
 	src: url('../../fonts/DejaVuSansMono.ttf');
 }
 
+select {
+	border: none !important;
+	outline: none !important;
+}
+
+select:focus {
+	border: 1px solid var(--main-color) !important;
+}
+
 pre, td, th, select, option, .btn, .dropdown-item {
 	color: var(--text-strong) !important;
 }
@@ -547,7 +556,7 @@ select, option {
 }
 
 .footer {
-	background-color: var(--forms-bg);
+	background-color: var(--footer) !important;
 	color: var(--text-light);
 	padding: 5px;
 	position: fixed;

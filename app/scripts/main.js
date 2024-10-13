@@ -821,6 +821,8 @@ function switchTheme(e) {
 
 	if (theme == 'dark') {
 		theme = 'light';
+	} else if (theme == 'light') {
+		theme = 'mew';
 	} else {
 		theme = 'dark';
 	}
@@ -830,6 +832,7 @@ function switchTheme(e) {
 	localStorage.setItem('theme', theme);
 
 	updateTheme();
+	updateNav();
 }
 
 function getOwnerTypeClass(type) {
