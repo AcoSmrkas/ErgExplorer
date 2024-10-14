@@ -7,8 +7,6 @@ var priceData = undefined;
 $(function() {	
 	updatePrices();
 	getNetworkState();
-
-    $('#searchType').val('0');
 });
 
 function updatePrices() {

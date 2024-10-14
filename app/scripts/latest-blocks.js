@@ -1,7 +1,5 @@
 $(function() {  
     getPrices(printLatestBlocks)
-
-    $('#searchType').val('3');
 });
 
 function printLatestBlocks() {

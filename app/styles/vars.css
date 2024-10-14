@@ -65,8 +65,4 @@ html[data-bs-theme="mew"] {
 	.btn-primary {
 		background: #fff !important;
 	}
-
-	table > :not(caption) > * > * {
-		background-color: var(--forms-bg) !important;
-	}
 }

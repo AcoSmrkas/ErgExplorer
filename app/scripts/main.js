@@ -181,9 +181,18 @@ function getSearchQueryPage(page, query) {
 	return newPage;
 }
 
-function searchAddress() {
+var searchType = null;
+async function searchAddress() {
 	let searchQuery = $('#searchInput').val().trim();
-	let searchType = $('#searchType').val();
+	searchType = $('#searchType').val();
+
+	if (searchType == "*") {
+		checkErgoIdentifier(searchQuery);
+
+		do {
+			await sleep(100);
+		} while (searchType == '*')
+	}
 
 	if (searchType != '2' && searchQuery == '') return;
 
@@ -210,6 +219,50 @@ function searchAddress() {
 
 		default:
 			break;
+	}
+}
+
+function checkErgoIdentifier(input) {
+  try {
+    qfleetSDKcore.ErgoAddress.fromBase58(input);
+
+    searchType = "0";
+    return;
+  } catch {}
+
+	if (input.length == 64) {
+		try {
+			$.get(`${API_HOST}transactions/${input}`,
+	  		function (data) {
+	  			searchType = "1";
+	  		});
+		} catch {}
+
+		try {
+	  		$.get(`${API_HOST}mempool/transactions/byAddress/${input}`, function(data) {
+				for (let i = 0; i < data.items.length; i++) {
+					if (data.items[i].id == input) {
+						searchType = "1";
+					}
+				}
+			})
+  		} catch {}
+
+		try {
+			$.get(`${API_HOST}tokens/${input}`,
+	  		function (data) {
+	  			searchType = "2";
+	  		});
+		} catch {}
+
+		try {
+			$.get(`${API_HOST}blocks/${input}`,
+	  		function (data) {
+	  			searchType = "3";
+	  		});
+		} catch {}
+	} else {
+		searchType = "2";
 	}
 }
 
@@ -968,4 +1021,10 @@ function hex2a(hexx) {
     }
 
     return str;
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }

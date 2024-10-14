@@ -7,8 +7,6 @@ $(function() {
 	getPrices(onGotPrices);
 
 	setDocumentTitle(boxId);
-
-    $('#searchType').val('1');
 });
 
 function onGotPrices() {

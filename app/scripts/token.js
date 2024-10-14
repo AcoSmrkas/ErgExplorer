@@ -442,8 +442,6 @@ function onGetNftInfoDone(nftInfo, message) {
 		    let stats = '';
 		    let levels = '';
 
-		    console.log(constant);
-
 		    if (constant && constant.data && (
 		    	constant.data[0] || (constant.data[1] && (constant.data[1][0] || constant.data[1][1]))
 		    	)) {

@@ -148,6 +148,13 @@ function processNftData(nftData) {
 		link = formatLink(link);
 	}
 
+	if (nftData.cachedurl) {
+		link = {
+			ipfsCid: false,
+			url: nftData.cachedurl
+		};
+	}
+
 	let type = getNftType(typeString);
 
 	let nft = new NftInfo(type, hash, link, additionalLinks, nftData);

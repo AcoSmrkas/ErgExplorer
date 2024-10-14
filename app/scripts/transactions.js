@@ -11,8 +11,6 @@ $(function() {
 	getPrices(onGotPrices);
 
 	setDocumentTitle(txId);
-
-    $('#searchType').val('1');
 });
 
 window.onfocus = (event) => {
