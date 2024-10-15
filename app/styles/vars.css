@@ -25,7 +25,7 @@ html[data-bs-theme="light"] {
  	--footer: var(--forms-bg);
 }
 
-html[data-bs-theme="mew"] {
+html[data-theme="mew"] {
  	--info-color: #04dfff;
 	--text-color: #ffffff88;
 	--forms-bg: #271843;
@@ -37,6 +37,10 @@ html[data-bs-theme="mew"] {
 	--striped-1: var(--background);
 	--main-color: #f9d72d;
 	--main-color-hover: var(--info-color);
+
+	.card {
+		background-color: var(--footer);
+	}
 
 	.page-link {
 		background-color: var(--forms-bg);

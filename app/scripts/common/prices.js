@@ -6,7 +6,7 @@ var theCallback = undefined;
 var pricesData = undefined;
 var poolsData = undefined;
 
-function getPrices(callback) {
+function getPrices(callback, force = false) {
 	theCallback = callback;
 
 	$.get('https://api.ergexplorer.com/tokens/getErgPrice', function (data) {
@@ -18,7 +18,7 @@ function getPrices(callback) {
 		function(data) {
 			pricesData = data;
 
-			handlePrices();
+			handlePrices(force);
 		}).fail(function () {
 			doCallback();
 		});
@@ -27,7 +27,7 @@ function getPrices(callback) {
 		function(data) {
 			poolsData = data;
 
-			handlePrices();
+			handlePrices(force);
 		}).fail(function () {
 			doCallback();
 		});
@@ -36,7 +36,7 @@ function getPrices(callback) {
 	});
 }
 
-function handlePrices() {
+function handlePrices(force = false) {
 	if (poolsData == undefined || pricesData == undefined) {
 		return;
 	}
@@ -52,7 +52,7 @@ function handlePrices() {
 
 				if (poolData.lockedX.id == pairData['baseId']
 					&& poolData.lockedY.id == pairData['quoteId']
-					&& poolData.lockedX.amount / Math.pow(10, 9) >= 1000) {
+					&& (poolData.lockedX.amount / Math.pow(10, 9) >= 1000 || force)) {
 					skip = false;
 					break;
 				}

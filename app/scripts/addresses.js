@@ -309,7 +309,8 @@ function getTxType(tx) {
 
 	let outputAddress = tx.outputs[0].address;
 
-	if (outputAddress == FEE_ADDRESS) {
+	if (outputAddress == FEE_ADDRESS
+		&& tx.outputs.length > 1) {
 		outputAddress = tx.outputs[1].address;
 	}
 

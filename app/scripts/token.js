@@ -30,7 +30,7 @@ function getCruxData() {
 
 		amountsData = data;
 
-		getPrices(getPriceHistory);
+		getPrices(getPriceHistory, true);
 	});
 }
 
@@ -82,7 +82,7 @@ function setLinks() {
 }
 
 function getPriceHistory() {
-	$.post(ERGEXPLORER_API_HOST + 'tokens/getPriceHistory',
+	$.post(ERGEXPLORER_API_HOST + 'tokens/getPriceHistoryLowLiq',
 		{from: from30d, ids : [tokenId]},
 		function(data) {
 
@@ -642,6 +642,7 @@ function printGainersLosers(timeframe) {
 			difference = difference;
 			classString = 'text-danger';
 		}
+
 
 		if (from30dset == false && from30d <= item.timestamp) {
 			$('#usdChange30d').html(difference + '%');
