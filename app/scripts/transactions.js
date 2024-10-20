@@ -47,7 +47,7 @@ function getTxUrl(mempool) {
 	return txUrl;
 }
 
-function getTransaction(mempool) {
+function getTransaction(mempool, retries = 0) {
 	let txUrl = getTxUrl(mempool);
 
 	$.get(txUrl, function(txData) {
@@ -86,8 +86,16 @@ function getTransaction(mempool) {
 	})
     .fail(function() {
     	if (mempool) {
-    		showLoadError('No results matching your query.');
+    		showLoadError('No results matching your query.<br>Just submitted your transaction? Hang tight for a little longer!');
 	        $('#txLoading').hide();
+
+	        if (retries < 5) {
+	        	setTimeout(() => {
+				    getTransaction(true, retries + 1);
+				}, 2000);
+	    	} else {
+	    		showLoadError('No results matching your query.<br>Just submitted your transaction? Try reloading this page.');
+	    	}
     	} else {
     		getTransaction(true);
     	}

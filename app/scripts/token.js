@@ -13,6 +13,7 @@ var tempDate = -1;
 var hasPrice = false;
 var amountsData = undefined;
 var imageUrl = null;
+var currentAddress = '';
 
 $(function() {
 	tokenId = getWalletAddressFromUrl();
@@ -76,7 +77,7 @@ function setLinks() {
 		$('#spectrumLink').attr('href', 'https://dex.crooks-fi.com/ergo/swap?base=0000000000000000000000000000000000000000000000000000000000000000&quote=' + tokenId);
 		$('#spectrumLink').html('Crooks Finance <i class="erg-span fa-solid fa-up-right-from-square"></i>');
 	} else {
-		$('#spectrumLink').attr('href', 'https://app.spectrum.fi/ergo/swap?base=0000000000000000000000000000000000000000000000000000000000000000&quote=' + tokenId);
+		$('#spectrumLink').attr('href', 'https://dex.mewfinance.com/ergo/swap?base=0000000000000000000000000000000000000000000000000000000000000000&quote=' + tokenId);
 	}
 	$('#cruxLink').attr('href', 'https://cruxfinance.io/tokens/' + tokenId);
 }
@@ -396,7 +397,11 @@ function onGetNftInfoDone(nftInfo, message) {
 		}
 
 		if (networkType == 'mainnet') {
-			$('#nftAuction').html('<p>View on <a  target="_new" href="https://www.skyharbor.io/token/' + tokenData.id + '">SkyHarbor.io</a></p><p>View on <a  target="_new" href="https://ergoauctions.org/artwork/' + tokenData.id + '">Ergoauctions.org</a></p>');
+			if (nftInfo.type == NFT_TYPE.ArtCollection) {
+				$('#nftAuction').html('<p>View on <a  target="_new" href="https://ergoauctions.org/collection/' + tokenData.id + '">Ergoauctions.org</a></p>');
+			} else {
+				$('#nftAuction').html('<p>View on <a  target="_new" href="https://www.skyharbor.io/token/' + tokenData.id + '">SkyHarbor.io</a></p><p>View on <a  target="_new" href="https://ergoauctions.org/artwork/' + tokenData.id + '">Ergoauctions.org</a></p>');
+			}
 		} else {
 			$('#marketplaceHolder').remove();
 		}
@@ -502,11 +507,15 @@ function getCurrentAddress() {
 		let txOFfset = data.total - 1;
 
 		var jqxhr = $.get(API_HOST + 'boxes/byTokenId/' + tokenId + '?offset=' + txOFfset, function(data) {
-			let currentAddress = data.items[0].address;
+			currentAddress = data.items[0].address;
 
 			addAddress(currentAddress);
 			$('#nftCurrentAddress').html('<p><a class="address-string" addr="' + currentAddress + '" href="' + getWalletAddressUrl(currentAddress) + '">' + formatLongAddressString(currentAddress) + '</a></p>');
 			$('#nftCurrentAddressHolder').show();
+
+			if (currentAddress == '2sTiXsgg5x6T8pMqxruCsfKtQh5JcN9TgBWpT6PLkNUg6Gvkg923sXUbwm9iv4Yi2yH6f2e9a6HzY2WF3ScSBVKmCE1WJBvpRLugRY7xxDvYmkdPA1XV1rvhSQTPMoU6fwBuGxuzdjjmWGYyt3jqLJhEHh59X4vpd5GpeEyjvhTxiTc2a1UTpzaeasyLQmYdhGuLFeSvxGgxWMD8mer1aoEq1AiBwkBdSo2DCKo81UPrXFn934cNTpPcUGoG4cTwdhMX7z1N3VyZ74dBbWPDsN6V6oBVaaUW9ggWRwttmTAGQywEobFwgDswEu8XZSRDUXg77ivAywy9DfrjkbutRjNCgh1fExtKG8QWEHkPcALwLaKT7QsKJcEVmC3rGBQSeTHEozx9FPniM47847yxk4A9wG5MaUoFbwiBbFEusWaTsNN9jEP7M8Uw5RFkeyQhooEG1A32R59pgoouXiUc974VXeaP8J1rSey3FD5VjsQc6tFhEdcAN5ULSaWXrHxoHEaHJHZyPQmejzX7hdy') {
+				$('#nftAuction').html('<p>Available for purchase on <a class="erg-span" target="_new" href="https://mart.mewfinance.com/explore?tokenId=' + tokenId + '">Mew Mart</a></p>' + $('#nftAuction').html());
+			}
 
 			getAddressesInfo();
 		})
