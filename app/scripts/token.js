@@ -308,7 +308,19 @@ function onGetNftInfoDone(nftInfo, message) {
 
 		if (nftInfo.link.ipfsCid) {
 			urlHtml = formatIpfsCidHtmlString(nftInfo.link.url);
-			fullUrl = IPFS_PROVIDER_HOSTS[0] + '/ipfs/' + nftInfo.link.url;
+
+			for (let i = 0; i < IPFS_PROVIDER_HOSTS.length; i++) {
+				fullUrl = IPFS_PROVIDER_HOSTS[i] + '/ipfs/' + nftInfo.link.url;
+
+				if (isAudioPlayable(fullUrl)) {
+					break;
+				} else {
+					if (i == IPFS_PROVIDER_HOSTS.length - 1) {
+						fullUrl = IPFS_PROVIDER_HOSTS[0] + '/ipfs/' + nftInfo.link.url;
+					}
+				}
+			}
+
 			cidHtml = `<p>CID 1: ${nftInfo.link.url}</p>`;
 		} else {
 			urlHtml = '<p><a  target="_new" href="' + fullUrl + '">' + linkString + '</a></p>';
@@ -327,16 +339,26 @@ function onGetNftInfoDone(nftInfo, message) {
 					additionalFullUrl.push(IPFS_PROVIDER_HOSTS[0] + '/ipfs/' + additionalLink.url);
 					cidHtml += `<p>CID ${i + 2}: ${additionalLink.url}</p>`
 				} else {
-					fullAdditionalUrlString = '<a  target="_new" href="' + additionalLink.url + '">' + linkString + '</a>';
+					let additionalLinkString = formatAddressString(additionalLink.url, NFT_LINK_MAX_LENGTH);
+					fullAdditionalUrlString = '<a  target="_new" href="' + additionalLink.url + '">' + additionalLinkString + '</a>';
 					additionalFullUrl.push(additionalLink.url);
 				}
 
 				formattedLinksHtml += '<br><p>URL ' + (i + 2) + ': </p>' + fullAdditionalUrlString;
 
-
 			}
 
-			fullUrl = IPFS_PROVIDER_HOSTS[0] + '/ipfs/' + nftInfo.link.url;
+			for (let i = 0; i < IPFS_PROVIDER_HOSTS.length; i++) {
+				fullUrl = IPFS_PROVIDER_HOSTS[i] + '/ipfs/' + nftInfo.link.url;
+
+				if (isAudioPlayable(fullUrl)) {
+					break;
+				} else {	
+					if (i == IPFS_PROVIDER_HOSTS.length - 1) {
+						fullUrl = IPFS_PROVIDER_HOSTS[0] + '/ipfs/' + nftInfo.link.url;
+					}
+				}
+			}
 
 			$('#nftLink').html(formattedLinksHtml);
 			$('#ipfsCid').html(cidHtml);
@@ -827,4 +849,33 @@ function mapLabel(row, index) {
 			return '';
 		}
 	}
+}
+
+function isAudioPlayable(audioUrl) {
+  const audio = new Audio();
+
+  const mimeType = getMimeType(audioUrl);
+
+  if (audio.canPlayType(mimeType) !== '') {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+// Helper function to get the MIME type based on the file extension
+function getMimeType(url) {
+  const extension = url.split('.').pop();
+  switch (extension) {
+    case 'mp3':
+      return 'audio/mpeg';
+    case 'wav':
+      return 'audio/wav';
+    case 'ogg':
+      return 'audio/ogg';
+    case 'aac':
+      return 'audio/aac';
+    default:
+      return '';
+  }
 }
