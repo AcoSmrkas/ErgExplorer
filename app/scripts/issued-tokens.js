@@ -45,7 +45,7 @@ function printIssuedTokens() {
 	var jqxhr = $.get(tokensSearchUrl, function(data) {
 		let formattedResult = '';
 		let items = data.items;
-
+        console.log(items);
         if (items.length == 0) {
             formattedResult = '<tr><td colspan="5">No results matching your query.</td></tr>';
         } else {
@@ -90,6 +90,20 @@ function printIssuedTokens() {
                 let asciiArt = isAsciiArt(tokenData.data.description);
 
         		formattedResult += '<td><span class="d-lg-none"><strong>Description: </strong></span><pre class="tokenDescriptionPre' + (asciiArt ? ' pre-ascii' : '') + '" style="max-height:100px;overflow-y:auto;">' + formatNftDescription(tokenData.data.description) + '</pre></td>';
+
+                formattedResult += `<td id="${tokenData.data.transactionId}"></td>`;
+
+                $.get(`${API_HOST}transactions/${tokenData.data.transactionId}`, function(tdata) {
+                    const date = new Date(tdata.timestamp);
+
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const year = date.getFullYear();
+
+                    const formattedDate = `${day}/${month}/${year}`;
+
+                    $('#' + tokenData.data.transactionId).html(formattedDate);
+                });
 
     			formattedResult += '</tr>';	
     		}
