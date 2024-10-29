@@ -1,5 +1,17 @@
 var tokenIcons = [];
 //TokenIconsArrayStart
+tokenIcons['da754307c5823cf39e098414919b3fac8821f4aa0c909fac474742942878dc1c'] = 'https://spectrum.fi/logos/cardano/29d222ce763455e3d7a09a665ce554f00ac89d2e99a1a83d267170c64d494e.webp';
+tokenIcons['a50d95830f150f8ffb5da1a65e2313b1269807a855e30cd2f0b3fbaee0a47386'] = 'https://spectrum.fi/logos/cardano/5d16cc1a177b5d9ba9cfa9793b07e60f1fb70fea1f8aef064415d114494147.webp';
+tokenIcons['1a0dad7633c634ffda3578a3eab07e949c19b0c82f05fb00461c1e429a874298'] = 'https://spectrum.fi/logos/cardano/95a427e384527065f2f8946f5e86320d0117839a5e98ea2c0b55fb0048554e54.webp';
+tokenIcons['569d53ad945c5a671761c108cc0646a1c96d1d529647d75a4e96770cfa68bdd9'] = 'https://spectrum.fi/logos/cardano/e52964af4fffdb54504859875b1827b60ba679074996156461143dc14f5054494d.webp';
+tokenIcons['eeb17283c641d1c74c1d44b1dee7509766350ec31ca954c420ddd788bff8f412'] = 'https://storage.googleapis.com/dexhunter-images/tokens/804f5544c1962a40546827cab750a88404dc7108c0f588b72964754f56594649.webp';
+tokenIcons['d1dcfca3330bc884298c7111a9ef1e7b2970ab0c1d11bbcbacf31d319f0c2d55'] = 'https://storage.googleapis.com/dexhunter-images/tokens/9a9693a9a37912a5097918f97918d15240c92ab729a0b7c4aa144d7753554e444145.webp';
+tokenIcons['27fd0367536ef3f05c460115087c38b6ff25a944047cc6ab06a74aaec52ccb48'] = 'https://storage.googleapis.com/dexhunter-images/tokens/ececc92aeaaac1f5b665f567b01baec8bc2771804b4c21716a87a4e353504c415348.webp';
+tokenIcons['8da6eec252f720a09bc0655abfc4ac943a9769728e1b167454ed9c3298d151ff'] = 'https://storage.googleapis.com/dexhunter-images/tokens/533bb94a8850ee3ccbe483106489399112b74c905342cb1792a797a0494e4459.webp';
+tokenIcons['b2bb4d99ffd6f73c06a4ca1fe9fadd1ad4a20b5b9052373e3cee5ddeb4534e27'] = 'https://storage.googleapis.com/dexhunter-images/tokens/016be5325fd988fea98ad422fcfd53e5352cacfced5c106a932a35a442544e.webp';
+tokenIcons['a01cb7b8ab08dec2e191b3ba58165a88a510d0f310dff5d81eb8e62e4ea6ab20'] = 'https://storage.googleapis.com/dexhunter-images/tokens/da8c30857834c6ae7203935b89278c532b3995245295456f993e1d244c51.webp';
+tokenIcons['203ef3066a912f35c488487cc2cb94bdb0d30680dab22551c7e6fdbc70dfcc8e'] = 'https://cryptologos.cc/logos/ethereum-eth-logo.png';
+tokenIcons['4ba9550720bc6520c8d58b1e8d7615627b775440f8d642415df1581eacf6d68a'] = 'https://spectrum.fi/logos/cardano/279c909f348e533da5808898f87f9a14bb2c3dfbbacccd631d927a3f534e454b.webp';
 tokenIcons['f0d5bdf474fcbd4249608e6dc6e9cf34a327b218f66445ea545b4c711b4676e3'] = 'https://cupofsugar.io/icon.png';
 tokenIcons['6c35aa395c7c75b0f67f7804d6930f0e11ef93c3387dc1faa86498d54af7962c'] = 'https://ergexplorer.com/images/tokens/mew.png';
 tokenIcons['9944ff273ff169f32b851b96bbecdbb67f223101c15ae143de82b3e7f75b19d2'] = 'https://ergexplorer.com/images/tokens/gauc.svg';
