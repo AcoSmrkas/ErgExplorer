@@ -466,7 +466,6 @@ function formatNftDescription(description) {
 		return result;
 	} else {
 		description = description.replaceAll('\n', '<br>');
-		description = description.replaceAll('<br><br>','<br>');
 
 		return description;
 	}

@@ -149,10 +149,18 @@ function processNftData(nftData) {
 	}
 
 	if (nftData.cachedurl) {
-		link = {
-			ipfsCid: false,
-			url: nftData.cachedurl
-		};
+		if (nftData.additionalRegisters.R7.serializedValue == '0e020102'
+			&& additionalLinks.length > 0) {
+			additionalLinks[0] = {
+				ipfsCid: false,
+				url: nftData.cachedurl				
+			}
+		} else {
+			link = {
+				ipfsCid: false,
+				url: nftData.cachedurl
+			};
+		}
 	}
 
 	let type = getNftType(typeString);
