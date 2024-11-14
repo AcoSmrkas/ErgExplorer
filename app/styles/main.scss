@@ -12,6 +12,11 @@ body {
 	src: url('../../fonts/DejaVuSansMono.ttf');
 }
 
+button:focus:not(:focus-visible) {
+	box-shadow: unset !important;
+	outline: unset !important;
+}
+
 select {
 	border: none !important;
 	outline: none !important;
@@ -500,6 +505,15 @@ select, option {
 
 .navbar-toggler {
 	border: none;
+	padding-right: 0;
+}
+
+.navbar-toggler-bars {
+	font-size: 1.7rem;
+}
+
+.navbar-toggler-bars:hover, .navbar-toggler-bars:focus {
+	color: var(--main-color);
 }
 
 .dropdown-menu {

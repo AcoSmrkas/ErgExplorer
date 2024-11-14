@@ -17,14 +17,13 @@
 {% block content %}
 	<div class="col-md-12">
 		<div class="row w-100">
-			<div class="col-md-12">
-				<h2>Address</h2>
+			<div class="col-md-12 mb-3 mb-md-4">
+				<h2 class="m-0">Address</h2>
 			</div>
 		</div>
-		<br>
 		<div id="summaryOk" class="mb-3" style="display: none;">
 			<div class="row w-100 div-cell-dark border-bottom-flat" style="align-items:center;">
-				<div class="col">
+				<div class="col pe-0 ps-0 ps-md-2 pe-md-2">
 					<p><a title="Copy" onclick="copyWalletAddress(event)" href="Copy to clipboard!" id="address"></a></p>
 				</div>
 			</div>		
@@ -36,8 +35,6 @@
 							<p id="verifiedOwnerHolder" style="display: none;"><strong>Verified owner: </strong><span id="verifiedOwner"></span></p>
 							<p id="addressNameHolder" style="display: none;"><strong>Name: </strong><span id="addressName"></span></p>
 							<p id="totalTransactions"></p>
-							<br>
-							<button id="showQRcodeBtn" type="button" class="btn btn-info mb-3 me-2">Show QR Code</button>
 							<button id="showUnspenBoxesBtn" type="button" class="btn btn-info mb-2 d-none">Show Unspent Boxes</button>
 
 							<hr class="my-3 d-lg-none">
