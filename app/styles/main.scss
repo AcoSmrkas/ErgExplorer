@@ -625,6 +625,12 @@ select, option {
 		color: var(--main-color) !important;
 	}
 
+	.navbar-toggler {
+		border: none;
+		padding-right: 0;
+		color: var(--text-color) !important;
+	}
+
 	span, pre, td, th {
 		color: var(--text-color);
 	}
