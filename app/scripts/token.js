@@ -560,8 +560,8 @@ function checkIfBurned() {
 }
 
 function onTokenIconLoaded() {
-	$('#tokenDescriptionHolderRight').removeClass('col-xl-10 col-9');
-	$('#tokenDescriptionHolderRight').addClass('col-xl-8 col-7');
+	$('#tokenDescriptionHolderRight').removeClass('col-xl-10 col-lg-9');
+	$('#tokenDescriptionHolderRight').addClass('col-xl-8 col-lg-7');
 
 	$('#tokenIcon').addClass('col-12');
 	$('#tokenIcon').addClass('col-lg-2');

@@ -62,10 +62,10 @@
 							</div>
 						</div>
 					</div>
+					<hr class="my-3 me-3">
 					<div class="row w-100">
 						<div id="nftsHolder" class="ps-0 pe-0 ps-md-2 pe-md-2 row w-100" style="display: none;">
 							<div class="col-12 p-0">
-								<hr class="my-3">
 								<h4 style="display:inline-block;" id="nftsTitle"><strong>Owned NFTs</strong></h4><a id="showAllNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="showNfts(event)">Show</a>
 								<a id="hideAllNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="hideNfts(event)">Hide</a>
 								<div id="nftsShowAll" style="display: none;">
@@ -109,8 +109,7 @@
 							</div>
 						</div>
 						<div id="issuedNftsHolder" class="ps-0 pe-0 ps-md-2 pe-md-2 row w-100" style="display: none;">
-							<div class="col-12 p-0">
-							<hr class="my-3">
+							<div class="col-12 p-0 mt-2">
 							<h4 style="display:inline-block;" id="issuedNftsTitle"><strong>Issued assets</strong></h4><a id="showIssuedNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="showIssuedNfts(event)">Show</a>
 								<a id="hideIssuedNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="hideIssuedNfts(event)">Hide</a>
 								<div id="nftsShowIssued" style="display: none;">
@@ -159,7 +158,18 @@
 								</div>
 							</div>
 						</div>
-					</div>					
+					</div>	
+					
+			<div class="row w-100 ps-0 pe-0 ps-md-2 pe-md-2" >
+				<div class="col-12 p-0 mt-2">
+				<h4 style="display:inline-block;" id="unspentBoxesHeading"><strong>Unspent boxes</strong></h4>
+				<a id="showUnspentBoxesAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="showUnspentBoxes(event)">Show</a>
+				<a id="hideUnspentBoxesAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="hideUnspentBoxes(event)">Hide</a>
+				</div>
+				<div style="margin-top:15px !important;" class="row p-0" id="unspentBoxesHolder">
+					
+				</div>				
+			</div>				
 				</div>
 				<div class="ps-0 pe-0 ps-md-2 pe-md-2 col-lg-4 col-md-12 border-lg-start" id="tokensHolder" style="display:none">
 					<hr class="my-3 d-lg-none">
@@ -175,16 +185,6 @@
 				</div>
 
 			<hr class="my-3 d-block d-md-none" style="border: 0;">
-			<div class="row w-100 ps-0 pe-0 ps-md-2 pe-md-2" >
-				<div class="col-12 p-0">
-				<h4 style="display:inline-block;" id="unspentBoxesHeading"><strong>Unspent boxes</strong></h4>
-				<a id="showUnspentBoxesAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="showUnspentBoxes(event)">Show</a>
-				<a id="hideUnspentBoxesAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="hideUnspentBoxes(event)">Hide</a>
-				</div>
-				<div style="margin-top:15px !important;" class="row p-0" id="unspentBoxesHolder">
-					
-				</div>				
-			</div>
 			  </div>
 		  </div>
 

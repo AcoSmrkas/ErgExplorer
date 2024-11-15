@@ -1221,7 +1221,7 @@ function printTransactions() {
 function getMempoolData() {
     let mempoolUrl = getMempoolUrl();
 
-    get(mempoolUrl)
+    fetch(mempoolUrl)
 	.then(async response => {
 		if (!response.ok) {
             throw new Error('Network response was not ok');

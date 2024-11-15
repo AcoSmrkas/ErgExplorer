@@ -821,6 +821,11 @@ function nFormatter(num, digits) {
 		{ value: 1e18, symbol: 'E' }
 	];
 
+	let isMinus = num < 0;
+	if (isMinus) {
+		num = Math.abs(num);
+	}
+
 	if (num > 10) {
 		digits = 2;
 	}
@@ -835,7 +840,9 @@ function nFormatter(num, digits) {
 		return num >= item.value;
 	});
 	
-	return item ? (num / item.value).toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: minimumFractionDigits }).replace(rx, '$1') + item.symbol : num.toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: minimumFractionDigits });
+	return item ? (isMinus ? "-" : "") + (num / item.value).toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: minimumFractionDigits }).replace(rx, '$1') + item.symbol
+	:
+	(isMinus ? "-" : "") + num.toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: minimumFractionDigits });
 }
 
 function sortTokens(tokens) {

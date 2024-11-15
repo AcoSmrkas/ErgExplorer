@@ -137,7 +137,13 @@ select:hover {
 }
 
 #tokensHolder {
-	min-height: 400px;
+	min-height: unset;
+}
+
+@media only screen and (min-width: 992px) {
+	#tokensHolder {
+		min-height: 400px;
+	}
 }
 
 #transactionsTableBody > tr > td:last-child > span:last-child {
