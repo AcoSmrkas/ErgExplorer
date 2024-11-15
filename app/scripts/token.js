@@ -564,7 +564,7 @@ function onTokenIconLoaded() {
 	$('#tokenDescriptionHolderRight').addClass('col-xl-8 col-7');
 
 	$('#tokenIcon').addClass('col-12');
-	$('#tokenIcon').addClass('col-md-2');
+	$('#tokenIcon').addClass('col-lg-2');
 
 	$('#tokenIcon').addClass('d-flex');
 	$('#tokenIcon').show();

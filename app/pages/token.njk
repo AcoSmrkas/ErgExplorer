@@ -12,7 +12,11 @@
 {% endblock %}
 
 {% block content %}
-	<h2 class="main-heading p-2">Token</h2>
+	<div class="row w-100">
+		<div class="col-md-12 mb-3 mb-md-4">
+			<h2 class="m-0">Token</h2>
+		</div>
+	</div>
 
 	<div id="tokenScamHolder" style="display: none;" class="col-md-12">
 		<div id="tokenScam" class="border-danger row w-100 div-cell-dark p-3">
@@ -24,7 +28,7 @@
 
 	<div id="tokenDataHolder" style="display: none;" class="col-md-12">
 		<div class="row w-100 div-cell-dark p-3 border-bottom-flat">
-			<div id="tokenHeader" class="col"></div>
+			<div id="tokenHeader" class="col pe-0 ps-0 ps-md-0 pe-md-0"></div>
 		</div>
 
 		<div class="row w-100 two-column-holder-top-flat-lg">
@@ -73,13 +77,13 @@
 
 			<div id="tokenDataRight" class="col-lg-8 div-cell-dark border-top-flat p-0">
 				<div class="row w-100 p-1">
-					<div id="tokenDescriptionHolderLeft" class="col-xl-2 col-3">
+					<div id="tokenDescriptionHolderLeft" class="col-xl-2 col-lg-3 col-12 col-md-5 mb-2">
 						<p><strong>Description</strong></p>
 					</div>
-					<div id="tokenDescriptionHolderRight" class="col-xl-10 col-9">
+					<div id="tokenDescriptionHolderRight" class="col-xl-8 col-lg-7 col-12 col-md-7">
 						<p id="tokenDescription"></p>
 					</div>
-					<div id="tokenIcon" style="display: none;" class="p-3 justify-content-center justify-content-md-end"><img id="tokenIconImg" onload="onTokenIconLoaded()"></div>
+					<div id="tokenIcon" style="display: none;" class="p-3 justify-content-center justify-content-lg-end"><img id="tokenIconImg" onload="onTokenIconLoaded()"></div>
 				</div>
 			</div>
 		</div>
