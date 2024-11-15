@@ -1221,7 +1221,18 @@ function printTransactions() {
 function getMempoolData() {
     let mempoolUrl = getMempoolUrl();
 
-    let jqxhr = $.get(mempoolUrl, function(data) {
+    get(mempoolUrl)
+	.then(async response => {
+		if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        let abuffer = await response.arrayBuffer();
+		const buffer = new TextDecoder("utf-8").decode(abuffer);
+        const stringFromBuffer = buffer.toString('utf8');
+
+        let data = JSONbig.parse(stringFromBuffer);
+
         mempoolData = data;
 		totalTransactions += mempoolData.total;
 		mempoolCount = mempoolData.total
@@ -1234,10 +1245,10 @@ function getMempoolData() {
 			showNotificationPermissionToast();
 		}
     })
-    .fail(function() {
+    .catch(function() {
         console.log('Mempool transactions fetch failed.');
     })
-    .always(function() {
+    .finally(function() {
         mempoolRequestDone = true;
         onMempoolAndTransactionsDataFetched();
     });
@@ -1422,14 +1433,25 @@ function onNotificationToastNo() {
 }
 
 function getTransactionsData() {
-	var jqxhr = $.get(getTxsDataUrl(), function(data) {
+	fetch(getTxsDataUrl())
+	.then(async response => {
+		if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        let abuffer = await response.arrayBuffer();
+		const buffer = new TextDecoder("utf-8").decode(abuffer);
+        const stringFromBuffer = buffer.toString('utf8');
+
+        let data = JSONbig.parse(stringFromBuffer);
+
         transactionsData = data;
 		totalTransactions += transactionsData.total;
     })
-    .fail(function() {
+    .catch(function() {
         console.log('Transactions fetch failed.');
     })
-    .always(function() {
+    .finally(function() {
         transactionsRequestDone = true;
         onMempoolAndTransactionsDataFetched();
     });

@@ -10,7 +10,18 @@ $(function() {
 });
 
 function printBlock() {
-	var jqxhr = $.get(API_HOST + 'blocks/' + blockId, function(data) {
+	fetch(API_HOST + 'blocks/' + blockId)
+	.then(async response => {
+		if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        let abuffer = await response.arrayBuffer();
+		const buffer = new TextDecoder("utf-8").decode(abuffer);
+        const stringFromBuffer = buffer.toString('utf8');
+
+        let data = JSONbig.parse(stringFromBuffer);
+
 		blockData = data.block;
 
 		printBlockSummary();
@@ -20,10 +31,10 @@ function printBlock() {
 
 		getAddressesInfo();
     })
-    .fail(function() {
+    .catch(function() {
     	showLoadError('No results matching your query.');
     })
-    .always(function() {
+    .finally(function() {
         $('#txLoading').hide();
     });
 }

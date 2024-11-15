@@ -34,7 +34,18 @@ function getBoxUrl(mempool) {
 function getBox(mempool) {
 	let boxUrl = getBoxUrl(mempool);
 
-	$.get(boxUrl, function(txData) {
+	fetch(boxUrl)
+	.then(async response => {
+		if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        let abuffer = await response.arrayBuffer();
+		const buffer = new TextDecoder("utf-8").decode(abuffer);
+        const stringFromBuffer = buffer.toString('utf8');
+
+        txData = JSONbig.parse(stringFromBuffer);
+
 		if (mempool) {
 			let walletAddress = txData.inputs[0].address;
 
@@ -60,7 +71,7 @@ function getBox(mempool) {
 			printBox(txData, mempool);
 		}
 	})
-    .fail(function() {
+    .catch(function() {
     	if (mempool) {
     		showLoadError('No results matching your query.');
 	        $('#txLoading').hide();

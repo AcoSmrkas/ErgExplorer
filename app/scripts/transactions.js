@@ -50,7 +50,18 @@ function getTxUrl(mempool) {
 function getTransaction(mempool, retries = 0) {
 	let txUrl = getTxUrl(mempool);
 
-	$.get(txUrl, function(txData) {
+	fetch(txUrl)
+	.then(async response => {
+		if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        let abuffer = await response.arrayBuffer();
+		const buffer = new TextDecoder("utf-8").decode(abuffer);
+        const stringFromBuffer = buffer.toString('utf8');
+
+        txData = JSONbig.parse(stringFromBuffer);
+
 		if (mempool) {
 			let walletAddress = 'N/A'
 
@@ -84,7 +95,7 @@ function getTransaction(mempool, retries = 0) {
 			printTransaction(txData, mempool);
 		}
 	})
-    .fail(function() {
+    .catch(function() {
     	if (mempool) {
     		showLoadError('No results matching your query.<br>Just submitted your transaction? Hang tight for a little longer!');
 	        $('#txLoading').hide();
