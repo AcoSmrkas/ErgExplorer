@@ -141,8 +141,8 @@ select:hover {
 }
 
 @media only screen and (min-width: 992px) {
-	#tokensHolder {
-		min-height: 400px;
+	.tokensContainer {
+		//min-height: 400px;
 	}
 }
 

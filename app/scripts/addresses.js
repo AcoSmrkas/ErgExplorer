@@ -72,7 +72,7 @@ const resizeObserver = new ResizeObserver((entries) => {
 	if (element) {
 		let heightStr = element.css('height');
 		let height = parseInt(heightStr);
-		let newHeight = (height / 2) - 50;
+		let newHeight = (height / 2);
 
 		$('.tokensContainer').css('max-height', newHeight + 'px');
 	}
