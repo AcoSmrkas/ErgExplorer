@@ -22,15 +22,15 @@
 			</div>
 		</div>
 		<div id="summaryOk" class="mb-3" style="display: none;">
-			<div class="row w-100 div-cell-dark border-bottom-flat" style="align-items:center;">
-				<div class="col pe-0 ps-0 ps-md-2 pe-md-2">
+			<div class="row w-100 div-cell-dark border-bottom-flat p-2 p-lg-3" style="align-items:center;">
+				<div class="col pe-0 ps-0">
 					<p><a title="Copy" onclick="copyWalletAddress(event)" href="Copy to clipboard!" id="address"></a></p>
 				</div>
 			</div>		
-			<div class="row w-100 div-cell-dark border-top-flat">
+			<div class="row w-100 div-cell-dark border-top-flat p-2 p-lg-3">
 				<div class="col-md p-0">
 					<div class="row w-100">
-						<div class="ps-0 pe-0 ps-md-2 pe-md-2 col-lg-6 col-md-12">
+						<div class="ps-0 pe-0 col-lg-6 col-md-12">
 							<h4><strong>Summary</strong></h4>
 							<p id="verifiedOwnerHolder" style="display: none;"><strong>Verified owner: </strong><span id="verifiedOwner"></span></p>
 							<p id="addressNameHolder" style="display: none;"><strong>Name: </strong><span id="addressName"></span></p>
@@ -39,11 +39,11 @@
 
 							<hr class="my-3 d-lg-none">
 						</div>
-						<div class="ps-0 pe-0 ps-md-2 pe-md-2 col-lg-6 col-md-12 border-lg-start">
+						<div class="ps-0 pe-0 ps-lg-3 col-lg-6 col-md-12 border-lg-start">
 							<h4><strong>Balance</strong></h4>
 							<h5 id="finalErgBalance"></h5>
 							<h5 style="display: none" id="finalAssetsBalance"></h5>
-							<h4 style="display: none" id="finalBalance"></h4>
+							<h4 style="display: none;margin-bottom:0;" id="finalBalance"></h4>
 							
 							<div id="ergopad" style="display: none;">
 							<hr class="my-3 p-0">
@@ -62,9 +62,9 @@
 							</div>
 						</div>
 					</div>
-					<hr class="my-3 me-3">
+					<hr class="my-3 me-0 me-lg-3">
 					<div class="row w-100">
-						<div id="nftsHolder" class="ps-0 pe-0 ps-md-2 pe-md-2 row w-100" style="display: none;">
+						<div id="nftsHolder" class="ps-0 pe-0 row w-100" style="display: none;">
 							<div class="col-12 p-0">
 								<h4 style="display:inline-block;" id="nftsTitle"><strong>Owned NFTs</strong></h4><a id="showAllNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="showNfts(event)">Show</a>
 								<a id="hideAllNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="hideNfts(event)">Hide</a>
@@ -108,7 +108,7 @@
 								</div>
 							</div>
 						</div>
-						<div id="issuedNftsHolder" class="ps-0 pe-0 ps-md-2 pe-md-2 row w-100" style="display: none;">
+						<div id="issuedNftsHolder" class="ps-0 pe-0 row w-100" style="display: none;">
 							<div class="col-12 p-0 mt-2">
 							<h4 style="display:inline-block;" id="issuedNftsTitle"><strong>Issued assets</strong></h4><a id="showIssuedNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="showIssuedNfts(event)">Show</a>
 								<a id="hideIssuedNftsAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="hideIssuedNfts(event)">Hide</a>
@@ -160,7 +160,7 @@
 						</div>
 					</div>	
 					
-			<div class="row w-100 ps-0 pe-0 ps-md-2 pe-md-2" >
+			<div class="row w-100 ps-0 pe-0" >
 				<div class="col-12 p-0 mt-2">
 				<h4 style="display:inline-block;" id="unspentBoxesHeading"><strong>Unspent boxes</strong></h4>
 				<a id="showUnspentBoxesAction" style="display:inline-block; font-size: 1.25em;" href="#" onclick="showUnspentBoxes(event)">Show</a>
@@ -171,7 +171,7 @@
 				</div>				
 			</div>				
 				</div>
-				<div class="ps-0 pe-0 ps-md-3 pe-md-2 col-lg-4 col-md-12 border-lg-start" id="tokensHolder" style="display:none">
+				<div class="ps-0 pe-0 ps-lg-3 pe-lg-3 col-lg-4 col-md-12 border-lg-start" id="tokensHolder" style="display:none">
 					<hr class="my-3 d-lg-none">
 					<div style="display: none;" id="financialAssetsHolder">
 						<h4><strong>Financial assets</strong></h4>

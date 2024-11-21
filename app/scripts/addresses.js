@@ -60,26 +60,6 @@ $(function() {
     setupDatePicker();
 });
 
-const resizeObserver = new ResizeObserver((entries) => {
-	let windowWidth = window.innerWidth;
-
-	if (windowWidth <= 992) {
-		return;
-	}
-
-	let element = $('#tokensHolder');
-
-	if (element) {
-		let heightStr = element.css('height');
-		let height = parseInt(heightStr);
-		let newHeight = (height / 2);
-
-		$('.tokensContainer').css('max-height', newHeight + 'px');
-	}
-});
-
-resizeObserver.observe(document.getElementById('tokensHolder'));
-
 function getScamList(callback) {
 	$.get(ERGEXPLORER_API_HOST + 'tokens/getScam',
 	function (data) {
@@ -2028,7 +2008,7 @@ function printUnspentBoxes() {
 	var jqxhr = $.get(getUnspentBoxesDataUrl(), function(data) {
 		let html = '';
         for (let i = 0; i < data.items.length; i++) {
-        	html += formatBox(data.items[i], false, true).replace('row', 'col-6');
+        	html += formatBox(data.items[i], false, true).replace('row', 'col-12 col-md-6 ps-0 pe-0');
         }
 
         unspentBoxesCount = data.total;

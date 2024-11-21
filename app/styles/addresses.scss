@@ -132,7 +132,7 @@ select:hover {
 }
 
 .tokensContainer {
-	max-height: 200px;
+	max-height: 130px;
 	overflow-y: auto;
 }
 
@@ -150,4 +150,9 @@ select:hover {
 	display: block;
 	max-height: 110px;
 	overflow-y: auto;	
+}
+
+#unspentBoxesHolder > div {
+	max-height: 200px;
+	overflow-y: auto;
 }
