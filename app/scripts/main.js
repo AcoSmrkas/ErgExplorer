@@ -342,7 +342,7 @@ function formatIpfsCidHtmlString(cid) {
 	return urlHtml;
 }
 
-function formatValue(value, digits, autodigits = false) {
+function formatValue(value, digits, autodigits = false, same = false) {
 	if (autodigits) {
 		digits = getAutoDigits(value, digits);
 	}
@@ -354,7 +354,11 @@ function formatValue(value, digits, autodigits = false) {
 		vstring = value.toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: 2 });
 	}
 
-	return '<span title="' + vstring + '">' + nFormatter(value, digits) + '</span>';
+	if (same) {
+		return '<span title="' + vstring + '">' + vstring + '</span>';
+	} else {
+		return '<span title="' + vstring + '">' + nFormatter(value, digits) + '</span>';
+	}
 }
 
 function isFloat(value) {

@@ -179,7 +179,7 @@ function printHolders(data) {
     if (!hasPrice) {
     	$('#financeHeader').hide();
     	$('#chartColumn').hide();
-    	$('#holdersColumn').removeClass('col-xl-5');
+    	$('#holdersColumn').removeClass('col-xl-6');
     }
 }
 
@@ -221,7 +221,7 @@ function onGetNftInfoDone(nftInfo, message) {
 	//Emission amount
 	decimals = tokenData.decimals;
 	let emissionAmount = getAssetValue(tokenData.emissionAmount, tokenData.decimals);
-	$('#tokenEmissionAmount').html('<p>' + formatValue(emissionAmount) + '</p>');
+	$('#tokenEmissionAmount').html('<p>' + formatValue(emissionAmount, 0, true, true) + '</p>');
 
 	if (tokenData.emissionAmount == 1) {
 		getCurrentAddress();

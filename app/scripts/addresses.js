@@ -1411,7 +1411,7 @@ function onNotificationToastNo() {
 	hideNotificationPermissionToast();
 }
 
-function getTransactionsData(attempt = 1) {
+function getTransactionsData(attempt = 2) {
 	fetch(getTxsDataUrl(attempt))
 	.then(async response => {
 		if (!response.ok) {
@@ -1430,7 +1430,9 @@ function getTransactionsData(attempt = 1) {
 		attempt = 2;
     })
     .catch(function() {
-		getTransactionsData(2);
+		if (attempt == 1) {
+			getTransactionsData(2);
+		}
         console.log('Transactions fetch failed.');
     })
     .finally(function() {
