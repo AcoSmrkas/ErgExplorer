@@ -52,7 +52,6 @@ $(function() {
 
 	setDocumentTitle(walletAddress);
 	
-    getUser();
     getScamList();
     getPrices(onInitRequestsFinished);
     getIssuedNfts(walletAddress, onGotIssuedNftInfo, false);
@@ -2018,10 +2017,6 @@ function getErgopadStaking() {
 }
 
 function onInitRequestsFinished() {
-	if (!checkedUser) {
-		return;
-	}
-
     printAddressSummary();
 	printTransactions();
 	printUnspentBoxes();
