@@ -990,8 +990,8 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 
 		let ergValueString = '';
 		if (totalTransferedAssets.value != 0) {
-			ergValueString = (totalTransferedAssets.value > 0 ? mixedPlus : '') + (txInOut == TxInOut.Out ? '-' : '') + formatErgValueString(totalTransferedAssets.value, 4, true) + (ergDollarValue == undefined ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>')
-formatErgValueString(totalTransferedAssets.value, 4, true) + (ergDollarValue == undefined ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>');
+			ergValueString = (totalTransferedAssets.value > 0 ? mixedPlus : '') + (txInOut == TxInOut.Out ? '-' : '') + formatErgValueString(totalTransferedAssets.value, 4) + (ergDollarValue == undefined ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>')
+formatErgValueString(totalTransferedAssets.value, 4) + (ergDollarValue == undefined ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>');
 		} else {
 			assetsFull = assets.substr(5);
 			assets = assets.substr(5);
