@@ -267,20 +267,24 @@ function checkErgoIdentifier(input) {
 }
 
 //Format strings
-function formatErgValueString(value, maxDecimals = 4) {
-    let ergValue = value / 1000000000;
+function formatErgValueString(value, maxDecimals = 4, force = false) {
+    let ergValue = parseFloat(new BigNumber(value).dividedBy(1000000000).toString());
+	
+    let tempMaxDecimals = getDecimals(ergValue, 1);
 
-    maxDecimals = getDecimals(ergValue, 1);
+	if (tempMaxDecimals > maxDecimals) {
+		maxDecimals = tempMaxDecimals;
+	}
 
-    if (ergValue > 10 || ergValue < -10) {
-            maxDecimals = 2;
+    if ((ergValue > 10 || ergValue < -10) && !force) {
+		maxDecimals = 2;
     }
 
     let minimumFractionDigits = 2;
     if (maxDecimals < minimumFractionDigits) {
             minimumFractionDigits= maxDecimals;
     }
-
+	
 	return '<strong title="' + ergValue + '"><span class="text-white">' + ergValue.toLocaleString('en-US', { maximumFractionDigits: maxDecimals, minimumFractionDigits: minimumFractionDigits }) + '</span></strong> ERG';
 }
 

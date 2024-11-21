@@ -1,5 +1,7 @@
 var tokenIcons = [];
 //TokenIconsArrayStart
+tokenIcons['012c74dcd0920ce0c3f9f3945d509ea07b33872f3f144b816bcd7b664b22d5b3'] = 'https://bafybeihuet24oa6zr25cfdxvu22wqnuummm4vjmd4lmxz2xmkqoowawtyy.ipfs.nftstorage.link/';
+tokenIcons['7c788b124df40d5ab4d4c428dd7a1290b5b8579da4e8cbddeea060b1671312da'] = 'https://images.playground.com/57c074df4ead4c1eb8faaba2ca62f46f.jpeg';
 tokenIcons['da754307c5823cf39e098414919b3fac8821f4aa0c909fac474742942878dc1c'] = 'https://spectrum.fi/logos/cardano/29d222ce763455e3d7a09a665ce554f00ac89d2e99a1a83d267170c64d494e.webp';
 tokenIcons['a50d95830f150f8ffb5da1a65e2313b1269807a855e30cd2f0b3fbaee0a47386'] = 'https://spectrum.fi/logos/cardano/5d16cc1a177b5d9ba9cfa9793b07e60f1fb70fea1f8aef064415d114494147.webp';
 tokenIcons['1a0dad7633c634ffda3578a3eab07e949c19b0c82f05fb00461c1e429a874298'] = 'https://spectrum.fi/logos/cardano/95a427e384527065f2f8946f5e86320d0117839a5e98ea2c0b55fb0048554e54.webp';

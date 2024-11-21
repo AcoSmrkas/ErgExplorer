@@ -34,6 +34,7 @@ var loadingIssuedNfts = false;
 var unspentBoxesCount = 0;
 var printedAddressSummary = false;
 var scamList = [];
+var getTxData = false;
 
 const N2T_SWAP_SELL_TEMPLATE_ERG = 'd803d6017300d602b2a4730100d6037302eb027201d195ed92b1a4730393b1db630872027304d804d604db63087202d605b2a5730500d606b2db63087205730600d6077e8c72060206edededededed938cb2720473070001730893c27205d07201938c72060173099272077e730a06927ec172050699997ec1a7069d9c72077e730b067e730c067e720306909c9c7e8cb27204730d0002067e7203067e730e069c9a7207730f9a9c7ec17202067e7310067e9c73117e7312050690b0ada5d90108639593c272087313c1720873147315d90108599a8c7208018c72080273167317'
 const N2T_SWAP_SELL_TEMPLATE_SPF = 'd804d601b2a4730000d6027301d6037302d6049c73037e730405eb027305d195ed92b1a4730693b1db630872017307d806d605db63087201d606b2a5730800d607db63087206d608b27207730900d6098c720802d60a95730a9d9c7e997209730b067e7202067e7203067e720906edededededed938cb27205730c0001730d93c27206730e938c720801730f92720a7e7310069573117312d801d60b997e7313069d9c720a7e7203067e72020695ed91720b731492b172077315d801d60cb27207731600ed938c720c017317927e8c720c0206720b7318909c7e8cb2720573190002067e7204069c9a720a731a9a9c7ec17201067e731b067e72040690b0ada5d9010b639593c2720b731cc1720b731d731ed9010b599a8c720b018c720b02731f7320'
@@ -114,12 +115,8 @@ function printAddressSummary() {
 
 	$.get(balanceUrl,
 	function(data) {
-		if (walletAddress == '9fnZypJQLj37k3iLSPVVczGkoSArMZenJLdU4QFaGUpyDrdzPCv') {
-			data.confirmed.nanoErgs += 7660000000000;
-		}
 		//Total ERG value
-		$('#finalErgBalance').html('<strong class="erg-span">ERG</strong><span class="gray-color"> balance:</span> <strong>' + formatErgValueString(data.confirmed.nanoErgs, 2) + '</strong>');
-
+		$('#finalErgBalance').html('<strong class="erg-span">ERG</strong><span class="gray-color"> balance:</span> <strong>' + formatErgValueString(data.confirmed.nanoErgs, 4, true) + '</strong>');
 
 		let ergDollarValue = formatAssetDollarPrice(data.confirmed.nanoErgs, ERG_DECIMALS, 'ERG');
 		if (gotPrices) {
@@ -509,15 +506,6 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 					}
 				}
 			}
-		}
-
-
-		if (walletAddress == '9fnZypJQLj37k3iLSPVVczGkoSArMZenJLdU4QFaGUpyDrdzPCv' && item.id == '7b76c4cf02550f58c880ef627d934be3902e945548fa87e7c1b8ba807843503e') {
-			totalTransferedAssets.value = 7660000000000;
-		}
-
-		if (walletAddress == '9gvDVNy1XvDeFoi4ZHn5v6u3tFRECMXGKbwuHbijJu6Z2hLQTQz' && item.id == '7b76c4cf02550f58c880ef627d934be3902e945548fa87e7c1b8ba807843503e') {
-			totalTransferedAssets.value = -7660000000000;
 		}
 
 		let txInOut = getTxInOutType(totalTransferedAssets);
@@ -1002,8 +990,8 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 
 		let ergValueString = '';
 		if (totalTransferedAssets.value != 0) {
-			ergValueString = (totalTransferedAssets.value > 0 ? mixedPlus : '') + (txInOut == TxInOut.Out ? '-' : '') + formatErgValueString(totalTransferedAssets.value, 5) + (ergDollarValue == undefined ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>')
-formatErgValueString(totalTransferedAssets.value, 5) + (ergDollarValue == undefined ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>');
+			ergValueString = (totalTransferedAssets.value > 0 ? mixedPlus : '') + (txInOut == TxInOut.Out ? '-' : '') + formatErgValueString(totalTransferedAssets.value, 4, true) + (ergDollarValue == undefined ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>')
+formatErgValueString(totalTransferedAssets.value, 4, true) + (ergDollarValue == undefined ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>');
 		} else {
 			assetsFull = assets.substr(5);
 			assets = assets.substr(5);
@@ -1209,6 +1197,14 @@ function hideNfts(e) {
 }
 
 function printTransactions() {
+	if (getTxData) {
+		return;
+	}
+
+	if (!getTxData) {
+		getTxData = true;
+	}
+
     if (offset == 0) {
         getMempoolData()
     } else {
@@ -1353,9 +1349,13 @@ function getUnspentBoxesDataUrl() {
 	return balanceUrl;	
 }
 
-function getTxsDataUrl() {
+function getTxsDataUrl(attempt = 1) {
 	if (params['filterTxs'] == undefined) {
-		return API_HOST_2 + 'addresses/' + walletAddress + '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
+		if (attempt == 1) {
+		return `https://api.sigmaspace.io/api/v1/addresses/${walletAddress}/transactions?offset=${offset}&limit=${ITEMS_PER_PAGE}`;
+		} else {
+			return API_HOST_2 + 'addresses/' + walletAddress + '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
+		}
 	} else {
 		let tokenId = params['tokenId'];
 		let minValue = params['minValue'];
@@ -1432,8 +1432,8 @@ function onNotificationToastNo() {
 	hideNotificationPermissionToast();
 }
 
-function getTransactionsData() {
-	fetch(getTxsDataUrl())
+function getTransactionsData(attempt = 1) {
+	fetch(getTxsDataUrl(attempt))
 	.then(async response => {
 		if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -1447,13 +1447,18 @@ function getTransactionsData() {
 
         transactionsData = data;
 		totalTransactions += transactionsData.total;
+
+		attempt = 2;
     })
     .catch(function() {
+		getTransactionsData(2);
         console.log('Transactions fetch failed.');
     })
     .finally(function() {
-        transactionsRequestDone = true;
-        onMempoolAndTransactionsDataFetched();
+		if (attempt == 2) {
+			transactionsRequestDone = true;
+			onMempoolAndTransactionsDataFetched();
+		}
     });
 }
 
