@@ -440,14 +440,14 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		}
 
 		let totalTransferedAssets = {
-			value: 0,
+			value: new BigNumber(0),
 			assets: {}
 		};
 
 		for (let j = 0; j < item.outputs.length; j++) {
 			if (item.outputs[j].address == outputsAddress) {
 
-				totalTransferedAssets.value += item.outputs[j].value;
+				totalTransferedAssets.value = totalTransferedAssets.value.plus(item.outputs[j].value);
 				
 				//Sort
 				let tokensArray = sortTokens(item.outputs[j].assets);
@@ -458,9 +458,9 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 						totalTransferedAssets.assets[tokensArray[k].tokenId].tokenId = tokensArray[k].tokenId;
 						totalTransferedAssets.assets[tokensArray[k].tokenId].decimals = tokensArray[k].decimals;
 						totalTransferedAssets.assets[tokensArray[k].tokenId].name = tokensArray[k].name;
-						totalTransferedAssets.assets[tokensArray[k].tokenId].amount = tokensArray[k].amount;
+						totalTransferedAssets.assets[tokensArray[k].tokenId].amount = new BigNumber(tokensArray[k].amount);
 					} else {
-						totalTransferedAssets.assets[tokensArray[k].tokenId].amount += tokensArray[k].amount;
+						totalTransferedAssets.assets[tokensArray[k].tokenId].amount = totalTransferedAssets.assets[tokensArray[k].tokenId].amount.plus(tokensArray[k].amount);
 					}
 				}
 			}
@@ -469,7 +469,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		for (let j = 0; j < item.inputs.length; j++) {
 			if (item.inputs[j].address == outputsAddress) {
 
-				totalTransferedAssets.value -= item.inputs[j].value;
+				totalTransferedAssets.value = totalTransferedAssets.value.minus(item.inputs[j].value);
 				
 				//Sort
 				let tokensArray = sortTokens(item.inputs[j].assets);
@@ -479,9 +479,9 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 						totalTransferedAssets.assets[tokensArray[k].tokenId].tokenId = tokensArray[k].tokenId;
 						totalTransferedAssets.assets[tokensArray[k].tokenId].decimals = tokensArray[k].decimals;
 						totalTransferedAssets.assets[tokensArray[k].tokenId].name = tokensArray[k].name;
-						totalTransferedAssets.assets[tokensArray[k].tokenId].amount = -tokensArray[k].amount;
+						totalTransferedAssets.assets[tokensArray[k].tokenId].amount = new BigNumber(-tokensArray[k].amount);
 					} else {
-						totalTransferedAssets.assets[tokensArray[k].tokenId].amount -= tokensArray[k].amount;
+						totalTransferedAssets.assets[tokensArray[k].tokenId].amount = totalTransferedAssets.assets[tokensArray[k].tokenId].amount.minus(tokensArray[k].amount);
 					}
 				}
 			}
