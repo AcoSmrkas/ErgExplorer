@@ -342,16 +342,22 @@ function formatIpfsCidHtmlString(cid) {
 	return urlHtml;
 }
 
+
 function formatValue(value, digits, autodigits = false, same = false) {
 	if (autodigits) {
 		digits = getAutoDigits(value, digits);
 	}
 
 	let vstring = '';
+	let minimumFractionDigits = 2;
+	if (digits < minimumFractionDigits) {
+		minimumFractionDigits = digits;
+	}
+
 	if (!isFloat(value) && isLargerThanMaxSafeInteger(value)) {
 		vstring = formatBigIntToLocaleString(value);
 	} else {
-		vstring = value.toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: 2 });
+		vstring = value.toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: minimumFractionDigits });
 	}
 
 	if (same) {
@@ -411,7 +417,7 @@ function getAutoDigits(value, digits = 2, additionalDigits = 2) {
 	return digits;
 }
 
-function formatAssetValueString(value, decimals, digits = 2) {
+function formatAssetValueString(value, decimals, digits = 2, noshort = false) {
 	let assetValue = getAssetValue(value, decimals);
 
 	if (assetValue > 0.1) {
@@ -420,7 +426,7 @@ function formatAssetValueString(value, decimals, digits = 2) {
 
 	digits = getDecimals(assetValue, 1);
 
-	return formatValue(assetValue, digits);
+	return formatValue(assetValue, digits, false, noshort);
 }
 
 function formatAssetNameAndValueString(name, valueString, tokenId) {
@@ -687,7 +693,7 @@ function formatBox(box, trueBox = false, unspent = false) {
 	}
 
 	//Value
-	formattedData += '<div style="padding-bottom:10px;" class="ps-0 pe-0 pe-md-2 ps-md-2 col-10"><span><strong>Value: </strong></span><span class="">' + formatErgValueString(box.value, 5) + ' <span class="text-light">' + formatAssetDollarPriceString(box.value, ERG_DECIMALS, 'ERG') + '</span></span></div>';
+	formattedData += '<div style="padding-bottom:10px;" class="ps-0 pe-0 pe-md-2 ps-md-2 col-10"><span><strong>Value: </strong></span><span class="">' + formatErgValueString(box.value, 9, true, !trueBox) + ' <span class="text-light">' + formatAssetDollarPriceString(box.value, ERG_DECIMALS, 'ERG') + '</span></span></div>';
 	
 	//Output transaction
 	if (box.outputTransactionId != undefined) {
@@ -700,7 +706,7 @@ function formatBox(box, trueBox = false, unspent = false) {
 		for (let j = 0; j < box.assets.length; j++) {
 			let asset = box.assets[j];
 			let assetPrice = formatAssetDollarPrice(asset.amount, asset.decimals, asset.tokenId);
-			formattedData += '<p><strong>' + getAssetTitle(asset, true) + '</strong>: <span class="text-white">' + formatAssetValueString(asset.amount, asset.decimals, 4) + ' ' + (assetPrice == -1 ? '' : '<span class="text-light">' + formatDollarPriceString(assetPrice) + '</span>') + '</span></p>';
+			formattedData += '<p><strong>' + getAssetTitle(asset, true) + '</strong>: <span class="text-white">' + formatAssetValueString(asset.amount, asset.decimals, 4, !trueBox) + ' ' + (assetPrice == -1 ? '' : '<span class="text-light">' + formatDollarPriceString(assetPrice) + '</span>') + '</span></p>';
 		}
 		formattedData += '</div>'
 	}

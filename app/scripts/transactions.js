@@ -129,9 +129,9 @@ function printTransaction(data, mempool) {
 				burnedAssets[tokensArray[k].tokenId].tokenId = tokensArray[k].tokenId;
 				burnedAssets[tokensArray[k].tokenId].decimals = tokensArray[k].decimals;
 				burnedAssets[tokensArray[k].tokenId].name = tokensArray[k].name;
-				burnedAssets[tokensArray[k].tokenId].amount = tokensArray[k].amount;
+				burnedAssets[tokensArray[k].tokenId].amount = new BigNumber(tokensArray[k].amount);
 			} else {
-				burnedAssets[tokensArray[k].tokenId].amount += tokensArray[k].amount;
+				burnedAssets[tokensArray[k].tokenId].amount = burnedAssets[tokensArray[k].tokenId].amount.plus(tokensArray[k].amount);
 			}
 		}
 	}
@@ -147,7 +147,7 @@ function printTransaction(data, mempool) {
 				burnedAssets[tokensArray[k].tokenId].name = tokensArray[k].name;
 				burnedAssets[tokensArray[k].tokenId].amount = -tokensArray[k].amount;
 			} else {
-				burnedAssets[tokensArray[k].tokenId].amount -= tokensArray[k].amount;
+				burnedAssets[tokensArray[k].tokenId].amount = burnedAssets[tokensArray[k].tokenId].amount.minus(tokensArray[k].amount);
 			}
 		}
 	}
