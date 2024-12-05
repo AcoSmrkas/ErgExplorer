@@ -722,6 +722,9 @@ function formatBox(box, trueBox = false, unspent = false) {
 				if (register.sigmaType == 'Coll[SByte]'
 					|| register.sigmaType == 'SLong'
 					|| register.sigmaType == 'SInt'
+					|| register.sigmaType == 'Coll[SInt]'
+					|| register.sigmaType == 'SBigInt'
+					|| register.sigmaType == 'SSigmaProp'
 					) {
 					if (!shownRegisters) {
 						formattedData += '<div style="margin-top:5px;" class="ps-0 pe-0 pe-md-2 ps-md-2 col-10"><p style="margin-bottom:5px;"><strong class="text-white">Additional registers:</strong></p>'
@@ -732,8 +735,13 @@ function formatBox(box, trueBox = false, unspent = false) {
 				if (register.sigmaType == 'Coll[SByte]') {
 					formattedData += `<p><strong>${registerKeys[i]}</strong>: ${hex2a(register.renderedValue)}</p>`;
 				} else if (register.sigmaType == 'SLong' ||
-					register.sigmaType == 'SInt') {
+					register.sigmaType == 'SInt'
+				|| register.sigmaType == 'Coll[SInt]') {
 					formattedData += `<p><strong>${registerKeys[i]}</strong>: ${register.renderedValue}</p>`;
+				} else if (register.sigmaType == 'SBigInt') {
+					formattedData += `<p><strong>${registerKeys[i]}</strong>: ${parseInt(register.renderedValue.match(/\d+/)[0], 10)}</p>`;
+				} else if (register.sigmaType == 'SSigmaProp') {
+					formattedData += `<p><strong>${registerKeys[i]}</strong>: <a href="/addresses/${qfleetSDKcore.ErgoAddress.fromPublicKey(register.renderedValue, 0)}">${qfleetSDKcore.ErgoAddress.fromPublicKey(register.renderedValue, 0)}</a></p>`;
 				}
 			}
 

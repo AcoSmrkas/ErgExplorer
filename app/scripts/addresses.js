@@ -55,9 +55,6 @@ $(function() {
     getScamList();
     getPrices(onInitRequestsFinished);
     getIssuedNfts(walletAddress, onGotIssuedNftInfo, false);
-
-    setupQrCode();
-    setupDatePicker();
 });
 
 function getScamList(callback) {
@@ -779,13 +776,13 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 					burnedAssets[tokensArray[k].tokenId].tokenId = tokensArray[k].tokenId;
 					burnedAssets[tokensArray[k].tokenId].decimals = tokensArray[k].decimals;
 					burnedAssets[tokensArray[k].tokenId].name = tokensArray[k].name;
-					burnedAssets[tokensArray[k].tokenId].amount = tokensArray[k].amount;
+					burnedAssets[tokensArray[k].tokenId].amount = new BigNumber(tokensArray[k].amount);
 				} else {
-					burnedAssets[tokensArray[k].tokenId].amount += tokensArray[k].amount;
+					burnedAssets[tokensArray[k].tokenId].amount = burnedAssets[tokensArray[k].tokenId].amount.plus(tokensArray[k].amount);
 				}
 			}
 		}
-
+	
 		for (let j = 0; j < item.outputs.length; j++) {				
 			//Sort
 			let tokensArray = sortTokens(item.outputs[j].assets);
@@ -795,9 +792,9 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 					burnedAssets[tokensArray[k].tokenId].tokenId = tokensArray[k].tokenId;
 					burnedAssets[tokensArray[k].tokenId].decimals = tokensArray[k].decimals;
 					burnedAssets[tokensArray[k].tokenId].name = tokensArray[k].name;
-					burnedAssets[tokensArray[k].tokenId].amount = -tokensArray[k].amount;
+					burnedAssets[tokensArray[k].tokenId].amount = new BigNumber(-tokensArray[k].amount);
 				} else {
-					burnedAssets[tokensArray[k].tokenId].amount -= tokensArray[k].amount;
+					burnedAssets[tokensArray[k].tokenId].amount = burnedAssets[tokensArray[k].tokenId].amount.minus(tokensArray[k].amount);
 				}
 			}
 		}
@@ -1666,78 +1663,6 @@ function setupQrCode() {
 		$('body').css('height', 'inherit');
 		$('body').css('overflow-y', 'auto');
 	});
-}
-
-function setupDatePicker() {
-    datePickerFrom = new tempusDominus.TempusDominus(document.getElementById('datetimepicker1'), {
-	  allowInputToggle: true,
-	  display: {
-	    viewMode: 'calendar',
-	    components: {
-	      decades: false,
-	      year: true,
-	      month: true,
-	      date: true,
-	      hours: false,
-	      minutes: false,
-	      seconds: false
-	    },
-	    buttons: {
-	      today: true,
-	      clear: true,
-	      close: true
-	    }
-	  }
-	});
-
-    datePickerFrom.dates.formatInput = function(date) {
-    	{
-    		if (date == undefined) {
-    			return '';
-    		}
-
-    		return date.toLocaleDateString(undefined,
-    			{  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-}) + ' 00:00 AM';
-    	}
-	}
-
-    datePickerTo = new tempusDominus.TempusDominus(document.getElementById('datetimepicker2'), {
-	  allowInputToggle: true,
-	  display: {
-	    viewMode: 'calendar',
-	    components: {
-	      decades: false,
-	      year: true,
-	      month: true,
-	      date: true,
-	      hours: false,
-	      minutes: false,
-	      seconds: false
-	    },
-	    buttons: {
-	      today: true,
-	      clear: true,
-	      close: true
-	    }
-	  }
-	});
-
-    datePickerTo.dates.formatInput = function(date) {
-    	{
-    		if (date == undefined) {
-    			return '';
-    		}
-
-    		return date.toLocaleDateString(undefined,
-    			{  year: 'numeric',
-		  month: '2-digit',
-		  day: '2-digit',
-		}) + ' 11:59 PM';
-    	}
-	}
 }
 
 function filterTransactions(e) {
