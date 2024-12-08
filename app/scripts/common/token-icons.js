@@ -1,5 +1,9 @@
 var tokenIcons = [];
 //TokenIconsArrayStart
+tokenIcons['3fba7e9e77350709a1aeddd0c47ad7f7675e16cb06bd19264cecf49d16d4368f'] = 'https://raw.githubusercontent.com/PJs-Token/Pyjamas/dd90c5a7008761916fbcf34a1bfe151a70fceb67/PJs%20Logo.png';
+tokenIcons['b780a9682ba1ea68eedfe3dd00169e414ea8968d96142ee95e2391d64df05c3d'] = 'https://storage.googleapis.com/dexhunter-images/tokens/5612bee388219c1b76fd527ed0fa5aa1d28652838bcab4ee4ee63197446973636f696e.webp';
+tokenIcons['f0cac602d618081f46db086726d3c4da53006b646b50e382989054dcf3c93bd8'] = 'https://cupofsugar.io/fakulogo.png';
+tokenIcons['919be0b1063f2eb3f1aa0ad0b8753d6564f97658b5986908e2734cb22b2a35b0'] = 'https://api.ergexplorer.com/nftcache/bafkreifhs4646gohs77oqdsbea4pi5fkqny7gwggny5keok6rxd6f3ptbi.png';
 tokenIcons['5c26c101dfa8740c4e48b439ca15efe14b23ddc4d85bc971c56ffbb3cff84569'] = 'https://ergexplorer.com/images/tokens/santakey.png';
 tokenIcons['8e8dd3b13d12485cdc599977e4a2a537a519c5db0c08649c55b5181e0294cdae'] = 'https://images.playground.com/57c074df4ead4c1eb8faaba2ca62f46f.jpeg';
 tokenIcons['012c74dcd0920ce0c3f9f3945d509ea07b33872f3f144b816bcd7b664b22d5b3'] = 'https://bafybeihuet24oa6zr25cfdxvu22wqnuummm4vjmd4lmxz2xmkqoowawtyy.ipfs.nftstorage.link/';

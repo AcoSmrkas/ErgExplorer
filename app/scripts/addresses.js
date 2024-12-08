@@ -1325,7 +1325,7 @@ function getUnspentBoxesDataUrl() {
 	return balanceUrl;	
 }
 
-function getTxsDataUrl(attempt = 1) {
+function getTxsDataUrl(attempt) {
 	if (params['filterTxs'] == undefined) {
 		if (attempt == 1) {
 		return `https://api.sigmaspace.io/api/v1/addresses/${walletAddress}/transactions?offset=${offset}&limit=${ITEMS_PER_PAGE}`;
@@ -1408,7 +1408,7 @@ function onNotificationToastNo() {
 	hideNotificationPermissionToast();
 }
 
-function getTransactionsData(attempt = 2) {
+function getTransactionsData(attempt = 1) {
 	fetch(getTxsDataUrl(attempt))
 	.then(async response => {
 		if (!response.ok) {
