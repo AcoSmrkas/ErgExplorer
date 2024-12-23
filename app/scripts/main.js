@@ -492,7 +492,12 @@ function parseNftJson(jsonObject, result, indent) {
 	for (let i = 0; i < keys.length; i++) {
 		if (typeof values[i] === 'object') {
 			result += formatNftDescriptonJson(keys[i], '', indent) + '<br>';
-			result = parseNftJson(values[i], result, indent + 1);
+
+			if (values[i] != null) {
+				result = parseNftJson(values[i], result, indent + 1);
+			} else {
+				result += '    null';
+			}
 		} else {
 			result += formatNftDescriptonJson(keys[i], values[i], indent); 
 		}
@@ -526,6 +531,10 @@ function getAssetTitleParams(tokenId, name, iconIsToTheLeft, scam = false) {
 
 	if (name == 'Crooks Finance Stake Key') {
 		imgSrc = 'https://crooks-fi.com/images/logo.png';
+	}
+
+	if (name == 'Mew Fun Lottery Ticket') {
+		imgSrc = 'https://api.ergexplorer.com/nftcache/bafybeie6z4zm7ahjvlawjfq4idojdrahklksygpfmb4zvlrx3id3h5dyty.png';
 	}
 
 	let iconHtml = '<img style="display: none;" onload="onTokenIconLoad(this)"  class="token-icon" src="' + imgSrc + '"/>';

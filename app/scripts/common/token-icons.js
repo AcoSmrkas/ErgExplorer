@@ -1,6 +1,7 @@
 var tokenIcons = [];
 //TokenIconsArrayStart
-tokenIcons['3fba7e9e77350709a1aeddd0c47ad7f7675e16cb06bd19264cecf49d16d4368f'] = 'https://raw.githubusercontent.com/PJs-Token/Pyjamas/dd90c5a7008761916fbcf34a1bfe151a70fceb67/PJs%20Logo.png';
+tokenIcons['556598b2ca017610a0c5911f1eb1185f1d5a539287979730394d291dbd87186f'] = 'https://assets.coingecko.com/coins/images/52099/standard/sugarsquare.jpg';
+tokenIcons['3fba7e9e77350709a1aeddd0c47ad7f7675e16cb06bd19264cecf49d16d4368f'] = 'https://github.com/PJs-Token/Pyjamas/blob/main/assets/pjs_256x256.png?raw=true';
 tokenIcons['b780a9682ba1ea68eedfe3dd00169e414ea8968d96142ee95e2391d64df05c3d'] = 'https://storage.googleapis.com/dexhunter-images/tokens/5612bee388219c1b76fd527ed0fa5aa1d28652838bcab4ee4ee63197446973636f696e.webp';
 tokenIcons['f0cac602d618081f46db086726d3c4da53006b646b50e382989054dcf3c93bd8'] = 'https://cupofsugar.io/fakulogo.png';
 tokenIcons['919be0b1063f2eb3f1aa0ad0b8753d6564f97658b5986908e2734cb22b2a35b0'] = 'https://api.ergexplorer.com/nftcache/bafkreifhs4646gohs77oqdsbea4pi5fkqny7gwggny5keok6rxd6f3ptbi.png';

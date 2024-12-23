@@ -485,6 +485,8 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		}
 
 		let txInOut = getTxInOutType(totalTransferedAssets);
+		let analysis = analyzeTransfers(item, walletAddress);
+		console.log(analysis);
 
 		let fromAddress;
 		let toAddress;
@@ -764,6 +766,9 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 
 			} while (!hasEnough);
 		}
+
+		fromAddress = analysis.from;
+		toAddress = analysis.to;
 
 		//check burn for single emissions
 		let burnedAssets = {};
@@ -2186,4 +2191,239 @@ function getAddressFromErgotree(ergoTree, fromAddress, formattedAddress) {
 			}
 
 			return formattedAddress;
+}
+
+function analyzeTransfers(txData, inputAddress) {
+    // Initialize result object
+    const result = {
+        isSending: false,
+        isReceiving: false,
+        isMinting: false,
+        isBurning: false,
+        sendingTo: new Set(),
+        receivingFrom: new Set(),
+        assetsSent: [],
+        assetsReceived: [],
+        assetsMinted: [],
+        assetsBurned: [],
+        from: '',
+        to: ''
+    };
+
+    // Get all boxes for the input address
+    const inputBoxes = txData.inputs.filter(box => box.address === inputAddress);
+    const outputBoxes = txData.outputs.filter(box => box.address === inputAddress);
+
+    // Special address that receives payment
+    const PAYMENT_ADDRESS = '2iHkR7CWvD1R4j1yZg5bkeDRQavjAaVPeTDFGGLZduHyfWMuYpmhHocX8GJoaieTx78FntzJbCBVL6rf96ocJoZdmWBL2fci7NqWgAirppPQmZ7fN9V6z13Ay6brPriBKYqLp1bT2Fk4FkFLCfdPpe';
+
+    // Helper function to get total assets for boxes
+    function getBoxAssets(boxes) {
+        const assets = new Map(); // Map of tokenId to amount
+        boxes.forEach(box => {
+            // Add ERG value
+            if (!assets.has('ERG')) {
+                assets.set('ERG', 0);
+            }
+            assets.set('ERG', assets.get('ERG') + box.value);
+            
+            // Add other assets
+            box.assets.forEach(asset => {
+                if (!assets.has(asset.tokenId)) {
+                    assets.set(asset.tokenId, 0);
+                }
+                assets.set(asset.tokenId, assets.get(asset.tokenId) + asset.amount);
+            });
+        });
+        return assets;
+    }
+
+    // Get all assets in the transaction
+    const inputAssets = getBoxAssets(inputBoxes);
+    const outputAssets = getBoxAssets(outputBoxes);
+    const allTxInputAssets = getBoxAssets(txData.inputs);
+    const allTxOutputAssets = getBoxAssets(txData.outputs);
+
+    // Check for minting (new assets appearing in output)
+    for (const [tokenId, outputAmount] of outputAssets) {
+        const inputAmount = inputAssets.get(tokenId) || 0;
+        const totalTxInputAmount = allTxInputAssets.get(tokenId) || 0;
+        const totalTxOutputAmount = allTxOutputAssets.get(tokenId) || 0;
+
+        if (totalTxOutputAmount > totalTxInputAmount && outputAmount > inputAmount) {
+            result.isMinting = true;
+            result.assetsMinted.push({
+                tokenId,
+                amount: Math.min(outputAmount - inputAmount, totalTxOutputAmount - totalTxInputAmount)
+            });
+        }
+    }
+
+    // Check for burning (assets disappearing from input)
+    for (const [tokenId, inputAmount] of inputAssets) {
+        const outputAmount = outputAssets.get(tokenId) || 0;
+        const totalTxInputAmount = allTxInputAssets.get(tokenId) || 0;
+        const totalTxOutputAmount = allTxOutputAssets.get(tokenId) || 0;
+
+        if (totalTxOutputAmount < totalTxInputAmount && inputAmount > outputAmount) {
+            result.isBurning = true;
+            result.assetsBurned.push({
+                tokenId,
+                amount: Math.min(inputAmount - outputAmount, totalTxInputAmount - totalTxOutputAmount)
+            });
+        }
+    }
+
+    // Track which assets are only burned (not sent to other addresses)
+    const onlyBurnedAssets = new Set(
+        result.assetsBurned.map(asset => asset.tokenId)
+    );
+
+    // Compare input and output assets to determine transfers
+    for (const [tokenId, inputAmount] of inputAssets) {
+        const outputAmount = outputAssets.get(tokenId) || 0;
+        if (inputAmount > outputAmount) {
+            // Find if this asset is actually being sent to someone
+            const isActuallySent = txData.outputs
+                .some(box => 
+                    box.address !== inputAddress && 
+                    box.address !== PAYMENT_ADDRESS && 
+                    (
+                        (tokenId === 'ERG' && box.value > 0) ||
+                        box.assets.some(asset => asset.tokenId === tokenId && asset.amount > 0)
+                    )
+                );
+
+            if (isActuallySent) {
+                onlyBurnedAssets.delete(tokenId);
+                result.isSending = true;
+                // Find recipients (excluding payment address)
+                txData.outputs
+                    .filter(box => box.address !== inputAddress && box.address !== PAYMENT_ADDRESS)
+                    .forEach(box => {
+                        if (tokenId === 'ERG' && box.value > 0) {
+                            result.sendingTo.add(box.address);
+                        } else {
+                            const assetExists = box.assets.some(asset => 
+                                asset.tokenId === tokenId && asset.amount > 0);
+                            if (assetExists) {
+                                result.sendingTo.add(box.address);
+                            }
+                        }
+                    });
+            }
+            
+            result.assetsSent.push({
+                tokenId,
+                amount: inputAmount - outputAmount
+            });
+        }
+    }
+
+    // Remove assets that are only burned from assetsSent
+    result.assetsSent = result.assetsSent.filter(
+        asset => !onlyBurnedAssets.has(asset.tokenId)
+    );
+
+    // Check for receiving assets
+    for (const [tokenId, outputAmount] of outputAssets) {
+        const inputAmount = inputAssets.get(tokenId) || 0;
+        if (outputAmount > inputAmount) {
+            result.isReceiving = true;
+            // Find senders
+            txData.inputs
+                .filter(box => box.address !== inputAddress)
+                .forEach(box => {
+                    if (tokenId === 'ERG' && box.value > 0) {
+                        result.receivingFrom.add(box.address);
+                    } else {
+                        const assetExists = box.assets.some(asset => 
+                            asset.tokenId === tokenId && asset.amount > 0);
+                        if (assetExists) {
+                            result.receivingFrom.add(box.address);
+                        }
+                    }
+                });
+            result.assetsReceived.push({
+                tokenId,
+                amount: outputAmount - inputAmount
+            });
+        }
+    }
+
+	if (result.isSending && (!result.isBurning || result.sendingTo.size > 0)) {
+        result.from = inputAddress;
+        // If sending to single address, use that
+        if (result.sendingTo.size === 1) {
+            result.to = Array.from(result.sendingTo)[0];
+        } 
+        // If sending to multiple addresses, use the one receiving the most value
+        else if (result.sendingTo.size > 1) {
+            let maxValue = 0;
+            let maxAddress = '';
+            Array.from(result.sendingTo).forEach(address => {
+                let totalValue = 0;
+                txData.outputs
+                    .filter(box => box.address === address)
+                    .forEach(box => {
+                        totalValue += box.value; // Add ERG value
+                        // Add other assets value (simplified - just adding amounts)
+                        box.assets.forEach(asset => {
+                            totalValue += asset.amount;
+                        });
+                    });
+                if (totalValue > maxValue) {
+                    maxValue = totalValue;
+                    maxAddress = address;
+                }
+            });
+            result.to = maxAddress;
+        }
+    }
+    // If primarily receiving
+    else if (result.isReceiving) {
+        result.to = inputAddress;
+        // If receiving from single address, use that
+        if (result.receivingFrom.size === 1) {
+            result.from = Array.from(result.receivingFrom)[0];
+        }
+        // If receiving from multiple addresses, use the one sending the most value
+        else if (result.receivingFrom.size > 1) {
+            let maxValue = 0;
+            let maxAddress = '';
+            Array.from(result.receivingFrom).forEach(address => {
+                let totalValue = 0;
+                txData.inputs
+                    .filter(box => box.address === address)
+                    .forEach(box => {
+                        totalValue += box.value; // Add ERG value
+                        // Add other assets value (simplified - just adding amounts)
+                        box.assets.forEach(asset => {
+                            totalValue += asset.amount;
+                        });
+                    });
+                if (totalValue > maxValue) {
+                    maxValue = totalValue;
+                    maxAddress = address;
+                }
+            });
+            result.from = maxAddress;
+        }
+    }
+    // If only burning
+    else if (result.isBurning && !result.isSending) {
+        result.from = inputAddress;
+        result.to = PAYMENT_ADDRESS;
+    }
+    // If only minting
+    else if (result.isMinting && !result.isReceiving) {
+        result.from = inputAddress;
+        result.to = inputAddress;
+    }
+
+    return {
+        ...result,
+        sendingTo: Array.from(result.sendingTo),
+        receivingFrom: Array.from(result.receivingFrom)
+    };
 }
