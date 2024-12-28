@@ -12,6 +12,10 @@ html[data-bs-theme="dark"] {
 	--text-strong: #CCC;
 	--background: #222;
 	--footer: var(--forms-bg);
+	
+	#dropdown > .dropdown-menu > li > a:hover {
+		color: var(--background) !important;
+	}
 }
 
 html[data-bs-theme="light"] {
@@ -37,6 +41,14 @@ html[data-theme="mew"] {
 	--striped-1: var(--background);
 	--main-color: #f9d72d;
 	--main-color-hover: var(--info-color);
+
+	#dropdown > a {
+		color: var(--text-light) !important;
+	}
+
+	#dropdown > .dropdown-menu > li > a:hover {
+		color: var(--background) !important;
+	}
 
 	.card {
 		background-color: var(--footer);

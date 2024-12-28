@@ -16,7 +16,7 @@ $(function() {
 	setOfficialLink();
 
 	if (IS_DEV_ENVIRONMENT) {
-		ERGEXPLORER_API_HOST = 'https://localhost/ergexplorer-api/'
+		// ERGEXPLORER_API_HOST = 'https://localhost/ergexplorer-api/'
 	}
 
 	if (window.location.host == 'dev.ergexplorer.com') {
@@ -692,8 +692,9 @@ function formatBox(box, trueBox = false, unspent = false) {
 			formattedData += '<p><strong class="text-white">Spent Transaction Id: </strong><a href=" ' + getTransactionsUrl(box.spentTransactionId) + '">'+box.spentTransactionId+'</a> <a title="' + box.spentTransactionId + '" onclick="copyId(event, this)" href="Copy to clipboard!">&#128203;</a></p>';
 		}
 		formattedData += '<p><strong class="text-white">Creation height</strong>: ' + box.creationHeight + '</p>';
-		formattedData += '<p><strong class="text-white">Settlement height</strong>: ' + box.settlementHeight + '</p>';
 	}
+
+	formattedData += '<p><strong class="text-white">Settlement height</strong>: <a href="' + getBlockUrl(box.blockId) + '">' + box.settlementHeight + '</a></p>';
 
 	formattedData += '</div>';
 

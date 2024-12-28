@@ -35,6 +35,7 @@ var unspentBoxesCount = 0;
 var printedAddressSummary = false;
 var scamList = [];
 var getTxData = false;
+var printedUnspentBoxes = false;
 
 const N2T_SWAP_SELL_TEMPLATE_ERG = 'd803d6017300d602b2a4730100d6037302eb027201d195ed92b1a4730393b1db630872027304d804d604db63087202d605b2a5730500d606b2db63087205730600d6077e8c72060206edededededed938cb2720473070001730893c27205d07201938c72060173099272077e730a06927ec172050699997ec1a7069d9c72077e730b067e730c067e720306909c9c7e8cb27204730d0002067e7203067e730e069c9a7207730f9a9c7ec17202067e7310067e9c73117e7312050690b0ada5d90108639593c272087313c1720873147315d90108599a8c7208018c72080273167317'
 const N2T_SWAP_SELL_TEMPLATE_SPF = 'd804d601b2a4730000d6027301d6037302d6049c73037e730405eb027305d195ed92b1a4730693b1db630872017307d806d605db63087201d606b2a5730800d607db63087206d608b27207730900d6098c720802d60a95730a9d9c7e997209730b067e7202067e7203067e720906edededededed938cb27205730c0001730d93c27206730e938c720801730f92720a7e7310069573117312d801d60b997e7313069d9c720a7e7203067e72020695ed91720b731492b172077315d801d60cb27207731600ed938c720c017317927e8c720c0206720b7318909c7e8cb2720573190002067e7204069c9a720a731a9a9c7ec17201067e731b067e72040690b0ada5d9010b639593c2720b731cc1720b731d731ed9010b599a8c720b018c720b02731f7320'
@@ -1935,9 +1936,16 @@ function onInitRequestsFinished() {
 }
 
 function printUnspentBoxes() {
+	if (printedUnspentBoxes) {
+		return;
+	}
+
+	printedUnspentBoxes = true;
+
 	hideUnspentBoxes(null);
 
 	var jqxhr = $.get(getUnspentBoxesDataUrl(), function(data) {
+		console.log(data);
 		let html = '';
         for (let i = 0; i < data.items.length; i++) {
         	html += formatBox(data.items[i], false, true).replace('row', 'col-12 col-md-6 ps-0 pe-0');
@@ -2420,6 +2428,15 @@ function analyzeTransfers(txData, inputAddress) {
         result.from = inputAddress;
         result.to = inputAddress;
     }
+
+	if (!result.isMinting
+		&& !result.isBurning
+		&& !result.isSending
+		&& !result.isReceiving
+	) {
+		result.from = inputAddress;
+		result.to = inputAddress;
+	}
 
     return {
         ...result,
