@@ -14,6 +14,8 @@ var hasPrice = false;
 var amountsData = undefined;
 var imageUrl = null;
 var currentAddress = '';
+var tempDateIndex = 0;
+var chartUsd = true;
 
 $(function() {
 	tokenId = getWalletAddressFromUrl();
@@ -83,19 +85,21 @@ function setLinks() {
 }
 
 function getPriceHistory() {
-	$.post(ERGEXPLORER_API_HOST + 'tokens/getPriceHistoryLowLiq',
-		{from: from30d, ids : [tokenId]},
+	$.post(ERGEXPLORER_API_HOST + 'tokens/getPriceHistoryNew',
+		{from: from30d, ids : [tokenData.name]},
 		function(data) {
 
 		getHolders();
 		getHolderCount();
 
-		if (data.items.length == 0) {
+		if (data.length == 0) {
 			return;
 		}
 
+		$('#priceLoading').show();
+
 		priceData = data;
-		printGainersLosers(from24h);
+		printGainersLosers(0);
 		hasPrice = true;
 	});
 }
@@ -162,7 +166,7 @@ function printHolders(data) {
 		}
 
 		let percent = formatValue(data[i].balance * 100 / ((amountsData.liquid_supply + amountsData.locked_supply) * Math.pow(10, tokenData.decimals)), 2);
-		formattedResult += '<td class="">' + formatAssetValueString(data[i].balance, decimals) + ' ' + getAssetTitleParams(tokenData.id, tokenData.name, false) + ' <span class="text-light">' + dollarPrice + '</span><span style="text-align:right;float:right;" class="d-inline d-lg-none text-white"> ' + percent + '%</span></td>';
+		formattedResult += '<td class="">' + formatAssetValueString(data[i].balance, decimals) + ' ' + getAssetTitleParams(tokenData, tokenData.id, tokenData.name, false) + ' <span class="text-light">' + dollarPrice + '</span><span style="text-align:right;float:right;" class="d-inline d-lg-none text-white"> ' + percent + '%</span></td>';
 
 		//Percent
 		formattedResult += '<td class="d-none d-lg-table-cell" style="text-align:right;">' + percent + '%</td>';
@@ -191,6 +195,8 @@ function printHolderCount(data) {
 	} else {
 		$('#priceInfo').show();
 	}
+
+	$('#priceLoading').hide();
 }
 
 function onGetNftInfoDone(nftInfo, message) {
@@ -256,6 +262,10 @@ function onGetNftInfoDone(nftInfo, message) {
 
 	if (tokenData.name == 'Crooks Finance Stake Key') {
 		tImg = 'https://crooks-fi.com/images/logo.png';
+	}
+
+	if (tokenData.iconurl) {
+		tImg = tokenData.iconurl;
 	}
 
 	$('#tokenIconImg').attr('src', tImg);
@@ -618,7 +628,7 @@ function onNftImageLoad() {
 }
 
 function printGainersLosers30d() {
-	printGainersLosers(from30d);
+	printGainersLosers(2);
 	$('#showGainersLosers30d').removeClass('btn-primary');
 	$('#showGainersLosers30d').addClass('btn-info');
 	$('#showGainersLosers24h').removeClass('btn-info');
@@ -628,7 +638,7 @@ function printGainersLosers30d() {
 }
 
 function printGainersLosers7d() {
-	printGainersLosers(from7d);
+	printGainersLosers(1);
 	$('#showGainersLosers7d').removeClass('btn-primary');
 	$('#showGainersLosers7d').addClass('btn-info');
 	$('#showGainersLosers24h').removeClass('btn-info');
@@ -638,7 +648,7 @@ function printGainersLosers7d() {
 }
 
 function printGainersLosers24h() {
-	printGainersLosers(from24h);
+	printGainersLosers(0);
 	$('#showGainersLosers24h').removeClass('btn-primary');
 	$('#showGainersLosers24h').addClass('btn-info');
 	$('#showGainersLosers7d').removeClass('btn-info');
@@ -647,17 +657,24 @@ function printGainersLosers24h() {
 	$('#showGainersLosers30d').addClass('btn-primary');
 }
 
+function toggleChart() {
+	chartUsd = !chartUsd;
+	printGainersLosers(chartType);
+
+	$('#chartToggleBtn').val(chartUsd ? 'USD' : 'ERG');
+}
+
 function printGainersLosers(timeframe) {
 	let data = JSON.parse(JSON.stringify(priceData));
 	chartType = timeframe;
 
-	let from7dset = false;
-	let from30dset = false;
-	let from24hset = false;
-	for (var i = data.items.length - 1; i >= 0; i--) {
-		let item = data.items[i];
-		let oldPrice = item.price;
-		let newPrice = prices[item.tokenid];
+	for (var i = 0; i < data.length; i++) {
+		if (data[i].length == 0) continue;
+
+		let item = data[i][0];
+
+		let oldPrice = chartUsd ? item.price : item.price_in_erg;
+		let newPrice = chartUsd ? prices[tokenId] : prices[tokenId] / prices['ERG'];
 		let difference = (newPrice * 100 / oldPrice) - 100;
 
 		if (!difference || isNaN(difference)) {
@@ -674,22 +691,21 @@ function printGainersLosers(timeframe) {
 			classString = 'text-danger';
 		}
 
-
-		if (from30dset == false && from30d <= item.timestamp) {
+		if (i == 2) {
 			$('#usdChange30d').html(difference + '%');
 			$('#usdChange30d').addClass(classString);
 
 			from30dset = true;
 		}
 
-		if (from7dset == false && from7d <= item.timestamp) {
+		if (i == 1) {
 			$('#usdChange7d').html(difference + '%');
 			$('#usdChange7d').addClass(classString);
 
 			from7dset = true;
 		}
 
-		if (from7dset == true && from24hset == false && from24h <= item.timestamp) {
+		if (i == 0) {
 			$('#usdChange24h').html(difference + '%');
 			$('#usdChange24h').addClass(classString);
 
@@ -697,58 +713,69 @@ function printGainersLosers(timeframe) {
 		}
 	}
 
+	data = data[timeframe];
+
+	// let from7dset = false;
+	// let from30dset = false;
+	// let from24hset = false;
+	
+
 	if (prices[tokenId]) {
-	 	$('#usdPrice').html('$' + formatValue(prices[tokenId], 2, true));
+		let price = (chartUsd ? '$' + formatValue(prices[tokenId], 2, true) :
+		formatValue(prices[tokenId] /prices['ERG'], 9, true) + ' <span class="erg-span">ERG</span>');
+		$('#usdPrice').html(price);
 	} else if (data.items.length > 0) {
-		$('#usdPrice').html('$' + formatValue(parseFloat(data.items[0].price), 2, true));
+		let price = (chartUsd ? '$' + formatValue(parseFloat(data[0].price), 2, true) :
+		formatValue(data[0].price / prices['ERG'], 9, true) + ' <span class="erg-span">ERG</span>');
+		$('#usdPrice').html(price);
 	}
 
-	 for (var i = data.items.length - 1; i >= 0; i--) {
-		if (timeframe > data.items[i].timestamp) {
-			data.items.splice(i, 1);
-			continue;
-		}
-	}
+	//  for (var i = data.items.length - 1; i >= 0; i--) {
+	// 	if (timeframe > data.items[i].timestamp) {
+	// 		data.items.splice(i, 1);
+	// 		continue;
+	// 	}
+	// }
 
-	let tI = 0;
-	let lastTimestamp = -1;
-	let step = 1;
-	let lastStep;
-	let diff = 0;
-	let diffI = 0;
-	if (data.items.length > 25) {
-		step = parseInt(data.items.length / 25);
-	}
-	data.items = data.items.filter(function (_, index) {
-		let item = data.items[index];
-		if (index == 0) {
-			lastStep = item.value;
-			diff = 0;
+	// let tI = 0;
+	// let lastTimestamp = -1;
+	// let step = 1;
+	// let lastStep;
+	// let diff = 0;
+	// let diffI = 0;
+	// if (data.items.length > 25) {
+	// 	step = parseInt(data.items.length / 25);
+	// }
+	// data.items = data.items.filter(function (_, index) {
+	// 	let item = data.items[index];
+	// 	if (index == 0) {
+	// 		lastStep = item.value;
+	// 		diff = 0;
 
-			return true;
-		}
+	// 		return true;
+	// 	}
 
-		if (index == data.items.length - 1) {
-			return true;
-		}
+	// 	if (index == data.items.length - 1) {
+	// 		return true;
+	// 	}
 
-		let temp = Math.abs(lastStep - item.value);
-		if (temp > diff) {
-			diff = temp;
-			diffI = index;
-		}
+	// 	let temp = Math.abs(lastStep - item.value);
+	// 	if (temp > diff) {
+	// 		diff = temp;
+	// 		diffI = index;
+	// 	}
 
-		if (index % step === 0) {
-			data.items[index].value = data.items[diffI].value;
+	// 	if (index % step === 0) {
+	// 		data.items[index].value = data.items[diffI].value;
 
-			lastStep = item.value;
-			diff = 0;
+	// 		lastStep = item.value;
+	// 		diff = 0;
 
-			return true;
-		}
+	// 		return true;
+	// 	}
 
-		return false;
-	});
+	// 	return false;
+	// });
 
 	/*
 	for (var i = data.items.length - 1; i >= 0; i--) {
@@ -778,21 +805,25 @@ function printGainersLosers(timeframe) {
 	*/
 
 	 //Chart
-	data.items = data.items.reverse();
-	data.items.push({
+	//data.items = data.items.reverse();
+	
+	data.push({
 		'price': prices[tokenId],
-		'timestamp': Date.now()
+		'price_in_erg': prices[tokenId] /prices['ERG'],
+		'timestamp': unixTimestampToDateTimeUTCString(getCurrentUTCDate().getTime())
 	})
 
 	if (chart != undefined) {
 		chart.destroy();
 	}
 
+	tempDateIndex = 0;
+
 	const rootStyles = getComputedStyle(document.documentElement);
 
 	// Get the value of the global CSS variable
 	const primaryColor = rootStyles.getPropertyValue('--main-color').trim();
-
+	
 	chart = new Chart(
 	    document.getElementById('chart'),
 	    {
@@ -813,7 +844,7 @@ function printGainersLosers(timeframe) {
 	            displayColors: false,
 	            callbacks: {
 	            	label: function (tooltip) {
-	            		let formattedValue = '$' + nFormatter(tooltip.parsed.y, getAutoDigits(tooltip.parsed.y));
+	            		let formattedValue = (chartUsd ? '$' : '') + nFormatter(tooltip.parsed.y, getAutoDigits(tooltip.parsed.y)) + (chartUsd ? '' : ' ERG');
 
 	            		return formattedValue;
 	            	}
@@ -822,11 +853,11 @@ function printGainersLosers(timeframe) {
 	        }
 	      },
 	      data: {
-	        labels: data.items.map(mapLabel),
+	        labels: data.map(mapLabel),
 	        datasets: [
 	          {
 	            label: '$',
-	            data: data.items.map(row => row.price)
+	            data: data.map(row => chartUsd ? row.price : row.price_in_erg)
 	          }
 	        ]
 	      }
@@ -834,16 +865,19 @@ function printGainersLosers(timeframe) {
 	  );
 
 	$('#priceInfo').show();
+	$('#priceLoading').hide();
 }
 
 function mapLabel(row, index) {
-	if (chartType == from24h) {
-		return formatTimeString(parseInt(row.timestamp), false);
+	if (chartType == 0) {
+		return formatTimeString(utcToLocal(row.timestamp));
 	} else {
-		let dateString = new Date(parseInt(row.timestamp)).toLocaleDateString();
+		let dateString = parseDate(row.timestamp).toLocaleDateString();
+		return dateString;
 
 		if (dateString != tempDate) {
 			tempDate = dateString;
+			tempDateIndex = index;
 			return dateString;
 		} else {
 			return '';

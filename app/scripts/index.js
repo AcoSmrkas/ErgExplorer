@@ -86,7 +86,7 @@ function getPoolStats() {
 			formattedResult += '<tr>';
 
 			//Token
-			formattedResult += '<td><a href="' + getTokenUrl(poolStat.lockedY.id) + '">' + getAssetTitleParams(poolStat.lockedY.id, poolStat.lockedY.ticker, true) + '</a></td>';
+			formattedResult += '<td><a href="' + getTokenUrl(poolStat.lockedY.id) + '">' + getAssetTitleParams(null, poolStat.lockedY.id, poolStat.lockedY.ticker, true) + '</a></td>';
 			
 			//Volume
 			formattedResult += '<td>$' + formatValue(poolStat.volume.value, 2) + '</td>';
@@ -242,7 +242,7 @@ function printGainersLosers(timeframe) {
 		formattedResult += '<tr>';
 
 		//Token
-		formattedResult += '<td><a href="' + getTokenUrl(item.tokenid) + '">' + getAssetTitleParams(item.tokenid, item.ticker, true) + '</a></td>';
+		formattedResult += '<td><a href="' + getTokenUrl(item.tokenid) + '">' + getAssetTitleParams(item, item.tokenid, item.ticker, true) + '</a></td>';
 		
 		//Price			
 		let decimals = getDecimals(prices[item.tokenid]);
@@ -309,7 +309,7 @@ function getWhaleTxs() {
 			formattedResult += '<td><span class="d-lg-none"><strong>To: </strong></span>' + (toAddress == 'N/A' ? 'N/A' : '<a class="address-string" addr="' + toAddress + '" href="' + getWalletAddressUrl(toAddress) + '" >' + (getOwner(toAddress) == undefined ? formatAddressString(toAddress, 10) : getOwner(toAddress)) + '</a>') + '</td>';
 
 			//Value
-			formattedResult += '<td><span class="d-lg-none"><strong>Value: </strong></span>' + formatAssetValueString(item.value, item.decimals) + ' ' + getAssetTitleParams(item.tokenid, item.ticker, false) + ' <span class="text-light">' + formatDollarPriceString(item.value / Math.pow(10, item.decimals) * prices[item.tokenid]) + '</span></td></tr>';
+			formattedResult += '<td><span class="d-lg-none"><strong>Value: </strong></span>' + formatAssetValueString(item.value, item.decimals) + ' ' + getAssetTitleParams(item, item.tokenid, item.ticker, false) + ' <span class="text-light">' + formatDollarPriceString(item.value / Math.pow(10, item.decimals) * prices[item.tokenid]) + '</span></td></tr>';
 
 			formattedResult += '</tr>';
 		}

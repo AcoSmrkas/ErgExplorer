@@ -203,6 +203,12 @@
 
 		<br>
 
+		<div id="priceLoading" style="margin-top:50px;margin-bottom:50px;"> 
+			<div id="priceLoadingInner">
+				<img id="loadingImgPrice" src="./images/logo.png" alt="Loading" class="loadingImg index-card-symbol" style="display: block; margin: 0 auto;">
+			</div>
+		</div>
+
 		<div id="priceInfo" style="display: none;">		
 			<h3 id="financeHeader" class="p-2">Finance</h3>
 			<div class="div-cell-dark row w-100 p-0">
@@ -224,7 +230,7 @@
 					<hr class="mt-2 mb-2">
 					<div class="row w-100 p-0 p-md-2 ps-md-0 pe-md-0">
 						<div class="col-6 p-0 pb-1">
-							<h4>Price chart USD</h4>
+							<h4>Price chart <input id="chartToggleBtn" onclick="toggleChart()" type="button" class="btn btn-info ms-1" value="USD" /></h4>
 						</div>
 						<div class="col-6 p-0">
 							<input id="showGainersLosers30d" onclick="printGainersLosers30d()" style="display:inline-block;" class="p-2 p-sm-2 btn btn-primary float-end" type="button" value="30d">
@@ -292,7 +298,7 @@
 
 {% block scripts %}
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.3.1/chart.umd.min.js" integrity="sha512-UcCmTcAm3IkzrswF+WqvwWSjsnv8nsJpDL09KHCETWS0g0WjoIZDRUYXCeHeow1cEij0kqL9OwRwirv/xCQ6GA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-	<script src="./scripts/common/prices.js?v=38"></script>
-	<script src="./scripts/common/nft.js?v=38"></script>
-	<script src="./scripts/token.js?v=38"></script>
+	<script src="./scripts/common/prices.js?v=39"></script>
+	<script src="./scripts/common/nft.js?v=39"></script>
+	<script src="./scripts/token.js?v=39"></script>
 {% endblock %}

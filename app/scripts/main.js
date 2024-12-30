@@ -288,6 +288,74 @@ function formatErgValueString(value, maxDecimals = 4, force = false) {
 	return '<strong title="' + ergValue + '"><span class="text-white">' + ergValue.toLocaleString('en-US', { maximumFractionDigits: maxDecimals, minimumFractionDigits: minimumFractionDigits }) + '</span></strong> ERG';
 }
 
+function utcToLocal(utcDateString) {
+	// Convert to Date object
+const utcDate = new Date(utcDateString.replace(" ", "T") + "Z"); // Ensure it's in a valid format
+
+// Convert to current locale date string
+const localeDateString = utcDate.toLocaleString();
+
+return localeDateString;
+}
+
+function unixTimestampToDateTimeString(timestamp) {
+    // Create a new Date object from the Unix timestamp (in milliseconds)
+    const date = new Date(timestamp);
+
+    // Get the date components
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
+
+    // Construct the date-time string in the desired format
+    const dateTimeString = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+
+    return dateTimeString;
+}
+
+function unixTimestampToDateTimeUTCString(timestamp) {
+    // Create a new Date object from the Unix timestamp (in milliseconds)
+    const date = new Date(timestamp);
+
+    // Get the date components
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const hours = String(date.getUTCHours()).padStart(2, '0');
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+    const milliseconds = String(date.getUTCMilliseconds()).padStart(3, '0');
+
+    // Construct the date-time string in the desired format
+    const dateTimeString = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+
+    return dateTimeString;
+}
+
+function getCurrentUTCDate() {
+    const currentDate = new Date();
+    return new Date(Date.UTC(
+        currentDate.getUTCFullYear(), 
+        currentDate.getUTCMonth(), 
+        currentDate.getUTCDate(),
+        currentDate.getUTCHours(),
+        currentDate.getUTCMinutes(),
+        currentDate.getUTCSeconds()
+    ));
+}
+
+function parseDate(dateString) {
+    const components = dateString.split(/[- :]/);
+    return new Date(Date.UTC(
+        components[0], components[1] - 1, components[2],
+        components[3], components[4], components[5]
+    ));
+}
+
 function formatTimeString(dateString, seconds) {
 	const date = new Date(dateString);
 
@@ -520,10 +588,10 @@ function formatNftDescriptonJson(key, value, indent) {
 }
 
 function getAssetTitle(asset, iconIsToTheLeft, scam = false) {
-	return getAssetTitleParams(asset.tokenId, asset.name, iconIsToTheLeft, scam);
+	return getAssetTitleParams(asset, id, asset.name, iconIsToTheLeft, scam);
 }
 
-function getAssetTitleParams(tokenId, name, iconIsToTheLeft, scam = false) {
+function getAssetTitleParams(token, tokenId, name, iconIsToTheLeft, scam = false) {
 	let imgSrc = '';
 	if (hasIcon(tokenId)) {
 		imgSrc = getIcon(tokenId);
@@ -535,6 +603,10 @@ function getAssetTitleParams(tokenId, name, iconIsToTheLeft, scam = false) {
 
 	if (name == 'Mew Fun Lottery Ticket') {
 		imgSrc = 'https://api.ergexplorer.com/nftcache/bafybeie6z4zm7ahjvlawjfq4idojdrahklksygpfmb4zvlrx3id3h5dyty.png';
+	}
+
+	if (token && token.iconurl) {
+		imgSrc = token.iconurl;
 	}
 
 	let iconHtml = '<img style="display: none;" onload="onTokenIconLoad(this)"  class="token-icon" src="' + imgSrc + '"/>';
