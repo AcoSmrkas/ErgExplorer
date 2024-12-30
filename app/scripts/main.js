@@ -588,7 +588,7 @@ function formatNftDescriptonJson(key, value, indent) {
 }
 
 function getAssetTitle(asset, iconIsToTheLeft, scam = false) {
-	return getAssetTitleParams(asset, id, asset.name, iconIsToTheLeft, scam);
+	return getAssetTitleParams(asset, asset.tokenId, asset.name, iconIsToTheLeft, scam);
 }
 
 function getAssetTitleParams(token, tokenId, name, iconIsToTheLeft, scam = false) {
