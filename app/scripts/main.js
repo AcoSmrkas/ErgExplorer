@@ -1138,3 +1138,13 @@ function sleep(ms) {
     setTimeout(resolve, ms);
   });
 }
+
+async function checkLinkExists(url) {
+    try {
+        const response = await fetch(url, { method: 'HEAD' }); // Use HEAD for minimal data
+        return response.ok; // `true` if the status code is 2xx or 3xx
+    } catch (error) {
+        console.error('Error checking link:', error);
+        return false; // If there's an error, assume the link does not exist
+    }
+}

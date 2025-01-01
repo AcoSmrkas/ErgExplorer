@@ -92,11 +92,12 @@ function getPriceHistory() {
 		getHolders();
 		getHolderCount();
 
-		if (data.length == 0) {
+		if (data.length == 0
+			|| data[0].length == 0
+		) {
+			$('#priceLoading').hide();
 			return;
 		}
-
-		$('#priceLoading').show();
 
 		priceData = data;
 		printGainersLosers(0);
@@ -179,7 +180,7 @@ function printHolders(data) {
 	$('#holdersTable').show();
 
     getAddressesInfo();
-
+console.log(hasPrice);
     if (!hasPrice) {
     	$('#financeHeader').hide();
     	$('#chartColumn').hide();
@@ -322,7 +323,18 @@ function onGetNftInfoDone(nftInfo, message) {
 			for (let i = 0; i < IPFS_PROVIDER_HOSTS.length; i++) {
 				fullUrl = IPFS_PROVIDER_HOSTS[i] + '/ipfs/' + nftInfo.link.url;
 
-				if (isAudioPlayable(fullUrl)) {
+				if (nftInfo.type == NFT_TYPE.Image) {
+					let urlToCheck = fullUrl;
+					checkLinkExists(urlToCheck).then(exists => {
+						if (exists) {
+							imageUrl = urlToCheck;
+							$('#nftPreviewImg').attr('src', imageUrl);
+							$('#nftImageFull').attr('src', imageUrl);
+						}
+					});
+				}
+
+				if (nftInfo.type == NFT_TYPE.Audio && isAudioPlayable(fullUrl)) {
 					break;
 				} else {
 					if (i == IPFS_PROVIDER_HOSTS.length - 1) {
@@ -381,11 +393,14 @@ function onGetNftInfoDone(nftInfo, message) {
 		}
 
 		imageUrl = fullUrl;
+		if (nftInfo.cachedurl) {
+			imageUrl = nftInfo.cachedurl;
+		}
 
 		if (nftInfo.type == NFT_TYPE.Image) {
 			if (!nftInfo.data.nsfw) {
-				$('#nftPreviewImg').attr('src', fullUrl);
-				$('#nftImageFull').attr('src', fullUrl);
+				$('#nftPreviewImg').attr('src', imageUrl);
+				$('#nftImageFull').attr('src', imageUrl);
 			} else {
 				$('#nftPreviewImgNsfw').attr('src', 'https://thumbs.dreamstime.com/b/nsfw-sign-not-safe-work-censorship-vector-stock-illustration-nsfw-sign-not-safe-work-censorship-vector-stock-illustration-245733305.jpg');
 				$('#nftPreviewImgNsfw').show();
@@ -668,6 +683,12 @@ function printGainersLosers(timeframe) {
 	let data = JSON.parse(JSON.stringify(priceData));
 	chartType = timeframe;
 
+	if (data.length == 0
+		|| data[0].length == 0
+	) {
+		return;
+	}
+
 	for (var i = 0; i < data.length; i++) {
 		if (data[i].length == 0) continue;
 
@@ -724,7 +745,7 @@ function printGainersLosers(timeframe) {
 		let price = (chartUsd ? '$' + formatValue(prices[tokenId], 2, true) :
 		formatValue(prices[tokenId] /prices['ERG'], 9, true) + ' <span class="erg-span">ERG</span>');
 		$('#usdPrice').html(price);
-	} else if (data.items.length > 0) {
+	} else if (data.length > 0) {
 		let price = (chartUsd ? '$' + formatValue(parseFloat(data[0].price), 2, true) :
 		formatValue(data[0].price / prices['ERG'], 9, true) + ' <span class="erg-span">ERG</span>');
 		$('#usdPrice').html(price);
@@ -863,7 +884,7 @@ function printGainersLosers(timeframe) {
 	      }
 	    }
 	  );
-
+	  
 	$('#priceInfo').show();
 	$('#priceLoading').hide();
 }

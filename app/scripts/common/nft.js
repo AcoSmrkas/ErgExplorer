@@ -63,7 +63,7 @@ function getNftInfo(tokenId, callback) {
 			if (data.total > 0) {
 				nft = processNftData(data.items[0]);
 			}
-
+			
 			callback(nft, null);
 	    })
 	    .fail(function() {
@@ -148,26 +148,15 @@ function processNftData(nftData) {
 		link = formatLink(link);
 	}
 
-	if (nftData.cachedurl) {
-		if (nftData.additionalRegisters.R7.serializedValue == '0e020102'
-			&& additionalLinks.length > 0) {
-			additionalLinks[0] = {
-				ipfsCid: false,
-				url: nftData.cachedurl				
-			}
-		} else {
-			link = {
-				ipfsCid: false,
-				url: nftData.cachedurl
-			};
-		}
-	}
-
 	let type = getNftType(typeString);
 
 	let nft = new NftInfo(type, hash, link, additionalLinks, nftData);
 
 	nft.isNft = type != undefined;
+
+	if (nftData.cachedurl) {
+		nft.cachedurl = nftData.cachedurl;
+	}
 
 	return nft;
 }

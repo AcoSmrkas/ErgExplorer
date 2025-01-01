@@ -487,7 +487,6 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 
 		let txInOut = getTxInOutType(totalTransferedAssets);
 		let analysis = analyzeTransfers(item, walletAddress);
-		console.log(analysis);
 
 		let fromAddress;
 		let toAddress;
@@ -768,8 +767,13 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 			} while (!hasEnough);
 		}
 
-		fromAddress = analysis.from;
-		toAddress = analysis.to;
+		if (fromAddress != AddressType.Multiple) {
+			fromAddress = analysis.from;
+		}
+
+		if (toAddress != AddressType.Multiple) {
+			toAddress = analysis.to;
+		}
 
 		//check burn for single emissions
 		let burnedAssets = {};
@@ -1050,6 +1054,10 @@ function onGotOwnedNftInfo(nftInfos, message) {
 					cSrc = IPFS_PROVIDER_HOSTS[0] + '/ipfs/' + nftInfos[i].link.url;
 				} else {
 					cSrc = nftInfos[i].link.url;
+				}
+
+				if (nftInfos[i].cachedurl) {
+					cSrc = nftInfos[i].cachedurl;
 				}
 
 				if (nftInfos[i].data.nsfw) {
@@ -1779,6 +1787,10 @@ function onGotIssuedNftInfo(nftInfos, message) {
 						cSrc = nftInfos[i].link.url;
 					}
 
+					if (nftInfos[i].cachedurl) {
+						cSrc = nftInfos[i].cachedurl;
+					}
+
 					if (nftInfos[i].data.nsfw) {
 						cSrc = '';
 					}
@@ -1945,7 +1957,6 @@ function printUnspentBoxes() {
 	hideUnspentBoxes(null);
 
 	var jqxhr = $.get(getUnspentBoxesDataUrl(), function(data) {
-		console.log(data);
 		let html = '';
         for (let i = 0; i < data.items.length; i++) {
         	html += formatBox(data.items[i], false, true).replace('row', 'col-12 col-md-6 ps-0 pe-0');
@@ -2117,7 +2128,7 @@ function findOtherAddress(item, totalTransferred, txInOut, firstAddress) {
 			continue;
 		}
 
-		console.log(totalTransferedAssets[address].value, totalTransferred.value);
+	//	console.log(totalTransferedAssets[address].value, totalTransferred.value);
 		if (totalTransferedAssets[address].value != totalTransferred.value) {
 			exactMatch = false;
 			continue;
