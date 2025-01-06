@@ -766,7 +766,9 @@ function formatBox(box, trueBox = false, unspent = false) {
 		formattedData += '<p><strong class="text-white">Creation height</strong>: ' + box.creationHeight + '</p>';
 	}
 
-	formattedData += '<p><strong class="text-white">Settlement height</strong>: <a href="' + getBlockUrl(box.blockId) + '">' + box.settlementHeight + '</a></p>';
+	if (box.settlementHeight) {
+		formattedData += '<p><strong class="text-white">Settlement height</strong>: <a href="' + getBlockUrl(box.blockId) + '">' + box.settlementHeight + '</a></p>';
+	}
 
 	formattedData += '</div>';
 
