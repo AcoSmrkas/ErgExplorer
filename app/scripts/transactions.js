@@ -8,6 +8,7 @@ const treasuryOriginTx = '{"id":"e179f12156061c04d375f599bd8aea7ea5e704fab2d9530
 $(function() {
 	txId = getWalletAddressFromUrl();
 
+	getTokenIcons(onGotPrices);
 	getPrices(onGotPrices);
 
 	setDocumentTitle(txId);
@@ -21,6 +22,8 @@ window.onfocus = (event) => {
 };
 
 function onGotPrices() {
+	if (!gotTokenIcons || !gotPrices) return;
+
 	if (txId == 'e179f12156061c04d375f599bd8aea7ea5e704fab2d95300efb2d87460d60b83') {
 		printTransaction(JSON.parse(treasuryOriginTx), false);
 		return;

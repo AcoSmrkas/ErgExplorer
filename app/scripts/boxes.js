@@ -4,12 +4,15 @@ var boxId = '';
 $(function() {
 	boxId = getWalletAddressFromUrl();
 
+	getTokenIcons(onGotPrices);
 	getPrices(onGotPrices);
 
 	setDocumentTitle(boxId);
 });
 
 function onGotPrices() {
+	if (!gotTokenIcons || !gotPrices) return;
+
 	getBox(false);
 }
 
