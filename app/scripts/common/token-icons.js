@@ -104,10 +104,18 @@ tokenIcons['e8b20745ee9d18817305f32eb21015831a48f02d40980de6e849f886dca7f807'] =
 //TokenIconsArrayStop
 
 function hasIcon(tokenId) {
+	if (tokenIconsDb && tokenIconsDb[tokenId]) {
+		return true;
+	}
+
 	return tokenIcons[tokenId] != undefined;
 }
 
 function getIcon(tokenId) {
+	if (tokenIconsDb && tokenIconsDb[tokenId]) {
+		return tokenIconsDb[tokenId];
+	}
+
 	return tokenIcons[tokenId];
 }
 
