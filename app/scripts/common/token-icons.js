@@ -103,6 +103,25 @@ tokenIcons['59ee24951ce668f0ed32bdb2e2e5731b6c36128748a3b23c28407c5f8ccbf0f6'] =
 tokenIcons['e8b20745ee9d18817305f32eb21015831a48f02d40980de6e849f886dca7f807'] = 'https://raw.githubusercontent.com/RunOnFlux/press/master/Flux_Asset_SVG/Flux%20Logo/Symbol/Round%20Symbol/SVG/Flux_symbol_blue-white.svg';
 //TokenIconsArrayStop
 
+var tokenIconsDb = [];
+var gotTokenIcons = false;
+
+function getTokenIcons(callback) {
+	$.get(ERGEXPLORER_API_HOST + 'tokens/getTokenIcons',
+		function (data) {
+			tokenIconsDb = data.items.reduce((acc, item) => {
+				acc[item.id] = item.iconurl;
+				return acc;
+			  }, {});
+			gotTokenIcons = true;
+		}
+	).always(function (data) {
+		if (callback) {
+			callback();
+		}
+	})
+}
+
 function hasIcon(tokenId) {
 	if ((typeof tokenIconsDb !== 'undefined') && tokenIconsDb[tokenId]) {
 		return true;

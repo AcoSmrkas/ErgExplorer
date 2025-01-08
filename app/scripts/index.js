@@ -4,7 +4,8 @@ var from7d = nowTime - (7 * 24 * 60 * 60 * 1000);
 var from30d = nowTime - (30 * 24 * 60 * 60 * 1000);
 var priceData = undefined;
 
-$(function() {	
+$(function() {
+	getTokenIcons();
 	updatePrices();
 	getNetworkState();
 });
