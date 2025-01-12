@@ -1227,7 +1227,7 @@ function getMempoolData() {
 		totalTransactions += mempoolData.total;
 		mempoolCount = mempoolData.total
 
-		if (mempoolData.total > 0) {
+		if (mempoolData.total > 0 && mempoolTxIds.length == 0) {
 			for (let i = 0; i < mempoolData.items.length; i++) {
 				mempoolTxIds.push(mempoolData.items[i].id);
 			}
@@ -1975,6 +1975,7 @@ function refreshData() {
 	transactionsRequestDone = false;
 	printed = false;
 	getTxData = false;
+	totalTransactions = 0;
 
 	getPrices(onInitRequestsFinished, true);
 }

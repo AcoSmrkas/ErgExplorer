@@ -488,12 +488,16 @@ function getAutoDigits(value, digits = 2, additionalDigits = 2) {
 function formatAssetValueString(value, decimals, digits = 2, noshort = false) {
 	let assetValue = getAssetValue(value, decimals);
 
-	if (assetValue > 0.1) {
+	if (assetValue > 0.1 && decimals > 2) {
 		digits = 2;
 	}
 
 	digits = getDecimals(assetValue, 1);
 
+	if (decimals < 2) {
+		digits = decimals;
+	}
+	
 	return formatValue(assetValue, digits, false, noshort);
 }
 
