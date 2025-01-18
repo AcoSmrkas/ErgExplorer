@@ -825,6 +825,8 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 			}
 		}
 
+		console.log(hasBurnedAssets, burnedAssets);
+
 		//Tx
 		formattedResult += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionsUrl(item.id) + '"><i class="fas fa-link text-info"></i></a><span class="d-inline d-lg-none text-white float-end">' + formatDateString((isMempool) ? item.creationTimestamp : item.timestamp) + '</span></td>';
 
@@ -894,12 +896,11 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		for (let k = 0; k < assetKeys.length; k++) {
 			let asset = totalTransferedAssets.assets[assetKeys[k]];
 			asset.isBurned = false;
-			if (asset.amount == -1
+			if (asset.amount < 0
 				&& burnedAssets[asset.tokenId] != undefined) {
 				asset.isBurned = true;
 			}
 		}
-			
 
 		//Value
 		if (txInOut != TxInOut.Mixed) {
@@ -948,7 +949,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 					isMinted = true;
 				}
 			}
-
+			
 			let assetsString = '<br><strong>'+(isMinted ? '<span title="Minted">✨</span>' : '')+''+(asset.isBurned ? '<span title="Burned">🔥</span>' : '')+'<span class="">' + (asset.amount > 0 ? mixedPlus : '') + (txInOut == TxInOut.Out ? '-' : '') + formatAssetValueString(asset.amount, asset.decimals, 4) + '</span></strong> ' + getAssetTitle(asset, false, scamList.includes(asset.tokenId)) + (assetPrice == undefined ? '' : ' <span class="text-light">' + assetPrice +'</span>');
 
 			assetsFull += assetsString;
