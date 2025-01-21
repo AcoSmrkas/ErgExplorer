@@ -180,7 +180,7 @@ function printHolders(data) {
 	$('#holdersTable').show();
 
     getAddressesInfo();
-console.log(hasPrice);
+	
     if (!hasPrice) {
     	$('#financeHeader').hide();
     	$('#chartColumn').hide();
@@ -485,7 +485,7 @@ function onGetNftInfoDone(nftInfo, message) {
 		}
 
 		function bytesToString(bytes) {
-		    return new TextDecoder().decode(bytes);
+			return new TextDecoder().decode(bytes);
 		}
 
 		function deserializeHex(hex) {
@@ -495,50 +495,62 @@ function onGetNftInfoDone(nftInfo, message) {
 		    let properties = '';
 		    let stats = '';
 		    let levels = '';
-
 		    if (constant && constant.data && (
 		    	constant.data[0] || (constant.data[1] && (constant.data[1][0] || constant.data[1][1]))
 		    	)) {
+				
+				try {
+					if (constant.data[0] && constant.data[0].length > 0) {			    	
+						for (let array of constant.data[0]) {
+							properties += `<div class="bg-background" style="padding:5px; border-radius:5px;box-sizing: border-box;
+	place-content: space-between;text-align:center;">`
+							properties += `<p class="erg-span">${bytesToString(array[0])}</p>`;
+							properties += `<p>${bytesToString(array[1])}</p>`;
+							properties += '</div>';
+						}
 
-			    if (constant.data[0] && constant.data[0].length > 0) {			    	
-				    for (let array of constant.data[0]) {
-				    	properties += `<div class="bg-background" style="padding:5px; border-radius:5px;box-sizing: border-box;
-  place-content: space-between;text-align:center;">`
-				    	properties += `<p class="erg-span">${bytesToString(array[0])}</p>`;
-				    	properties += `<p>${bytesToString(array[1])}</p>`;
-				    	properties += '</div>';
-				    }
+						$('#nftPropertiesHolder').show();
+						$('#nftProperties').html(properties);
+					}
+				} catch {
+			    	$('#nftPropertiesHolder').hide();
+				}
 
-			    	$('#nftPropertiesHolder').show();
-			    	$('#nftProperties').html(properties);
-			  	}
+				try {
+					if (constant.data[1] && constant.data[1][0] && constant.data[1][0].length > 0) {			    	
+						for (let array of constant.data[1][0]) {
+							stats += `<div class="bg-background" style="padding:5px; border-radius:5px;box-sizing: border-box;
+	place-content: space-between;text-align:center;">`
+							stats += `<p class="erg-span">${bytesToString(array[0])}</p>`;
+							stats += `<p>${array[1][0]} of ${array[1][1]}</p>`;
+							stats += '</div>';
+						}
 
-			    if (constant.data[1] && constant.data[1][0] && constant.data[1][0].length > 0) {			    	
-				    for (let array of constant.data[1][0]) {
-				    	stats += `<div class="bg-background" style="padding:5px; border-radius:5px;box-sizing: border-box;
-  place-content: space-between;text-align:center;">`
-				    	stats += `<p class="erg-span">${bytesToString(array[0])}</p>`;
-				    	stats += `<p>${array[1][0]} of ${array[1][1]}</p>`;
-				    	stats += '</div>';
-				    }
+						$('#nftStatsHolder').show();
+						$('#nftStats').html(stats);
+					}
+				} catch {
+					$('#nftStatsHolder').hide();
+				}
 
-			    	$('#nftStatsHolder').show();
-			    	$('#nftStats').html(stats);
-			  	}
+				try {
+					if (constant.data[0] && constant.data[1][1] && constant.data[1][1].length > 0) {			    	
+						for (let array of constant.data[1][1]) {
+							levels += `<div class="bg-background" style="padding:5px; border-radius:5px;box-sizing: border-box;
+	place-content: space-between;text-align:center;">`
+							levels += `<p class="erg-span">${bytesToString(array[0])}</p>`;
+							levels += `<p>${array[1][0]} of ${array[1][1]}</p>`;
+							levels += '</div>';
+						}
 
-			    if (constant.data[0] && constant.data[1][1] && constant.data[1][1].length > 0) {			    	
-				    for (let array of constant.data[1][1]) {
-				    	levels += `<div class="bg-background" style="padding:5px; border-radius:5px;box-sizing: border-box;
-  place-content: space-between;text-align:center;">`
-				    	levels += `<p class="erg-span">${bytesToString(array[0])}</p>`;
-				    	levels += `<p>${array[1][0]} of ${array[1][1]}</p>`;
-				    	levels += '</div>';
-				    }
-
-			    	$('#nftLevelsHolder').show();
-			    	$('#nftLevels').html(levels);
-			  	}
-			  }
+						$('#nftLevelsHolder').show();
+						$('#nftLevels').html(levels);
+					}
+				}
+				catch {
+					$('#nftLevelsHolder').hide();
+				}
+			}
 		}
 
 		const hexString = data.inputs[0].additionalRegisters?.R6?.serializedValue;
@@ -564,11 +576,11 @@ function getCurrentAddress() {
 
 			if (currentAddress == '2sTiXsgg5x6T8pMqxruCsfKtQh5JcN9TgBWpT6PLkNUg6Gvkg923sXUbwm9iv4Yi2yH6f2e9a6HzY2WF3ScSBVKmCE1WJBvpRLugRY7xxDvYmkdPA1XV1rvhSQTPMoU6fwBuGxuzdjjmWGYyt3jqLJhEHh59X4vpd5GpeEyjvhTxiTc2a1UTpzaeasyLQmYdhGuLFeSvxGgxWMD8mer1aoEq1AiBwkBdSo2DCKo81UPrXFn934cNTpPcUGoG4cTwdhMX7z1N3VyZ74dBbWPDsN6V6oBVaaUW9ggWRwttmTAGQywEobFwgDswEu8XZSRDUXg77ivAywy9DfrjkbutRjNCgh1fExtKG8QWEHkPcALwLaKT7QsKJcEVmC3rGBQSeTHEozx9FPniM47847yxk4A9wG5MaUoFbwiBbFEusWaTsNN9jEP7M8Uw5RFkeyQhooEG1A32R59pgoouXiUc974VXeaP8J1rSey3FD5VjsQc6tFhEdcAN5ULSaWXrHxoHEaHJHZyPQmejzX7hdy'
 				||
-				'2DnYaspUNUtsGfFELT8Bhvn1pGGE3nuHxyzxdDML4P31NgVPYZYwG2tsXJLsAWEvZRcKyBYXc6kUuoUpYVPHRpMQen36R2hFx4pBF6DmbeKWbXExsbXxyNaiQre58GUfwB2qktmaHETbgSSX64H2zFvCpPnLD8nPWAivN9zidxuWJyu1o8MxLf88bzJRBj8P3x75Qrd65KbfcWvFF9trYu6CyFc8M81DZ9GbPJVTNjvC9gdaRvkFBEWL8fM4xFTjZru3UT7NkbPy27RJwxgMNun7NQw3bhz3L5AGre4RXo8Ur4m3fJZjXK3GLUAGcTmV4VvjwFTzrDfb2bShgGYjEANjM7Fx9b3CbQHdJWwfq88hUXeqcoDJ9fT97zRJCxLCTYTuA9CDVaENsGGiRWQHykDwcdPZRSEWL5tJUr5knHxejdkQqE6unn3pZnHdwWWXqUqMuYKpfaeSS4za8MYUx1AK927ouM4yxUewQPJpbeTt8YQKDdeRNRwahqbQjziLYfRc3A1e4fqAgtWSsWcwn4sNVAXTm3EE7wJgA14yezRiEdpdkiam3mFjYR6xne1GtcSfssF'
+				currentAddress == '2DnYaspUNUtsGfFELT8Bhvn1pGGE3nuHxyzxdDML4P31NgVPYZYwG2tsXJLsAWEvZRcKyBYXc6kUuoUpYVPHRpMQen36R2hFx4pBF6DmbeKWbXExsbXxyNaiQre58GUfwB2qktmaHETbgSSX64H2zFvCpPnLD8nPWAivN9zidxuWJyu1o8MxLf88bzJRBj8P3x75Qrd65KbfcWvFF9trYu6CyFc8M81DZ9GbPJVTNjvC9gdaRvkFBEWL8fM4xFTjZru3UT7NkbPy27RJwxgMNun7NQw3bhz3L5AGre4RXo8Ur4m3fJZjXK3GLUAGcTmV4VvjwFTzrDfb2bShgGYjEANjM7Fx9b3CbQHdJWwfq88hUXeqcoDJ9fT97zRJCxLCTYTuA9CDVaENsGGiRWQHykDwcdPZRSEWL5tJUr5knHxejdkQqE6unn3pZnHdwWWXqUqMuYKpfaeSS4za8MYUx1AK927ouM4yxUewQPJpbeTt8YQKDdeRNRwahqbQjziLYfRc3A1e4fqAgtWSsWcwn4sNVAXTm3EE7wJgA14yezRiEdpdkiam3mFjYR6xne1GtcSfssF'
 				||
-				'2DnYaspUNUtsGfFELT8Bhvn1pGGE3nuHxyzxdDML4P31NgVPYZYwG2tsXJLsAWEvZRcKyBYXc6kUuoUpYVPHRpMQen36R2hFx4pBF6DmbeKWbXExsbXxyNaiQre58GUfwB2qktmaHETbgSSX64H2zFvCpPnLD8nPWAivN9zidxuWJyu1o8MxLf88bzJRBj8P3x75Qrd65KbfcWvFF9trYu6CyFc8M81DZ9GbPJVTNjvC9gdaRvkFBEWL8fM4xFTjZru3UT7NkbPy27RJwxgMNun7NQw3bhz3L5AGre4RXo8Ur4m3fJZjXK3GLUAGcTmV4VvjwF7WR3DDK2wiZGZnuWfkg8rXoyNBNf5NRe2FjoPWFU21R44ujLbnvsYRPZ5y24XzraKpLrYUhNDnMKHPqFo9CB6He8BnFWQzqQWJdWqYmdNgwbFC3yTuoyn1bNieRKPf2hXPMzQonRTcJBHLPXqgjhP39tbbc7fD83uDCxkyaT6TJzroCy7MU5TW159cDryPJQXwcbEir6EuACnqxs7e1BPzhFgDEdb3yw7m7rhvxYwcyk3mEamAdUJHxnnvi7M3uw8'
+				currentAddress == '2DnYaspUNUtsGfFELT8Bhvn1pGGE3nuHxyzxdDML4P31NgVPYZYwG2tsXJLsAWEvZRcKyBYXc6kUuoUpYVPHRpMQen36R2hFx4pBF6DmbeKWbXExsbXxyNaiQre58GUfwB2qktmaHETbgSSX64H2zFvCpPnLD8nPWAivN9zidxuWJyu1o8MxLf88bzJRBj8P3x75Qrd65KbfcWvFF9trYu6CyFc8M81DZ9GbPJVTNjvC9gdaRvkFBEWL8fM4xFTjZru3UT7NkbPy27RJwxgMNun7NQw3bhz3L5AGre4RXo8Ur4m3fJZjXK3GLUAGcTmV4VvjwF7WR3DDK2wiZGZnuWfkg8rXoyNBNf5NRe2FjoPWFU21R44ujLbnvsYRPZ5y24XzraKpLrYUhNDnMKHPqFo9CB6He8BnFWQzqQWJdWqYmdNgwbFC3yTuoyn1bNieRKPf2hXPMzQonRTcJBHLPXqgjhP39tbbc7fD83uDCxkyaT6TJzroCy7MU5TW159cDryPJQXwcbEir6EuACnqxs7e1BPzhFgDEdb3yw7m7rhvxYwcyk3mEamAdUJHxnnvi7M3uw8'
 				||
-				'Qn2EsTdde6bMH91AoCaTV2dLbxBbepqZpZurA17XNZSF8nNLMF9cWxJQ6sDf9pNpeXiQ8T4Ay2G5xCiiz7u8CVNvJrxBSwpUDwPff3N2KJM1Bokazqqn2pVKNDbdRLc76L599kQxEBqGNcVeG9yMUGVLBeJNZyHsCRnCACKj9CPsGW63mtgUdzNTnLUhNYQETir8auYF2aQuAqzSGfFUuqqg89uXZBcXt4XVe49aoydo1ffjAmPH6g6NdErjB7FNmKEx3dxGGtgJSbniC1znoY2uvpyEZVorCobdQ9hy6uQG8Ho3VXftn324VdeLYi9jd23XuUKCsT4YPaVG6naH7N1WRuMMxyC3sRkX3qqp3DNgcGh1oxrUm9BGjJrTw2G3b9j4QV9XrXBPdNJAuzU5BVw5jwNLyGWsCp8Ap6666YDRX95wSxrwftZjo6PyfYHNra6D6LwtPKGJM2L5b5k1afidudtFjyJhnHyu5JgjX7JNV72QXhYM2TfngV77zGu6Pr8kSHutgJHFAU8jbVv9DPVSyLEXsUKvWYvHVB2BNVi7THmyeZnmsoXUv87fWLKpFDjmQeqFg'
+				currentAddress == 'Qn2EsTdde6bMH91AoCaTV2dLbxBbepqZpZurA17XNZSF8nNLMF9cWxJQ6sDf9pNpeXiQ8T4Ay2G5xCiiz7u8CVNvJrxBSwpUDwPff3N2KJM1Bokazqqn2pVKNDbdRLc76L599kQxEBqGNcVeG9yMUGVLBeJNZyHsCRnCACKj9CPsGW63mtgUdzNTnLUhNYQETir8auYF2aQuAqzSGfFUuqqg89uXZBcXt4XVe49aoydo1ffjAmPH6g6NdErjB7FNmKEx3dxGGtgJSbniC1znoY2uvpyEZVorCobdQ9hy6uQG8Ho3VXftn324VdeLYi9jd23XuUKCsT4YPaVG6naH7N1WRuMMxyC3sRkX3qqp3DNgcGh1oxrUm9BGjJrTw2G3b9j4QV9XrXBPdNJAuzU5BVw5jwNLyGWsCp8Ap6666YDRX95wSxrwftZjo6PyfYHNra6D6LwtPKGJM2L5b5k1afidudtFjyJhnHyu5JgjX7JNV72QXhYM2TfngV77zGu6Pr8kSHutgJHFAU8jbVv9DPVSyLEXsUKvWYvHVB2BNVi7THmyeZnmsoXUv87fWLKpFDjmQeqFg'
 			) {
 				$('#nftAuction').html('<p>Available for purchase on <a class="erg-span" target="_new" href="https://mart.mewfinance.com/explore?tokenId=' + tokenId + '">Mew Mart</a></p>' + $('#nftAuction').html());
 			}
