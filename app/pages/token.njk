@@ -275,6 +275,31 @@
 					</table>
 				</div>
 			</div>
+			<div id="swapsHolder" style="display: none; margin-top:20px !important;" class="div-cell-dark row w-100 p-0">
+				<div class="p-0 col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+					<h4 style="display: inline-block;padding-right:10px !important;" class="p-3 pb-2">Latest DEX Swaps</h4>
+					<div id="swapsLoading"> 
+						<div id="swapsLoadingInner">
+							<canvas id="loadingImgSwaps" class="loadingImg" width="150" height="150"></canvas>
+						</div>
+					</div>
+					<table id="swapsTable" style="display:none; border-left: 0 !important;" class="w-100 w-full table table-dark table-striped table-mobile m-0">
+						<thead>
+							<tr>
+								<th scope="col">Address</th>
+								<th style="min-width:200px;" scope="col">Type</th>
+								<th>Amount</th>
+								<th>TX ID</th>
+								<th>Timestamp</th>
+							</tr>
+						</thead>
+
+						<tbody id="swapsTableBody">
+
+						</tbody>
+					</table>
+				</div>
+			</div>
 		</div>
 
 		<div id="addressbookInfo" style="display: none;">

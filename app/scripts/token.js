@@ -37,6 +37,57 @@ function getCruxData() {
 	});
 }
 
+function getSwapsData() {
+	$.get('https://api.mewfinance.com/dex/getSwapsByTokenId?tokenId=' + tokenId,
+		function (data) {
+			printSwaps(data.items);
+		});
+}
+
+function printSwaps(data) {
+	console.log(data);
+	if (data.length > 0) {
+		$('#swapsHolder').show();
+		$('#swapsLoading').hide();
+
+		let html = '';
+
+		for (let i = 0; i < data.length; i++) {
+			let item = data[i];
+
+			if (item.buyasset == tokenId) {
+				item.type = 'Buy';
+				item.amount = item.buyamount;
+			} else {
+				item.type = 'Sell';
+				item.amount = item.sellamount
+			}
+			
+			html += '<tr>';
+			html += '<td><a class="address-string" addr="' + item.address + '" href="' + getWalletAddressUrl(item.address) + '">' + formatAddressString(item.address, 4) + '</a></td>';
+			html += '<td><span class="' + (item.type == 'Sell' ? 'text-danger' : 'text-success') + '">' + item.type + '</span></td>';
+			html += '<td>'
+				+ '<span class="text-white">'
+					+ formatAssetValueString(item.amount * Math.pow(10, tokenData.decimals), tokenData.decimals, 4)
+					+ ' '
+					+ getAssetTitleParams(tokenData, tokenData.id, tokenData.name, false)
+					+ ' '
+					+ '<span class="text-light">'
+						+ formatAssetDollarPriceString(item.amount * Math.pow(10, tokenData.decimals), tokenData.decimals, tokenId)
+					+ '</span>'
+				+ '</span>'
+			+ '</td>';
+			html += '<td><a class="" href="' + getTransactionsUrl(item.txid) + '">' + formatAddressString(item.txid, 4) + '</a></td>';
+			html += '<td>' + item.timestamp.substr(0, item.timestamp.indexOf('.')) + '</td>';
+			html += '</tr>';
+		}
+
+		$('#swapsTableBody').html(html);
+
+		$('#swapsTable').show();
+	}
+}
+
 function checkAddressbook() {
 	$.get(ERGEXPLORER_API_HOST + 'addressbook/getTokenAddresses?tokenId=' + tokenId,
 	function (data) {
@@ -91,6 +142,7 @@ function getPriceHistory() {
 
 		getHolders();
 		getHolderCount();
+		getSwapsData();
 
 		if (data.length == 0
 			|| data[0].length == 0
