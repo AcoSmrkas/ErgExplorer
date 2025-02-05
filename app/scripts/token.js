@@ -77,6 +77,7 @@ function printSwaps(data) {
 					+ '</span>'
 				+ '</span>'
 			+ '</td>';
+			html += '<td>' + item.dexname + '</td>';
 			html += '<td><a class="" href="' + getTransactionsUrl(item.txid) + '">' + formatAddressString(item.txid, 4) + '</a></td>';
 			html += '<td>' + item.timestamp.substr(0, item.timestamp.indexOf('.')) + '</td>';
 			html += '</tr>';

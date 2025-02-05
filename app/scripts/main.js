@@ -31,6 +31,8 @@ $(function() {
 
     // Call the toggle function every 5 seconds
     //setInterval(toggleDivs, 9000);
+
+	$('#cyear').html(new Date().getFullYear());
 });
 
 window.addEventListener('hashchange', () => {
