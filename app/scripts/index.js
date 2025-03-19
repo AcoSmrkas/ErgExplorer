@@ -52,45 +52,23 @@ function getNetworkState() {
 }
 
 function getPoolStats() {
-	// Get the current Unix timestamp in milliseconds
-	var currentTimestamp = Date.now();
-
-	// Calculate the timestamp for 24 hours ago (subtracting 24 hours in milliseconds)
-	var twentyFourHoursAgoTimestamp = currentTimestamp - (24 * 60 * 60 * 1000);
-	$.get('https://api.spectrum.fi/v1/amm/pools/stats?from=' + twentyFourHoursAgoTimestamp,
+	$.get('https://api.mewfinance.com/dex/getTop10Volume',
 	function (data) {
-		let poolStatsData = data;
-
-		for (let i = 0; i < poolStatsData.length; i++) {
-			for (let j = i + 1; j < poolStatsData.length; j++) {
-				if (poolStatsData[i].lockedY.id === poolStatsData[j].lockedY.id) {
-					poolStatsData[i].volume.value += poolStatsData[j].volume.value;
-					poolStatsData.splice(j, 1);
-					j--;
-				}
-			}
-		}
-
-		poolStatsData.sort(function (a, b) {
-			if (a.volume.value === b.volume.value) return 0;
-
-			return a.volume.value > b.volume.value ? -1 : 1;
-		});
+		let poolStatsData = data.items;
 
 		//Volume
 		let formattedResult = '';
-		let ids = ['ERG'];
-		for (let i = 0; i < 10; i++) {
+
+		for (let i = 0; i < poolStatsData.length; i++) {
 			let poolStat = poolStatsData[i];
-			ids.push(poolStat.lockedY.id);
 
 			formattedResult += '<tr>';
 
 			//Token
-			formattedResult += '<td><a href="' + getTokenUrl(poolStat.lockedY.id) + '">' + getAssetTitleParams(null, poolStat.lockedY.id, poolStat.lockedY.ticker, true) + '</a></td>';
+			formattedResult += '<td><a href="' + getTokenUrl(poolStat.asset) + '">' + getAssetTitleParams(null, poolStat.asset, poolStat.name, true) + '</a></td>';
 			
 			//Volume
-			formattedResult += '<td>$' + formatValue(poolStat.volume.value, 2) + '</td>';
+			formattedResult += '<td>$' + formatValue(poolStat.total_usd, 2) + '</td>';
 
 			formattedResult += '</tr>';
 		}

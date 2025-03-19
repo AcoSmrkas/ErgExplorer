@@ -825,8 +825,6 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 			}
 		}
 
-		console.log(hasBurnedAssets, burnedAssets);
-
 		//Tx
 		formattedResult += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionsUrl(item.id) + '"><i class="fas fa-link text-info"></i></a><span class="d-inline d-lg-none text-white float-end">' + formatDateString((isMempool) ? item.creationTimestamp : item.timestamp) + '</span></td>';
 
