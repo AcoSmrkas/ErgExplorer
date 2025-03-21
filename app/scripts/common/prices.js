@@ -14,26 +14,22 @@ function getPrices(callback, force = false) {
 		prices['ERG'] = data.items[0].value;
 		pricesNames['ERG'] = 'ERG';
 
-		$.ajax({
-			url: 'https://api.cruxfinance.io/spectrum/token_list',
-			type: 'POST',
-			contentType: 'application/json',
-			data: JSON.stringify({
-				sort_by: 'Volume',
-				sort_order: 'Desc',
-				limit: 500,
-				offset: 0,
-				filter_window: 'Day',
-				name_filter: ''
-			}),
-			success: function(response) {
-				pricesData = response;
+		$.get('https://api.spectrum.fi/v1/price-tracking/markets',
+		function(data) {
+			pricesData = data;
 
-				handlePrices(force);
-			},
-			error: function(xhr, status, error) {
-				doCallback();
-			}
+			handlePrices(force);
+		}).fail(function () {
+			doCallback();
+		});
+
+		$.get('https://api.spectrum.fi/v1/amm/pools/stats',
+		function(data) {
+			poolsData = data;
+
+			handlePrices(force);
+		}).fail(function () {
+			doCallback();
 		});
 	}).fail(function () {
 		doCallback();
@@ -41,26 +37,32 @@ function getPrices(callback, force = false) {
 }
 
 function handlePrices(force = false) {
-	if (pricesData == undefined) {
+	if (poolsData == undefined || pricesData == undefined) {
 		return;
 	}
 
 	for (let i = 0; i < pricesData.length; i++) {
-		let tokenData = pricesData[i];
+		let pairData = pricesData[i];
+		if (pairData['baseSymbol'] == 'ERG') {
+			if (prices[pairData['quoteId']] != undefined) continue;
 
-		if (prices[tokenData['id']] != undefined) continue;
+			let skip = true;
+			for (let j = 0; j < poolsData.length; j++) {
+				let poolData = poolsData[j];
 
-		let skip = true;
-
-		if ((tokenData.liquidity >= 2000 || force)) {
-			skip = false;
-		}
+				if (poolData.lockedX.id == pairData['baseId']
+					&& poolData.lockedY.id == pairData['quoteId']
+					&& (poolData.lockedX.amount / Math.pow(10, 9) >= 1000 || force)) {
+					skip = false;
+					break;
+				}
+			}
+			if (skip) continue;
 			
-		if (skip) continue;
-		
-		let price = prices['ERG'] * tokenData['price_erg'];
-		prices[tokenData['id']] = price;
-		pricesNames[tokenData['ticker']] = price;
+			let price = prices['ERG'] / pairData['lastPrice'];
+			prices[pairData['quoteId']] = price;
+			pricesNames[pairData['quoteSymbol']] = price;
+		}
 	}
 	
 	gotPrices = true;
