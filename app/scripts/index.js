@@ -225,7 +225,7 @@ function printGainersLosers(timeframe) {
 		
 		//Price			
 		let decimals = getDecimals(prices[item.tokenid]);
-
+		
 		formattedResult += '<td>$' + formatValue(prices[item.tokenid], decimals) + '</td>';
 
 		//Change

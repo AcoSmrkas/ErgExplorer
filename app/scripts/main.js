@@ -981,7 +981,7 @@ function nFormatter(num, digits, noLetter = false, noDecimal = false) {
 	
 	return item ? (isMinus ? "-" : "") + (num / item.value).toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: minimumFractionDigits }).replace(rx, '$1') + item.symbol
 	:
-	(isMinus ? "-" : "") +  new Intl.NumberFormat("en-US", {}).format(num);
+	(isMinus ? "-" : "") + new Intl.NumberFormat("en-US", options).format(num);
 }
 
 function sortTokens(tokens) {
