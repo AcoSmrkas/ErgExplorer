@@ -24,7 +24,7 @@ function setupPagination(totalItems) {
 		currentPageNum = 1;
 	}
 
-	$('.pageNum').html(currentPageNum + ' of ' + numPages);
+	$('.pageNum').html(nFormatter(currentPageNum, 0, true, true) + ' of ' + nFormatter(numPages, 0, true, true));
 	$('.firstPage').attr('href', getUrlWithOffset(0));
 	$('.previousPage').attr('href', getUrlWithOffset((currentPageNum - 2) * ITEMS_PER_PAGE));
 	$('.nextPage').attr('href', getUrlWithOffset(currentPageNum * ITEMS_PER_PAGE));

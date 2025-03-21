@@ -14,7 +14,7 @@ function printLatestBlocks() {
     		formattedResult += '<tr>';
 
             //Height
-    		formattedResult += '<td><span class="d-lg-none"><strong>Height: </strong></span><a href="' + getBlockUrl(items[i].id) + '">' + items[i].height + '</a></td>';
+    		formattedResult += '<td><span class="d-lg-none"><strong>Height: </strong></span><a href="' + getBlockUrl(items[i].id) + '">' + nFormatter(items[i].height, 2, true, true) + '</a></td>';
 
             //Time
     		formattedResult += '<td><span class="d-lg-none"><strong>Time: </strong></span>' + formatDateString(items[i].timestamp) + '</td>';

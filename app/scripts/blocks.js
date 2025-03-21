@@ -47,13 +47,13 @@ function printBlockSummary() {
 	$('#blockTime').html('<p>' + formatDateString(blockData.header.timestamp) + '</p>');
 
 	//Height
-	$('#blockHeight').html('<p>' + blockData.header.height + '</p>');
+	$('#blockHeight').html('<p>' + nFormatter(blockData.header.height, 0, true, true) + '</p>');
 
 	//Previous
 	$('#blockPrevious').html('<p><a href="' + getBlockUrl(blockData.header.parentId) + '">' + blockData.header.parentId + '</a></p>');
 
 	//Difficulty
-	$('#blockDifficulty').html('<p>' + blockData.header.difficulty + '</p>');
+	$('#blockDifficulty').html('<p>' + nFormatter(blockData.header.difficulty) + '</p>');
 
 	//Extension hash
 	$('#blockExtHash').html('<p>' + blockData.header.extensionHash + '</p>');
@@ -74,7 +74,7 @@ function printBlockSummary() {
 	$('#blockStateRoot').html('<p>' + blockData.header.stateRoot + '</p>');
 
 	//Bits
-	$('#blockBits').html('<p>' + blockData.header.nBits + '</p>');
+	$('#blockBits').html('<p>' + nFormatter(blockData.header.nBits) + '</p>');
 
 	//Size
 	$('#blockSize').html(formatKbSizeString(blockData.header.size));

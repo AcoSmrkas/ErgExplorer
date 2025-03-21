@@ -751,6 +751,11 @@ function formatBox(box, trueBox = false, unspent = false) {
 	let formattedData = '<div class="row div-cell border-flat p-2">';
 		
 	let customIdString = '';
+	
+	if (box.id) {
+		box.boxId = box.id;
+	}
+
 	if (box.boxId) {
 		customIdString = '<p><strong class="text-white">Box Id: </strong><a href=" ' + getBoxUrl(box.boxId) + '">'+box.boxId.substr(0, 8) + '...' + box.boxId.substr(box.boxId.length - 4)+'</a> <a title="' + box.boxId + '" onclick="copyId(event, this)" href="Copy to clipboard!">&#128203;</a></p>';
 	}
@@ -769,11 +774,11 @@ function formatBox(box, trueBox = false, unspent = false) {
 		if (box.spentTransactionId) {
 			formattedData += '<p><strong class="text-white">Spent Transaction Id: </strong><a href=" ' + getTransactionsUrl(box.spentTransactionId) + '">'+box.spentTransactionId+'</a> <a title="' + box.spentTransactionId + '" onclick="copyId(event, this)" href="Copy to clipboard!">&#128203;</a></p>';
 		}
-		formattedData += '<p><strong class="text-white">Creation height</strong>: ' + box.creationHeight + '</p>';
+		formattedData += '<p><strong class="text-white">Creation height</strong>: ' + nFormatter(box.creationHeight, 0, true, true) + '</p>';
 	}
 
 	if (box.settlementHeight) {
-		formattedData += '<p><strong class="text-white">Settlement height</strong>: <a href="' + getBlockUrl(box.blockId) + '">' + box.settlementHeight + '</a></p>';
+		formattedData += '<p><strong class="text-white">Settlement height</strong>: <a href="' + getBlockUrl(box.blockId) + '">' + nFormatter(box.settlementHeight, 0, true, true) + '</a></p>';
 	}
 
 	formattedData += '</div>';
@@ -796,6 +801,7 @@ function formatBox(box, trueBox = false, unspent = false) {
 		for (let j = 0; j < box.assets.length; j++) {
 			let asset = box.assets[j];
 			let assetPrice = formatAssetDollarPrice(asset.amount, asset.decimals, asset.tokenId);
+
 			formattedData += '<p><strong>' + getAssetTitle(asset, true) + '</strong>: <span class="text-white">' + formatAssetValueString(asset.amount, asset.decimals, 4, !trueBox) + ' ' + (assetPrice == -1 ? '' : '<span class="text-light">' + formatDollarPriceString(assetPrice) + '</span>') + '</span></p>';
 		}
 		formattedData += '</div>'
@@ -815,6 +821,7 @@ function formatBox(box, trueBox = false, unspent = false) {
 					|| register.sigmaType == 'Coll[SInt]'
 					|| register.sigmaType == 'SBigInt'
 					|| register.sigmaType == 'SSigmaProp'
+					|| !register.sigmaType
 					) {
 					if (!shownRegisters) {
 						formattedData += '<div style="margin-top:5px;" class="ps-0 pe-0 pe-md-2 ps-md-2 col-10"><p style="margin-bottom:5px;"><strong class="text-white">Additional registers:</strong></p>'
@@ -822,8 +829,16 @@ function formatBox(box, trueBox = false, unspent = false) {
 					}
 				}
 
-				if (register.sigmaType == 'Coll[SByte]') {
-					formattedData += `<p><strong>${registerKeys[i]}</strong>: ${hex2a(register.renderedValue)}</p>`;
+				if (!register.sigmaType) {
+					// formattedData += `<p><strong>${registerKeys[i]}</strong>: ${register}</p>`;
+				} else if (register.sigmaType == 'Coll[SByte]') {
+					let parseResult = hex2a(register.renderedValue);
+
+					if (containsWeirdCharacters(parseResult)) {
+						parseResult = register.renderedValue;
+					}
+
+					formattedData += `<p><strong>${registerKeys[i]}</strong>: ${parseResult}</p>`;
 				} else if (register.sigmaType == 'SLong' ||
 					register.sigmaType == 'SInt'
 				|| register.sigmaType == 'Coll[SInt]') {
@@ -922,7 +937,7 @@ function clamp (num, min, max) {
 	return Math.min(Math.max(num, min), max);
 }
 
-function nFormatter(num, digits) {
+function nFormatter(num, digits, noLetter = false, noDecimal = false) {
 	const lookup = [
 		{ value: 1, symbol: '' },
 	//	{ value: 1e3, symbol: "k" },
@@ -951,10 +966,23 @@ function nFormatter(num, digits) {
 	var item = lookup.slice().reverse().find(function(item) {
 		return num >= item.value;
 	});
+
+	if (noLetter) {
+		item = null;
+	}
+
+	let options = {
+		minimumFractionDigits: minimumFractionDigits,
+		maximumFractionDigits: digits
+	};
+
+	if (noDecimal) {
+		options = {};
+	}
 	
 	return item ? (isMinus ? "-" : "") + (num / item.value).toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: minimumFractionDigits }).replace(rx, '$1') + item.symbol
 	:
-	(isMinus ? "-" : "") + num.toLocaleString('en-US', { maximumFractionDigits: digits, minimumFractionDigits: minimumFractionDigits });
+	(isMinus ? "-" : "") +  new Intl.NumberFormat("en-US", {}).format(num);
 }
 
 function sortTokens(tokens) {
@@ -1155,4 +1183,16 @@ async function checkLinkExists(url) {
         console.error('Error checking link:', error);
         return false; // If there's an error, assume the link does not exist
     }
+}
+
+function containsWeirdCharacters(str) {
+	return /[^\x20-\x7E]/.test(str);
+}
+
+function hexToBytes(hex) {
+	return Uint8Array.from(hex.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)));
+}
+
+function bytesToString(bytes) {
+	return new TextDecoder().decode(bytes);
 }

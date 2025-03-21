@@ -8,6 +8,7 @@ const treasuryOriginTx = '{"id":"e179f12156061c04d375f599bd8aea7ea5e704fab2d9530
 $(function() {
 	txId = getWalletAddressFromUrl();
 
+	initSocket();
 	getTokenIcons(onGotPrices);
 	getPrices(onGotPrices);
 
@@ -20,6 +21,211 @@ window.onfocus = (event) => {
 		location.reload();
 	}
 };
+
+let socket = undefined;
+let printedFromSocket = false;
+let mempoolTxs = [];
+let assetInfos = {};
+let boxes = [];
+function initSocket() {
+	if (socket !== undefined) return;
+
+	const newSocket = io(SOCKET_URL);
+
+	newSocket?.on('connect', () => {
+		console.log('Connected to server at', SOCKET_URL);
+	});
+
+	newSocket?.on('connect_error', (error) => {
+		console.error('Connection error:', error);
+	});
+
+	newSocket?.on(
+		'mempoolTxs',
+		async (
+			transactions
+		) => {
+			console.log('Socket on', 'mempoolTxs');
+
+			mempoolTxs = transactions;
+
+			try {
+				let tx = mempoolTxs.find((tx) => tx.id === txId);
+
+				if (tx) {
+					const inputBoxIds = tx.inputs?.map((input) => input.boxId) || [];
+					const outputBoxIds = tx.outputs?.map((output) => output.boxId) || [];
+
+					const allBoxIds = [...inputBoxIds, ...outputBoxIds];
+
+					boxes = await getBoxInfos(allBoxIds, mempoolTxs);
+					tx = await resolveTxBoxes(tx);
+
+					const allAssetIds = collectTokenIds(mempoolTxs);
+					assetInfos = await getAssetInfos(allAssetIds);
+
+					updateAssets(tx, assetInfos);
+
+					printTransaction(tx, true);
+					printedFromSocket = true;
+
+					newSocket.disconnect();
+				}
+			} catch (error) {
+				printedFromSocket = false;
+			}
+		}
+	);
+}
+
+function updateAssets(tx, assetInfos) {
+	["inputs", "outputs"].forEach((key) => {
+		if (tx[key]) {
+			tx[key].forEach((entry) => {
+				if (entry.assets) {
+					entry.assets.forEach((asset) => {
+						if (assetInfos[asset.tokenId]) {
+							asset.decimals = assetInfos[asset.tokenId].decimals;
+							asset.name = assetInfos[asset.tokenId].name;
+						}
+					});
+				}
+			});
+		}
+	});
+}
+
+async function getBoxInfos(ids, txs) {
+	if (ids.length === 0) return [];
+
+	await Promise.all(ids.map((id) => resolveBoxFromMempool(id, txs)));
+	const result = await Promise.all(ids.map((id) => resolveBoxById(id)));
+
+	return result.filter((box) => box.boxId !== undefined);
+}
+
+function resolveBoxFromMempool(boxId, txs) {
+	let box = null;
+
+	for (const mTx of txs) {
+		const outputs = mTx.outputs;
+		for (const o of outputs) {
+			if (o.boxId == boxId) {
+				box = o;
+			}
+		}
+	}
+
+	return box;
+}
+
+async function resolveBoxById(boxId) {
+	let box = null;
+
+	try {
+		const boxData = await fetch(`${API_HOST}boxes/${boxId}`);
+		const data = await boxData.json();
+
+		if (data) {
+			box = data;
+		}
+	} catch {
+		box = null;
+	}
+
+	return box;
+}
+
+function resolveTxBoxes(tx) {
+	const proxyTx = JSON.parse(JSON.stringify(tx));
+
+	for (let i = 0; i < proxyTx.outputs.length; i++) {
+		const output = proxyTx.outputs[i];
+
+		proxyTx.outputs[i].address = ergoTreeToAddress(output.ergoTree);
+	}
+
+	for (let i = 0; i < proxyTx.inputs.length; i++) {
+		const input = proxyTx.inputs[i];
+
+		const boxData = getBoxDataById(input.boxId);
+
+		if (boxData) {
+			proxyTx.inputs[i] = boxData;
+			proxyTx.inputs[i].address = ergoTreeToAddress(proxyTx.inputs[i].ergoTree);
+		}
+	}
+
+	return proxyTx;
+}
+function getBoxDataById(boxId) {
+	let box = null;
+
+	for (const mTx of mempoolTxs) {
+		const outputs = mTx.outputs;
+		for (const o of outputs) {
+			if (o.boxId == boxId) {
+				box = o;
+			}
+		}
+	}
+
+	for (const b of boxes) {
+		if (b.boxId == boxId) {
+			box = b;
+		}
+	}
+
+	return box;
+}
+
+function ergoTreeToAddress(ergoTree) {
+	return qfleetSDKcore.ErgoAddress.fromErgoTree(ergoTree).toString();
+}
+
+function collectTokenIds(
+	transactions
+) {
+	const tokenIds = new Set();
+
+	transactions.forEach((tx) => {
+		// Process inputs
+		tx.inputs
+			?.flatMap((input) => input.assets || [])
+			.forEach((asset) => asset.tokenId && tokenIds.add(asset.tokenId));
+
+		// Process outputs
+		tx.outputs
+			?.flatMap((output) => output.assets || [])
+			.forEach((asset) => asset.tokenId && tokenIds.add(asset.tokenId));
+	});
+
+	return Array.from(tokenIds);
+}
+
+async function getAssetInfos(ids) {
+	if (ids.length == 0) return;
+
+	const response = await fetch(`${ERGEXPLORER_API_HOST}tokens/byId`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json"
+		},
+		body: JSON.stringify({ ids })
+	});
+	
+	const data = await response.json();
+
+	const newData = data.items;
+
+	let assets = {};
+
+	for (const data of newData) {
+		assets[data.id] = data;
+	}
+
+	return assets;
+}
 
 function onGotPrices() {
 	if (!gotTokenIcons || !gotPrices) return;
@@ -117,6 +323,8 @@ function getTransaction(mempool, retries = 0) {
 }
 
 function printTransaction(data, mempool) {	
+	if (printedFromSocket) return;
+
 	if (mempool) {
 		showNotificationPermissionToast();
 	}
@@ -173,7 +381,9 @@ function printTransaction(data, mempool) {
 
 	//Time
 	if (mempool) {
-		$('#txTime').html('<p>' + formatDateString(data.creationTimestamp) + '</p>');
+		if (data.creationTimestamp) {
+			$('#txTime').html('<p>' + formatDateString(data.creationTimestamp) + '</p>');
+		}
 	} else {
 		$('#txTime').html('<p>' + formatDateString(data.timestamp) + '</p>');
 	}
@@ -210,7 +420,7 @@ function printTransaction(data, mempool) {
 
 	//Date received
 	if (mempool) {
-		$('#txReceivedTime').remove();
+		$('#txReceivedTime').html('N/A');
 		$('#receivedTimeLeft').remove();
 	} else {
 		$('#txReceivedTime').html(formatDateString(data.timestamp));
@@ -219,7 +429,7 @@ function printTransaction(data, mempool) {
 	//Inclusion height
 	if (mempool) {
 		$('#includedInBlocksLeft').remove();
-		$('#txIncludedInBlocks').remove();
+		$('#txIncludedInBlocks').html('N/A');
 	} else {
 		$('#txIncludedInBlocks').html('<a href="' + getBlockUrl(data.outputs[0].blockId) + '">' + data.inclusionHeight + '</a>');
 	}

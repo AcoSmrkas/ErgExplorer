@@ -7,5 +7,7 @@ var API_HOST_2 = 'https://api.ergoplatform.com/api/v1/';
 //https://api.ergexplorer.com/
 //https://localhost/ergexplorer-api/
 var ERGEXPLORER_API_HOST = 'https://api.ergexplorer.com/';
+var SOCKET_URL = 'https://socket.ergexplorer.com';
+
 const ERG_DECIMALS = 9;
 const IS_DEV_ENVIRONMENT = window.location.host == 'localhost:9004';

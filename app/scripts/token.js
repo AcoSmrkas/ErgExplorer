@@ -45,7 +45,6 @@ function getSwapsData() {
 }
 
 function printSwaps(data) {
-	console.log(data);
 	if (data.length > 0) {
 		$('#swapsHolder').show();
 		$('#swapsLoading').hide();
@@ -283,7 +282,7 @@ function onGetNftInfoDone(nftInfo, message) {
 	//Emission amount
 	decimals = tokenData.decimals;
 	let emissionAmount = getAssetValue(tokenData.emissionAmount, tokenData.decimals);
-	$('#tokenEmissionAmount').html('<p>' + formatValue(emissionAmount, 0, true, true) + '</p>');
+	$('#tokenEmissionAmount').html('<p>' + nFormatter(emissionAmount, 0, true) + '</p>');
 
 	if (tokenData.emissionAmount == 1) {
 		getCurrentAddress();
@@ -356,7 +355,7 @@ function onGetNftInfoDone(nftInfo, message) {
 		$('#nftMintedAddress').html('<p><a class="address-string" addr="' + mintAddress + '" href="' + getWalletAddressUrl(mintAddress) + '">' + formatLongAddressString(mintAddress) + '</a></p>');
 
 		$('#nftMintedTransaction').html('<p><a href="' + getTransactionsUrl(tokenData.transactionId) + '">' + tokenData.transactionId + '</a></p>');
-		$('#nftCreationHeight').html('<p><a href="' + getBlockUrl(tokenData.blockId) + '">' + tokenData.creationHeight + '</a></p>');
+		$('#nftCreationHeight').html('<p><a href="' + getBlockUrl(tokenData.blockId) + '">' + nFormatter(tokenData.creationHeight, 0, true, true) + '</a></p>');
 
 		let fullUrl = '';
 		if (!nftInfo.link.ipfsCid) {
@@ -524,7 +523,7 @@ function onGetNftInfoDone(nftInfo, message) {
 
 		$('#nftMintedAddress').html('<p><a href="' + getWalletAddressUrl(mintAddress) + '">' + mintAddress + '</a></p>');
 		$('#nftMintedTransaction').html('<p><a href="' + getTransactionsUrl(tokenData.transactionId) + '">' + tokenData.transactionId + '</a></p>');
-		$('#nftCreationHeight').html('<p><a href="' + getBlockUrl(tokenData.blockId) + '">' + tokenData.creationHeight + '</a></p>');
+		$('#nftCreationHeight').html('<p><a href="' + getBlockUrl(tokenData.blockId) + '">' + nFormatter(tokenData.creationHeight, 0, true, true) + '</a></p>');
 
 		$('#tokenHolder').show();
 	}
@@ -535,20 +534,11 @@ function onGetNftInfoDone(nftInfo, message) {
 	function (data) {
 		const Constant = qfleetSDK.SConstant;
 
-		function hexToBytes(hex) {
-		    return Uint8Array.from(hex.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)));
-		}
-
-		function bytesToString(bytes) {
-			return new TextDecoder().decode(bytes);
-		}
-
 		function deserializeHex(hex) {
 		    const bytes = hexToBytes(hex);
 		    const constant = Constant.from(bytes);
 
 			if (nftInfo.type == NFT_TYPE.ArtCollection) {
-				console.log(constant);
 				if (constant && constant.data && constant.data.length > 0) {
 					let hasTwitter = false;
 					let hasInstagram = false;
