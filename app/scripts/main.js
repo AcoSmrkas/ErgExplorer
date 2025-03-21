@@ -821,7 +821,6 @@ function formatBox(box, trueBox = false, unspent = false) {
 					|| register.sigmaType == 'Coll[SInt]'
 					|| register.sigmaType == 'SBigInt'
 					|| register.sigmaType == 'SSigmaProp'
-					|| !register.sigmaType
 					) {
 					if (!shownRegisters) {
 						formattedData += '<div style="margin-top:5px;" class="ps-0 pe-0 pe-md-2 ps-md-2 col-10"><p style="margin-bottom:5px;"><strong class="text-white">Additional registers:</strong></p>'
