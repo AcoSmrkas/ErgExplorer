@@ -158,6 +158,10 @@ function processNftData(nftData) {
 		nft.cachedurl = nftData.cachedurl;
 	}
 
+	if (nftData.name == 'Mew Fun Lottery Ticket') {
+		nft.cachedurl = 'https://api.ergexplorer.com/nftcache/bafybeie6z4zm7ahjvlawjfq4idojdrahklksygpfmb4zvlrx3id3h5dyty.png';
+	}
+
 	return nft;
 }
 
