@@ -14,6 +14,20 @@ table > tbody > tr > td {
 	background-color: var(--striped-1);
 }
 
+#nftCollectionDataHolder > div:nth-child(odd), #nftInfoHolder > div:nth-child(odd) {
+	background-color: var(--striped-1);
+}
+
+#nftCollectionHolder {
+	padding-left: unset;
+	padding-right: unset;
+}
+
+#nftCollectionHolder > h3 {
+	padding-left: 12px;
+	padding-right: 12px;
+}
+
 #tokenDescription {
 	overflow-wrap: anywhere;
 }

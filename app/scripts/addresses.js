@@ -36,7 +36,7 @@ var printedAddressSummary = false;
 var scamList = [];
 var getTxData = false;
 var printedUnspentBoxes = false;
-var rfTimeout = 5000;
+var rfTimeout = 60000;
 var rfT = null;
 var firstTime = true;
 var ownedNftsShown = false;
@@ -320,25 +320,6 @@ function isWalletAddress(address) {
 	return address.substring(0, 1) == walletAddressPrefix;
 }
 
-function formatTxAddressString(address, formattedAddress = null) {	
-	if (address == walletAddress) {
-		formattedAddress = 'This Address';
-	} else if (formattedAddress == null) {
-		formattedAddress = formatAddressString(address, 10);
-	}
-
-	let addressString = '<a title="' + address + '" class="address-string" addr="' + address + '" href="' + getWalletAddressUrl(address) + '" >' + (getOwner(address) == undefined ? formattedAddress : getOwner(address)) + '</a>';
-	if (address == AddressType.NA) {
-		addressString = '<span class="text-light">' + AddressType.NA + '</span>';
-	} else if (address == AddressType.Multiple) {
-		addressString = '<span class="text-light" title="This transaction has multiple receiving addresses. Check transaction link for more details.">' + AddressType.Multiple + '</span>';
-	}
-
-	addressString = '<a title="' + address + '" onclick="copyAddress(event, this)" href="Copy to clipboard!">&#128203;</a> ' + addressString;
-
-	return addressString;
-}
-
 function getTxInOutType(totalTransferedAssets) {
 	let txInOut = checkAssetsSign(totalTransferedAssets.assets);
 
@@ -396,11 +377,6 @@ const TxInOut = {
 	In: 'In',
 	Out: 'Out',
 	Mixed: 'Mixed'
-}
-
-const AddressType = {
-	NA: 'N/A',
-	Multiple: 'Multiple'
 }
 
 function getFormattedTransactionsString(transactionsJson, isMempool) {
@@ -868,7 +844,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		
 		//From
 		addAddress(fromAddress);
-		let formattedAddressString = formatTxAddressString(fromAddress);
+		let formattedAddressString = formatTxAddressString(fromAddress, null, walletAddress);
 
 		if (networkType != 'testnet' && (txType == TxType.Wallet2Contract || txType == TxType.Contract2Wallet)) {
 			formattedAddressString = getAddressFromErgotree(item.inputs[0].ergoTree, fromAddress, formattedAddressString);
@@ -878,7 +854,7 @@ function getFormattedTransactionsString(transactionsJson, isMempool) {
 		
 		//To
 		addAddress(toAddress);
-		formattedAddressString = formatTxAddressString(toAddress);
+		formattedAddressString = formatTxAddressString(toAddress, null, walletAddress);
 
 		if (txType == TxType.Wallet2Contract || txType == TxType.Contract2Wallet) {
 			formattedAddressString = getAddressFromErgotree(item.outputs[0].ergoTree, toAddress, formattedAddressString);
@@ -1358,7 +1334,11 @@ function getUnspentBoxesDataUrl() {
 function getTxsDataUrl(attempt) {
 	if (params['filterTxs'] == undefined) {
 		if (attempt == 1) {
-		return `https://api.sigmaspace.io/api/v1/addresses/${walletAddress}/transactions?offset=${offset}&limit=${ITEMS_PER_PAGE}`;
+			if (networkType == 'testnet') {
+				return API_HOST + 'api/v1/addresses/' + walletAddress + '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
+			}
+
+			return `https://api.sigmaspace.io/api/v1/addresses/${walletAddress}/transactions?offset=${offset}&limit=${ITEMS_PER_PAGE}`;
 		} else {
 			return API_HOST_2 + 'addresses/' + walletAddress + '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
 		}
@@ -2064,7 +2044,7 @@ function getAddressInfo() {
 	function (data) {
 		if (data.total == 0) {
 			let newName = "";
-
+			console.log(transactionsData)
 			for (let i = 0; i < transactionsData.items[0].inputs.length; i++) {
 				let box = transactionsData.items[0].inputs[i];
 				if (box.address == walletAddress) {

@@ -387,6 +387,8 @@ function formatLongAddressString(address, length = 15) {
 }
 
 function formatAddressString(address, length = 15) {
+	if (address == 'Multiple') return 'Multiple';
+
 	return address.substring(0, length) + '...' + address.substring(address.length - 4);
 }
 
@@ -1194,4 +1196,28 @@ function hexToBytes(hex) {
 
 function bytesToString(bytes) {
 	return new TextDecoder().decode(bytes);
+}
+
+const AddressType = {
+	NA: 'N/A',
+	Multiple: 'Multiple'
+}
+
+function formatTxAddressString(address, formattedAddress = null, walletAddress = null) {	
+	if (address == walletAddress) {
+		formattedAddress = 'This Address';
+	} else if (formattedAddress == null) {
+		formattedAddress = formatAddressString(address, 10);
+	}
+
+	let addressString = '<a title="' + address + '" class="address-string" addr="' + address + '" href="' + getWalletAddressUrl(address) + '" >' + (getOwner(address) == undefined ? formattedAddress : getOwner(address)) + '</a>';
+	if (address == AddressType.NA) {
+		addressString = '<span class="text-light">' + AddressType.NA + '</span>';
+	} else if (address == AddressType.Multiple) {
+		addressString = '<span class="text-light" title="This transaction has multiple receiving addresses. Check transaction link for more details.">' + AddressType.Multiple + '</span>';
+	}
+
+	addressString = '<a title="' + address + '" onclick="copyAddress(event, this)" href="Copy to clipboard!">&#128203;</a> ' + addressString;
+
+	return addressString;
 }

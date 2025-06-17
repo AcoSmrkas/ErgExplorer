@@ -30,11 +30,17 @@ $(function() {
 function getCruxData() {
 	$.get('https://api.cruxfinance.io/crux/token_info/' + tokenId,
 		function (data) {
-
-		amountsData = data;
-
+			amountsData = data;
+	}).always(function (data) {
 		getPrices(getPriceHistory, true);
 	});
+}
+
+function getTxsData() {
+	$.get('http://localhost/ergexplorer-api/tokens/getTransactions?offset=0&limit=10&tokenId=' + tokenId,
+		function (data) {
+			printTxs(data.items);
+		});
 }
 
 function getSwapsData() {
@@ -42,6 +48,100 @@ function getSwapsData() {
 		function (data) {
 			printSwaps(data.items);
 		});
+}
+
+function printTxs(data) {
+	if (data.length > 0) {
+		$('#txsHolder').show();
+		$('#txsLoading').hide();
+
+		let html = '';
+
+		for (let i = 0; i < data.length; i++) {
+			let item = data[i];
+
+			html += '<tr>';
+			html += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionsUrl(item.txId) + '"><i class="fas fa-link text-info"></i></a><span class="d-inline d-lg-none text-white float-end">' + formatDateString(item.timestamp) + '</span></td>';
+
+			//Timestamp
+			html += '<td class="d-none d-lg-table-cell"><span class="d-lg-none"><strong>Time: </strong></span>' + formatDateString(item.timestamp) + '</td>';
+
+			//Block nr.
+			let blockNr = item.blockHeight;
+
+			html += '<td><span class="d-inline d-lg-none float-end"><strong>Block: </strong><a href="' + getBlockUrl(item.blockId) + '">' + blockNr + '</a></span><span class="d-none d-lg-inline"><a href="' + getBlockUrl(item.blockId) + '">' + blockNr + '</a></span></td>';
+
+			const fromAddress = item.inputs.length == 1 ? item.inputs[0].address : 'Multiple';
+
+			addAddress(fromAddress);
+			let formattedAddressString = formatTxAddressString(fromAddress);
+			html += '<td><span class="d-lg-none"><strong>From: </strong></span>' + formattedAddressString + '</td>';
+
+			const toAddress = item.outputs.length == 1 ? item.outputs[0].address : 'Multiple';
+
+			addAddress(toAddress);
+			formattedAddressString = formatTxAddressString(toAddress);
+			html += '<td><span class="d-lg-none"><strong>From: </strong></span>' + formattedAddressString + '</td>';
+
+			let value = calculateTransferredAmount(item);
+			html += `<td><span class="text-white">`
+				+ formatAssetValueString(value * Math.pow(10, tokenData.decimals), tokenData.decimals, 4)
+				+ ' '
+				+ getAssetTitleParams(tokenData, tokenData.id, tokenData.name, false);
+
+				if (prices[tokenData.id]) {
+					html += ' '
+					+ '<span class="text-light">'
+						+ formatAssetDollarPriceString(value * Math.pow(10, tokenData.decimals), tokenData.decimals, tokenId)
+					+ '</span>';
+				}
+			html += '</span></td>';
+			
+			html += '</tr>';
+		}
+
+		$('#txsTableBody').html(html);
+		$('#txsTable').show();
+
+		getAddressesInfo();
+	}
+}
+
+function calculateTransferredAmount(tx) {
+	const addressInputSums = {};
+	const addressOutputSums = {};
+
+	// Sum inputs by address
+	for (const input of tx.inputs) {
+		const addr = input.address;
+		addressInputSums[addr] = (addressInputSums[addr] || 0) + input.value;
+	}
+
+	// Sum outputs by address
+	for (const output of tx.outputs) {
+		const addr = output.address;
+		addressOutputSums[addr] = (addressOutputSums[addr] || 0) + output.value;
+	}
+
+	let totalTransferred = 0;
+
+	// For each address that had inputs (i.e. sent funds)
+	for (const addr in addressInputSums) {
+		const inputSum = addressInputSums[addr];
+		const outputSum = addressOutputSums[addr] || 0;
+		const netSent = inputSum - outputSum;
+
+		// If netSent > 0, this address lost value overall
+		if (netSent > 0) {
+			totalTransferred += netSent;
+		}
+	}
+
+	if (Object.keys(addressInputSums) == 0) {
+		totalTransferred = addressOutputSums[Object.keys(addressOutputSums)[0]] || 0;
+	}
+
+	return totalTransferred;
 }
 
 function printSwaps(data) {
@@ -143,6 +243,7 @@ function getPriceHistory() {
 		getHolders();
 		getHolderCount();
 		getSwapsData();
+		getTxsData();
 
 		if (data.length == 0
 			|| data[0].length == 0
@@ -262,13 +363,20 @@ function onGetNftInfoDone(nftInfo, message) {
 
 	tokenData = nftInfo.data;
 	
+	if (tokenData.collectionid && tokenData.collectionid != '') {
+		$('#nftCollectionId').html('<p><a href="' + getTokenUrl(tokenData.collectionid) + '">' + tokenData.collectionid + '</p>');
+		$('#nftCollectionName').html('<p>' + tokenData.collectionname + '</p>');
+
+		$('#nftCollectionHolder').show();
+	}
+
 	if (tokenData.scam) {
 		$('#tokenScamHolder').show();
 	}
 
 	if (tokenData.royaltypercent && tokenData.royaltypercent > 0) {
 		$('#royaltyHolder').show();
-		$('#nftRoyalty').html(tokenData.royaltypercent + "%");
+		$('#nftRoyalty').html('<p>' + tokenData.royaltypercent + "%</p>");
 	} else {
 		$('#royaltyHolder').remove();
 	}
@@ -300,6 +408,8 @@ function onGetNftInfoDone(nftInfo, message) {
 	let isBurned = tokenData.isBurned == 't';
 	if (isBurned) {
 		$('#tokenBurned').show();
+		$('#nftCurrentAddressHolder').remove();
+		getBurnTx();
 	} else {
 		checkIfBurned();
 	}
@@ -671,11 +781,37 @@ function getCurrentAddress() {
 	});
 }
 
+async function getBurnTx() {
+	try {
+		const response = await fetch(`${API_HOST}boxes/byTokenId/${tokenId}?limit=100`);
+
+		const responseJson = await response.json();
+		const total = responseJson.total;
+
+		if (total > 0) {
+			const response2 = await fetch(`${API_HOST}boxes/byTokenId/${tokenId}?offset=${total - 1}`);
+
+			const responseJson2 = await response2.json();
+			const box = responseJson2.items[0];
+
+			$('#nftBurnTransactionHolder').show();
+			$('#nftBurnTransaction').html('<p><a href="' + getTransactionsUrl(box.spentTransactionId) + '">' + box.spentTransactionId + '</a></p>');
+		}
+	} catch {
+		console.error(e);
+		$('#nftBurnTransactionHolder').remove();
+	}
+}
+
 function checkIfBurned() {
 	var jqxhr = $.get(API_HOST + 'boxes/unspent/byTokenId/' + tokenId, function(data) {
 		if (data.total == 0) {
 			$('#tokenBurned').show();
+			$('#nftCurrentAddressHolder').remove();
 			$.get(ERGEXPLORER_API_HOST + 'tokens/updateSingle?id=' + tokenId);
+			getBurnTx();
+		} else {		
+			$('#nftBurnTransactionHolder').remove();
 		}
 	});
 }

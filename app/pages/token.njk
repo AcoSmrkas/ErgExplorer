@@ -35,7 +35,7 @@
 			<div id="tokenDataLeft" class="col-lg-4 div-cell-dark border-top-flat p-0">
 				<div class="row w-100 p-1">
 					<div class="col-5">
-						<p><strong>Name</strong></p>
+						<p><strong class="text-white">Name</strong></p>
 					</div>
 					<div class="col-7">
 						<p id="tokenName"></p>
@@ -43,7 +43,7 @@
 				</div>				
 				<div class="row w-100 p-1">
 					<div class="col-5">
-						<p><strong>Emission amount</strong></p>
+						<p><strong class="text-white">Emission amount</strong></p>
 					</div>
 					<div class="col-7">
 						<p id="tokenEmissionAmount"></p>
@@ -51,7 +51,7 @@
 				</div>
 				<div class="row w-100 p-1">
 					<div class="col-5">
-						<p><strong>Decimals</strong></p>
+						<p><strong class="text-white">Decimals</strong></p>
 					</div>
 					<div class="col-7">
 						<p id="tokenDecimals"></p>
@@ -59,7 +59,7 @@
 				</div>
 				<div class="row w-100 p-1">
 					<div class="col-5">
-						<p><strong>Type</strong></p>
+						<p><strong class="text-white">Type</strong></p>
 					</div>
 					<div class="col-7">
 						<p id="tokenType"></p>
@@ -67,7 +67,7 @@
 				</div>	
 				<div style="display: none;" id="tokenBurned" class="row w-100 p-1">
 					<div class="col-5">
-						<p><strong>Status</strong></p>
+						<p><strong class="text-white">Status</strong></p>
 					</div>
 					<div class="col-7">
 						<p class="text-danger">Burned</p>
@@ -78,7 +78,7 @@
 			<div id="tokenDataRight" class="col-lg-8 div-cell-dark border-top-flat p-0">
 				<div class="row w-100 p-1">
 					<div id="tokenDescriptionHolderLeft" class="col-xl-2 col-lg-3 col-12 col-md-5 mb-2">
-						<p><strong>Description</strong></p>
+						<p><strong class="text-white">Description</strong></p>
 					</div>
 					<div id="tokenDescriptionHolderRight" class="col-xl-10 col-lg-9 col-12 col-md-7" style="padding-top: 2px;">
 						<p id="tokenDescription"></p>
@@ -106,77 +106,94 @@
 				</div>
 				<div id="nftInfoHolder" class="col-lg-9 p-0">
 					<div class="row w-100 p-2 border-bottom-flat">
-						<div class="col-md-3"><strong><p>Type</p></strong></div>
+						<div class="col-md-3"><strong><p class="text-white">Type</p></strong></div>
 						<div id="nftType" class="col"></div>
 					</div>
 					<div class="row w-100 p-2">
-						<div class="col-md-3"><strong><p>Mint block</p></strong></div>
+						<div class="col-md-3"><strong><p class="text-white">Mint block</p></strong></div>
 						<div id="nftCreationHeight" class="col"></div>
 					</div>
 					<div class="row w-100 p-2">
-						<div class="col-md-3"><strong><p>Mint address</p></strong></div>
+						<div class="col-md-3"><strong><p class="text-white">Mint address</p></strong></div>
 						<div id="nftMintedAddress" class="col"></div>
 					</div>
 					<!--
 					<div id="nftMintedWalletHolder" style="display: none;" class="row w-100 p-2">
-						<div class="col-md-3"><strong><p>Mint wallet</p></strong></div>
+						<div class="col-md-3"><strong><p class="text-white">Mint wallet</p></strong></div>
 						<div id="nftMintedWallet" class="col"></div>
 					</div>
 					-->	
 					<div class="row w-100 p-2">
-						<div class="col-md-3"><strong><p>Mint transaction</p></strong></div>
+						<div class="col-md-3"><strong><p class="text-white">Mint transaction</p></strong></div>
 						<div id="nftMintedTransaction" class="col"></div>
 					</div>		
 					<div id="nftCurrentAddressHolder" style="display: none;" class="row w-100 p-2">
-						<div class="col-md-3"><strong><p>Current address</p></strong></div>
+						<div class="col-md-3"><strong><p class="text-white">Current address</p></strong></div>
 						<div id="nftCurrentAddress" class="col"></div>
 					</div>
+					<div id="nftBurnTransactionHolder" style="display: none;" class="row w-100 p-2">
+						<div class="col-md-3"><strong><p class="text-white">Burn transaction</p></strong></div>
+						<div id="nftBurnTransaction" class="col"></div>
+					</div>
 					<div id="ipfsCidHolder" class="row w-100 p-2">
-						<div class="col-md-3"><strong><p>IPFS CID</p></strong></div>
+						<div class="col-md-3"><strong><p class="text-white">IPFS CID</p></strong></div>
 						<div id="ipfsCid" class="col"></div>
 					</div>
 					<div class="row w-100 p-2">
-						<div class="col-md-3"><strong><p>URL</p></strong></div>
+						<div class="col-md-3"><strong><p class="text-white">URL</p></strong></div>
 						<div id="nftLink" class="col"></div>
 					</div>
 					<div id="nftHashHolder" class="row w-100 p-2">
-						<div class="col-md-3"><strong><p>SHA-256 hash</p></strong></div>
+						<div class="col-md-3"><strong><p class="text-white">SHA-256 hash</p></strong></div>
 						<div id="nftHash" class="col"></div>
 					</div>
-					<div id="marketplaceHolder" class="row w-100 p-2 border-top-flat">
-						<div class="col-md-3"><strong><p>Marketplace</p></strong></div>
+					{# <div id="marketplaceHolder" class="row w-100 p-2 border-top-flat">
+						<div class="col-md-3"><strong><p class="text-white">Marketplace</p></strong></div>
 						<div id="nftAuction" class="col"></div>
-					</div>
+					</div> #}
 					<div id="royaltyHolder" style="display: none;" class="row w-100 p-2 border-top-flat">
-						<div class="col-md-3"><strong><p>Royalty</p></strong></div>
+						<div class="col-md-3"><strong><p class="text-white">Royalty</p></strong></div>
 						<div id="nftRoyalty" class="col"></div>
 					</div>
 					<div id="twitterHolder" style="display: none;" class="row w-100 p-2 border-top-flat">
-						<div class="col-md-3"><strong><p>Twitter</p></strong></div>
+						<div class="col-md-3"><strong><p class="text-white">Twitter</p></strong></div>
 						<div id="nftTwitter" class="col"><a id="twitterLink" href="" target="_new"></a></div>
 					</div>
 					<div id="instagramHolder" style="display: none;" class="row w-100 p-2 border-top-flat">
-						<div class="col-md-3"><strong><p>Instagram</p></strong></div>
+						<div class="col-md-3"><strong><p class="text-white">Instagram</p></strong></div>
 						<div id="nftInstagram" class="col"><a id="instagramLink" href="" target="_new"></a></div>
 					</div>
 				</div>
 				<div id="nftPropertiesHolder" style="display: none; padding-bottom: 15px;">
-				<h3 style="margin-top:10px;margin-bottom: 10px;">Properties</h3>
-				<div id="nftProperties" style="display: grid;
-  grid-template-columns:  repeat(auto-fill, minmax(150px, 1fr)); /* Creates 3 equal-width columns */
-  gap: 10px; /* Space between grid items */"></div>
+					<h3 style="margin-top:25px;margin-bottom: 10px;">Properties</h3>
+					<div id="nftProperties" style="display: grid;
+	grid-template-columns:  repeat(auto-fill, minmax(150px, 1fr)); /* Creates 3 equal-width columns */
+	gap: 10px; /* Space between grid items */"></div>
+					</div>
+					<div id="nftStatsHolder" style="display: none; padding-bottom: 15px;">
+					<h3 style="margin-top:10px;margin-bottom: 10px;">Stats</h3>
+					<div id="nftStats" style="display: grid;
+	grid-template-columns:  repeat(auto-fill, minmax(150px, 1fr)); /* Creates 3 equal-width columns */
+	gap: 10px; /* Space between grid items */"></div>
+					</div>
+					<div id="nftLevelsHolder" style="display: none; padding-bottom: 15px;">
+					<h3 style="margin-top:10px;margin-bottom: 10px;">Levels</h3>
+					<div id="nftLevels" style="display: grid;
+	grid-template-columns:  repeat(auto-fill, minmax(150px, 1fr)); /* Creates 3 equal-width columns */
+	gap: 10px; /* Space between grid items */"></div>
 				</div>
-				<div id="nftStatsHolder" style="display: none; padding-bottom: 15px;">
-				<h3 style="margin-top:10px;margin-bottom: 10px;">Stats</h3>
-				<div id="nftStats" style="display: grid;
-  grid-template-columns:  repeat(auto-fill, minmax(150px, 1fr)); /* Creates 3 equal-width columns */
-  gap: 10px; /* Space between grid items */"></div>
-				</div>
-				<div id="nftLevelsHolder" style="display: none; padding-bottom: 15px;">
-				<h3 style="margin-top:10px;margin-bottom: 10px;">Levels</h3>
-				<div id="nftLevels" style="display: grid;
-  grid-template-columns:  repeat(auto-fill, minmax(150px, 1fr)); /* Creates 3 equal-width columns */
-  gap: 10px; /* Space between grid items */"></div>
+				<div id="nftCollectionHolder" style="display: none; padding-bottom: 15px;">
+					<h3 style="margin-top:10px;margin-bottom: 10px;">Collection Data</h3>
+					<div id="nftCollectionDataHolder" class="col-12 p-0 stripedHolder">
+						<div class="row w-100 p-2 border-bottom-flat">
+							<div class="col-md-3"><strong><p class="text-white">ID</p></strong></div>
+							<div id="nftCollectionId" class="col"></div>
+						</div>
+						<div class="row w-100 p-2 border-bottom-flat">
+							<div class="col-md-3"><strong><p class="text-white">Name</p></strong></div>
+							<div id="nftCollectionName" class="col"></div>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -186,23 +203,23 @@
 			<div class="div-cell-dark row w-100 p-0">
 				<div id="nftInfoHolder" class="col-lg-12 p-0">
 					<div class="row w-100 p-2 border-bottom-flat">
-						<div class="col-md-3"><strong><p>Type</p></strong></div>
+						<div class="col-md-3"><strong><p class="text-white">Type</p></strong></div>
 						<div id="nftType" class="col"></div>
 					</div>
 					<div class="row w-100 p-2">
-						<div class="col-md-3"><strong><p>Mint block</p></strong></div>
+						<div class="col-md-3"><strong><p class="text-white">Mint block</p></strong></div>
 						<div id="nftCreationHeight" class="col"></div>
 					</div>
 					<div class="row w-100 p-2">
-						<div class="col-md-3"><strong><p>Mint address</p></strong></div>
+						<div class="col-md-3"><strong><p class="text-white">Mint address</p></strong></div>
 						<div id="nftMintedAddress" class="col"></div>
 					</div>
 					<div class="row w-100 p-2">
-						<div class="col-md-3"><strong><p>Mint transaction</p></strong></div>
+						<div class="col-md-3"><strong><p class="text-white">Mint transaction</p></strong></div>
 						<div id="nftMintedTransaction" class="col"></div>
 					</div>	
 					<div id="nftCurrentAddressHolder" style="display: none;" class="row w-100 p-2">
-						<div class="col-md-3"><strong><p>Current address</p></strong></div>
+						<div class="col-md-3"><strong><p class="text-white">Current address</p></strong></div>
 						<div id="nftCurrentAddress" class="col"></div>
 					</div>
 				</div>				
@@ -270,6 +287,32 @@
 						</thead>
 
 						<tbody id="holdersTableBody">
+
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div id="txsHolder" style="display: none; margin-top:20px !important;" class="div-cell-dark row w-100 p-0">
+				<div class="p-0 col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+					<h4 style="display: inline-block;padding-right:10px !important;" class="p-3 pb-2">Latest Transactions</h4>
+					<div id="txsLoading"> 
+						<div id="txsLoadingInner">
+							<canvas id="loadingImgTxs" class="loadingImg" width="150" height="150"></canvas>
+						</div>
+					</div>
+					<table id="txsTable" style="display:none; border-left: 0 !important;" class="w-100 w-full table table-dark table-striped table-mobile m-0">
+						<thead>
+							<tr>
+								<th scope="col">Tx</th>
+								<th scope="col" style="min-width: 180px">Time</th>
+								<th scope="col">Block</th>
+								<th style="min-width:200px" scope="col">From</th>
+								<th style="min-width:200px" scope="col">To</th>
+								<th scope="col" >Value</th>
+							</tr>
+						</thead>
+
+						<tbody id="txsTableBody">
 
 						</tbody>
 					</table>
