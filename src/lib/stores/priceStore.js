@@ -24,7 +24,6 @@ priceStore.subscribe(prices => {
 
 // Update all prices
 export function updatePrices(prices) {
-	console.log(prices)
 	priceStore.set(prices);
 }
 

@@ -14,10 +14,13 @@
 				<i class="fas fa-spinner fa-spin me-2"></i>Loading statistics...
 			</div>
 		{:else}
+			<div class="row col-12 px-1">
+				<h2 class="mb-3 text-strong">24h Stats</h2>
+				<hr class="mt-1 mb-0">
+			</div>
 			<div class="row w-100 p-0">
 				<!-- Left Column -->
 				<div class="col-md-6 p-0">
-					<h2 class="p-1 p-sm-3 m-0 text-strong">24h Stats</h2>
 					<h3 class="p-1 p-sm-3 erg-span">Block summary</h3>
 					<div class="col-12 p-0 p-sm-1">
 						<div class="row w-100 p-0 p-sm-1">
@@ -69,8 +72,6 @@
 				
 				<!-- Right Column -->
 				<div class="col-md-6 p-0">
-					<!-- svelte-ignore a11y_missing_content -->
-					<h2 class="p-1 p-sm-3 m-0 d-none d-md-block">&nbsp;</h2>
 					<h3 class="p-1 p-sm-3 erg-span">Mining cost</h3>
 					<div class="col-12 p-0 p-sm-1">
 						<div class="row w-100 p-0 p-sm-1">

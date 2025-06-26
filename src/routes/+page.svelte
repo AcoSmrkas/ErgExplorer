@@ -34,7 +34,6 @@
 	});
 	
 	currentPrices.subscribe(prices => {
-		console.log(prices)
 		currentPricesValue = prices;
 	});
 

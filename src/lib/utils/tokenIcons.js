@@ -30,7 +30,6 @@ export function getIcon(tokenId) {
 
 export function getAssetTitleParams(token, tokenId, name, iconIsToTheLeft, scam = false) {
 	if (tokenId === undefined && name === 'ERG') {
-		console.log('yes')
 		return ERG_SPAN;
 	}
 
