@@ -1,0 +1,456 @@
+/* Popup Styles for Token, Address, and Block Popups */
+
+/* ================================
+   TOKEN POPUP STYLES
+   ================================ */
+
+.token-popup {
+	position: fixed;
+	background: var(--forms-bg);
+	border: 1px solid var(--main-color);
+	border-radius: 5px;
+	padding: 12px;
+	max-width: 350px;
+	min-width: 280px;
+	max-height: 400px;
+	overflow-y: auto;
+	z-index: 1000;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+	color: var(--text-strong);
+	font-size: 0.85em;
+	display: none;
+	pointer-events: auto;
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+}
+
+/* Token popup header with image/icon */
+.token-popup .token-header {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	margin-bottom: 8px;
+}
+
+.token-popup .token-title {
+	flex: 1;
+	min-width: 0;
+}
+
+.token-popup .token-type {
+	font-size: 0.75em;
+	color: var(--text-light);
+	font-style: italic;
+	margin-top: 2px;
+}
+
+/* Token images */
+.token-popup-image {
+	border-radius: 3px;
+	flex-shrink: 0;
+}
+
+.token-popup .nft-image {
+	width: 40px;
+	height: 40px;
+	object-fit: cover;
+}
+
+.token-popup .token-icon-large {
+	width: 24px;
+	height: 24px;
+	object-fit: contain;
+}
+
+/* Token ID section with copy button */
+.token-popup .token-id-section {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 6px;
+}
+
+.token-popup .copy-btn {
+	background: none;
+	border: 1px solid var(--borders);
+	color: var(--text-light);
+	padding: 2px 6px;
+	font-size: 0.7em;
+	border-radius: 3px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	flex-shrink: 0;
+}
+
+.token-popup .copy-btn:hover {
+	background: var(--main-color);
+	border-color: var(--main-color);
+	color: #EEE;
+}
+
+/* Token warning for scam tokens */
+.token-popup .token-warning {
+	background: rgba(255, 193, 7, 0.1);
+	border: 1px solid rgba(255, 193, 7, 0.3);
+	border-radius: 3px;
+	padding: 6px 8px;
+	margin-top: 8px;
+	font-size: 0.75em;
+	color: #ffc107;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+/* Description section */
+.token-popup .description-label {
+	font-weight: bold;
+	color: var(--text-strong);
+	margin-bottom: 3px;
+}
+
+.token-popup .description-text {
+	color: var(--text-color);
+	line-height: 1.3;
+}
+
+.token-popup.show {
+	display: block;
+}
+
+.token-popup .token-name {
+	font-weight: bold;
+	color: var(--main-color);
+	margin-bottom: 6px;
+	font-size: 1.1em;
+}
+
+.token-popup .token-ticker {
+	color: var(--text-strong);
+	font-weight: 600;
+	margin-bottom: 4px;
+}
+
+.token-popup .token-id {
+	font-family: 'DejaVu', monospace;
+	font-size: 0.75em;
+	color: var(--text-light);
+	word-break: break-all;
+	margin-bottom: 6px;
+	background: var(--background);
+	padding: 3px 6px;
+	border-radius: 3px;
+}
+
+.token-popup .token-price {
+	color: var(--text-strong);
+	font-weight: bold;
+	margin-bottom: 4px;
+}
+
+.token-popup .token-decimals,
+.token-popup .token-supply {
+	color: var(--text-light);
+	margin-bottom: 4px;
+	font-size: 0.9em;
+}
+
+.token-popup .token-description {
+	color: var(--text-color);
+	margin-top: 8px;
+	padding-top: 8px;
+	border-top: 1px solid var(--borders);
+	line-height: 1.3;
+	font-style: italic;
+}
+
+/* Loading section in popup */
+.token-popup .loading-section {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 8px 0;
+	color: var(--text-light);
+}
+
+.token-popup .loading-text {
+	font-size: 0.8em;
+	font-style: italic;
+}
+
+/* Token details section */
+.token-popup .token-details {
+	opacity: 1;
+	transition: opacity 0.3s ease-in-out;
+}
+
+.token-popup .token-basic-info {
+	opacity: 0.8;
+}
+
+/* Smooth transitions for popup */
+.token-popup {
+	transition: all 0.2s ease-in-out;
+	transform-origin: top left;
+}
+
+.token-popup.show {
+	transform: scale(1);
+	opacity: 1;
+}
+
+/* ================================
+   ADDRESS POPUP STYLES
+   ================================ */
+
+.address-popup {
+	position: fixed;
+	background: var(--forms-bg);
+	border: 1px solid var(--main-color);
+	border-radius: 5px;
+	padding: 12px;
+	max-width: 400px;
+	min-width: 320px;
+	max-height: 300px;
+	overflow-y: auto;
+	z-index: 1000;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+	color: var(--text-strong);
+	font-size: 0.85em;
+	display: none;
+	pointer-events: auto;
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+}
+
+.address-popup.show {
+	display: block;
+}
+
+/* Address popup header with icon */
+.address-popup .address-header {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	margin-bottom: 8px;
+}
+
+.address-popup .address-icon {
+	color: var(--main-color);
+	font-size: 1.2em;
+	width: 24px;
+	text-align: center;
+	flex-shrink: 0;
+}
+
+.address-popup .address-title {
+	flex: 1;
+	min-width: 0;
+}
+
+.address-popup .address-name {
+	font-weight: bold;
+	color: var(--main-color);
+	margin-bottom: 2px;
+	font-size: 1.1em;
+}
+
+.address-popup .address-short {
+	color: var(--text-light);
+	font-size: 0.9em;
+	font-family: 'DejaVu', monospace;
+}
+
+/* Address details */
+.address-popup .address-full {
+	font-family: 'DejaVu', monospace;
+	font-size: 0.75em;
+	color: var(--text-light);
+	word-break: break-all;
+	background: var(--background);
+	padding: 3px 6px;
+	border-radius: 3px;
+	flex: 1;
+}
+
+.address-popup .address-balance,
+.address-popup .address-unconfirmed,
+.address-popup .address-total {
+	color: var(--text-strong);
+	margin-bottom: 4px;
+}
+
+.address-popup .address-total {
+	font-weight: bold;
+	color: var(--main-color);
+	border-top: 1px solid var(--borders);
+	padding-top: 6px;
+	margin-top: 6px;
+}
+
+.address-popup .address-unconfirmed {
+	color: var(--text-light);
+	font-style: italic;
+}
+
+/* Smooth transitions for address popup */
+.address-popup {
+	transition: all 0.2s ease-in-out;
+	transform-origin: top left;
+}
+
+.address-popup.show {
+	transform: scale(1);
+	opacity: 1;
+}
+
+/* ================================
+   BLOCK POPUP STYLES
+   ================================ */
+
+.block-popup {
+	position: fixed;
+	background: var(--forms-bg);
+	border: 1px solid var(--main-color);
+	border-radius: 5px;
+	padding: 12px;
+	max-width: 400px;
+	min-width: 320px;
+	max-height: 350px;
+	overflow-y: auto;
+	z-index: 1000;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+	color: var(--text-strong);
+	font-size: 0.85em;
+	display: none;
+	pointer-events: auto;
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+}
+
+.block-popup.show {
+	display: block;
+}
+
+/* Block popup header */
+.block-popup .block-header {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	margin-bottom: 8px;
+	border-bottom: 1px solid var(--borders);
+	padding-bottom: 8px;
+}
+
+.block-popup .block-title {
+	flex: 1;
+	min-width: 0;
+}
+
+.block-popup .block-height {
+	font-weight: bold;
+	color: var(--main-color);
+	margin-bottom: 2px;
+	font-size: 1.1em;
+}
+
+/* Block details */
+.block-popup .block-details > div,
+.block-popup .block-basic-info > div {
+	margin: 6px 0;
+	color: var(--text-strong);
+	font-size: 0.9em;
+}
+
+/* Block ID section with copy button */
+.block-popup .block-id-section {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 6px;
+}
+
+.block-popup .block-id {
+	font-family: 'DejaVu', monospace;
+	font-size: 0.75em;
+	color: var(--text-light);
+	word-break: break-all;
+	background: var(--background);
+	padding: 3px 6px;
+	border-radius: 3px;
+	flex: 1;
+}
+
+.block-popup .copy-btn {
+	background: none;
+	border: 1px solid var(--borders);
+	color: var(--text-light);
+	padding: 2px 6px;
+	font-size: 0.7em;
+	border-radius: 3px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	flex-shrink: 0;
+}
+
+.block-popup .copy-btn:hover {
+	background: var(--main-color);
+	border-color: var(--main-color);
+	color: #EEE;
+}
+
+/* Block timestamps and data */
+.block-popup .block-time,
+.block-popup .block-transactions,
+.block-popup .block-size,
+.block-popup .block-difficulty,
+.block-popup .block-bits,
+.block-popup .block-epoch,
+.block-popup .block-version {
+	color: var(--text-strong);
+	margin-bottom: 4px;
+}
+
+/* Loading section in popup */
+.block-popup .loading-section {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 8px 0;
+	color: var(--text-light);
+}
+
+.block-popup .loading-text {
+	font-size: 0.8em;
+	font-style: italic;
+}
+
+/* Smooth transitions for block popup */
+.block-popup {
+	transition: all 0.2s ease-in-out;
+	transform-origin: top left;
+}
+
+.block-popup.show {
+	transform: scale(1);
+	opacity: 1;
+}
+
+/* ================================
+   SHARED POPUP STYLES
+   ================================ */
+
+/* Small loading spinner for popups */
+.loading-spinner-small {
+	width: 12px;
+	height: 12px;
+	border: 2px solid var(--borders);
+	border-top: 2px solid var(--main-color);
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}

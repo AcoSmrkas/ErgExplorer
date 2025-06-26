@@ -1,0 +1,213 @@
+/* Centralized CSS custom properties for easy theme management */
+:root {
+	/* Enhanced color system */
+	--color-primary: var(--main-color, #fb5c16);
+	--color-primary-hover: var(--main-color-hover, #FF8418);
+	--color-secondary: #6c757d;
+	--color-success: #28a745;
+	--color-warning: #ffc107;
+	--color-danger: #dc3545;
+	--color-info: #17a2b8;
+	
+	/* Typography system */
+	--font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+	--font-family-mono: 'DejaVu', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+	
+	--font-size-xs: 0.75rem;
+	--font-size-sm: 0.875rem;
+	--font-size-base: 1rem;
+	--font-size-lg: 1.125rem;
+	--font-size-xl: 1.25rem;
+	--font-size-2xl: 1.5rem;
+	--font-size-3xl: 1.875rem;
+	
+	--font-weight-normal: 400;
+	--font-weight-medium: 500;
+	--font-weight-semibold: 600;
+	--font-weight-bold: 700;
+	
+	--line-height-tight: 1.25;
+	--line-height-normal: 1.5;
+	--line-height-relaxed: 1.75;
+	
+	/* Spacing system */
+	--space-xs: 0.25rem;
+	--space-sm: 0.5rem;
+	--space-md: 1rem;
+	--space-lg: 1.5rem;
+	--space-xl: 2rem;
+	--space-2xl: 3rem;
+	--space-3xl: 4rem;
+	
+	/* Border radius system */
+	--radius-none: 0;
+	--radius-sm: 2px;
+	--radius-base: 4px;
+	--radius-md: 5px;     /* Legacy compatibility */
+	--radius-lg: 8px;
+	--radius-xl: 12px;
+	--radius-full: 50%;
+	
+	/* Shadow system */
+	--shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+	--shadow-base: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+	--shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+	--shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+	--shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+	
+	/* Z-index scale */
+	--z-dropdown: 1000;
+	--z-sticky: 1020;
+	--z-fixed: 1030;
+	--z-modal-backdrop: 1040;
+	--z-modal: 1050;
+	--z-popover: 1060;
+	--z-tooltip: 1070;
+	
+	/* Component-specific variables */
+	--navbar-height: 55px;
+	--navbar-padding: var(--space-md);
+	
+	--card-padding: 15px;      /* Legacy compatibility */
+	--card-border-radius: var(--radius-md);
+	--card-border: 1px solid var(--borders);
+	
+	--button-padding-y: 0.5rem;
+	--button-padding-x: 1rem;
+	--button-border-radius: var(--radius-base);
+	
+	/* Transition system */
+	--transition-fast: 150ms ease;
+	--transition-base: 200ms ease;
+	--transition-slow: 300ms ease;
+	
+	/* Layout breakpoints (for CSS custom media queries in future) */
+	--breakpoint-xs: 575.98px;
+	--breakpoint-sm: 576px;
+	--breakpoint-md: 768px;
+	--breakpoint-lg: 992px;
+	--breakpoint-xl: 1200px;
+	--breakpoint-xxl: 1400px;
+}
+
+/* Enhanced utility classes using the new system */
+.u-font-mono {
+	font-family: var(--font-family-mono);
+}
+
+.u-text-xs { font-size: var(--font-size-xs); }
+.u-text-sm { font-size: var(--font-size-sm); }
+.u-text-base { font-size: var(--font-size-base); }
+.u-text-lg { font-size: var(--font-size-lg); }
+.u-text-xl { font-size: var(--font-size-xl); }
+.u-text-2xl { font-size: var(--font-size-2xl); }
+.u-text-3xl { font-size: var(--font-size-3xl); }
+
+.u-font-normal { font-weight: var(--font-weight-normal); }
+.u-font-medium { font-weight: var(--font-weight-medium); }
+.u-font-semibold { font-weight: var(--font-weight-semibold); }
+.u-font-bold { font-weight: var(--font-weight-bold); }
+
+.u-leading-tight { line-height: var(--line-height-tight); }
+.u-leading-normal { line-height: var(--line-height-normal); }
+.u-leading-relaxed { line-height: var(--line-height-relaxed); }
+
+/* Enhanced transition utilities */
+.u-transition { transition: all var(--transition-base); }
+.u-transition-fast { transition: all var(--transition-fast); }
+.u-transition-slow { transition: all var(--transition-slow); }
+
+.u-transition-colors { transition: color var(--transition-base), background-color var(--transition-base), border-color var(--transition-base); }
+.u-transition-shadow { transition: box-shadow var(--transition-base); }
+.u-transition-transform { transition: transform var(--transition-base); }
+
+/* Enhanced shadow utilities */
+.u-shadow-sm { box-shadow: var(--shadow-sm); }
+.u-shadow { box-shadow: var(--shadow-base); }
+.u-shadow-md { box-shadow: var(--shadow-md); }
+.u-shadow-lg { box-shadow: var(--shadow-lg); }
+.u-shadow-xl { box-shadow: var(--shadow-xl); }
+.u-shadow-none { box-shadow: none; }
+
+/* Enhanced border radius utilities */
+.u-rounded-none { border-radius: var(--radius-none); }
+.u-rounded-sm { border-radius: var(--radius-sm); }
+.u-rounded { border-radius: var(--radius-base); }
+.u-rounded-md { border-radius: var(--radius-md); }
+.u-rounded-lg { border-radius: var(--radius-lg); }
+.u-rounded-xl { border-radius: var(--radius-xl); }
+.u-rounded-full { border-radius: var(--radius-full); }
+
+/* Component enhancement classes */
+.enhanced-card {
+	padding: var(--card-padding);
+	border: var(--card-border);
+	border-radius: var(--card-border-radius);
+	background-color: var(--forms-bg);
+	transition: var(--transition-base);
+}
+
+.enhanced-card:hover {
+	box-shadow: var(--shadow-md);
+}
+
+.enhanced-button {
+	padding: var(--button-padding-y) var(--button-padding-x);
+	border-radius: var(--button-border-radius);
+	font-weight: var(--font-weight-medium);
+	transition: var(--transition-base);
+	border: none;
+	cursor: pointer;
+}
+
+.enhanced-button--primary {
+	background-color: var(--color-primary);
+	color: white;
+}
+
+.enhanced-button--primary:hover {
+	background-color: var(--color-primary-hover);
+}
+
+/* Enhanced navbar theme button */
+.enhanced-theme-switcher {
+	height: 40px;
+	width: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: var(--radius-base);
+	transition: background-color var(--transition-base);
+	text-decoration: none;
+	color: inherit;
+}
+
+.enhanced-theme-switcher:hover {
+	background-color: rgba(255, 255, 255, 0.1);
+	color: inherit;
+	text-decoration: none;
+}
+
+/* Dark theme enhancements */
+html[data-bs-theme="dark"] .enhanced-card {
+	background-color: var(--forms-bg);
+	border-color: var(--borders);
+}
+
+/* Mew theme enhancements */
+html[data-theme="mew"] .enhanced-button--primary {
+	background-color: var(--main-color);
+}
+
+html[data-theme="mew"] .enhanced-button--primary:hover {
+	background-color: var(--main-color-hover);
+}
+
+html[data-theme="mew"] .dropdown-item:hover {
+	background-color: var(--main-color);
+	color: var(--footer) !important;
+}
+
+html[data-theme="mew"] .dropdown-toggle::after {
+	color: var(--text-light) !important;
+}

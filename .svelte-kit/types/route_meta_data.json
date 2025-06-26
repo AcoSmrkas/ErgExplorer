@@ -1,0 +1,34 @@
+{
+	"/": [
+		"src/routes/+page.server.js",
+		"src/routes/+layout.server.js",
+		"src/routes/+layout.server.js"
+	],
+	"/about": [
+		"src/routes/+layout.server.js"
+	],
+	"/addressbook": [
+		"src/routes/+layout.server.js"
+	],
+	"/addresses/[address]": [
+		"src/routes/+layout.server.js"
+	],
+	"/blocks/[id]": [
+		"src/routes/+layout.server.js"
+	],
+	"/issued-tokens": [
+		"src/routes/+layout.server.js"
+	],
+	"/latest-blocks": [
+		"src/routes/+layout.server.js"
+	],
+	"/mempool": [
+		"src/routes/+layout.server.js"
+	],
+	"/tokens/[tokenId]": [
+		"src/routes/+layout.server.js"
+	],
+	"/transactions/[txId]": [
+		"src/routes/+layout.server.js"
+	]
+}
