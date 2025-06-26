@@ -1,66 +1,134 @@
-/* Popup Styles for Token, Address, and Block Popups */
+/* ====================================================================
+   ENHANCED POPUP STYLES USING CENTRALIZED GLASS SYSTEM
+   ==================================================================== */
+
 
 /* ================================
    TOKEN POPUP STYLES
    ================================ */
 
-.token-popup {
+/* Apply centralized glass system to popups */
+.token-popup,
+.address-popup,
+.block-popup {
 	position: fixed;
-	background: var(--forms-bg);
-	border: 1px solid var(--main-color);
-	border-radius: 5px;
-	padding: 12px;
-	max-width: 350px;
-	min-width: 280px;
-	max-height: 400px;
-	overflow-y: auto;
 	z-index: 1000;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 	color: var(--text-strong);
-	font-size: 0.85em;
+	font-size: 0.9em;
 	display: none;
 	pointer-events: auto;
 	word-wrap: break-word;
 	overflow-wrap: break-word;
+	padding: 20px;
+	background: var(--glass-bg-subtle);
+	backdrop-filter: var(--glass-blur-xl);
+	-webkit-backdrop-filter: var(--glass-blur-xl);
+	border: 1px solid var(--glass-border-light);
+	box-shadow: var(--glass-shadow-sm);
+	border-radius: 16px;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	transform: scale(0.95) translateY(5px);
+	opacity: 0;
 }
 
-/* Token popup header with image/icon */
+.token-popup.show,
+.address-popup.show,
+.block-popup.show {
+	display: block;
+	opacity: 1;
+	transform: scale(1) translateY(0);
+}
+
+.token-popup {
+	max-width: 380px;
+	min-width: 320px;
+	max-height: 450px;
+	overflow-y: auto;
+}
+
+.address-popup {
+	max-width: 400px;
+	min-width: 320px;
+	max-height: 350px;
+	overflow-y: auto;
+}
+
+.block-popup {
+	max-width: 400px;
+	min-width: 320px;
+	max-height: 400px;
+	overflow-y: auto;
+}
+
+/* Enhanced token popup header */
 .token-popup .token-header {
 	display: flex;
-	align-items: flex-start;
-	gap: 10px;
-	margin-bottom: 8px;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 16px;
+	padding-bottom: 12px;
+	border-bottom: 1px solid var(--glass-border-light);
 }
 
 .token-popup .token-title {
 	flex: 1;
 	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 2px;
+}
+
+.token-popup .token-name {
+	font-weight: bold;
+	color: var(--main-color);
+	font-size: 1.1em;
+	margin: 0;
+	line-height: 1.2;
+}
+
+.token-popup .token-ticker {
+	color: var(--text-strong);
+	font-weight: 600;
+	font-size: 0.9em;
+	margin: 0;
+	line-height: 1.2;
 }
 
 .token-popup .token-type {
 	font-size: 0.75em;
 	color: var(--text-light);
 	font-style: italic;
-	margin-top: 2px;
+	margin: 0;
+	line-height: 1.2;
 }
 
-/* Token images */
+/* Clean token images without frames */
 .token-popup-image {
-	border-radius: 3px;
+	border-radius: 8px;
 	flex-shrink: 0;
+	overflow: hidden;
 }
 
 .token-popup .nft-image {
-	width: 40px;
-	height: 40px;
+	width: 72px;
+	height: 72px;
 	object-fit: cover;
+	transition: transform 0.3s ease;
+}
+
+.token-popup .nft-image:hover {
+	transform: scale(1.05);
 }
 
 .token-popup .token-icon-large {
-	width: 24px;
-	height: 24px;
+	width: 40px;
+	height: 40px;
 	object-fit: contain;
+	padding: 4px;
 }
+
+/* Clean images across all themes - no additional styling needed */
 
 /* Token ID section with copy button */
 .token-popup .token-id-section {
@@ -70,36 +138,60 @@
 	margin-bottom: 6px;
 }
 
-.token-popup .copy-btn {
-	background: none;
-	border: 1px solid var(--borders);
-	color: var(--text-light);
-	padding: 2px 6px;
-	font-size: 0.7em;
-	border-radius: 3px;
+/* Copy button using centralized glass system */
+.copy-btn {
+	background: var(--glass-bg-subtle);
+	backdrop-filter: var(--glass-blur-sm);
+	-webkit-backdrop-filter: var(--glass-blur-sm);
+	border: 1px solid var(--glass-border-light);
+	box-shadow: var(--glass-shadow-sm);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	color: var(--text-color);
+	padding: 6px 12px;
+	font-size: 0.75em;
+	border-radius: 8px;
 	cursor: pointer;
-	transition: all 0.2s ease;
 	flex-shrink: 0;
 }
 
-.token-popup .copy-btn:hover {
-	background: var(--main-color);
-	border-color: var(--main-color);
-	color: #EEE;
+/* Removed shimmer effect for cleaner glass look */
+
+.copy-btn:hover {
+	background: var(--main-color) !important;
+	border-color: var(--main-color) !important;
+	color: white !important;
 }
 
-/* Token warning for scam tokens */
+.copy-btn:active {
+	transform: translateY(0) !important;
+}
+
+/* Enhanced token warning with glass effect */
 .token-popup .token-warning {
-	background: rgba(255, 193, 7, 0.1);
+	background: var(--glass-bg-subtle);
+	backdrop-filter: var(--glass-blur-md);
+	-webkit-backdrop-filter: var(--glass-blur-md);
 	border: 1px solid rgba(255, 193, 7, 0.3);
-	border-radius: 3px;
-	padding: 6px 8px;
-	margin-top: 8px;
-	font-size: 0.75em;
+	border-radius: 12px;
+	padding: 12px 16px;
+	margin-top: 16px;
+	font-size: 0.8em;
 	color: #ffc107;
 	display: flex;
 	align-items: center;
-	gap: 6px;
+	gap: 10px;
+}
+
+/* Removed gradient background for cleaner glass look */
+
+.token-popup .token-warning i {
+	font-size: 1.2em;
+	animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0.7; }
 }
 
 /* Description section */
@@ -118,18 +210,9 @@
 	display: block;
 }
 
-.token-popup .token-name {
-	font-weight: bold;
-	color: var(--main-color);
-	margin-bottom: 6px;
-	font-size: 1.1em;
-}
+/* Duplicate token-name styles removed - using header version */
 
-.token-popup .token-ticker {
-	color: var(--text-strong);
-	font-weight: 600;
-	margin-bottom: 4px;
-}
+/* Duplicate ticker styles removed - using header version */
 
 .token-popup .token-id {
 	font-family: 'DejaVu', monospace;
@@ -203,29 +286,7 @@
    ADDRESS POPUP STYLES
    ================================ */
 
-.address-popup {
-	position: fixed;
-	background: var(--forms-bg);
-	border: 1px solid var(--main-color);
-	border-radius: 5px;
-	padding: 12px;
-	max-width: 400px;
-	min-width: 320px;
-	max-height: 300px;
-	overflow-y: auto;
-	z-index: 1000;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-	color: var(--text-strong);
-	font-size: 0.85em;
-	display: none;
-	pointer-events: auto;
-	word-wrap: break-word;
-	overflow-wrap: break-word;
-}
-
-.address-popup.show {
-	display: block;
-}
+/* Address popup styles handled by centralized popup styling above */
 
 /* Address popup header with icon */
 .address-popup .address-header {
@@ -282,7 +343,7 @@
 
 .address-popup .address-total {
 	font-weight: bold;
-	color: var(--main-color);
+	color: var(--text-white);
 	border-top: 1px solid var(--borders);
 	padding-top: 6px;
 	margin-top: 6px;

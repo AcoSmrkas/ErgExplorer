@@ -16,9 +16,8 @@
 <style>
 	.footer {
 		margin-top: auto;
-		background-color: var(--footer) !important;
 		color: var(--text-light);
-		padding: 5px;
+		padding: 10px;
 	}
 	
 	.footer a {

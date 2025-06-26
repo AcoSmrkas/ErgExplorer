@@ -1,6 +1,7 @@
 :root {
 	--main-color: #fb5c16;
 	--main-color-hover: #FF8418;
+	--main-color-rgb: 251, 92, 22;
 }
 
 html[data-bs-theme="dark"] {
@@ -19,7 +20,7 @@ html[data-bs-theme="dark"] {
 }
 
 html[data-bs-theme="light"] {
-	--striped-1: #f8f8f8;
+	--striped-1: #f4f4f4;
 	--text-color: #444;
 	--forms-bg: #FFF;
 	--borders: #CCC;
@@ -41,6 +42,7 @@ html[data-theme="mew"] {
 	--striped-1: var(--background);
 	--main-color: #f9d72d;
 	--main-color-hover: var(--info-color);
+	--main-color-rgb: 249, 215, 45;
 
 	#dropdown > a {
 		color: var(--text-light) !important;
@@ -71,14 +73,28 @@ html[data-theme="mew"] {
 	}
 
 	.btn {
-		color: var(--background) !important;
+		color: var(--text-strong) !important;
 	}
 
 	.btn-primary:hover {
-		background: var(--info-color) !important;
+		background: var(--main-color) !important;
+		color: var(--footer) !important;
 	}
 
 	.btn-primary {
-		background: #fff !important;
+		background: var(--glass-bg-light) !important;
+		backdrop-filter: var(--glass-blur-sm);
+		-webkit-backdrop-filter: var(--glass-blur-sm);
+		border: none !important;
+		border-radius: 12px !important;
+		color: var(--text-strong) !important;
+	}
+
+	.btn-info {
+		color: var(--footer) !important;
+	}
+
+	.btn-info:hover {
+		color: var(--footer) !important;
 	}
 }

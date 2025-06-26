@@ -122,6 +122,34 @@ export const patterns = {
 		'transition-all duration-200 hover:shadow-md cursor-pointer'
 	),
 	
+	// Glass effect cards
+	glassCard: compose(
+		'glass',
+		'u-rounded-md',
+		'p-3',
+		'u-transition'
+	),
+	
+	glassCardSubtle: compose(
+		'glass-subtle',
+		'u-rounded-md',
+		'p-3',
+		'u-transition'
+	),
+	
+	glassCardAccent: compose(
+		'glass-accent',
+		'u-rounded-md',
+		'p-3',
+		'u-transition'
+	),
+	
+	// Enhanced navbar with glass
+	glassNavbar: compose(
+		'glass-subtle',
+		'u-transition'
+	),
+	
 	// Centered loading state
 	loading: compose(
 		css.flex.center,
@@ -141,6 +169,15 @@ export const patterns = {
 		'mb-3'
 	),
 	
+	// Glass statistics display
+	glassStatCard: compose(
+		'glass',
+		css.text.center,
+		'mb-3',
+		'p-3',
+		'u-rounded-md'
+	),
+	
 	// Navigation item
 	navItem: compose(
 		'nav-link',
@@ -152,5 +189,31 @@ export const patterns = {
 		css.table.default,
 		css.table.responsive,
 		'border-no-flat'
+	),
+	
+	// Glass data table
+	glassDataTable: compose(
+		'glass-subtle',
+		css.table.responsive,
+		'u-rounded-md',
+		'overflow-hidden'
+	),
+	
+	// Glass table variants
+	glassTableHeader: compose(
+		'glass-accent',
+		'u-font-semibold'
+	),
+	
+	glassTableRow: compose(
+		'glass-subtle',
+		'u-transition'
+	),
+	
+	// Glass pagination
+	glassPagination: compose(
+		'glass',
+		'u-rounded',
+		'd-flex justify-content-center'
 	)
 };

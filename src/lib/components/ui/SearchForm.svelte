@@ -106,6 +106,7 @@
 					<option value="3">Block</option>
 					<option value="4">Box</option>
 				</select>
+				<!-- svelte-ignore a11y_consider_explicit_label -->
 				<button onclick={handleSearch} class="btn btn-lg btn-info" type="button">
 					<i class="fas fa-search"></i>
 				</button>
@@ -115,18 +116,38 @@
 </div>
 
 <style>
-	/* Search form styling matching original */
-	.form-control-lg {
-		background-color: var(--forms-bg);
-		color: var(--text-strong);
+	.form-control {
 		border: none;
+		box-shadow: var(--glass-shadow-sm) !important;
 	}
 
 	.form-control:focus {
-		background-color: var(--forms-bg);
-		box-shadow: none;
-		border: 1px solid var(--main-color);
+		background: var(--glass-bg-medium) !important;
 		color: var(--text-strong) !important;
+		box-shadow: 0 0 0 3px rgba(var(--main-color-rgb), 0.2), var(--glass-shadow-sm) !important;
+	}
+
+	/* Fix overlapping elements in input-group */
+	.input-group .form-control:not(:last-child) {
+		border-top-right-radius: 0 !important;
+		border-bottom-right-radius: 0 !important;
+		margin-right: -1px;
+	}
+
+	.input-group .form-select {
+		border-top-left-radius: 0 !important;
+		border-bottom-left-radius: 0 !important;
+		border-top-right-radius: 0 !important;
+		border-bottom-right-radius: 0 !important;
+		margin-left: -1px;
+		margin-right: -1px;
+		box-shadow: none !important;
+	}
+
+	.input-group .btn {
+		border-top-left-radius: 0 !important;
+		border-bottom-left-radius: 0 !important;
+		margin-left: -1px;
 	}
 
 	select, option {

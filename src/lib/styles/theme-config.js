@@ -28,7 +28,7 @@ export const themeConfig = {
 				muted: '#444'
 			},
 			borders: '#CCC',
-			striped: '#f8f8f8'
+			striped: '#f0f0f0'
 		},
 		dark: {
 			background: '#222',

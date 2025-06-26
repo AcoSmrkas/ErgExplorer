@@ -57,7 +57,7 @@
 				
 				{#if balance?.confirmed?.nanoErgs !== undefined}
 					<div class="address-total">
-						<strong>Total Balance:</strong> {@html formatErgValue((balance.confirmed?.nanoErgs || 0) + (balance.unconfirmed?.nanoErgs || 0))}
+						<strong class="erg-span">Total Balance:</strong> {@html formatErgValue((balance.confirmed?.nanoErgs || 0) + (balance.unconfirmed?.nanoErgs || 0))}
 					</div>
 				{/if}
 			</div>

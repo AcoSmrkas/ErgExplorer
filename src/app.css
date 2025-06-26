@@ -7,6 +7,9 @@
 /* Import centralized theme system */
 @import url('./lib/styles/theme-variables.css');
 
+/* Import centralized glass system */
+@import url('./lib/styles/glass-system.css');
+
 /* Global styles matching original */
 html {
 	overflow-y: scroll;
@@ -38,12 +41,19 @@ button:focus:not(:focus-visible) {
 }
 
 select {
+	background: var(--glass-bg-light) !important;
+	backdrop-filter: var(--glass-blur-sm);
+	-webkit-backdrop-filter: var(--glass-blur-sm);
 	border: none !important;
+	border-radius: 12px !important;
+	box-shadow: var(--glass-shadow-sm);
 	outline: none !important;
+	transition: all 0.3s ease;
 }
 
 select:focus {
-	border: 1px solid var(--main-color) !important;
+	background: var(--glass-bg-medium) !important;
+	box-shadow: 0 0 0 3px rgba(251, 92, 22, 0.2), var(--glass-shadow-sm) !important;
 }
 
 pre, td, th, select, option, .btn, .dropdown-item {
@@ -56,7 +66,6 @@ pre {
 
 footer {
 	margin-top: auto;
-	background-color: var(--forms-bg) !important;
 }
 
 html {
@@ -143,8 +152,8 @@ p {
 }
 
 table {  
-	border: 1px solid var(--borders) !important;
-	border-radius: 5px 5px;
+	border: none !important;
+	border-radius: 16px;
 	padding: 15px;
 }
 
@@ -165,16 +174,16 @@ tbody {
 }
 
 .table > :not(caption) > * > * {
-	background-color: var(--forms-bg) !important;
+	background-color: transparent !important;
 }
 
 .table-dark {
-	--bs-table-striped-bg: var(--striped-1);
+	--bs-table-striped-bg: var(--glass-bg-light);
 	border-color: var(--borders);
 }
 
 .table-striped > tbody > tr:nth-of-type(2n+1) > * {
-	--bs-table-bg-type: var(--striped-1);
+	--bs-table-bg-type: var(--glass-bg-light);
 }
 
 .text-light {
@@ -190,16 +199,19 @@ tbody {
 }
 
 .div-cell {
-	border: 1px solid var(--borders);
-	border-radius: 5px 5px;
+	background: var(--glass-bg-light);
+	backdrop-filter: var(--glass-blur-sm);
+	-webkit-backdrop-filter: var(--glass-blur-sm);
+	border: none;
+	border-radius: 16px;
 	padding: 15px;
+	box-shadow: var(--glass-shadow-sm);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.div-cell-dark {
-	border: 1px solid var(--borders);
-	border-radius: 5px 5px;
-	padding: 15px;
-	background-color: var(--forms-bg);
+.div-cell:hover {
+	background: var(--glass-bg-medium);
+	transform: translateY(-1px);
 }
 
 .div-cell-dark > div {
@@ -207,10 +219,26 @@ tbody {
 }
 
 .div-summary {
-	border: 2px solid var(--main-color);
-	border-radius: 5px 5px;
+	background: var(--glass-bg-medium);
+	backdrop-filter: var(--glass-blur-md);
+	-webkit-backdrop-filter: var(--glass-blur-md);
+	border: 1px solid var(--main-color);
+	border-radius: 16px;
 	padding: 15px; 
-	background-color: var(--forms-bg);
+	box-shadow: var(--glass-shadow-sm);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+	overflow: hidden;
+}
+
+.div-summary::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 2px;
+	background: linear-gradient(90deg, var(--main-color), var(--main-color-hover));
 }
 
 .erg-span {
@@ -237,7 +265,7 @@ tbody {
 .subtitle {
 	color: var(--text-strong);
 	font-weight: bold;
-	font-size: 1.25rem;
+	font-size: 1.5rem;
 	margin-top: 25px !important;
 	margin-bottom: 25px !important;
 }
@@ -260,8 +288,8 @@ tbody {
 
 /* Token icon styling to match original */
 .token-icon {
-	max-width: 18px;
-	max-height: 18px;
+	max-width: 25px;
+	max-height: 25px;
 	line-height: 25px;
 	padding-bottom: 3px;
 	display: inline-block;
@@ -323,6 +351,297 @@ button:focus {
 .btn-info.search-btn {
 	background-color: var(--main-color) !important;
 	border-color: var(--main-color) !important;
+}
+
+/* Subtle pattern backgrounds for glass effects */
+
+/* Light theme - Clean with subtle pattern */
+html[data-bs-theme="light"] {
+	background: var(--background);
+	background-image: 
+		radial-gradient(circle at 25% 25%, rgba(251, 92, 22, 0.06) 0%, transparent 25%),
+		radial-gradient(circle at 75% 75%, rgba(251, 92, 22, 0.04) 0%, transparent 25%);
+	min-height: 100vh;
+}
+
+html[data-bs-theme="light"] body {
+	background: transparent;
+	min-height: 100vh;
+}
+
+/* Dark theme - Subtle orange accent points */
+html[data-bs-theme="dark"] {
+	background: var(--background);
+	background-image: 
+		radial-gradient(circle at 20% 80%, rgba(251, 92, 22, 0.08) 0%, transparent 50%),
+		radial-gradient(circle at 80% 20%, rgba(251, 92, 22, 0.06) 0%, transparent 50%),
+		radial-gradient(circle at 40% 40%, rgba(251, 92, 22, 0.04) 0%, transparent 50%);
+	min-height: 100vh;
+}
+
+html[data-bs-theme="dark"] body {
+	background: transparent;
+	min-height: 100vh;
+}
+
+/* Mew theme - Subtle mystical accent points */
+html[data-theme="mew"] {
+	background: var(--background);
+	background-image: 
+		radial-gradient(circle at 30% 70%, rgba(249, 215, 45, 0.06) 0%, transparent 40%),
+		radial-gradient(circle at 70% 30%, rgba(4, 223, 255, 0.04) 0%, transparent 40%);
+	min-height: 100vh;
+}
+
+html[data-theme="mew"] body {
+	background: transparent;
+	min-height: 100vh;
+}
+
+/* Apply centralized glass system to existing components */
+.div-cell-dark {
+	background: var(--glass-bg-light);
+	backdrop-filter: var(--glass-blur-md);
+	-webkit-backdrop-filter: var(--glass-blur-md);
+	border: none;
+	box-shadow: var(--glass-shadow-sm);
+	border-radius: 16px;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	padding: 15px;
+}
+
+.table {
+	background: var(--glass-bg-subtle);
+	backdrop-filter: var(--glass-blur-md);
+	-webkit-backdrop-filter: var(--glass-blur-md);
+	border: none;
+	border-radius: 16px;
+	box-shadow: var(--glass-shadow-sm);
+	overflow: hidden;
+}
+
+.table thead th {
+	background: var(--glass-bg-medium);
+	backdrop-filter: var(--glass-blur-md);
+	-webkit-backdrop-filter: var(--glass-blur-md);
+	border: none;
+	border-bottom: 2px solid var(--main-color);
+	color: var(--text-strong);
+	font-weight: 600;
+	padding: 1rem 0.75rem;
+}
+
+.table tbody tr {
+	background: transparent;
+	transition: all 0.2s ease;
+	border: none;
+}
+
+.table tbody tr:hover {
+	/* Hover effect disabled for transparent glass tables */
+}
+
+.table tbody tr:nth-child(odd) {
+	background: rgba(255, 255, 255, 0.02);
+}
+
+.table tbody tr:nth-child(odd):hover {
+	/* Hover effect disabled for transparent glass tables */
+}
+
+.table td, .table th {
+	border: none;
+	padding: 0.75rem;
+}
+
+.navbar {
+	background: var(--glass-bg-subtle);
+	backdrop-filter: var(--glass-blur-lg);
+	-webkit-backdrop-filter: var(--glass-blur-lg);
+	border: none;
+	box-shadow: var(--glass-shadow-sm);
+}
+
+.form-control-lg {
+	background: var(--glass-bg-light);
+	backdrop-filter: var(--glass-blur-sm);
+	-webkit-backdrop-filter: var(--glass-blur-sm);
+	border: none;
+	border-radius: 12px;
+	transition: all 0.3s ease;
+	box-shadow: var(--glass-shadow-sm);
+}
+
+.form-control-lg:focus {
+	background: var(--glass-bg-medium);
+	box-shadow: 0 0 0 3px rgba(251, 92, 22, 0.2), var(--glass-shadow-sm);
+}
+
+.btn-info {
+	background: var(--main-color);
+	backdrop-filter: var(--glass-blur-sm);
+	-webkit-backdrop-filter: var(--glass-blur-sm);
+	border: none;
+	border-radius: 12px;
+	box-shadow: var(--glass-shadow-sm);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+	overflow: hidden;
+	color: white;
+}
+
+.btn-info::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+	transition: left 0.5s ease;
+}
+
+.btn-info:hover::before {
+	left: 100%;
+}
+
+.btn-info:hover {
+	background: var(--main-color-hover);
+	box-shadow: var(--glass-shadow-sm);
+	transform: translateY(-1px);
+}
+
+.pagination .page-item .page-link {
+	background: var(--glass-bg-light);
+	backdrop-filter: var(--glass-blur-sm);
+	-webkit-backdrop-filter: var(--glass-blur-sm);
+	border: 1px solid var(--glass-border-light);
+	box-shadow: var(--glass-shadow-sm);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	color: var(--text-color);
+}
+
+.pagination .page-item .page-link:hover {
+	background: var(--main-color);
+	border-color: var(--main-color);
+	color: white;
+	box-shadow: var(--glass-shadow-sm);
+	transform: translateY(-1px);
+}
+
+.pagination .page-item.active .page-link {
+	background: var(--main-color);
+	border-color: var(--main-color);
+	color: white;
+	box-shadow: var(--glass-shadow-sm);
+}
+
+.card {
+	background: var(--glass-bg-light);
+	backdrop-filter: var(--glass-blur-md);
+	-webkit-backdrop-filter: var(--glass-blur-md);
+	border: 1px solid var(--glass-border-light);
+	box-shadow: var(--glass-shadow-sm);
+	border-radius: 12px;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card:hover {
+	background: var(--glass-bg-medium);
+	border-color: var(--glass-border-medium);
+	box-shadow: var(--glass-shadow-sm);
+	transform: translateY(-1px);
+}
+
+.dropdown-menu {
+	background: var(--glass-bg-medium);
+	backdrop-filter: var(--glass-blur-xl);
+	-webkit-backdrop-filter: var(--glass-blur-xl);
+	border: 1px solid var(--glass-border-medium);
+	box-shadow: var(--glass-shadow-sm);
+	border-radius: 16px;
+}
+
+/* Footer glass effects */
+.footer,
+footer {
+	background: var(--glass-bg-subtle) !important;
+	backdrop-filter: var(--glass-blur-sm);
+	-webkit-backdrop-filter: var(--glass-blur-sm);
+	border: none;
+	box-shadow: var(--glass-shadow-sm);
+}
+
+/* Enhanced button glass effects */
+.btn-primary {
+	background: var(--glass-bg-light);
+	backdrop-filter: var(--glass-blur-sm);
+	-webkit-backdrop-filter: var(--glass-blur-sm);
+	border: 1px solid var(--glass-border-light);
+	box-shadow: var(--glass-shadow-sm);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	position: relative;
+	overflow: hidden;
+	color: var(--text-strong) !important;
+}
+
+.btn-primary::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+	transition: left 0.5s ease;
+}
+
+.btn-primary:hover::before {
+	left: 100%;
+}
+
+.btn-primary:hover {
+	background: var(--main-color);
+	border-color: var(--main-color);
+	color: white !important;
+	box-shadow: var(--glass-shadow-sm);
+	transform: translateY(-1px);
+}
+
+.btn-secondary {
+	background: var(--glass-bg-light);
+	backdrop-filter: var(--glass-blur-sm);
+	-webkit-backdrop-filter: var(--glass-blur-sm);
+	border: 1px solid var(--glass-border-light);
+	box-shadow: var(--glass-shadow-sm);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	color: var(--text-strong) !important;
+}
+
+.btn-secondary:hover {
+	background: var(--glass-bg-medium);
+	border-color: var(--glass-border-medium);
+	box-shadow: var(--glass-shadow-sm);
+	transform: translateY(-1px);
+}
+
+.btn-outline-primary {
+	background: transparent;
+	backdrop-filter: var(--glass-blur-sm);
+	-webkit-backdrop-filter: var(--glass-blur-sm);
+	border: 1px solid var(--main-color);
+	color: var(--main-color);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-outline-primary:hover {
+	background: var(--main-color);
+	border-color: var(--main-color);
+	color: white !important;
+	backdrop-filter: var(--glass-blur-md);
+	-webkit-backdrop-filter: var(--glass-blur-md);
+	box-shadow: var(--glass-shadow-sm);
+	transform: translateY(-1px);
 }
 
 /* Responsive utilities */

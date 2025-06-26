@@ -125,10 +125,8 @@
 
 <style>
 	.navbar {
-		background-color: var(--forms-bg);
-		border-bottom: 1px solid var(--main-color);
+		/* Base navbar styling - glass effects handled by centralized system in app.css */
 		min-height: 55px;
-		box-shadow: none;
 	}
 	
 	.nav-link.active {
