@@ -9,8 +9,10 @@ export const currentPrices = writable({});
 
 // Subscribe to main store and update individual stores
 priceStore.subscribe(prices => {
-	// Update ERG price - format as object with 'value' property for StatsOverview component
-	if (prices.ERG) {
+	// Update ERG price - use full data if available, otherwise just value
+	if (prices.ERG_FULL) {
+		ergPrice.set(prices.ERG_FULL);
+	} else if (prices.ERG) {
 		ergPrice.set({ value: prices.ERG });
 	}
 	

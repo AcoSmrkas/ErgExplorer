@@ -294,6 +294,8 @@
 	align-items: flex-start;
 	gap: 10px;
 	margin-bottom: 8px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid var(--borders);
 }
 
 .address-popup .address-icon {
@@ -322,6 +324,14 @@
 	font-family: 'DejaVu', monospace;
 }
 
+/* Address ID section with copy button */
+.address-popup .address-id-section {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 6px;
+}
+
 /* Address details */
 .address-popup .address-full {
 	font-family: 'DejaVu', monospace;
@@ -331,7 +341,6 @@
 	background: var(--background);
 	padding: 3px 6px;
 	border-radius: 3px;
-	flex: 1;
 }
 
 .address-popup .address-balance,
@@ -369,29 +378,7 @@
    BLOCK POPUP STYLES
    ================================ */
 
-.block-popup {
-	position: fixed;
-	background: var(--forms-bg);
-	border: 1px solid var(--main-color);
-	border-radius: 5px;
-	padding: 12px;
-	max-width: 400px;
-	min-width: 320px;
-	max-height: 350px;
-	overflow-y: auto;
-	z-index: 1000;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-	color: var(--text-strong);
-	font-size: 0.85em;
-	display: none;
-	pointer-events: auto;
-	word-wrap: break-word;
-	overflow-wrap: break-word;
-}
-
-.block-popup.show {
-	display: block;
-}
+/* Block popup styles handled by centralized popup styling above */
 
 /* Block popup header */
 .block-popup .block-header {
@@ -439,26 +426,9 @@
 	background: var(--background);
 	padding: 3px 6px;
 	border-radius: 3px;
-	flex: 1;
 }
 
-.block-popup .copy-btn {
-	background: none;
-	border: 1px solid var(--borders);
-	color: var(--text-light);
-	padding: 2px 6px;
-	font-size: 0.7em;
-	border-radius: 3px;
-	cursor: pointer;
-	transition: all 0.2s ease;
-	flex-shrink: 0;
-}
-
-.block-popup .copy-btn:hover {
-	background: var(--main-color);
-	border-color: var(--main-color);
-	color: #EEE;
-}
+/* Block popup copy button uses centralized styling */
 
 /* Block timestamps and data */
 .block-popup .block-time,

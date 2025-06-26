@@ -39,8 +39,8 @@
 		{#if hasDetailedData}
 			<div class="block-details" in:fade={{ duration: 300, delay: 100 }}>
 				{#if blockId}
-					<div class="block-id-section">
-						<div class="block-id">ID: {formatAddress(blockId, 15, 4)}...</div>
+					<div class="block-id-section mb-2">
+						<div class="block-id">ID: {formatAddress(blockId, 15, 4)}</div>
 						<CopyButton
 							text={blockId}
 							label="Copy full block ID"
@@ -66,7 +66,7 @@
 			<div class="block-basic-info">
 				{#if blockId}
 					<div class="block-id-section">
-						<div class="block-id">ID: {formatAddress(blockId, 15, 4)}...</div>
+						<div class="block-id">ID: {formatAddress(blockId, 15, 4)}</div>
 						<CopyButton
 							text={blockId}
 							label="Copy full block ID"

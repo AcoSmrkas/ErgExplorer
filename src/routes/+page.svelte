@@ -7,8 +7,11 @@
 	import LatestBlocks from '$lib/components/home/LatestBlocks.svelte';
 	import DailyStats from '$lib/components/home/DailyStats.svelte';
 	import { isTestnet } from '$lib/stores/network.svelte.js';
-	import { ergPrice, currentPrices } from '$lib/stores/priceStore.js';
+	import { ergPrice, currentPrices, updatePrices } from '$lib/stores/priceStore.js';
 	import * as api from '$lib/utils/api.js';
+	
+	// Receive server data
+	export let data;
 	
 	// Client-side state for all data  
 	let ergPriceValue = null;
@@ -39,6 +42,11 @@
 		try {
 			loading = true;
 			error = null;
+			
+			// Use server-loaded price data
+			if (data?.currentPrices) {
+				updatePrices(data.currentPrices);
+			}
 			
 			// Load essential data first (network stats, protocol info)
 			loadEssentialData();

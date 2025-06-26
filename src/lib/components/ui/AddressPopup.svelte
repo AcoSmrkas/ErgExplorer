@@ -1,6 +1,7 @@
 <script>
 	import { formatErgValue, formatAddress } from '$lib/utils/formatting.js';
 	import { fade } from 'svelte/transition';
+	import CopyButton from './CopyButton.svelte';
 	
 	export let address = '';
 	export let balance = null;
@@ -30,8 +31,16 @@
 			</div>
 			<div class="address-title">
 				<div class="address-name">Address Balance</div>
-				<div class="address-short">{displayAddress}</div>
 			</div>
+		</div>
+		
+		<!-- Full address with copy button -->
+		<div class="address-id-section mb-2">
+			<div class="address-full">{formatAddress(address, 15, 4)}</div>
+			<CopyButton text={address}
+				label="Copy full address"
+				successMessage="Address copied to clipboard!"
+			/>
 		</div>
 		
 		{#if loading && !hasBalanceData}

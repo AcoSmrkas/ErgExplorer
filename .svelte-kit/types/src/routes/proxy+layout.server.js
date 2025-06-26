@@ -22,6 +22,12 @@ async function loadCurrentPrices() {
 		const ergData = await ergResponse.json();
 		if (ergData.items?.[0]) {
 			prices['ERG'] = parseFloat(ergData.items[0].value);
+			// Also store the full ERG price data for components that need percentage change
+			prices['ERG_FULL'] = {
+				value: ergData.items[0].value,
+				difference: ergData.items[0].difference,
+				timestamp: ergData.items[0].timestamp
+			};
 		}
 		
 		// Get token prices from Spectrum
