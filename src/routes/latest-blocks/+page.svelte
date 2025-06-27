@@ -1,46 +1,87 @@
 <script>
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
+	import { browser } from '$app/environment';
 	import DataTable from '$lib/components/data/DataTable.svelte';
-	import AddressFormatter from '$lib/components/data/AddressFormatter.svelte';
 	import Pagination from '$lib/components/ui/Pagination.svelte';
-	import Loading from '$lib/components/ui/Loading.svelte';
 	import ErrorMessage from '$lib/components/ui/ErrorMessage.svelte';
-	import { getBlocks, getPrices } from '$lib/utils/api.js';
-	import { formatDateString, formatErgValue, formatFileSize, formatNumber, formatDifficulty, formatPriceUSD } from '$lib/utils/formatting.js';
+	import { getBlocks } from '$lib/utils/api.js';
+	import { formatDateString, formatErgValue, formatFileSize, formatNumber, formatDifficulty, formatPriceUSD, formatAddress } from '$lib/utils/formatting.js';
+	import { ergPrice } from '$lib/stores/priceStore.js';
+	import { addAddress, getOwner, addressBook } from '$lib/stores/addressBook.js';
 
 	let blocks = [];
 	let loading = true;
 	let error = null;
-	let currentPage = 1;
 	let totalPages = 1;
-	let ergPrice = null;
 	
-	const ITEMS_PER_PAGE = 20;
+	const DEFAULT_LIMIT = 20;
 
-	$: offset = (currentPage - 1) * ITEMS_PER_PAGE;
+	// Get pagination params from URL
+	$: limit = parseInt($page.url.searchParams.get('limit') || DEFAULT_LIMIT.toString(), 10);
+	$: offset = parseInt($page.url.searchParams.get('offset') || '0', 10);
+	$: currentPage = Math.floor(offset / limit) + 1;
 
 	const headers = [
-		{ label: 'Height', field: 'height', sortKey: 'height', render: (value, row) => `<a href="/blocks/${row.id}" data-block-id="${row.id}" aria-label="View block ${value}"><i class="fas fa-link text-info me-1"></i></a><span class="fw-bold">${formatNumber(value, 0, true)}</span>` },
-		{ label: 'Time', field: 'timestamp', sortKey: 'timestamp', render: (value) => formatDateString(value) },
-		{ label: 'Transactions', field: 'transactionsCount', sortKey: 'transactionsCount', render: (value) => formatNumber(value) },
-		{ label: 'Mined by', field: 'miner', render: (value) => `<span class="miner-cell" data-address="${value.address}" data-name="${value.name}"></span>` },
-		{ label: 'Reward', field: 'minerReward', sortKey: 'minerReward', render: (value) => `${formatErgValue(value)} ERG<br><small class="text-muted">${formatPriceUSD(value, ergPrice)}</small>` },
-		{ label: 'Difficulty', field: 'difficulty', sortKey: 'difficulty', render: (value) => formatDifficulty(value) },
-		{ label: 'Size', field: 'size', sortKey: 'size', render: (value) => formatFileSize(value) }
+		{ label: 'Height', field: 'height', render: (value, row) => `<a href="/blocks/${row.id}" data-block-id="${row.id}" class="height-link">${formatNumber(value, 0, true)}</a>` },
+		{ label: 'Time', field: 'timestamp', render: (value) => formatDateString(value) },
+		{ label: 'Transactions', field: 'transactionsCount', render: (value) => formatNumber(value) },
+		{ label: 'Mined by', field: 'miner', render: (value, row, index) => renderMinerCell(value, index) },
+		{ label: 'Reward', field: 'minerReward', render: (value) => `${formatErgValue(value)} <small class="text-muted">${formatPriceUSD(value, 9, $ergPrice.value)}</small>` },
+		{ label: 'Difficulty', field: 'difficulty', render: (value) => formatDifficulty(value) },
+		{ label: 'Size', field: 'size', render: (value) => formatFileSize(value) }
 	];
 
 	onMount(async () => {
-		await Promise.all([loadBlocks(), loadPrices()]);
+		await loadBlocks();
 	});
-
-	async function loadPrices() {
-		try {
-			const priceData = await getPrices();
-			ergPrice = priceData?.price || null;
-		} catch (err) {
-			console.warn('Failed to load prices:', err);
-		}
+	
+	// Function to render miner cell with addressbook integration
+	function renderMinerCell(miner, index) {
+		if (!miner?.address) return '';
+		
+		// Add address to fetch queue for addressbook lookup
+		addAddress(miner.address);
+		
+		return `<span class="miner-cell-reactive" data-address="${miner.address}" data-index="${index}"></span>`;
+	}
+	
+	// Reactive function to update miner cells when addressbook changes
+	$: if (browser && blocks.length > 0) {
+		updateMinerCells();
+	}
+	
+	function updateMinerCells() {
+		if (!browser) return;
+		
+		console.log('updateMinerCells called, addressBook:', $addressBook);
+		
+		setTimeout(() => {
+			const minerCells = document.querySelectorAll('.miner-cell-reactive');
+			console.log('Found miner cells:', minerCells.length);
+			
+			minerCells.forEach(cell => {
+				const address = cell.dataset.address;
+				const index = parseInt(cell.dataset.index);
+				
+				console.log('Processing cell:', address, index);
+				
+				if (address && blocks[index]?.miner?.address === address) {
+					// Get friendly name from addressbook
+					const friendlyName = getOwner(address, $addressBook);
+					
+					// Use friendly name, fallback to provided name, then formatted address
+					const displayName = friendlyName || 
+									   formatAddress(blocks[index].miner.address, 9, 4) || 
+									   formatAddress(address, 6, 6);
+					
+					console.log('Display name for', address, ':', displayName);
+					
+					cell.innerHTML = `<a href="/addresses/${address}" class="miner-link" data-address="${address}">${displayName}</a>`;
+				}
+			});
+		}, 50);
 	}
 
 	async function loadBlocks() {
@@ -49,17 +90,20 @@
 			error = null;
 			
 			const data = await getBlocks({
-				limit: ITEMS_PER_PAGE,
+				limit,
 				offset,
 				sortBy: 'height',
 				sortDirection: 'desc'
 			});
 			
 			blocks = data.items || [];
-			totalPages = Math.ceil((data.total || 0) / ITEMS_PER_PAGE);
+			totalPages = Math.ceil((data.total || 0) / limit);
 			
-			// Enhance blocks data after render for miner addresses
-			setTimeout(() => enhanceMinerCells(), 100);
+			// Debug: log miner addresses to check what we're getting
+			if (blocks.length > 0) {
+				console.log('First block miner:', blocks[0].miner);
+				console.log('All miner addresses:', blocks.map(b => b.miner?.address).filter(Boolean));
+			}
 			
 		} catch (err) {
 			error = err.message;
@@ -69,31 +113,33 @@
 		}
 	}
 
-	function enhanceMinerCells() {
-		const minerCells = document.querySelectorAll('.miner-cell');
-		minerCells.forEach(cell => {
-			const address = cell.dataset.address;
-			const name = cell.dataset.name;
-			
-			if (address) {
-				// Create AddressFormatter component manually
-				cell.innerHTML = `
-					<div class="address-formatter">
-						<span class="address-text" title="${address}">
-							${name || `${address.slice(0, 6)}...${address.slice(-6)}`}
-						</span>
-						<a href="/addresses/${address}" class="ms-1 text-primary">
-							<i class="fas fa-external-link-alt"></i>
-						</a>
-					</div>
-				`;
-			}
-		});
-	}
 
 	async function handlePageChange(event) {
-		currentPage = event.detail.page;
-		await loadBlocks();
+		const newPage = event.detail.page;
+		const newOffset = (newPage - 1) * limit;
+		const url = new URL($page.url);
+		
+		// Update offset and limit in URL
+		if (newOffset === 0) {
+			url.searchParams.delete('offset');
+		} else {
+			url.searchParams.set('offset', newOffset.toString());
+		}
+		
+		if (limit === DEFAULT_LIMIT) {
+			url.searchParams.delete('limit');
+		} else {
+			url.searchParams.set('limit', limit.toString());
+		}
+		
+		// Update URL without full page reload
+		await goto(url.pathname + url.search, { 
+			replaceState: false,
+			noScroll: false,
+			keepFocus: false
+		});
+		
+		// Smooth scroll to top
 		window.scrollTo({ top: 0, behavior: 'smooth' });
 	}
 </script>
@@ -106,15 +152,19 @@
 <div class="container-fluid">
 	<div class="row">
 		<div class="col-12">
-			<div class="d-flex justify-content-between align-items-center mb-4">
-				<h1 class="h3 mb-0">
-					<i class="fas fa-cubes me-2 text-primary"></i>
-					Latest Blocks
-				</h1>
-				<div class="text-muted">
-					{#if !loading && blocks.length > 0}
-						Showing {ITEMS_PER_PAGE * (currentPage - 1) + 1} - {Math.min(ITEMS_PER_PAGE * currentPage, blocks.length)} blocks
-					{/if}
+			<div class="page-header glass-header mb-0">
+				<div class="header-content">
+					<h1 class="page-title">
+						<i class="fas fa-cubes me-3 title-icon"></i>
+						Latest Blocks
+					</h1>
+					<div class="header-info">
+						{#if !loading && blocks.length > 0}
+							<span class="info-text">
+								Showing {offset + 1} - {Math.min(offset + limit, offset + blocks.length)} blocks
+							</span>
+						{/if}
+					</div>
 				</div>
 			</div>
 
@@ -122,19 +172,17 @@
 				<ErrorMessage message={error} type="danger" dismissible />
 			{/if}
 
-			<div class="card">
-				<div class="card-body p-0">
-					<DataTable 
-						{headers} 
-						data={blocks} 
-						{loading}
-						emptyMessage="No blocks found"
-					/>
-				</div>
+			<div class="glass-container">
+				<DataTable 
+					{headers} 
+					data={blocks} 
+					{loading}
+					emptyMessage="No blocks found"
+				/>
 			</div>
 
 			{#if !loading && totalPages > 1}
-				<div class="mt-4">
+				<div class="mt-2">
 					<Pagination 
 						{currentPage} 
 						{totalPages}
@@ -146,34 +194,116 @@
 	</div>
 </div>
 
+<div class="page-bottom-margin"></div>
+
 <style>
-	.card {
-		border: none;
-		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-		border-radius: 12px;
+	.glass-container {
+		background: var(--glass-bg-subtle);
+		backdrop-filter: var(--glass-blur-md);
+		-webkit-backdrop-filter: var(--glass-blur-md);
+		border: 1px solid var(--glass-border-light);
+		box-shadow: var(--glass-shadow-sm);
+		border-radius: 16px;
 		overflow: hidden;
+		padding: 0;
 	}
 
-	:global(.address-formatter) {
-		display: inline-flex;
-		align-items: center;
-		font-family: 'Courier New', monospace;
-		font-size: 0.9rem;
-	}
-
-	:global(.address-text) {
-		max-width: 120px;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	.h3 {
-		color: var(--bs-body-color);
+	:global(.height-link) {
+		color: var(--text-strong);
+		text-decoration: none;
 		font-weight: 600;
+		transition: color 0.3s ease;
 	}
 
-	.text-primary {
-		color: var(--main-color) !important;
+	:global(.height-link:hover) {
+		color: var(--main-color);
+	}
+
+	:global(.miner-link) {
+		color: var(--text-strong);
+		text-decoration: none;
+		transition: color 0.3s ease;
+	}
+
+	:global(.miner-link:hover) {
+		color: var(--main-color);
+	}
+
+	.page-header {
+		padding: 1.5rem 0;
+		margin-bottom: 1rem;
+	}
+
+	.header-content {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 1rem;
+	}
+
+	.page-title {
+		color: var(--text-strong);
+		font-weight: 700;
+		font-size: 2rem;
+		margin: 0;
+		display: flex;
+		align-items: center;
+	}
+
+	.title-icon {
+		color: var(--main-color);
+		font-size: 1.8rem;
+	}
+
+	.header-info {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 0.5rem;
+	}
+
+	.info-text {
+		color: var(--text-light);
+		font-size: 0.95rem;
+		font-weight: 500;
+	}
+
+	@media (max-width: 768px) {
+		.page-header {
+			padding: 1rem 1.5rem;
+		}
+
+		.page-title {
+			font-size: 1.5rem;
+		}
+
+		.title-icon {
+			font-size: 1.4rem;
+		}
+
+		.header-content {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+
+		.header-info {
+			align-items: flex-start;
+		}
+	}
+
+	.page-bottom-margin {
+		height: 2rem;
+	}
+
+	/* Column width customization */
+	:global(.glass-table th:nth-child(5), .glass-table td:nth-child(5)) {
+		width: 220px;
+		min-width: 220px;
+	}
+
+	/* Prevent line breaks in reward column */
+	:global(.glass-table td:nth-child(5)) {
+		white-space: nowrap;
 	}
 </style>

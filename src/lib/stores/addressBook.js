@@ -55,9 +55,19 @@ async function fetchAddressesInfo() {
 	pendingPromise = null;
 	
 	try {
-		const response = await axios.post(getApiHost() + 'addressbook/getAddressesInfo',
-			{'addresses' : addressesToQuery}
-		);
+		// Create URL-encoded form data
+		const formData = new URLSearchParams();
+		addressesToQuery.forEach(address => {
+			formData.append('addresses[]', address);
+		});
+		
+		const response = await fetch(getApiHost() + 'addressbook/getAddressesInfo', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			},
+			body: formData.toString()
+		});
 		
 		if (!response.ok) {
 			throw new Error(`API request failed: ${response.statusText}`);
@@ -65,7 +75,9 @@ async function fetchAddressesInfo() {
 		
 		const data = await response.json();
 		
-		if (data.total > 0 && data.items) {
+		console.log('Addressbook API response:', data);
+		
+		if (data.items && data.items.length > 0) {
 			// Update the address book store
 			addressBook.update(currentBook => {
 				const newBook = [...currentBook];
@@ -80,6 +92,7 @@ async function fetchAddressesInfo() {
 					}
 				}
 				
+				console.log('Updated addressbook:', newBook);
 				return newBook;
 			});
 		}
@@ -105,6 +118,8 @@ export function getOwner(address, currentAddressBook) {
 		return undefined;
 	}
 	
+	console.log('Found addressbook entry:', entry);
+	
 	let owner = entry.name;
 	
 	if (entry.urltype && entry.urltype !== '') {
@@ -117,6 +132,7 @@ export function getOwner(address, currentAddressBook) {
 		owner += ' (' + shortAdd + ')';
 	}
 	
+	console.log('Generated owner name:', owner);
 	return owner;
 }
 

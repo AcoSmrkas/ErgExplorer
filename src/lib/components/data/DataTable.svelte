@@ -26,37 +26,15 @@
 	function getNestedValue(obj, key) {
 		return key.split('.').reduce((value, k) => value?.[k], obj);
 	}
-	
-	function handleSort(key) {
-		if (!sortable) return;
-		
-		if (sortKey === key) {
-			sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-		} else {
-			sortKey = key;
-			sortDirection = 'asc';
-		}
-	}
-	
-	function getSortIcon(key) {
-		if (sortKey !== key) return 'fas fa-sort';
-		return sortDirection === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
-	}
 </script>
 
-<div class="table-responsive">
-	<table class="table table-hover">
+<div class="table-responsive glass-table-container">
+	<table class="table glass-table">
 		<thead>
 			<tr>
 				{#each headers as header}
-					<th 
-						class:sortable={sortable && header.sortKey}
-						onclick={() => sortable && header.sortKey && handleSort(header.sortKey)}
-					>
+					<th>
 						{header.label}
-						{#if sortable && header.sortKey}
-							<i class="{getSortIcon(header.sortKey)} ms-1"></i>
-						{/if}
 					</th>
 				{/each}
 			</tr>
@@ -98,52 +76,95 @@
 </div>
 
 <style>
-	.table {
+	.glass-table-container {
+		border-radius: 16px;
+		overflow: hidden;
+		background: var(--glass-bg-subtle);
+		backdrop-filter: var(--glass-blur-md);
+		-webkit-backdrop-filter: var(--glass-blur-md);
+		box-shadow: var(--glass-shadow-sm);
+	}
+
+	.glass-table {
 		margin-bottom: 0;
+		border: none;
+		background: transparent;
 	}
 	
-	.table {
-		border: 1px solid var(--borders);
-		border-radius: 5px;
+	.glass-table > :not(caption) > * > * {
+		background: transparent;
+		border-color: var(--glass-border-light);
 	}
 	
-	.table > :not(caption) > * > * {
-		background-color: var(--forms-bg);
+	.glass-table thead {
+		background: var(--glass-bg-medium);
 	}
 	
-	.table tbody {
-		border-top: 2px solid var(--main-color);
-	}
-	
-	.table thead th {
-		background-color: var(--forms-bg);
+	.glass-table thead th {
+		background: transparent;
 		color: var(--text-strong);
 		border: none;
-		font-weight: 600;
+		border-bottom: 2px solid var(--main-color);
+		font-weight: 700;
 		text-transform: uppercase;
 		font-size: 0.85rem;
-		letter-spacing: 0.05em;
+		letter-spacing: 0.08em;
+		padding: 1.25rem 1rem;
 	}
 	
-	.table thead th.sortable {
-		cursor: pointer;
-		user-select: none;
+	.glass-table thead th:first-child {
+		border-top-left-radius: 16px;
 	}
 	
-	.table thead th.sortable:hover {
+	.glass-table thead th:last-child {
+		border-top-right-radius: 16px;
+	}
+	
+	
+	
+	
+	.glass-table tbody tr:nth-child(even) {
+		background: var(--striped-1);
+	}
+	
+	.glass-table tbody tr:nth-child(odd) {
+		background: var(--striped-2);
+	}
+	
+	.glass-table td {
+		vertical-align: middle;
+		border-color: var(--glass-border-light);
+		border-width: 1px;
+		padding: 1rem;
+		color: var(--text-strong);
+		font-weight: 500;
+	}
+	
+	.glass-table td:first-child {
+		font-weight: 600;
+	}
+	
+	/* Loading and empty states */
+	.glass-table .spinner-border {
 		color: var(--main-color);
 	}
 	
-	.table tbody tr:hover {
-		background-color: var(--striped-1);
+	.glass-table .text-muted {
+		color: var(--text-light) !important;
+		font-style: italic;
 	}
 	
-	.table td {
-		vertical-align: middle;
-		border-color: var(--borders);
-	}
 	
-	.table-striped > tbody > tr:nth-of-type(2n+1) > * {
-		background-color: var(--striped-1);
+	/* Responsive improvements */
+	@media (max-width: 768px) {
+		.glass-table thead th {
+			padding: 0.75rem 0.5rem;
+			font-size: 0.8rem;
+		}
+		
+		.glass-table td {
+			padding: 0.75rem 0.5rem;
+			font-size: 0.9rem;
+		}
 	}
 </style>

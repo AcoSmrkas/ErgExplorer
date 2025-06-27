@@ -2,6 +2,8 @@
 	import { formatErgValue, formatAddress } from '$lib/utils/formatting.js';
 	import { fade } from 'svelte/transition';
 	import CopyButton from './CopyButton.svelte';
+	import { addAddress, getOwner, addressBook } from '$lib/stores/addressBook.js';
+	import { onMount } from 'svelte';
 	
 	export let address = '';
 	export let balance = null;
@@ -10,12 +12,16 @@
 	export let y = 0;
 	export let loading = false;
 	
-	$: displayAddress = address ? 
-		(address.length <= 12 ? 
-			address : 
-			formatAddress(address, 15, 4)
-		) : 'Unknown Address';
 	$: hasBalanceData = balance !== null && balance !== undefined;
+	
+	// Add address to addressbook when popup is shown
+	$: if (visible && address) {
+		addAddress(address);
+	}
+	
+	// Get friendly name from addressbook or fallback to formatted address
+	$: friendlyName = address ? getOwner(address, $addressBook) : null;
+	$: displayAddress = address ? formatAddress(address, 15, 4) : 'Unknown Address';
 </script>
 
 {#if visible && address}
@@ -30,13 +36,13 @@
 				<i class="fas fa-wallet"></i>
 			</div>
 			<div class="address-title">
-				<div class="address-name">Address Balance</div>
+				<div class="address-name">{friendlyName ? friendlyName : 'Address Balance'}</div>
 			</div>
 		</div>
 		
-		<!-- Full address with copy button -->
+		<!-- Full address with copy button (always shown) -->
 		<div class="address-id-section mb-2">
-			<div class="address-full">{formatAddress(address, 15, 4)}</div>
+			<div class="address-full">{displayAddress}</div>
 			<CopyButton text={address}
 				label="Copy full address"
 				successMessage="Address copied to clipboard!"

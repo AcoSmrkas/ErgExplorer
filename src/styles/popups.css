@@ -448,6 +448,10 @@
 	margin-bottom: 4px;
 }
 
+.block-popup .block-size {
+	margin-bottom: 0 !important;
+}
+
 /* Loading section in popup */
 .block-popup .loading-section {
 	display: flex;
