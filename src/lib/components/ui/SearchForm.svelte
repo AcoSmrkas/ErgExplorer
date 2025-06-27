@@ -89,65 +89,85 @@
 <div class="d-flex justify-content-center align-items-center h-100 mb-3 mb-md-4">
 	<div class="row w-100">
 		<div class="col-sm-12 col-md-12 mx-auto p-0">
-			<div class="input-group mb-0 w-100">
-				<input 
-					id="searchInput"
-					bind:value={searchInput}
-					onkeydown={handleKeydown}
-					type="text" 
-					class="form-control form-control-lg" 
-					placeholder="Search for"
-				>
-				<select id="searchType" bind:value={searchType} class="form-select form-control form-control-lg">
-					<option value="*">Auto</option>
-					<option value="0">Address</option>
-					<option value="1">Transaction</option>
-					<option value="2">Token</option>
-					<option value="3">Block</option>
-					<option value="4">Box</option>
-				</select>
-				<!-- svelte-ignore a11y_consider_explicit_label -->
-				<button onclick={handleSearch} class="btn btn-lg btn-info" type="button">
-					<i class="fas fa-search"></i>
-				</button>
+			<div class="search-wrapper">
+				<div class="input-group mb-0 w-100">
+					<input 
+						id="searchInput"
+						bind:value={searchInput}
+						onkeydown={handleKeydown}
+						type="text" 
+						class="form-control form-control-lg" 
+						placeholder="Search for"
+					>
+					<select id="searchType" bind:value={searchType} class="form-select form-control form-control-lg">
+						<option value="*">Auto</option>
+						<option value="0">Address</option>
+						<option value="1">Transaction</option>
+						<option value="2">Token</option>
+						<option value="3">Block</option>
+						<option value="4">Box</option>
+					</select>
+					<!-- svelte-ignore a11y_consider_explicit_label -->
+					<button onclick={handleSearch} class="btn btn-lg btn-info" type="button">
+						<i class="fas fa-search"></i>
+					</button>
+				</div>
 			</div>
 		</div>
 	</div>
 </div>
 
 <style>
-	.form-control {
-		border: none;
-		box-shadow: var(--glass-shadow-sm) !important;
+	.search-wrapper {
+		border-radius: 8px;
+		box-shadow: var(--glass-shadow-sm);
+		overflow: hidden;
+		transition: box-shadow 0.15s ease-in-out;
 	}
 
-	.form-control:focus {
-		background: var(--glass-bg-medium) !important;
+	.search-wrapper:focus-within {
+		box-shadow: 0 0 0 1px rgba(var(--main-color-rgb), 1), var(--glass-shadow-sm);
+	}
+
+	.form-control,
+	.form-select {
+		border: none;
+		box-shadow: none !important;
+		outline: none !important;
+		background: var(--glass-bg-subtle) !important;
 		color: var(--text-strong) !important;
-		box-shadow: 0 0 0 3px rgba(var(--main-color-rgb), 0.2), var(--glass-shadow-sm) !important;
+	}
+
+	.form-control:focus,
+	.form-select:focus {
+		background: var(--glass-bg-subtle) !important;
+		color: var(--text-strong) !important;
+		box-shadow: none !important;
+		outline: none !important;
 	}
 
 	/* Fix overlapping elements in input-group */
-	.input-group .form-control:not(:last-child) {
+	.input-group .form-control:first-child {
+		border-top-left-radius: 8px !important;
+		border-bottom-left-radius: 8px !important;
 		border-top-right-radius: 0 !important;
 		border-bottom-right-radius: 0 !important;
-		margin-right: -1px;
+		margin-right: 1px;
 	}
 
 	.input-group .form-select {
-		border-top-left-radius: 0 !important;
-		border-bottom-left-radius: 0 !important;
-		border-top-right-radius: 0 !important;
-		border-bottom-right-radius: 0 !important;
-		margin-left: -1px;
-		margin-right: -1px;
+		border-radius: 0 !important;
 		box-shadow: none !important;
+		border: none;
 	}
 
 	.input-group .btn {
 		border-top-left-radius: 0 !important;
 		border-bottom-left-radius: 0 !important;
-		margin-left: -1px;
+		border-top-right-radius: 8px !important;
+		border-bottom-right-radius: 8px !important;
+		box-shadow: none !important;
+		border: none;
 	}
 
 	select, option {

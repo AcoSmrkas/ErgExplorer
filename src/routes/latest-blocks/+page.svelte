@@ -149,9 +149,9 @@
 	<meta name="description" content="View the latest blocks mined on the Ergo blockchain with details about transactions, miners, and rewards.">
 </svelte:head>
 
-<div class="container-fluid">
-	<div class="row">
-		<div class="col-12">
+<div class="container-fluid p-0">
+	<div class="row p-0">
+		<div class="col-12 p-0">
 			<div class="page-header glass-header mb-0">
 				<div class="header-content">
 					<h1 class="page-title">
@@ -201,7 +201,6 @@
 		background: var(--glass-bg-subtle);
 		backdrop-filter: var(--glass-blur-md);
 		-webkit-backdrop-filter: var(--glass-blur-md);
-		border: 1px solid var(--glass-border-light);
 		box-shadow: var(--glass-shadow-sm);
 		border-radius: 16px;
 		overflow: hidden;
@@ -294,12 +293,6 @@
 
 	.page-bottom-margin {
 		height: 2rem;
-	}
-
-	/* Column width customization */
-	:global(.glass-table th:nth-child(5), .glass-table td:nth-child(5)) {
-		width: 220px;
-		min-width: 220px;
 	}
 
 	/* Prevent line breaks in reward column */

@@ -8,14 +8,15 @@ export function formatErgValue(value, decimals = ERG_DECIMALS, showDecimals = tr
 	
 	let maxDecimals = ERG_DECIMALS;
 
-	if (value > 1) {
-		maxDecimals = 2;
-	}
 
 	const num = parseFloat(value);
 	const divisor = Math.pow(10, decimals);
 	const ergValue = num / divisor;
-	
+
+	if (ergValue > 1) {
+		maxDecimals = 2;
+	}
+
 	if (!showDecimals && ergValue >= 1) {
 		return Math.floor(ergValue).toLocaleString() + ` ${ERG_SPAN}`;
 	}

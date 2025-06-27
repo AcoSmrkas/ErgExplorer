@@ -24,6 +24,7 @@
 	}
 	
 	function getNestedValue(obj, key) {
+		if (!key) return null;
 		return key.split('.').reduce((value, k) => value?.[k], obj);
 	}
 </script>
@@ -83,12 +84,18 @@
 		backdrop-filter: var(--glass-blur-md);
 		-webkit-backdrop-filter: var(--glass-blur-md);
 		box-shadow: var(--glass-shadow-sm);
+		border: none !important;
+	}
+
+	.table-responsive {
+		border: none !important;
 	}
 
 	.glass-table {
 		margin-bottom: 0;
-		border: none;
+		border: none !important;
 		background: transparent;
+		border-collapse: collapse !important;
 	}
 	
 	.glass-table > :not(caption) > * > * {

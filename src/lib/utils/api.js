@@ -1,14 +1,7 @@
-export const FEE_ADDRESS = '2iHkR7CWvD1R4j1yZg5bkeDRQavjAaVPeTDFGGLZduHyfWMuYpmhHocX8GJoaieTx78FntzJbCBVL6rf96ocJoZdmWBL2fci7NqWgAirppPQmZ7fN9V6z13Ay6brPriBKYqLp1bT2Fk4FkFLCfdPpe';
-export const DONATION_ADDRESS = '9hiaAS3pCydq12CS7xrTBBn2YTfdfSRCsXyQn9KZHVpVyEPk9zk';
+import { API_ENDPOINTS } from './constants.js';
 
-export const API_ENDPOINTS = {
-	ERGEXPLORER: 'https://api.ergexplorer.com/',
-	ERGOPLATFORM: 'https://api.ergoplatform.com/api/v1/',
-	ERGOPLATFORM_BASE: 'https://api.ergoplatform.com/',
-	SPECTRUM: 'https://api.spectrum.fi/v1/',
-	MEWFINANCE: 'https://api.mewfinance.com/',
-	SOCKET: 'https://socket.ergexplorer.com'
-};
+// Re-export for backward compatibility
+export { API_ENDPOINTS };
 
 export function getApiHost() {
 	if (typeof window !== 'undefined') {
@@ -74,8 +67,13 @@ export async function getBlock(id) {
 }
 
 export async function getMempool(params = {}) {
-	const { limit = 20, offset = 0 } = params;
-	const url = `${API_ENDPOINTS.ERGOPLATFORM}mempool/transactions?limit=${limit}&offset=${offset}`;
+	const { 
+		limit = 20, 
+		offset = 0, 
+		sortBy = 'size', 
+		sortDirection = 'desc' 
+	} = params;
+	const url = `${API_ENDPOINTS.ERGOPLATFORM_BASE}transactions/unconfirmed?limit=${limit}&offset=${offset}&sortBy=${sortBy}&sortDirection=${sortDirection}`;
 	return apiRequest(url);
 }
 

@@ -81,17 +81,9 @@
 	background: var(--glass-bg-light);
 	backdrop-filter: var(--glass-blur-md);
 	-webkit-backdrop-filter: var(--glass-blur-md);
-	border: 1px solid var(--glass-border-light);
 	box-shadow: var(--glass-shadow-md), var(--glass-highlight);
 	border-radius: 12px;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.glass-card:hover {
-	background: var(--glass-bg-medium);
-	border-color: var(--glass-border-medium);
-	box-shadow: var(--glass-shadow-lg), var(--glass-highlight-strong);
-	transform: translateY(-2px);
 }
 
 .glass-popup {
@@ -204,23 +196,6 @@ html[data-theme="mew"] {
 	--glass-shadow-right: 4px 4px 8px rgba(0, 0, 0, 0.15);
 	
 	--glass-highlight: inset 0 1px 0 rgba(249, 215, 45, 0.2);
-}
-
-/* Mew theme additional glow effects */
-html[data-theme="mew"] .glass-card,
-html[data-theme="mew"] .glass-popup {
-	box-shadow: 
-		var(--glass-shadow-md), 
-		var(--glass-highlight),
-		0 0 40px rgba(4, 223, 255, 0.1);
-}
-
-html[data-theme="mew"] .glass-card:hover,
-html[data-theme="mew"] .glass-popup:hover {
-	box-shadow: 
-		var(--glass-shadow-lg), 
-		var(--glass-highlight-strong),
-		0 0 60px rgba(4, 223, 255, 0.15);
 }
 
 /* ========================================================================

@@ -193,11 +193,6 @@ tbody {
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.div-cell:hover {
-	background: var(--glass-bg-medium);
-	transform: translateY(-1px);
-}
-
 .div-cell-dark > div {
 	border: 0 !important;
 }
@@ -393,16 +388,8 @@ html[data-theme="mew"] body {
 	border: none;
 }
 
-.table tbody tr:hover {
-	/* Hover effect disabled for transparent glass tables */
-}
-
 .table tbody tr:nth-child(odd) {
 	background: rgba(255, 255, 255, 0.02);
-}
-
-.table tbody tr:nth-child(odd):hover {
-	/* Hover effect disabled for transparent glass tables */
 }
 
 .table td, .table th {
@@ -500,13 +487,6 @@ html[data-theme="mew"] body {
 	box-shadow: var(--glass-shadow-sm);
 	border-radius: 12px;
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.card:hover {
-	background: var(--glass-bg-medium);
-	border-color: var(--glass-border-medium);
-	box-shadow: var(--glass-shadow-sm);
-	transform: translateY(-1px);
 }
 
 .dropdown-menu {

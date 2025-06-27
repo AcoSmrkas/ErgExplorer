@@ -3,7 +3,12 @@
   "name": "ergexplorer",
   "version": "1.0.0",
   "description": "Ergo blockchain explorer built with Svelte 5",
-  "keywords": ["ergo", "blockchain", "explorer", "svelte"],
+  "keywords": [
+    "ergo",
+    "blockchain",
+    "explorer",
+    "svelte"
+  ],
   "author": "",
   "license": "ISC",
   "type": "module",
@@ -26,5 +31,7 @@
     "typescript": "^5.7.2",
     "vite": "^6.0.7"
   },
-  "dependencies": {}
+  "dependencies": {
+    "socket.io-client": "^4.8.1"
+  }
 }
