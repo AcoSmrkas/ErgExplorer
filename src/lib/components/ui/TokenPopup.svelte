@@ -63,7 +63,7 @@
 				{/if}
 				
 				{#if tokenId}
-					<div class="token-id-section">
+					<div class="token-id-section mb-0">
 						<div class="token-id">ID: {formatAddress(tokenId, 15, 4)}</div>
 						<div class="mb-2">
 							<CopyButton 

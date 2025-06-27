@@ -30,7 +30,7 @@
 					{#each whaleTxs as tx, index (tx.txid + '_' + index)}
 						<tr>
 							<td>
-								<a href="/transactions/{tx.txid}" aria-label="View transaction {tx.txid}"><i class="fas fa-link text-info"></i></a>
+								<a href="/transactions/{tx.txid}" data-transaction-hover="{tx.txid}" aria-label="View transaction {tx.txid}"><i class="fas fa-link text-info"></i></a>
 							</td>
 							<td>{formatDateString(parseInt(tx.time))}</td>
 							<td>
@@ -71,7 +71,7 @@
 			{#each whaleTxs as tx, index (tx.txid + '_' + index)}
 				<div class="mobile-tx-item">
 					<div class="d-flex justify-content-between align-items-center mb-2 row">
-						<a href="/transactions/{tx.txid}" class="text-info" aria-label="View transaction {tx.txid}">
+						<a href="/transactions/{tx.txid}" data-transaction-hover="{tx.txid}" class="text-info" aria-label="View transaction {tx.txid}">
 							<i class="fas fa-link me-1"></i> Transaction
 						</a>
 						<span class="text-light small">{formatDateString(parseInt(tx.time))}</span>

@@ -13,9 +13,12 @@
 /* Global styles matching original */
 html {
 	overflow-y: scroll;
+	scroll-behavior: smooth;
 }
 
 body {
+	margin: 0;
+	padding: 0;
 	padding-bottom: 30px;
 	min-height: 100vh;
 	display: flex;
@@ -68,16 +71,7 @@ footer {
 	margin-top: auto;
 }
 
-html {
-	scroll-behavior: smooth;
-}
-
-body {
-	margin: 0;
-	padding: 0;
-	background-color: var(--background);
-	color: var(--text-strong);
-}
+/* Consolidated with earlier html/body declarations */
 
 /* Theme-specific overrides */
 [data-theme="mew"] {
@@ -92,7 +86,7 @@ body {
 
 .navbar-dark .navbar-nav .nav-link:hover,
 .navbar-dark .navbar-nav .nav-link:focus {
-	color: var(--text-strong) !important;
+	color: var(--main-color) !important;
 }
 
 .navbar-dark .navbar-nav .nav-link.active {
@@ -110,7 +104,7 @@ body {
 }
 
 .navbar .nav-link:hover, .navbar .navbar-nav .nav-link:hover {
-	color: var(--text-strong) !important;
+	color: var(--main-color) !important;
 }
 
 /* Network type dropdown text */
@@ -161,17 +155,7 @@ tbody {
 	border-top: 2px solid var(--main-color) !important;
 }
 
-.bg-forms {
-	background-color: var(--forms-bg) !important;
-}
-
-.bg-footer {
-	background-color: var(--footer) !important;
-}
-
-.bg-background {
-	background-color: var(--background) !important;
-}
+/* Background utilities - use glass system instead */
 
 .table > :not(caption) > * > * {
 	background-color: transparent !important;
@@ -195,7 +179,7 @@ tbody {
 }
 
 .border-no-flat {
-	border-radius: 5px 5px;
+	border-radius: 12px;
 }
 
 .div-cell {
@@ -270,7 +254,7 @@ tbody {
 	margin-bottom: 25px !important;
 }
 
-/* Fix Bootstrap row negative margins causing left shift */
+/* Bootstrap fixes */
 .row {
 	margin-left: 0 !important;
 	margin-right: 0 !important;
@@ -306,35 +290,7 @@ a:hover {
 	color: var(--main-color) !important;
 }
 
-/* Button styling to match original - NO BLUE */
-.btn-primary {
-	background-color: var(--borders);
-	border-color: var(--borders);
-	color: var(--text-strong) !important;
-}
-
-.btn-primary:hover {
-	background-color: var(--main-color);
-	border-color: var(--main-color);
-	color: #EEE !important;
-}
-
-.btn-info {
-	background-color: var(--main-color);
-	border: none;
-	color: #EEE !important;
-	font-weight: bold;
-}
-
-.btn-info:hover, .btn-info:focus, .btn-info:active {
-	background-color: var(--main-color-hover) !important;
-	color: #EEE !important;
-	box-shadow: none !important;
-}
-
-.btn-info:focus {
-	box-shadow: none;
-}
+/* Button styling superseded by glass system below */
 
 /* Override any Bootstrap blue defaults */
 .btn:focus, .btn:active:focus, .btn.active:focus {

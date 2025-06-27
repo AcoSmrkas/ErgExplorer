@@ -1,16 +1,19 @@
 <script>
 	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 	import Navigation from '$lib/components/layout/Navigation.svelte';
 	import SearchForm from '$lib/components/ui/SearchForm.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import TokenPopup from '$lib/components/ui/TokenPopup.svelte';
 	import AddressPopup from '$lib/components/ui/AddressPopup.svelte';
 	import BlockPopup from '$lib/components/ui/BlockPopup.svelte';
+	import TransactionPopup from '$lib/components/ui/TransactionPopup.svelte';
 	import { initializeTheme } from '$lib/stores/theme.svelte.js';
 	import { initializeGlobalTokenHover, tokenPopupState } from '$lib/stores/tokenHover.js';
 	import { updatePrices } from '$lib/stores/priceStore.js';
 	import { initializeGlobalAddressHover, addressPopupState } from '$lib/stores/addressHover.js';
 	import { initializeGlobalBlockHover, blockPopupState } from '$lib/stores/blockHover.js';
+	import { initializeGlobalTransactionHover, transactionPopupState } from '$lib/stores/transactionHover.js';
 	import { initializeTokenIcons } from '$lib/stores/tokenIconsStore.js';
 	import '../app.css';
 
@@ -22,6 +25,7 @@
 		initializeGlobalTokenHover();
 		initializeGlobalAddressHover();
 		initializeGlobalBlockHover();
+		initializeGlobalTransactionHover();
 		
 		// Update global prices from server data
 		if (data.currentPrices) {
@@ -64,6 +68,15 @@
 		loading: false
 	};
 	
+	let transactionPopup = {
+		visible: false,
+		x: 0,
+		y: 0,
+		transaction: null,
+		transactionId: '',
+		loading: false
+	};
+	
 	tokenPopupState.subscribe(state => {
 		tokenPopup = state;
 	});
@@ -74,6 +87,51 @@
 	
 	blockPopupState.subscribe(state => {
 		blockPopup = state;
+	});
+	
+	transactionPopupState.subscribe(state => {
+		transactionPopup = state;
+	});
+	
+	// Hide all popups on page navigation
+	page.subscribe(() => {
+		tokenPopupState.set({
+			visible: false,
+			x: 0,
+			y: 0,
+			token: null,
+			tokenId: '',
+			tokenName: '',
+			tokenPrice: null,
+			loading: false
+		});
+		
+		addressPopupState.set({
+			visible: false,
+			x: 0,
+			y: 0,
+			address: '',
+			balance: null,
+			loading: false
+		});
+		
+		blockPopupState.set({
+			visible: false,
+			x: 0,
+			y: 0,
+			block: null,
+			blockId: '',
+			loading: false
+		});
+		
+		transactionPopupState.set({
+			visible: false,
+			x: 0,
+			y: 0,
+			transaction: null,
+			transactionId: '',
+			loading: false
+		});
 	});
 </script>
 
@@ -114,7 +172,7 @@
 <div class="container p-0 mx-auto">
 	<div class="w-100 baner text-center p-0 mt-2 mt-md-3 mb-2 mb-md-3">
 		<a class="p-0" href="https://ergominers.com" target="_blank" rel="noopener">
-			<img src="/images/sigsmining.png" alt="Ad" style="max-height: 80px; width: auto; max-width:100%; margin: 0 auto; border: 1px solid var(--main-color);">
+			<img src="/images/sigsmining.png" alt="Ad" style="max-height: 80px; width: auto; max-width:100%; margin: 0 auto; border: 1px solid var(--main-color); border-radius: 10px">
 		</a>
 	</div>
 	
@@ -155,6 +213,15 @@
 	block={blockPopup.block}
 	blockId={blockPopup.blockId}
 	loading={blockPopup.loading}
+/>
+
+<TransactionPopup 
+	visible={transactionPopup.visible}
+	x={transactionPopup.x}
+	y={transactionPopup.y}
+	transaction={transactionPopup.transaction}
+	transactionId={transactionPopup.transactionId}
+	loading={transactionPopup.loading}
 />
 
 <style>

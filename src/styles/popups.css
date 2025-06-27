@@ -10,7 +10,8 @@
 /* Apply centralized glass system to popups */
 .token-popup,
 .address-popup,
-.block-popup {
+.block-popup,
+.transaction-popup {
 	position: fixed;
 	z-index: 1000;
 	color: var(--text-strong);
@@ -33,7 +34,8 @@
 
 .token-popup.show,
 .address-popup.show,
-.block-popup.show {
+.block-popup.show,
+.transaction-popup.show {
 	display: block;
 	opacity: 1;
 	transform: scale(1) translateY(0);
@@ -65,8 +67,8 @@
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	margin-bottom: 16px;
-	padding-bottom: 12px;
+	margin-bottom: 10px;
+	padding-bottom: 6px;
 	border-bottom: 1px solid var(--glass-border-light);
 }
 
@@ -223,6 +225,7 @@
 	background: var(--background);
 	padding: 3px 6px;
 	border-radius: 3px;
+	flex: 1;
 }
 
 .token-popup .token-price {
@@ -341,6 +344,7 @@
 	background: var(--background);
 	padding: 3px 6px;
 	border-radius: 3px;
+	flex: 1;
 }
 
 .address-popup .address-balance,
@@ -356,6 +360,7 @@
 	border-top: 1px solid var(--borders);
 	padding-top: 6px;
 	margin-top: 6px;
+	margin-bottom: 0 !important;
 }
 
 .address-popup .address-unconfirmed {
@@ -426,6 +431,7 @@
 	background: var(--background);
 	padding: 3px 6px;
 	border-radius: 3px;
+	flex: 1;
 }
 
 /* Block popup copy button uses centralized styling */
@@ -463,6 +469,113 @@
 }
 
 .block-popup.show {
+	transform: scale(1);
+	opacity: 1;
+}
+
+/* ================================
+   TRANSACTION POPUP STYLES
+   ================================ */
+
+/* Transaction popup styles handled by centralized popup styling above */
+
+/* Transaction popup header */
+.transaction-popup .transaction-header {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	margin-bottom: 10px;
+	padding-bottom: 6px;
+	border-bottom: 1px solid var(--borders);
+}
+
+.transaction-popup .transaction-icon {
+	color: var(--main-color);
+	font-size: 1.2em;
+	width: 24px;
+	text-align: center;
+	flex-shrink: 0;
+}
+
+.transaction-popup .transaction-title {
+	flex: 1;
+	min-width: 0;
+}
+
+.transaction-popup .transaction-name {
+	font-weight: bold;
+	color: var(--main-color);
+	margin-bottom: 2px;
+	font-size: 1.1em;
+}
+
+.transaction-popup .transaction-short {
+	color: var(--text-light);
+	font-size: 0.9em;
+	font-family: 'DejaVu', monospace;
+}
+
+/* Transaction ID section with copy button */
+.transaction-popup .transaction-id-section {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 6px;
+}
+
+.transaction-popup .transaction-id {
+	font-family: 'DejaVu', monospace;
+	font-size: 0.75em;
+	color: var(--text-light);
+	word-break: break-all;
+	background: var(--background);
+	padding: 3px 6px;
+	border-radius: 3px;
+	flex: 1;
+	flex: 1;
+}
+
+/* Transaction details */
+.transaction-popup .transaction-time,
+.transaction-popup .transaction-block,
+.transaction-popup .transaction-confirmations,
+.transaction-popup .transaction-inputs,
+.transaction-popup .transaction-outputs,
+.transaction-popup .transaction-value {
+	color: var(--text-strong);
+	margin-bottom: 4px;
+	font-size: 0.9em;
+}
+
+.transaction-popup .transaction-value {
+	font-weight: bold;
+	color: var(--main-color);
+	border-top: 1px solid var(--borders);
+	padding-top: 6px;
+	margin-top: 6px;
+}
+
+/* Loading section in popup */
+.transaction-popup .loading-section {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 8px 0;
+	color: var(--text-light);
+}
+
+.transaction-popup .loading-text {
+	font-size: 0.8em;
+	font-style: italic;
+}
+
+/* Smooth transitions for transaction popup */
+.transaction-popup {
+	transition: all 0.2s ease-in-out;
+	transform-origin: top left;
+}
+
+.transaction-popup.show {
 	transform: scale(1);
 	opacity: 1;
 }

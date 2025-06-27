@@ -102,11 +102,14 @@
 				<!-- Desktop Network Switcher -->
 				<li class="nav-item">
 					<div class="dropdown nav-link">
+						<!-- svelte-ignore a11y_invalid_attribute -->
 						<a class="btn nav-link dropdown-toggle text-light p-0 p-md-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 							<span class="networkType">{network === 'mainnet' ? 'Mainnet' : 'Testnet'}</span>
 						</a>
 						<ul class="dropdown-menu">
+							<!-- svelte-ignore a11y_invalid_attribute -->
 							<li><a class="dropdown-item" href="#" onclick={handleMainnetSwitch}>Mainnet</a></li>
+							<!-- svelte-ignore a11y_invalid_attribute -->
 							<li><a class="dropdown-item" href="#" onclick={handleTestnetSwitch}>Testnet</a></li>
 						</ul>
 					</div>
@@ -125,7 +128,6 @@
 
 <style>
 	.navbar {
-		/* Base navbar styling - glass effects handled by centralized system in app.css */
 		min-height: 55px;
 	}
 	
