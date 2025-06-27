@@ -78,8 +78,6 @@ async function fetchAddressesInfo() {
 
     const data = await response.json();
 
-    console.log("Addressbook API response:", data);
-
     if (data.items && data.items.length > 0) {
       // Update the address book store
       addressBook.update((currentBook) => {
@@ -97,7 +95,6 @@ async function fetchAddressesInfo() {
           }
         }
 
-        console.log("Updated addressbook:", newBook);
         return newBook;
       });
     }
@@ -122,8 +119,6 @@ export function getOwner(address, currentAddressBook) {
     return undefined;
   }
 
-  console.log("Found addressbook entry:", entry);
-
   let owner = entry.name;
 
   if (entry.urltype && entry.urltype !== "") {
@@ -136,7 +131,6 @@ export function getOwner(address, currentAddressBook) {
     owner += " (" + shortAdd + ")";
   }
 
-  console.log("Generated owner name:", owner);
   return owner;
 }
 

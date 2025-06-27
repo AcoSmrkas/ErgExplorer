@@ -215,6 +215,8 @@
 	<title>Erg Explorer - Ergo Blockchain Explorer</title>
 </svelte:head>
 
+<br>
+
 {#if error}
 	<ErrorMessage message={error} type="warning" dismissible />
 {/if}

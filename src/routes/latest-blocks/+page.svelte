@@ -36,6 +36,10 @@
 	onMount(async () => {
 		await loadBlocks();
 	});
+
+	addressBook.subscribe(() => {
+		updateMinerCells();
+	});
 	
 	// Function to render miner cell with addressbook integration
 	function renderMinerCell(miner, index) {
@@ -47,41 +51,27 @@
 		return `<span class="miner-cell-reactive" data-address="${miner.address}" data-index="${index}"></span>`;
 	}
 	
-	// Reactive function to update miner cells when addressbook changes
-	$: if (browser && blocks.length > 0) {
-		updateMinerCells();
-	}
-	
 	function updateMinerCells() {
 		if (!browser) return;
 		
-		console.log('updateMinerCells called, addressBook:', $addressBook);
+		const minerCells = document.querySelectorAll('.miner-cell-reactive');
 		
-		setTimeout(() => {
-			const minerCells = document.querySelectorAll('.miner-cell-reactive');
-			console.log('Found miner cells:', minerCells.length);
+		minerCells.forEach(cell => {
+			const address = cell.dataset.address;
+			const index = parseInt(cell.dataset.index);
 			
-			minerCells.forEach(cell => {
-				const address = cell.dataset.address;
-				const index = parseInt(cell.dataset.index);
+			if (address && blocks[index]?.miner?.address === address) {
+				// Get friendly name from addressbook
+				const friendlyName = getOwner(address, $addressBook);
 				
-				console.log('Processing cell:', address, index);
+				// Use friendly name, fallback to provided name, then formatted address
+				const displayName = friendlyName || 
+									formatAddress(blocks[index].miner.address, 9, 4) || 
+									formatAddress(address, 6, 6);
 				
-				if (address && blocks[index]?.miner?.address === address) {
-					// Get friendly name from addressbook
-					const friendlyName = getOwner(address, $addressBook);
-					
-					// Use friendly name, fallback to provided name, then formatted address
-					const displayName = friendlyName || 
-									   formatAddress(blocks[index].miner.address, 9, 4) || 
-									   formatAddress(address, 6, 6);
-					
-					console.log('Display name for', address, ':', displayName);
-					
-					cell.innerHTML = `<a href="/addresses/${address}" class="miner-link" data-address="${address}">${displayName}</a>`;
-				}
-			});
-		}, 50);
+				cell.innerHTML = `<a href="/addresses/${address}" class="miner-link" data-address="${address}">${displayName}</a>`;
+			}
+		});
 	}
 
 	async function loadBlocks() {
@@ -98,13 +88,6 @@
 			
 			blocks = data.items || [];
 			totalPages = Math.ceil((data.total || 0) / limit);
-			
-			// Debug: log miner addresses to check what we're getting
-			if (blocks.length > 0) {
-				console.log('First block miner:', blocks[0].miner);
-				console.log('All miner addresses:', blocks.map(b => b.miner?.address).filter(Boolean));
-			}
-			
 		} catch (err) {
 			error = err.message;
 			console.error('Failed to load blocks:', err);
