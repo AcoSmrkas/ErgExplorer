@@ -5,7 +5,7 @@ class Color {
 
   toString() {
     return `rgb(${Math.round(this.r)}, ${Math.round(this.g)}, ${Math.round(
-      this.b
+      this.b,
     )})`;
   }
 
@@ -29,7 +29,7 @@ class Color {
       0.072 - cos * 0.072 - sin * 0.283,
       0.213 - cos * 0.213 - sin * 0.787,
       0.715 - cos * 0.715 + sin * 0.715,
-      0.072 + cos * 0.928 + sin * 0.072
+      0.072 + cos * 0.928 + sin * 0.072,
     ]);
   }
 
@@ -43,7 +43,7 @@ class Color {
       0.0722 - 0.0722 * (1 - value),
       0.2126 - 0.2126 * (1 - value),
       0.7152 - 0.7152 * (1 - value),
-      0.0722 + 0.9278 * (1 - value)
+      0.0722 + 0.9278 * (1 - value),
     ]);
   }
 
@@ -57,7 +57,7 @@ class Color {
       0.168 - 0.168 * (1 - value),
       0.272 - 0.272 * (1 - value),
       0.534 - 0.534 * (1 - value),
-      0.131 + 0.869 * (1 - value)
+      0.131 + 0.869 * (1 - value),
     ]);
   }
 
@@ -71,19 +71,19 @@ class Color {
       0.072 - 0.072 * value,
       0.213 - 0.213 * value,
       0.715 - 0.715 * value,
-      0.072 + 0.928 * value
+      0.072 + 0.928 * value,
     ]);
   }
 
   multiply(matrix) {
     const newR = this.clamp(
-      this.r * matrix[0] + this.g * matrix[1] + this.b * matrix[2]
+      this.r * matrix[0] + this.g * matrix[1] + this.b * matrix[2],
     );
     const newG = this.clamp(
-      this.r * matrix[3] + this.g * matrix[4] + this.b * matrix[5]
+      this.r * matrix[3] + this.g * matrix[4] + this.b * matrix[5],
     );
     const newB = this.clamp(
-      this.r * matrix[6] + this.g * matrix[7] + this.b * matrix[8]
+      this.r * matrix[6] + this.g * matrix[7] + this.b * matrix[8],
     );
     this.r = newR;
     this.g = newG;
@@ -144,7 +144,7 @@ class Color {
     return {
       h: h * 100,
       s: s * 100,
-      l: l * 100
+      l: l * 100,
     };
   }
 
@@ -170,7 +170,7 @@ class Solver {
     return {
       values: result.values,
       loss: result.loss,
-      filter: this.css(result.values)
+      filter: this.css(result.values),
     };
   }
 
@@ -282,9 +282,9 @@ class Solver {
       return Math.round(filters[idx] * multiplier);
     }
     return `filter: invert(${fmt(0)}%) sepia(${fmt(1)}%) saturate(${fmt(
-      2
+      2,
     )}%) hue-rotate(${fmt(3, 3.6)}deg) brightness(${fmt(4)}%) contrast(${fmt(
-      5
+      5,
     )}%);`;
   }
 }
@@ -301,20 +301,20 @@ function hexToRgb(hex) {
     ? [
         parseInt(result[1], 16),
         parseInt(result[2], 16),
-        parseInt(result[3], 16)
+        parseInt(result[3], 16),
       ]
     : null;
 }
 
 $(document).ready(() => {
-    const rgb = hexToRgb('#fb5c16');
-    if (rgb.length !== 3) {
-      return;
-    }
+  const rgb = hexToRgb("#fb5c16");
+  if (rgb.length !== 3) {
+    return;
+  }
 
-    const color = new Color(rgb[0], rgb[1], rgb[2]);
-    const solver = new Solver(color);
-    const result = solver.solve();
+  const color = new Color(rgb[0], rgb[1], rgb[2]);
+  const solver = new Solver(color);
+  const result = solver.solve();
 
-    $('.logo-white').attr('style', result.filter);
+  $(".logo-white").attr("style", result.filter);
 });

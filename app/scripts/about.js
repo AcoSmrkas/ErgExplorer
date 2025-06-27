@@ -1,8 +1,8 @@
-$(function() {
-    $('#address').attr('href', getWalletAddressUrl(DONATION_ADDRESS));
-    $('#address').html(DONATION_ADDRESS);
+$(function () {
+  $("#address").attr("href", getWalletAddressUrl(DONATION_ADDRESS));
+  $("#address").html(DONATION_ADDRESS);
 });
 
 function copyErgoWalletAddress(e) {
-	copyToClipboard(e, DONATION_ADDRESS);
+  copyToClipboard(e, DONATION_ADDRESS);
 }

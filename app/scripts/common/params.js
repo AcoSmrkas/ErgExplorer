@@ -3,51 +3,51 @@ var params = [];
 readParams();
 
 function readParams() {
-	let hash = window.location.hash;
+  let hash = window.location.hash;
 
-	if (hash == '') {
-		return;
-	}
+  if (hash == "") {
+    return;
+  }
 
-	hash = hash.substring(1);
-	let temp = hash.split('&');
+  hash = hash.substring(1);
+  let temp = hash.split("&");
 
-	for (let i = 0; i < temp.length; i++) {
-		let param = temp[i].split('=');
+  for (let i = 0; i < temp.length; i++) {
+    let param = temp[i].split("=");
 
-		if (param[1] == undefined) {
-			param[1] = param[0];
-		}
+    if (param[1] == undefined) {
+      param[1] = param[0];
+    }
 
-		params[param[0]] = param[1];
-	}
+    params[param[0]] = param[1];
+  }
 
-	getUrlWithParams();
+  getUrlWithParams();
 }
 
 function getUrlWithParams(page, includeId = true) {
-	let separator = (IS_DEV_ENVIRONMENT) ? '#' : '/';
-	let address = '/' + page + separator;
+  let separator = IS_DEV_ENVIRONMENT ? "#" : "/";
+  let address = "/" + page + separator;
 
-	Object.keys(params).forEach((param) => {
-    	if (params[param] == param) {
-    		if (includeId) {
-	    		address += param + '&';
-	    	}
-    	
-    		return;
-    	}
+  Object.keys(params).forEach((param) => {
+    if (params[param] == param) {
+      if (includeId) {
+        address += param + "&";
+      }
 
-    	address += param + '=' + params[param] + '&';
-	});
+      return;
+    }
 
-	if (address.substring(address.length - 1) == '&') {
-		address = address.substring(0, address.length - 1);
-	}
+    address += param + "=" + params[param] + "&";
+  });
 
-	return address;
+  if (address.substring(address.length - 1) == "&") {
+    address = address.substring(0, address.length - 1);
+  }
+
+  return address;
 }
 
 function getCurrentUrlWithParams() {
-	return getUrlWithParams(window.location.pathname.substring(1));
+  return getUrlWithParams(window.location.pathname.substring(1));
 }

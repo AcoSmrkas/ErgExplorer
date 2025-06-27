@@ -1,158 +1,159 @@
 //QR code
 #qrCodeBack {
-	position: absolute;
-	top: 0;
-	left: 0;
-	background-color: #00000099;
-	width: 100%;
-	height: 100%;
-	padding: 0;
-	margin: 0;
-	border: 0;
-	display: none;
-	justify-content: center;
-	align-items: center;
-	z-index: 1000;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #00000099;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
 
 #qrCodeHolder {
-	opacity: 1;
-	position: relative;
-	display: flex;
-	margin: auto;
-	width: 420px;
-	height: 420px;
-	background-color: white;
-	justify-content: center;
-	align-items: center;
+  opacity: 1;
+  position: relative;
+  display: flex;
+  margin: auto;
+  width: 420px;
+  height: 420px;
+  background-color: white;
+  justify-content: center;
+  align-items: center;
 }
 
 .card {
-	display: inline-block;
-	max-width: 97px;
+  display: inline-block;
+  max-width: 97px;
 }
 
 .cardImgHolder {
-	position: relative;
-	min-height: 95px;
-	min-width: 100%;
-	background-color: #000;
-	border-radius: inherit;
-	text-align: center;
+  position: relative;
+  min-height: 95px;
+  min-width: 100%;
+  background-color: #000;
+  border-radius: inherit;
+  text-align: center;
 }
 
 .cardImgHolder > img {
-	width: auto;
-	height: auto;
-	max-width: 100%;
-	max-height: 100%;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .card-text {
-	font-size: 0.8em;
+  font-size: 0.8em;
 }
 
 .card-body {
-	overflow: auto;
-	min-height: 50px;
-	max-height: 50px;
+  overflow: auto;
+  min-height: 50px;
+  max-height: 50px;
 }
 
-
 label {
-	font-size: 1.2em;
-	min-width: 60px;
-	line-height: 42px;
-	margin-bottom: 0 !important;
-	margin-right: 2px;
+  font-size: 1.2em;
+  min-width: 60px;
+  line-height: 42px;
+  margin-bottom: 0 !important;
+  margin-right: 2px;
 }
 
 .checkbox-xl {
-	min-width: 150px;
+  min-width: 150px;
 }
 
 select {
-	min-height: inherit;
-	max-width: 100%;
+  min-height: inherit;
+  max-width: 100%;
 }
 
 select:not(:focus):not(:active):not(:hover) {
-	border: 1px solid var(--bs-border-color);
+  border: 1px solid var(--bs-border-color);
 }
 
 select:hover {
-	border: 1px solid var(--bs-border-color);
+  border: 1px solid var(--bs-border-color);
 }
 
 .carousel-item img {
-	width: 100% !important;
-	height: auto !important;
-	margin: 0;
-	overflow: hidden;
+  width: 100% !important;
+  height: auto !important;
+  margin: 0;
+  overflow: hidden;
 }
 
 #carouselExampleCaptions {
-	height: 100%;
-	max-height: 200px;
-	max-width: 350px;
-	border: 1px solid var(--main-color);
+  height: 100%;
+  max-height: 200px;
+  max-width: 350px;
+  border: 1px solid var(--main-color);
 }
 
 .carousel-caption {
-	padding: 8px 0;
-	color: var(--main-color) !important;
-	width: 100%;
-	margin: 0;
-	background-color: #000000AA;
-	left: 0;
-	bottom: 0;
+  padding: 8px 0;
+  color: var(--main-color) !important;
+  width: 100%;
+  margin: 0;
+  background-color: #000000aa;
+  left: 0;
+  bottom: 0;
 }
 
 .carousel-inner {
-	height: 100%;
+  height: 100%;
 }
 
 .carousel-item {
-	height: 100%;
-	position: relative;
+  height: 100%;
+  position: relative;
 }
 
-.carousel-control-next-icon, .carousel-control-prev-icon {
-	filter: invert(49%) sepia(49%) saturate(3923%) hue-rotate(348deg) brightness(96%) contrast(105%) !important;
+.carousel-control-next-icon,
+.carousel-control-prev-icon {
+  filter: invert(49%) sepia(49%) saturate(3923%) hue-rotate(348deg)
+    brightness(96%) contrast(105%) !important;
 }
 
 #nftsHolder > div > div > div > div > div,
 #issuedNftsHolder > div > div > div > div > div {
-	max-height: 400px;
-	overflow-y: auto;
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 .tokensContainer {
-	max-height: 130px;
-	overflow-y: auto;
+  max-height: 130px;
+  overflow-y: auto;
 }
 
 #tokensHolder {
-	min-height: unset;
+  min-height: unset;
 }
 
 @media only screen and (min-width: 992px) {
-	.tokensContainer {
-		//min-height: 400px;
-	}
+  .tokensContainer {
+    //min-height: 400px;
+  }
 }
 
 #transactionsTableBody > tr > td:last-child > span:last-child {
-	display: block;
-	max-height: 110px;
-	overflow-y: auto;	
+  display: block;
+  max-height: 110px;
+  overflow-y: auto;
 }
 
 #unspentBoxesHolder > div {
-	max-height: 200px;
-	overflow-y: auto;
+  max-height: 200px;
+  overflow-y: auto;
 }

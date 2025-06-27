@@ -1,139 +1,138 @@
-import { writable } from 'svelte/store';
-import { io } from 'socket.io-client';
-import { API_ENDPOINTS } from '$lib/utils/constants.js';
+import { writable } from "svelte/store";
+import { io } from "socket.io-client";
+import { API_ENDPOINTS } from "$lib/utils/constants.js";
 
 class SocketService {
-	constructor() {
-		this.socket = null;
-		this.isConnected = false;
-		this.reconnectAttempts = 0;
-		this.maxReconnectAttempts = 5;
-		this.reconnectDelay = 1000;
-		this.eventListeners = new Map();
-		
-		// Reactive stores
-		this.connectionStatus = writable(false);
-		this.mempoolTransactions = writable([]);
-		this.lastUpdate = writable(null);
-	}
+  constructor() {
+    this.socket = null;
+    this.isConnected = false;
+    this.reconnectAttempts = 0;
+    this.maxReconnectAttempts = 5;
+    this.reconnectDelay = 1000;
+    this.eventListeners = new Map();
 
-	connect() {
-		if (this.socket && this.isConnected) {
-			return;
-		}
+    // Reactive stores
+    this.connectionStatus = writable(false);
+    this.mempoolTransactions = writable([]);
+    this.lastUpdate = writable(null);
+  }
 
-		try {
-			this.socket = io(API_ENDPOINTS.SOCKET, {
-				autoConnect: true,
-				reconnection: true,
-				reconnectionAttempts: this.maxReconnectAttempts,
-				reconnectionDelay: this.reconnectDelay
-			});
+  connect() {
+    if (this.socket && this.isConnected) {
+      return;
+    }
 
-			this.setupEventListeners();
-			
-		} catch (error) {
-			console.error('Failed to connect to socket:', error);
-			this.connectionStatus.set(false);
-		}
-	}
+    try {
+      this.socket = io(API_ENDPOINTS.SOCKET, {
+        autoConnect: true,
+        reconnection: true,
+        reconnectionAttempts: this.maxReconnectAttempts,
+        reconnectionDelay: this.reconnectDelay,
+      });
 
-	setupEventListeners() {
-		this.socket.on('connect', () => {
-			console.log('Connected to socket server');
-			this.isConnected = true;
-			this.reconnectAttempts = 0;
-			this.connectionStatus.set(true);
-		});
+      this.setupEventListeners();
+    } catch (error) {
+      console.error("Failed to connect to socket:", error);
+      this.connectionStatus.set(false);
+    }
+  }
 
-		this.socket.on('disconnect', (reason) => {
-			console.log('Disconnected from socket server:', reason);
-			this.isConnected = false;
-			this.connectionStatus.set(false);
-		});
+  setupEventListeners() {
+    this.socket.on("connect", () => {
+      console.log("Connected to socket server");
+      this.isConnected = true;
+      this.reconnectAttempts = 0;
+      this.connectionStatus.set(true);
+    });
 
-		this.socket.on('connect_error', (error) => {
-			console.error('Socket connection error:', error);
-			this.isConnected = false;
-			this.connectionStatus.set(false);
-		});
+    this.socket.on("disconnect", (reason) => {
+      console.log("Disconnected from socket server:", reason);
+      this.isConnected = false;
+      this.connectionStatus.set(false);
+    });
 
-		// Listen for mempool updates
-		this.socket.on('mempoolTxs', (transactions) => {
-			this.mempoolTransactions.set(transactions);
-			this.lastUpdate.set(new Date().toISOString());
-			
-			// Emit to custom listeners
-			this.emit('mempoolTxs', transactions);
-		});
-	}
+    this.socket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+      this.isConnected = false;
+      this.connectionStatus.set(false);
+    });
 
-	// Subscribe to specific events
-	on(event, callback) {
-		if (!this.eventListeners.has(event)) {
-			this.eventListeners.set(event, new Set());
-		}
-		this.eventListeners.get(event).add(callback);
-	}
+    // Listen for mempool updates
+    this.socket.on("mempoolTxs", (transactions) => {
+      this.mempoolTransactions.set(transactions);
+      this.lastUpdate.set(new Date().toISOString());
 
-	// Unsubscribe from events
-	off(event, callback) {
-		if (this.eventListeners.has(event)) {
-			this.eventListeners.get(event).delete(callback);
-		}
-	}
+      // Emit to custom listeners
+      this.emit("mempoolTxs", transactions);
+    });
+  }
 
-	// Emit events to custom listeners
-	emit(event, data) {
-		if (this.eventListeners.has(event)) {
-			this.eventListeners.get(event).forEach(callback => {
-				try {
-					callback(data);
-				} catch (error) {
-					console.error('Error in socket event callback:', error);
-				}
-			});
-		}
-	}
+  // Subscribe to specific events
+  on(event, callback) {
+    if (!this.eventListeners.has(event)) {
+      this.eventListeners.set(event, new Set());
+    }
+    this.eventListeners.get(event).add(callback);
+  }
 
-	// Find specific transaction in mempool
-	findTransaction(txId) {
-		let transaction = null;
-		this.mempoolTransactions.subscribe(transactions => {
-			transaction = transactions.find(tx => tx.id === txId);
-		})();
-		return transaction;
-	}
+  // Unsubscribe from events
+  off(event, callback) {
+    if (this.eventListeners.has(event)) {
+      this.eventListeners.get(event).delete(callback);
+    }
+  }
 
-	disconnect() {
-		if (this.socket) {
-			this.socket.disconnect();
-			this.socket = null;
-			this.isConnected = false;
-			this.connectionStatus.set(false);
-		}
-	}
+  // Emit events to custom listeners
+  emit(event, data) {
+    if (this.eventListeners.has(event)) {
+      this.eventListeners.get(event).forEach((callback) => {
+        try {
+          callback(data);
+        } catch (error) {
+          console.error("Error in socket event callback:", error);
+        }
+      });
+    }
+  }
 
-	// Get connection status store
-	getConnectionStatus() {
-		return this.connectionStatus;
-	}
+  // Find specific transaction in mempool
+  findTransaction(txId) {
+    let transaction = null;
+    this.mempoolTransactions.subscribe((transactions) => {
+      transaction = transactions.find((tx) => tx.id === txId);
+    })();
+    return transaction;
+  }
 
-	// Get mempool transactions store
-	getMempoolTransactions() {
-		return this.mempoolTransactions;
-	}
+  disconnect() {
+    if (this.socket) {
+      this.socket.disconnect();
+      this.socket = null;
+      this.isConnected = false;
+      this.connectionStatus.set(false);
+    }
+  }
 
-	// Get last update time store
-	getLastUpdate() {
-		return this.lastUpdate;
-	}
+  // Get connection status store
+  getConnectionStatus() {
+    return this.connectionStatus;
+  }
+
+  // Get mempool transactions store
+  getMempoolTransactions() {
+    return this.mempoolTransactions;
+  }
+
+  // Get last update time store
+  getLastUpdate() {
+    return this.lastUpdate;
+  }
 }
 
 // Create singleton instance
 export const socketService = new SocketService();
 
 // Auto-connect on import (browser only)
-if (typeof window !== 'undefined') {
-	socketService.connect();
+if (typeof window !== "undefined") {
+  socketService.connect();
 }

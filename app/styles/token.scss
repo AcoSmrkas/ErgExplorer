@@ -1,124 +1,126 @@
 audio {
-	width: 100%;
+  width: 100%;
 }
 
 video {
-	width: 100%;
+  width: 100%;
 }
 
 table > tbody > tr > td {
-	padding:6px !important;
+  padding: 6px !important;
 }
 
-#tokenDataLeft > div:nth-child(odd), #nftInfoHolder > div:nth-child(odd) {
-	background-color: var(--striped-1);
+#tokenDataLeft > div:nth-child(odd),
+#nftInfoHolder > div:nth-child(odd) {
+  background-color: var(--striped-1);
 }
 
-#nftCollectionDataHolder > div:nth-child(odd), #nftInfoHolder > div:nth-child(odd) {
-	background-color: var(--striped-1);
+#nftCollectionDataHolder > div:nth-child(odd),
+#nftInfoHolder > div:nth-child(odd) {
+  background-color: var(--striped-1);
 }
 
 #nftCollectionHolder {
-	padding-left: unset;
-	padding-right: unset;
+  padding-left: unset;
+  padding-right: unset;
 }
 
 #nftCollectionHolder > h3 {
-	padding-left: 12px;
-	padding-right: 12px;
+  padding-left: 12px;
+  padding-right: 12px;
 }
 
 #tokenDescription {
-	overflow-wrap: anywhere;
+  overflow-wrap: anywhere;
 }
 
 #nftPreviewImgHolder {
-	position: relative;
-	text-align: center;
-	min-height: 200px;
-	background-color: #000;
+  position: relative;
+  text-align: center;
+  min-height: 200px;
+  background-color: #000;
 }
 
 #nftPreviewImg {
-	width: auto;
-	height: auto;
-	max-width: 100%;
-	max-height: 100%;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	cursor: pointer;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
 }
 
 #nftPreviewImgNsfw {
-	width: auto;
-	height: auto;
-	max-width: 100%;
-	max-height: 100%;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	cursor: pointer;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
 }
 
 #tokenIcon {
-	text-align: right;
+  text-align: right;
 }
 
 #tokenIconImg {
-	width: 88px;
-	height: 88px;
+  width: 88px;
+  height: 88px;
 }
 
 #nftImageFullBack {
-	position: fixed;
-	top: 0;
-	left: 0;
-	background-color: #00000099;
-	width: 100%;
-	height: 100%;
-	padding: 0;
-	margin: 0;
-	border: 0;
-	display: none;
-	justify-content: center;
-	align-items: center;
-	z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #00000099;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
 
 #nftImageFull {
-	width: auto;
-	max-height: 80vh;
-	max-width: 100%;
+  width: auto;
+  max-height: 80vh;
+  max-width: 100%;
 }
 
 #nftPreviewAudio {
-	min-height: 0;
-	height: 40px;
+  min-height: 0;
+  height: 40px;
 }
 
 #holdersLoading {
-	position: relative;
-	top:0;
-	left:0;
-	width:100%;
-	height:350px;
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 350px;
 }
 
 #holdersLoadingInner {
-	position: absolute;
-	display:flex;
-	justify-content: center;
-	align-items: center;
-	top: 0;
-	left: 0;
-	width:100%;
-	height:350px;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 350px;
 }
 
 #tokenScam {
-	border-width: 2px;
-	text-align: center;
+  border-width: 2px;
+  text-align: center;
 }

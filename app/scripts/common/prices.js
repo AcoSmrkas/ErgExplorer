@@ -7,73 +7,73 @@ var pricesData = undefined;
 var poolsData = undefined;
 
 function getPrices(callback, force = false) {
-	theCallback = callback;
+  theCallback = callback;
 
-	$.get('https://api.ergexplorer.com/tokens/getErgPrice', function (data) {
-		erg24hDiff = data.items[0].difference;
-		prices['ERG'] = data.items[0].value;
-		pricesNames['ERG'] = 'ERG';
+  $.get("https://api.ergexplorer.com/tokens/getErgPrice", function (data) {
+    erg24hDiff = data.items[0].difference;
+    prices["ERG"] = data.items[0].value;
+    pricesNames["ERG"] = "ERG";
 
-		$.get('https://api.spectrum.fi/v1/price-tracking/markets',
-		function(data) {
-			pricesData = data;
+    $.get("https://api.spectrum.fi/v1/price-tracking/markets", function (data) {
+      pricesData = data;
 
-			handlePrices(force);
-		}).fail(function () {
-			doCallback();
-		});
+      handlePrices(force);
+    }).fail(function () {
+      doCallback();
+    });
 
-		$.get('https://api.spectrum.fi/v1/amm/pools/stats',
-		function(data) {
-			poolsData = data;
+    $.get("https://api.spectrum.fi/v1/amm/pools/stats", function (data) {
+      poolsData = data;
 
-			handlePrices(force);
-		}).fail(function () {
-			doCallback();
-		});
-	}).fail(function () {
-		doCallback();
-	});
+      handlePrices(force);
+    }).fail(function () {
+      doCallback();
+    });
+  }).fail(function () {
+    doCallback();
+  });
 }
 
 function handlePrices(force = false) {
-	if (poolsData == undefined || pricesData == undefined) {
-		return;
-	}
+  if (poolsData == undefined || pricesData == undefined) {
+    return;
+  }
 
-	for (let i = 0; i < pricesData.length; i++) {
-		let pairData = pricesData[i];
-		if (pairData['baseSymbol'] == 'ERG') {
-			if (prices[pairData['quoteId']] != undefined) continue;
+  for (let i = 0; i < pricesData.length; i++) {
+    let pairData = pricesData[i];
+    if (pairData["baseSymbol"] == "ERG") {
+      if (prices[pairData["quoteId"]] != undefined) continue;
 
-			let skip = true;
-			for (let j = 0; j < poolsData.length; j++) {
-				let poolData = poolsData[j];
+      let skip = true;
+      for (let j = 0; j < poolsData.length; j++) {
+        let poolData = poolsData[j];
 
-				if (poolData.lockedX.id == pairData['baseId']
-					&& poolData.lockedY.id == pairData['quoteId']
-					&& (poolData.lockedX.amount / Math.pow(10, 9) >= 1000 || force)) {
-					skip = false;
-					break;
-				}
-			}
-			if (skip) continue;
-			
-			let price = prices['ERG'] / pairData['lastPrice'];
-			prices[pairData['quoteId']] = price;
-			pricesNames[pairData['quoteSymbol']] = price;
-		}
-	}
-	
-	gotPrices = true;
-	
-	doCallback();
+        if (
+          poolData.lockedX.id == pairData["baseId"] &&
+          poolData.lockedY.id == pairData["quoteId"] &&
+          (poolData.lockedX.amount / Math.pow(10, 9) >= 1000 || force)
+        ) {
+          skip = false;
+          break;
+        }
+      }
+      if (skip) continue;
+
+      let price = prices["ERG"] / pairData["lastPrice"];
+      prices[pairData["quoteId"]] = price;
+      pricesNames[pairData["quoteSymbol"]] = price;
+    }
+  }
+
+  gotPrices = true;
+
+  doCallback();
 }
 
 function doCallback() {
-	if (callbackCalled) {
-		return;
-	}
+  if (callbackCalled) {
+    return;
+  }
 
-	theCallback();
+  theCallback();
 }

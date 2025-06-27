@@ -1,11 +1,11 @@
 var walletAddress = undefined;
 var mempoolData = undefined;
 var transactionsData = undefined;
-var tokensContentFull = '';
-var tokensContent = '';
-var financialTokensContentFull = '';
-var financialTokensContent = '';
-var formattedResult = '';
+var tokensContentFull = "";
+var tokensContent = "";
+var financialTokensContentFull = "";
+var financialTokensContent = "";
+var formattedResult = "";
 var totalTransactions = 0;
 var valueFields = new Array();
 var valueFieldsFull = new Array();
@@ -42,2454 +42,2852 @@ var firstTime = true;
 var ownedNftsShown = false;
 var issuedNftsShown = false;
 
-const N2T_SWAP_SELL_TEMPLATE_ERG = 'd803d6017300d602b2a4730100d6037302eb027201d195ed92b1a4730393b1db630872027304d804d604db63087202d605b2a5730500d606b2db63087205730600d6077e8c72060206edededededed938cb2720473070001730893c27205d07201938c72060173099272077e730a06927ec172050699997ec1a7069d9c72077e730b067e730c067e720306909c9c7e8cb27204730d0002067e7203067e730e069c9a7207730f9a9c7ec17202067e7310067e9c73117e7312050690b0ada5d90108639593c272087313c1720873147315d90108599a8c7208018c72080273167317'
-const N2T_SWAP_SELL_TEMPLATE_SPF = 'd804d601b2a4730000d6027301d6037302d6049c73037e730405eb027305d195ed92b1a4730693b1db630872017307d806d605db63087201d606b2a5730800d607db63087206d608b27207730900d6098c720802d60a95730a9d9c7e997209730b067e7202067e7203067e720906edededededed938cb27205730c0001730d93c27206730e938c720801730f92720a7e7310069573117312d801d60b997e7313069d9c720a7e7203067e72020695ed91720b731492b172077315d801d60cb27207731600ed938c720c017317927e8c720c0206720b7318909c7e8cb2720573190002067e7204069c9a720a731a9a9c7ec17201067e731b067e72040690b0ada5d9010b639593c2720b731cc1720b731d731ed9010b599a8c720b018c720b02731f7320'
-const N2T_SWAP_BUY_TEMPLATE_ERG = 'd802d6017300d602b2a4730100eb027201d195ed92b1a4730293b1db630872027303d804d603db63087202d604b2a5730400d6059d9c7e99c17204c1a7067e7305067e730606d6068cb2db6308a773070002edededed938cb2720373080001730993c27204d072019272057e730a06909c9c7ec17202067e7206067e730b069c9a7205730c9a9c7e8cb27203730d0002067e730e067e9c72067e730f050690b0ada5d90107639593c272077310c1720773117312d90107599a8c7207018c72070273137314'
-const N2T_SWAP_BUY_TEMPLATE_SPF = 'd802d601b2a4730000d6029c73017e730205eb027303d195ed92b1a4730493b1db630872017305d804d603db63087201d604b2a5730600d60599c17204c1a7d606997e7307069d9c7e7205067e7308067e730906ededededed938cb27203730a0001730b93c27204730c927205730d95917206730ed801d607b2db63087204730f00ed938c7207017310927e8c7207020672067311909c7ec17201067e7202069c7e9a72057312069a9c7e8cb2720373130002067e7314067e72020690b0ada5d90107639593c272077315c1720773167317d90107599a8c7207018c72070273187319'
-const T2T_SWAP_TEMPLATE_ERG = 'd805d6017300d602b2a4730100d6037302d6047303d6057304eb027201d195ed92b1a4730593b1db630872027306d80ad606db63087202d607b2a5730700d608b2db63087207730800d6098c720802d60a7e720906d60bb27206730900d60c7e8c720b0206d60d7e8cb2db6308a7730a000206d60e7e8cb27206730b000206d60f9a720a730cedededededed938cb27206730d0001730e93c27207d07201938c7208017203927209730f927ec1720706997ec1a7069d9c720a7e7310067e73110695938c720b017203909c9c720c720d7e7204069c720f9a9c720e7e7205069c720d7e720406909c9c720e720d7e7204069c720f9a9c720c7e7205069c720d7e72040690b0ada5d90110639593c272107312c1721073137314d90110599a8c7210018c72100273157316'
-const T2T_SWAP_TEMPLATE_SPF = 'd805d601b2a4730000d6027301d6037302d6049c73037e730405d6057305eb027306d195ed92b1a4730793b1db630872017308d80ad606db63087201d607b2a5730900d608db63087207d609b27208730a00d60a8c720902d60b95730b9d9c7e99720a730c067e7203067e730d067e720a06d60cb27206730e00d60d7e8c720c0206d60e7e8cb27206730f000206d60f9a720b7310ededededededed938cb2720673110001731293c272077313938c720901720292720a731492c17207c1a79573157316d801d610997e7317069d9c720b7e7318067e72030695ed917210731992b17208731ad801d611b27208731b00ed938c721101731c927e8c721102067210731d95938c720c017202909c720d7e7204069c720f9a9c720e7e7205067e720406909c720e7e7204069c720f9a9c720d7e7205067e72040690b0ada5d90110639593c27210731ec17210731f7320d90110599a8c7210018c72100273217322'
-const SPECTRUM_LP_DEPOSIT = 'd802d601b2a4730000d6027301eb027302d195ed92b1a4730393b1db630872017304d80bd603db63087201d604b2a5730500d605b27203730600d6067e9973078c72050206d6077ec1720106d6089d9c7e72020672067207d609b27203730800d60a7e8c72090206d60b9d9c7e7309067206720ad60cdb63087204d60db2720c730a00ededededed938cb27203730b0001730c93c27204730d95ed8f7208720b93b1720c730ed801d60eb2720c730f00eded92c1720499c1a77310938c720e018c720901927e8c720e02069d9c99720b7208720a720695927208720b927ec1720406997ec1a706997e7202069d9c997208720b720772067311938c720d018c720501927e8c720d0206a17208720b90b0ada5d9010e639593c2720e7312c1720e73137314d9010e599a8c720e018c720e0273157316';
-const SPECTRUM_YF_DEPOSIT = 'd803d601b2a4730000d6027301d6037302eb027303d195ed92b1a4730493b1db630872017305d805d604db63087201d605b2a5730600d606c57201d607b2a5730700d6088cb2db6308a773080002ededed938cb27204730900017202ed93c2720572039386027206730ab2db63087205730b00ededededed93cbc27207730c93d0e4c672070608720393e4c67207070e72029386028cb27204730d00017208b2db63087207730e009386028cb27204730f00019c72087e731005b2db6308720773110093860272067312b2db6308720773130090b0ada5d90109639593c272097314c1720973157316d90109599a8c7209018c72090273177318';
-const SPECTRUM_YF_REDEEM = 'd802d601b2a5730400d60290b0ada5d90102639593c272027305c1720273067307d90102599a8c7202018c7202027308ededed93c272017309938602730a730bb2db63087201730c0072027202730d';
-const SPECTRUM_LP_REDEEM = 'd806d602db63087201d603b2a5730400d604b2db63087203730500d605b27202730600d6067e8cb2db6308a77307000206d6077e9973088cb272027309000206ededededed938cb27202730a0001730b93c27203730c938c7204018c720501927e99c17203c1a7069d9c72067ec17201067207927e8c720402069d9c72067e8c72050206720790b0ada5d90108639593c27208730dc17208730e730fd90108599a8c7208018c72080273107311';
+const N2T_SWAP_SELL_TEMPLATE_ERG =
+  "d803d6017300d602b2a4730100d6037302eb027201d195ed92b1a4730393b1db630872027304d804d604db63087202d605b2a5730500d606b2db63087205730600d6077e8c72060206edededededed938cb2720473070001730893c27205d07201938c72060173099272077e730a06927ec172050699997ec1a7069d9c72077e730b067e730c067e720306909c9c7e8cb27204730d0002067e7203067e730e069c9a7207730f9a9c7ec17202067e7310067e9c73117e7312050690b0ada5d90108639593c272087313c1720873147315d90108599a8c7208018c72080273167317";
+const N2T_SWAP_SELL_TEMPLATE_SPF =
+  "d804d601b2a4730000d6027301d6037302d6049c73037e730405eb027305d195ed92b1a4730693b1db630872017307d806d605db63087201d606b2a5730800d607db63087206d608b27207730900d6098c720802d60a95730a9d9c7e997209730b067e7202067e7203067e720906edededededed938cb27205730c0001730d93c27206730e938c720801730f92720a7e7310069573117312d801d60b997e7313069d9c720a7e7203067e72020695ed91720b731492b172077315d801d60cb27207731600ed938c720c017317927e8c720c0206720b7318909c7e8cb2720573190002067e7204069c9a720a731a9a9c7ec17201067e731b067e72040690b0ada5d9010b639593c2720b731cc1720b731d731ed9010b599a8c720b018c720b02731f7320";
+const N2T_SWAP_BUY_TEMPLATE_ERG =
+  "d802d6017300d602b2a4730100eb027201d195ed92b1a4730293b1db630872027303d804d603db63087202d604b2a5730400d6059d9c7e99c17204c1a7067e7305067e730606d6068cb2db6308a773070002edededed938cb2720373080001730993c27204d072019272057e730a06909c9c7ec17202067e7206067e730b069c9a7205730c9a9c7e8cb27203730d0002067e730e067e9c72067e730f050690b0ada5d90107639593c272077310c1720773117312d90107599a8c7207018c72070273137314";
+const N2T_SWAP_BUY_TEMPLATE_SPF =
+  "d802d601b2a4730000d6029c73017e730205eb027303d195ed92b1a4730493b1db630872017305d804d603db63087201d604b2a5730600d60599c17204c1a7d606997e7307069d9c7e7205067e7308067e730906ededededed938cb27203730a0001730b93c27204730c927205730d95917206730ed801d607b2db63087204730f00ed938c7207017310927e8c7207020672067311909c7ec17201067e7202069c7e9a72057312069a9c7e8cb2720373130002067e7314067e72020690b0ada5d90107639593c272077315c1720773167317d90107599a8c7207018c72070273187319";
+const T2T_SWAP_TEMPLATE_ERG =
+  "d805d6017300d602b2a4730100d6037302d6047303d6057304eb027201d195ed92b1a4730593b1db630872027306d80ad606db63087202d607b2a5730700d608b2db63087207730800d6098c720802d60a7e720906d60bb27206730900d60c7e8c720b0206d60d7e8cb2db6308a7730a000206d60e7e8cb27206730b000206d60f9a720a730cedededededed938cb27206730d0001730e93c27207d07201938c7208017203927209730f927ec1720706997ec1a7069d9c720a7e7310067e73110695938c720b017203909c9c720c720d7e7204069c720f9a9c720e7e7205069c720d7e720406909c9c720e720d7e7204069c720f9a9c720c7e7205069c720d7e72040690b0ada5d90110639593c272107312c1721073137314d90110599a8c7210018c72100273157316";
+const T2T_SWAP_TEMPLATE_SPF =
+  "d805d601b2a4730000d6027301d6037302d6049c73037e730405d6057305eb027306d195ed92b1a4730793b1db630872017308d80ad606db63087201d607b2a5730900d608db63087207d609b27208730a00d60a8c720902d60b95730b9d9c7e99720a730c067e7203067e730d067e720a06d60cb27206730e00d60d7e8c720c0206d60e7e8cb27206730f000206d60f9a720b7310ededededededed938cb2720673110001731293c272077313938c720901720292720a731492c17207c1a79573157316d801d610997e7317069d9c720b7e7318067e72030695ed917210731992b17208731ad801d611b27208731b00ed938c721101731c927e8c721102067210731d95938c720c017202909c720d7e7204069c720f9a9c720e7e7205067e720406909c720e7e7204069c720f9a9c720d7e7205067e72040690b0ada5d90110639593c27210731ec17210731f7320d90110599a8c7210018c72100273217322";
+const SPECTRUM_LP_DEPOSIT =
+  "d802d601b2a4730000d6027301eb027302d195ed92b1a4730393b1db630872017304d80bd603db63087201d604b2a5730500d605b27203730600d6067e9973078c72050206d6077ec1720106d6089d9c7e72020672067207d609b27203730800d60a7e8c72090206d60b9d9c7e7309067206720ad60cdb63087204d60db2720c730a00ededededed938cb27203730b0001730c93c27204730d95ed8f7208720b93b1720c730ed801d60eb2720c730f00eded92c1720499c1a77310938c720e018c720901927e8c720e02069d9c99720b7208720a720695927208720b927ec1720406997ec1a706997e7202069d9c997208720b720772067311938c720d018c720501927e8c720d0206a17208720b90b0ada5d9010e639593c2720e7312c1720e73137314d9010e599a8c720e018c720e0273157316";
+const SPECTRUM_YF_DEPOSIT =
+  "d803d601b2a4730000d6027301d6037302eb027303d195ed92b1a4730493b1db630872017305d805d604db63087201d605b2a5730600d606c57201d607b2a5730700d6088cb2db6308a773080002ededed938cb27204730900017202ed93c2720572039386027206730ab2db63087205730b00ededededed93cbc27207730c93d0e4c672070608720393e4c67207070e72029386028cb27204730d00017208b2db63087207730e009386028cb27204730f00019c72087e731005b2db6308720773110093860272067312b2db6308720773130090b0ada5d90109639593c272097314c1720973157316d90109599a8c7209018c72090273177318";
+const SPECTRUM_YF_REDEEM =
+  "d802d601b2a5730400d60290b0ada5d90102639593c272027305c1720273067307d90102599a8c7202018c7202027308ededed93c272017309938602730a730bb2db63087201730c0072027202730d";
+const SPECTRUM_LP_REDEEM =
+  "d806d602db63087201d603b2a5730400d604b2db63087203730500d605b27202730600d6067e8cb2db6308a77307000206d6077e9973088cb272027309000206ededededed938cb27202730a0001730b93c27203730c938c7204018c720501927e99c17203c1a7069d9c72067ec17201067207927e8c720402069d9c72067e8c72050206720790b0ada5d90108639593c27208730dc17208730e730fd90108599a8c7208018c72080273107311";
 
-$(function() {
-	walletAddress = getWalletAddressFromUrl();	
+$(function () {
+  walletAddress = getWalletAddressFromUrl();
 
-	setDocumentTitle(walletAddress);
-	
-    getScamList();
-	getTokenIcons(onInitRequestsFinished);
-    getPrices(onInitRequestsFinished);
-    getIssuedNfts(walletAddress, onGotIssuedNftInfo, false);
+  setDocumentTitle(walletAddress);
+
+  getScamList();
+  getTokenIcons(onInitRequestsFinished);
+  getPrices(onInitRequestsFinished);
+  getIssuedNfts(walletAddress, onGotIssuedNftInfo, false);
 });
 
 function getScamList(callback) {
-	$.get(ERGEXPLORER_API_HOST + 'tokens/getScam',
-	function (data) {
-		scamList = data.items.map(t => t.tokenId);
-	}).always(function (data) {
-		onInitRequestsFinished();
-	});
+  $.get(ERGEXPLORER_API_HOST + "tokens/getScam", function (data) {
+    scamList = data.items.map((t) => t.tokenId);
+  }).always(function (data) {
+    onInitRequestsFinished();
+  });
 }
 
 function getUser() {
-	$.get(ERGEXPLORER_API_HOST + 'user/getUser?address=' + walletAddress,
-	function (data) {
-		if (data.items.length > 0) {
-			//if (data.items[0].public == 't') {
-			//$('#filterHolder').show();
-			//getChart('ERG', 'chart', '1chartHolder');
-
-//			publicUser = true;
-		}
-	}).always(function (data) {
-		checkedUser = true;
-		onInitRequestsFinished();
-	});
+  $.get(
+    ERGEXPLORER_API_HOST + "user/getUser?address=" + walletAddress,
+    function (data) {
+      if (data.items.length > 0) {
+        //if (data.items[0].public == 't') {
+        //$('#filterHolder').show();
+        //getChart('ERG', 'chart', '1chartHolder');
+        //			publicUser = true;
+      }
+    },
+  ).always(function (data) {
+    checkedUser = true;
+    onInitRequestsFinished();
+  });
 }
 
 function printAddressSummary() {
-	if (!gotPrices || printedAddressSummary) return;
+  if (!gotPrices || printedAddressSummary) return;
 
-	printedAddressSummary = true;
+  printedAddressSummary = true;
 
-	let balanceUrl = getTxsUrl();
+  let balanceUrl = getTxsUrl();
 
-	$.get(balanceUrl,
-	function(data) {
-		//Total ERG value
-		$('#finalErgBalance').html('<strong class="erg-span">ERG</strong><span class="gray-color"> balance:</span> <strong>' + formatErgValueString(data.confirmed.nanoErgs, 4, true) + '</strong>');
+  $.get(balanceUrl, function (data) {
+    //Total ERG value
+    $("#finalErgBalance").html(
+      '<strong class="erg-span">ERG</strong><span class="gray-color"> balance:</span> <strong>' +
+        formatErgValueString(data.confirmed.nanoErgs, 4, true) +
+        "</strong>",
+    );
 
-		let ergDollarValue = formatAssetDollarPrice(data.confirmed.nanoErgs, ERG_DECIMALS, 'ERG');
-		if (gotPrices) {
-			$('#finalErgBalance').html($('#finalErgBalance').html() + ' ' + formatDollarPriceString(ergDollarValue, 2));
-		}
+    let ergDollarValue = formatAssetDollarPrice(
+      data.confirmed.nanoErgs,
+      ERG_DECIMALS,
+      "ERG",
+    );
+    if (gotPrices) {
+      $("#finalErgBalance").html(
+        $("#finalErgBalance").html() +
+          " " +
+          formatDollarPriceString(ergDollarValue, 2),
+      );
+    }
 
-		//Balance tokens
-		if (data.confirmed.tokens.length > 0) {
-			$('#tokensHolder').show();
+    //Balance tokens
+    if (data.confirmed.tokens.length > 0) {
+      $("#tokensHolder").show();
 
-			//Sort
-			tokensArray = sortTokens(data.confirmed.tokens);
+      //Sort
+      tokensArray = sortTokens(data.confirmed.tokens);
 
-			let financialTokens = tokensArray.filter(separateFinancialTokens);
-			let otherTokens = tokensArray.filter(separateNonFinancialTokens);
+      let financialTokens = tokensArray.filter(separateFinancialTokens);
+      let otherTokens = tokensArray.filter(separateNonFinancialTokens);
 
-			//Format output
-			if (financialTokens.length > 0) {
-				let financialTokensHtmlString = formatFinancialTokensHtmlString(financialTokens, ergDollarValue);
-				$('#financialTokens').html(financialTokensHtmlString);
-				$('#financialAssetsHolder').show();
-			}
+      //Format output
+      if (financialTokens.length > 0) {
+        let financialTokensHtmlString = formatFinancialTokensHtmlString(
+          financialTokens,
+          ergDollarValue,
+        );
+        $("#financialTokens").html(financialTokensHtmlString);
+        $("#financialAssetsHolder").show();
+      }
 
-			if (otherTokens.length > 0) {
-				let otherTokensHtmlString = formatOtherTokensHtmlString(otherTokens, ergDollarValue);
-				$('#otherTokens').html(otherTokensHtmlString);
-				$('#otherTokensHolder').show();
-			}
-		}
+      if (otherTokens.length > 0) {
+        let otherTokensHtmlString = formatOtherTokensHtmlString(
+          otherTokens,
+          ergDollarValue,
+        );
+        $("#otherTokens").html(otherTokensHtmlString);
+        $("#otherTokensHolder").show();
+      }
+    }
 
-		let walletAddressString = walletAddress;
-		if (walletAddressString.length > 70) {
-			walletAddressString = formatAddressString(walletAddressString, 58);
-		}
+    let walletAddressString = walletAddress;
+    if (walletAddressString.length > 70) {
+      walletAddressString = formatAddressString(walletAddressString, 58);
+    }
 
-		$('#address').html(walletAddressString + ' &#128203;');
-		$('#officialLink').html(getOfficialExplorereAddressUrl(walletAddressString));
-		$('#officialLink').attr('href', getOfficialExplorereAddressUrl(walletAddress));
-		$('#officialLink').show();
+    $("#address").html(walletAddressString + " &#128203;");
+    $("#officialLink").html(
+      getOfficialExplorereAddressUrl(walletAddressString),
+    );
+    $("#officialLink").attr(
+      "href",
+      getOfficialExplorereAddressUrl(walletAddress),
+    );
+    $("#officialLink").show();
 
-		$('#summaryOk').show();
+    $("#summaryOk").show();
 
-		getErgopadVesting();
-		getErgopadStaking();
-    })
-    .fail(function() {
-    	$('#txLoading').hide();
-    	showLoadError('No results matching your query.');
-    });
+    getErgopadVesting();
+    getErgopadStaking();
+  }).fail(function () {
+    $("#txLoading").hide();
+    showLoadError("No results matching your query.");
+  });
 }
 
 function formatOtherTokensHtmlString(tokensArray) {
-	let i = 0;
-	let nftSearchTokens = [];
-	let totalAssetsValue = 0;	
-	let tokensToShow = 2;
-	let totalVestingPrice = -1;
-	tokensContent = '';
-	tokensContentFull = '';
+  let i = 0;
+  let nftSearchTokens = [];
+  let totalAssetsValue = 0;
+  let tokensToShow = 2;
+  let totalVestingPrice = -1;
+  tokensContent = "";
+  tokensContentFull = "";
 
-	if (publicUser) {
-		tokensToShow = 15;
-	}
+  if (publicUser) {
+    tokensToShow = 15;
+  }
 
-	for (i = 0; i < tokensArray.length; i++) {
-		let tokensString = formatAssetNameAndValueString(getAssetTitle(tokensArray[i], true, scamList.includes(tokensArray[i].tokenId)), formatAssetValueString(tokensArray[i].amount, tokensArray[i].decimals, 4), tokensArray[i].tokenId);
+  for (i = 0; i < tokensArray.length; i++) {
+    let tokensString = formatAssetNameAndValueString(
+      getAssetTitle(
+        tokensArray[i],
+        true,
+        scamList.includes(tokensArray[i].tokenId),
+      ),
+      formatAssetValueString(tokensArray[i].amount, tokensArray[i].decimals, 4),
+      tokensArray[i].tokenId,
+    );
 
-		tokensContentFull += tokensString;
+    tokensContentFull += tokensString;
 
-		nftSearchTokens[i] = tokensArray[i].tokenId;
+    nftSearchTokens[i] = tokensArray[i].tokenId;
 
-		if (i > tokensToShow) continue;
+    if (i > tokensToShow) continue;
 
-		tokensContent += tokensString;
+    tokensContent += tokensString;
 
-		if (i == tokensToShow && tokensArray.length > tokensToShow + 1) {
-			tokensContent += '<p>...</p><p><strong><a href="#" onclick="showAllTokens(event)">Show all</a></strong></p>';
-		}
-	}
+    if (i == tokensToShow && tokensArray.length > tokensToShow + 1) {
+      tokensContent +=
+        '<p>...</p><p><strong><a href="#" onclick="showAllTokens(event)">Show all</a></strong></p>';
+    }
+  }
 
-	getNftsInfo(nftSearchTokens, onGotOwnedNftInfo);
+  getNftsInfo(nftSearchTokens, onGotOwnedNftInfo);
 
-	return tokensContentFull;
+  return tokensContentFull;
 }
 
 function formatFinancialTokensHtmlString(tokensArray, ergDollarValue) {
-	let i = 0;
-	let totalAssetsValue = 0;	
-	let tokensToShow = 6;
-	let totalVestingPrice = -1;
-	financialTokensContent = '';
-	financialTokensContentFull = '';
+  let i = 0;
+  let totalAssetsValue = 0;
+  let tokensToShow = 6;
+  let totalVestingPrice = -1;
+  financialTokensContent = "";
+  financialTokensContentFull = "";
 
-	if (publicUser) {
-		tokensToShow = 15;
-	}
+  if (publicUser) {
+    tokensToShow = 15;
+  }
 
-	for (i = 0; i < tokensArray.length; i++) {
-		let tokensPrice = 0;
-		let tokensPriceString = '';
-		if (gotPrices && prices[tokensArray[i].tokenId] != undefined) {
-			tokensPrice = formatAssetDollarPrice(tokensArray[i].amount, tokensArray[i].decimals, tokensArray[i].tokenId);
-			tokensPriceString = formatDollarPriceString(tokensPrice);
-			totalAssetsValue += tokensPrice;
-			tokensArray[i].usdPrice = tokensPrice;
-		}
+  for (i = 0; i < tokensArray.length; i++) {
+    let tokensPrice = 0;
+    let tokensPriceString = "";
+    if (gotPrices && prices[tokensArray[i].tokenId] != undefined) {
+      tokensPrice = formatAssetDollarPrice(
+        tokensArray[i].amount,
+        tokensArray[i].decimals,
+        tokensArray[i].tokenId,
+      );
+      tokensPriceString = formatDollarPriceString(tokensPrice);
+      totalAssetsValue += tokensPrice;
+      tokensArray[i].usdPrice = tokensPrice;
+    }
 
-		tokensArray[i].tokensString = formatAssetNameAndValueString(getAssetTitle(tokensArray[i], true, scamList.includes(tokensArray[i].tokenId)), formatAssetValueString(tokensArray[i].amount, tokensArray[i].decimals, 4) + (tokensPrice == 0 ? '' : '<span class="text-light"> ' + tokensPriceString + '</span>'), tokensArray[i].tokenId);
-	}
+    tokensArray[i].tokensString = formatAssetNameAndValueString(
+      getAssetTitle(
+        tokensArray[i],
+        true,
+        scamList.includes(tokensArray[i].tokenId),
+      ),
+      formatAssetValueString(
+        tokensArray[i].amount,
+        tokensArray[i].decimals,
+        4,
+      ) +
+        (tokensPrice == 0
+          ? ""
+          : '<span class="text-light"> ' + tokensPriceString + "</span>"),
+      tokensArray[i].tokenId,
+    );
+  }
 
-	if (gotPrices) {
-		tokensArray.sort((a, b) => {
-			let aAmount = a.usdPrice;
-			let bAmount = b.usdPrice;
+  if (gotPrices) {
+    tokensArray.sort((a, b) => {
+      let aAmount = a.usdPrice;
+      let bAmount = b.usdPrice;
 
-			if (aAmount === bAmount) return 0;
+      if (aAmount === bAmount) return 0;
 
-			return aAmount > bAmount ? -1 : 1;
-		});
-	}
+      return aAmount > bAmount ? -1 : 1;
+    });
+  }
 
-	for (i = 0; i < tokensArray.length; i++) {
-		let tokensString = tokensArray[i].tokensString;
+  for (i = 0; i < tokensArray.length; i++) {
+    let tokensString = tokensArray[i].tokensString;
 
-		financialTokensContentFull += tokensString;
+    financialTokensContentFull += tokensString;
 
-		if (i > tokensToShow) continue;
+    if (i > tokensToShow) continue;
 
-		financialTokensContent += tokensString;
+    financialTokensContent += tokensString;
 
-		if (i == tokensToShow && tokensArray.length > tokensToShow + 1) {
-			financialTokensContent += '<p>...</p><p><strong><a href="#" onclick="showAllFinancialTokens(event)">Show all</a></strong></p>';
-		}
-	}
+    if (i == tokensToShow && tokensArray.length > tokensToShow + 1) {
+      financialTokensContent +=
+        '<p>...</p><p><strong><a href="#" onclick="showAllFinancialTokens(event)">Show all</a></strong></p>';
+    }
+  }
 
-	if (totalAssetsValue > 0) {
-		$('#finalAssetsBalance').html('<span class="gray-color">Tokens balance:</span> $' + formatValue(totalAssetsValue, 2) + '');
-		$('#finalAssetsBalance').show();
+  if (totalAssetsValue > 0) {
+    $("#finalAssetsBalance").html(
+      '<span class="gray-color">Tokens balance:</span> $' +
+        formatValue(totalAssetsValue, 2) +
+        "",
+    );
+    $("#finalAssetsBalance").show();
 
-		$('#finalBalance').html('<span class="grey-color"><b>Total:</b></span> $' + formatValue(ergDollarValue + totalAssetsValue, 2) + '');
-		$('#finalBalance').show();
-	}
+    $("#finalBalance").html(
+      '<span class="grey-color"><b>Total:</b></span> $' +
+        formatValue(ergDollarValue + totalAssetsValue, 2) +
+        "",
+    );
+    $("#finalBalance").show();
+  }
 
-	return financialTokensContentFull;
+  return financialTokensContentFull;
 }
 
 function separateFinancialTokens(_, index, array) {
-	let pricesKeys = Object.keys(prices);
-	for (let i = 0; i < pricesKeys.length; i++) {
-		let priceId = pricesKeys[i];
-		let token = array[index];
+  let pricesKeys = Object.keys(prices);
+  for (let i = 0; i < pricesKeys.length; i++) {
+    let priceId = pricesKeys[i];
+    let token = array[index];
 
-		if (priceId == token.tokenId) {
-			return true;
-		}
-	}
+    if (priceId == token.tokenId) {
+      return true;
+    }
+  }
 
-	return false;
+  return false;
 }
 
 function separateNonFinancialTokens(_, index, array) {
-	let pricesKeys = Object.keys(prices);
-	for (let i = 0; i < pricesKeys.length; i++) {
-		let priceId = pricesKeys[i];
-		let token = array[index];
+  let pricesKeys = Object.keys(prices);
+  for (let i = 0; i < pricesKeys.length; i++) {
+    let priceId = pricesKeys[i];
+    let token = array[index];
 
-		if (priceId == token.tokenId) {
-			return false;
-		}
-	}
+    if (priceId == token.tokenId) {
+      return false;
+    }
+  }
 
-	return true;
+  return true;
 }
 
 const TxType = {
-	Wallet2Wallet: 'Wallet2Wallet',
-	Wallet2Contract: 'Wallet2Contract',
-	Contract2Wallet: 'Contract2Wallet',
-	Contract2Contract: 'Contract2Contract',
-	Origin: 'Origin'
-}
+  Wallet2Wallet: "Wallet2Wallet",
+  Wallet2Contract: "Wallet2Contract",
+  Contract2Wallet: "Contract2Wallet",
+  Contract2Contract: "Contract2Contract",
+  Origin: "Origin",
+};
 
-function getTxType(tx) {		
-	if (tx.inputs == undefined || tx.inputs.length == 0) {
-		return TxType.Origin;
-	}
+function getTxType(tx) {
+  if (tx.inputs == undefined || tx.inputs.length == 0) {
+    return TxType.Origin;
+  }
 
-	let outputAddress = tx.outputs[0].address;
+  let outputAddress = tx.outputs[0].address;
 
-	if (outputAddress == FEE_ADDRESS
-		&& tx.outputs.length > 1) {
-		outputAddress = tx.outputs[1].address;
-	}
+  if (outputAddress == FEE_ADDRESS && tx.outputs.length > 1) {
+    outputAddress = tx.outputs[1].address;
+  }
 
-	let input0isWallet = isWalletAddress(tx.inputs[0].address);
-	let output0isWallet = isWalletAddress(outputAddress);
+  let input0isWallet = isWalletAddress(tx.inputs[0].address);
+  let output0isWallet = isWalletAddress(outputAddress);
 
-	if (input0isWallet && output0isWallet) {
-		return TxType.Wallet2Wallet;
-	}
+  if (input0isWallet && output0isWallet) {
+    return TxType.Wallet2Wallet;
+  }
 
-	if (!input0isWallet && !output0isWallet) {
-		return TxType.Contract2Contract;
-	}
+  if (!input0isWallet && !output0isWallet) {
+    return TxType.Contract2Contract;
+  }
 
-	if (input0isWallet && !output0isWallet) {
-		return TxType.Wallet2Contract;
-	}
+  if (input0isWallet && !output0isWallet) {
+    return TxType.Wallet2Contract;
+  }
 
-	if (!input0isWallet && output0isWallet) {
-		return TxType.Contract2Wallet;
-	}
+  if (!input0isWallet && output0isWallet) {
+    return TxType.Contract2Wallet;
+  }
 }
 
 function isWalletAddress(address) {
-	let walletAddressPrefix = networkType == 'testnet' ? '3' : '9';
+  let walletAddressPrefix = networkType == "testnet" ? "3" : "9";
 
-	return address.substring(0, 1) == walletAddressPrefix;
+  return address.substring(0, 1) == walletAddressPrefix;
 }
 
 function getTxInOutType(totalTransferedAssets) {
-	let txInOut = checkAssetsSign(totalTransferedAssets.assets);
+  let txInOut = checkAssetsSign(totalTransferedAssets.assets);
 
-	if (txInOut != TxInOut.Mixed) {
-		if (totalTransferedAssets.value > 0) {
-			if (txInOut == TxInOut.Out) {
-				txInOut = TxInOut.Mixed;
-			} else {
-				txInOut = TxInOut.In;
-			}
-		} else if (totalTransferedAssets.value < 0) {
-			if (txInOut == TxInOut.In) {
-				txInOut = TxInOut.Mixed;
-			} else {
-				txInOut = TxInOut.Out;
-			}
-		}
-	}
+  if (txInOut != TxInOut.Mixed) {
+    if (totalTransferedAssets.value > 0) {
+      if (txInOut == TxInOut.Out) {
+        txInOut = TxInOut.Mixed;
+      } else {
+        txInOut = TxInOut.In;
+      }
+    } else if (totalTransferedAssets.value < 0) {
+      if (txInOut == TxInOut.In) {
+        txInOut = TxInOut.Mixed;
+      } else {
+        txInOut = TxInOut.Out;
+      }
+    }
+  }
 
-	return txInOut;
+  return txInOut;
 }
 
 function checkAssetsSign(assets) {
-	let assetsSign = undefined;
+  let assetsSign = undefined;
 
-	let assetsKeys = Object.keys(assets);
-	for (let i = 0; i < assetsKeys.length; i++) {
-		let asset = assets[assetsKeys[i]];
+  let assetsKeys = Object.keys(assets);
+  for (let i = 0; i < assetsKeys.length; i++) {
+    let asset = assets[assetsKeys[i]];
 
-		if (asset.amount > 0) {
-			if (assetsSign == TxInOut.Out) {
-				assetsSign = TxInOut.Mixed;
-			}
+    if (asset.amount > 0) {
+      if (assetsSign == TxInOut.Out) {
+        assetsSign = TxInOut.Mixed;
+      }
 
-			if (assetsSign == undefined) {
-				assetsSign = TxInOut.In;
-			}
-		}
+      if (assetsSign == undefined) {
+        assetsSign = TxInOut.In;
+      }
+    }
 
-		if (asset.amount < 0) {
-			if (assetsSign == TxInOut.In) {
-				assetsSign = TxInOut.Mixed;
-			}
+    if (asset.amount < 0) {
+      if (assetsSign == TxInOut.In) {
+        assetsSign = TxInOut.Mixed;
+      }
 
-			if (assetsSign == undefined) {
-				assetsSign = TxInOut.Out;
-			}
-		}
-	}
+      if (assetsSign == undefined) {
+        assetsSign = TxInOut.Out;
+      }
+    }
+  }
 
-	return assetsSign;
+  return assetsSign;
 }
 
 const TxInOut = {
-	In: 'In',
-	Out: 'Out',
-	Mixed: 'Mixed'
-}
+  In: "In",
+  Out: "Out",
+  Mixed: "Mixed",
+};
 
 function getFormattedTransactionsString(transactionsJson, isMempool) {
-	if (transactionsJson == undefined || transactionsJson == '' || transactionsJson.total == 0) {
-		return '';
-	}
-
-	let formattedResult = '';
-
-	for (let i = 0; i < transactionsJson.items.length; i++) {
-		const item = transactionsJson.items[i];
-
-		formattedResult += '<tr>';
-
-		//Fee
-		let fee = 0;
-		for (let j = 0; j < item.outputs.length; j++) {
-			if (item.outputs[j].address == FEE_ADDRESS) {
-				fee = item.outputs[j].value;
-			}
-		}
-
-		let outputsAddress = walletAddress;
-		let txType = getTxType(item);
-
-		let minted = undefined;
-		if (item.inputs[0]) {
-		let mintId = item.inputs[0].boxId;
-		for (let j = 0; j < item.outputs.length; j++) {
-			if (item.outputs[j].address == outputsAddress) {
-				
-				//Sort
-				let tokensArray = sortTokens(item.outputs[j].assets);
-				
-				for (let k = 0; k < tokensArray.length; k++) {
-					if (tokensArray[k].tokenId == mintId) {
-						minted = tokensArray[k];
-					}
-				}
-			}
-		}
-		}
-
-		let totalTransferedAssets = {
-			value: new BigNumber(0),
-			assets: {}
-		};
-
-		for (let j = 0; j < item.outputs.length; j++) {
-			if (item.outputs[j].address == outputsAddress) {
-
-				totalTransferedAssets.value = totalTransferedAssets.value.plus(item.outputs[j].value);
-				
-				//Sort
-				let tokensArray = sortTokens(item.outputs[j].assets);
-				
-				for (let k = 0; k < tokensArray.length; k++) {
-					if (totalTransferedAssets.assets[tokensArray[k].tokenId] == undefined) {
-						totalTransferedAssets.assets[tokensArray[k].tokenId] = {};
-						totalTransferedAssets.assets[tokensArray[k].tokenId].tokenId = tokensArray[k].tokenId;
-						totalTransferedAssets.assets[tokensArray[k].tokenId].decimals = tokensArray[k].decimals;
-						totalTransferedAssets.assets[tokensArray[k].tokenId].name = tokensArray[k].name;
-						totalTransferedAssets.assets[tokensArray[k].tokenId].amount = new BigNumber(tokensArray[k].amount);
-					} else {
-						totalTransferedAssets.assets[tokensArray[k].tokenId].amount = totalTransferedAssets.assets[tokensArray[k].tokenId].amount.plus(tokensArray[k].amount);
-					}
-				}
-			}
-		}
-
-		for (let j = 0; j < item.inputs.length; j++) {
-			if (item.inputs[j].address == outputsAddress) {
-
-				totalTransferedAssets.value = totalTransferedAssets.value.minus(item.inputs[j].value);
-				
-				//Sort
-				let tokensArray = sortTokens(item.inputs[j].assets);
-				for (let k = 0; k < tokensArray.length; k++) {
-					if (totalTransferedAssets.assets[tokensArray[k].tokenId] == undefined) {
-						totalTransferedAssets.assets[tokensArray[k].tokenId] = {};
-						totalTransferedAssets.assets[tokensArray[k].tokenId].tokenId = tokensArray[k].tokenId;
-						totalTransferedAssets.assets[tokensArray[k].tokenId].decimals = tokensArray[k].decimals;
-						totalTransferedAssets.assets[tokensArray[k].tokenId].name = tokensArray[k].name;
-						totalTransferedAssets.assets[tokensArray[k].tokenId].amount = new BigNumber(-tokensArray[k].amount);
-					} else {
-						totalTransferedAssets.assets[tokensArray[k].tokenId].amount = totalTransferedAssets.assets[tokensArray[k].tokenId].amount.minus(tokensArray[k].amount);
-					}
-				}
-			}
-		}
-
-		let txInOut = getTxInOutType(totalTransferedAssets);
-		let analysis = analyzeTransfers(item, walletAddress);
-
-		let fromAddress;
-		let toAddress;
-		if ((txInOut == TxInOut.Out
-			|| txInOut == TxInOut.Mixed)
-			&& totalTransferedAssets.value == -fee) {
-			let hasOtherAddresses = false;
-			let oneaddress = walletAddress;
-			for (let j = 0; j < item.inputs.length; j++) {
-				let input = item.inputs[j];
-
-				if (input.address != oneaddress && input.address != FEE_ADDRESS) {
-					hasOtherAddresses = true;
-				}
-			}
-			for (let j = 0; j < item.outputs.length; j++) {
-				let output = item.outputs[j];
-
-				if (output.address != oneaddress && output.address != FEE_ADDRESS) {
-					hasOtherAddresses = true;
-				}
-			}
-			if (!hasOtherAddresses) {
-				txInOut = undefined;
-			}
-//			totalTransferedAssets.value = 0;
-		} else if ((txType == TxType.Wallet2Wallet || txType == TxType.Wallet2Contract)
-			&& txInOut == TxInOut.Out) {
-//			totalTransferedAssets.value += fee;
-		} 
-
-		if (txInOut == TxInOut.In && txType != TxType.Origin) {
-			for (let j = 0; j < item.outputs.length; j++) {
-				let output = item.outputs[j];
-				if (output.address == walletAddress) {
-					toAddress = walletAddress;
-					fromAddress = item.inputs[0].address;
-					break;
-				}
-			}
-		}
-
-		//From/to address
-		if (txType == TxType.Origin) {
-			fromAddress = AddressType.NA;
-			toAddress = item.outputs[0].address;
-		} else if (txType == TxType.Wallet2Wallet) {
-			if (txInOut == TxInOut.In) {
-				//Input TX
-				fromAddress = item.inputs[0].address;
-				toAddress = walletAddress;
-
-				//Handle multiple input addresses
-				let otherAddresses = Array();
-				for (let j = 0; j < item.inputs.length; j++) {
-					let input = item.inputs[j];
-
-					if (input.address != toAddress && !otherAddresses.includes(input.address)) {
-						otherAddresses.push(input.address);
-					}
-				}
-
-				if (fromAddress == toAddress) {
-					if (otherAddresses.length == 1) {
-						for (let j = 0; j < item.inputs.length; j++) {
-							let output = item.inputs[j];
-
-							if (output.address != toAddress) {
-								fromAddress = output.address;
-								break;
-							}
-						}
-					}
-				}
-
-				if (otherAddresses.length > 1) {
-					fromAddress = AddressType.Multiple;
-				}
-
-			} else if (txInOut == TxInOut.Out
-				|| txInOut == TxInOut.Mixed) {
-				//Output TX
-				fromAddress = walletAddress;
-				toAddress = item.outputs[0].address;
-
-				//Handle multiple output addresses
-				let otherAddresses = Array();
-				for (let j = 0; j < item.outputs.length; j++) {
-					let output = item.outputs[j];
-
-					if (output.address != fromAddress && output.address != FEE_ADDRESS && !otherAddresses.includes(output.address)) {
-						otherAddresses.push(output.address);
-					}
-				}
-
-				if (fromAddress == toAddress) {
-					if (otherAddresses.length == 1) {
-						for (let j = 0; j < item.outputs.length; j++) {
-							let output = item.outputs[j];
-
-							if (output.address != fromAddress && output.address != FEE_ADDRESS) {
-								toAddress = output.address;
-								break;
-							}
-						}
-					}
-				}
-
-				if (otherAddresses.length > 1) {
-					toAddress = AddressType.Multiple;
-				}
-			}
-		} else if (txType == TxType.Contract2Contract) {
-			//Is this contract
-			let isThisContract;
-			if (item.inputs[0].address == item.outputs[0].address
-				&& item.inputs[0].address == walletAddress) {
-				isThisContract = true;
-			} else {
-				isThisContract = false;
-			}
-
-			if (txInOut == TxInOut.In) {
-				//Input TX
-				if (isThisContract) {
-					if (item.inputs.length > 1) {
-						fromAddress = item.inputs[1].address;
-					} else {
-						fromAddress = item.inputs[0].address;
-					}
-
-					toAddress = walletAddress;
-				} else {
-					fromAddress = item.inputs[0].address;
-					toAddress = walletAddress;
-				}
-			} else if (txInOut == TxInOut.Out
-				|| txInOut == TxInOut.Mixed) {
-				//Output TX
-				if (isThisContract) {
-					if (txInOut == TxInOut.Mixed && item.inputs.length == 2) {
-						fromAddress = item.inputs[1].address;
-					} else {
-						fromAddress = item.inputs[0].address;
-					}
-
-					toAddress = walletAddress;
-				} else {
-					fromAddress = walletAddress;
-					toAddress = item.outputs[0].address;
-				}
-
-				if (fromAddress == toAddress || txInOut == TxInOut.Mixed) {
-					let otherAddresses = Array();
-					for (let j = 0; j < item.outputs.length; j++) {
-						let output = item.outputs[j];
-
-						if (output.address != fromAddress
-							&& output.address != FEE_ADDRESS
-							&& !otherAddresses.includes(output.address)) {
-							otherAddresses.push(output.address);
-						}
-					}
-
-					if (otherAddresses.length > 1) {
-						toAddress = AddressType.Multiple;
-					} else {
-						if (item.outputs.length > 1) {
-							toAddress = item.outputs[1].address;
-						} else {
-							toAddress = item.outputs[0].address;
-						}
-					}
-				}
-			}
-		} else if (txType == TxType.Wallet2Contract) {
-			fromAddress = item.inputs[0].address;
-			toAddress = item.outputs[0].address;
-
-			if (toAddress == FEE_ADDRESS) {
-				if (item.outputs.length > 1) {
-					toAddress = item.outputs[1].address;
-				}
-			}
-		} else if (txType == TxType.Contract2Wallet) {
-			fromAddress = item.inputs[0].address;
-			toAddress = item.outputs[0].address;
-		}
-
-		if (txInOut == undefined) {
-			fromAddress = toAddress = walletAddress;
-		}
-
-		if (txInOut == TxInOut.Out && txType == TxType.Contract2Wallet) {
-			let minDiff = 9999999999;
-			let minDiffIndex = -1;
-			
-			for (let i = 0; i < item.outputs.length; i++) {
-				let output = item.outputs[i];
-
-				if (output.address == FEE_ADDRESS) continue;
-
-				let transferVal = Math.abs(totalTransferedAssets.value);
-
-				let newDiff = Math.abs(transferVal - output.value);
-				if (newDiff < minDiff) {
-					minDiff = newDiff
-					minDiffIndex = i;
-				}
-			}
-
-			if (minDiffIndex > -1) {
-				toAddress = item.outputs[minDiffIndex].address;
-			}
-		}
-
-		let fromAddressIndex = 0;
-		let originalFromAddressIndex = 0;
-		for (let i = 0; i < item.inputs.length; i++) {
-			if (item.inputs[i].address == fromAddress) {
-				fromAddressIndex = i;
-				originalFromAddressIndex = i;
-				break;
-			}
-		}
-
-		if (txInOut != TxInOut.In) {			
-			let hasEnough = true;
-			do {
-				hasEnough = true;
-
-				let totalSentFrom = {};
-				totalSentFrom.value = 0;
-				totalSentFrom.assets = {};
-
-				for (let i = 0; i < item.inputs.length; i++) {
-					let input = item.inputs[i];
-					if (input.address != fromAddress) continue;
-
-					totalSentFrom.value += input.value;
-					if (input.assets) {
-						for (let j = 0; j < input.assets.length; j++) {
-							let asset = input.assets[j];
-							if (totalSentFrom.assets[asset.tokenId] == undefined) {
-								totalSentFrom.assets[asset.tokenId] = {};
-								totalSentFrom.assets[asset.tokenId].amount = 0;
-								totalSentFrom.assets[asset.tokenId].decimals = asset.decimals;
-								totalSentFrom.assets[asset.tokenId].tokenId = asset.tokenId;
-							}
-
-							totalSentFrom.assets[asset.tokenId].amount += asset.amount;
-						}
-					}
-				}
-
-				if (totalSentFrom.value < totalTransferedAssets.value) hasEnough = false;
-				for (let i = 0; i < totalTransferedAssets.assets.length; i++) {
-					let asset = totalTransferedAssets.assets[i];
-					for (let j = 0; j < totalSentFrom.assets.length; j++) {
-						let sentAsset = totalSentFrom.assets[j];
-						if (sentAsset.tokenId == asset.tokenId &&
-							sentAsset.amount < totalTransferedAssets.amount) {
-							hasEnough = false;
-						}
-					}
-				}
-
-				if (!hasEnough) {
-					fromAddressIndex++;
-					if (fromAddressIndex < item.inputs.length) {
-						fromAddress = item.inputs[fromAddressIndex].address;
-					} else {
-						fromAddress = item.inputs[originalFromAddressIndex].address;
-						break;
-					}
-				}
-
-			} while (!hasEnough);
-		}
-
-		if (fromAddress != AddressType.Multiple) {
-			fromAddress = analysis.from;
-		}
-
-		if (toAddress != AddressType.Multiple) {
-			toAddress = analysis.to;
-		}
-
-		//check burn for single emissions
-		let burnedAssets = {};
-
-		for (let j = 0; j < item.inputs.length; j++) {
-			let tokensArray = sortTokens(item.inputs[j].assets);
-			for (let k = 0; k < tokensArray.length; k++) {
-				if (burnedAssets[tokensArray[k].tokenId] == undefined) {
-					burnedAssets[tokensArray[k].tokenId] = {};
-					burnedAssets[tokensArray[k].tokenId].tokenId = tokensArray[k].tokenId;
-					burnedAssets[tokensArray[k].tokenId].decimals = tokensArray[k].decimals;
-					burnedAssets[tokensArray[k].tokenId].name = tokensArray[k].name;
-					burnedAssets[tokensArray[k].tokenId].amount = new BigNumber(tokensArray[k].amount);
-				} else {
-					burnedAssets[tokensArray[k].tokenId].amount = burnedAssets[tokensArray[k].tokenId].amount.plus(tokensArray[k].amount);
-				}
-			}
-		}
-	
-		for (let j = 0; j < item.outputs.length; j++) {				
-			//Sort
-			let tokensArray = sortTokens(item.outputs[j].assets);
-			for (let k = 0; k < tokensArray.length; k++) {
-				if (burnedAssets[tokensArray[k].tokenId] == undefined) {
-					burnedAssets[tokensArray[k].tokenId] = {};
-					burnedAssets[tokensArray[k].tokenId].tokenId = tokensArray[k].tokenId;
-					burnedAssets[tokensArray[k].tokenId].decimals = tokensArray[k].decimals;
-					burnedAssets[tokensArray[k].tokenId].name = tokensArray[k].name;
-					burnedAssets[tokensArray[k].tokenId].amount = new BigNumber(-tokensArray[k].amount);
-				} else {
-					burnedAssets[tokensArray[k].tokenId].amount = burnedAssets[tokensArray[k].tokenId].amount.minus(tokensArray[k].amount);
-				}
-			}
-		}
-
-		let burnedAssetKeys = Object.keys(burnedAssets);
-		let hasBurnedAssets = false;
-		for (let i = 0; i < burnedAssetKeys.length; i++) {
-			let asset = burnedAssets[burnedAssetKeys[i]];
-
-			if (asset.amount == 0) {
-				delete burnedAssets[burnedAssetKeys[i]];
-			} else if (asset.amount > 0) {
-				hasBurnedAssets = true;
-			}
-		}
-
-		//Tx
-		formattedResult += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionsUrl(item.id) + '"><i class="fas fa-link text-info"></i></a><span class="d-inline d-lg-none text-white float-end">' + formatDateString((isMempool) ? item.creationTimestamp : item.timestamp) + '</span></td>';
-
-		//Timestamp
-		formattedResult += '<td class="d-none d-lg-table-cell"><span class="d-lg-none"><strong>Time: </strong></span>' + formatDateString((isMempool) ? item.creationTimestamp : item.timestamp) + '</td>';
-
-		//Block nr.
-		let blockNr = item.inclusionHeight;
-
-		let classString;
-		let inOutString;
-		if (txInOut == TxInOut.In) {
-			classString = 'text-success';
-			inOutString = 'In';
-		} else if (txInOut == TxInOut.Out) {
-			classString = 'text-danger';
-			inOutString = 'Out';
-		} else if (txInOut == TxInOut.Mixed) {
-			classString = 'text-warning';
-			inOutString = 'Mixed';
-		} else if (txInOut == undefined) {
-			classString = 'text-info';
-			inOutString = 'Consolidation';
-		}
-
-		let smartString = '<span class="text-info" title="Smart Contract interaction. Check transaction link for full details."> (SC)</span>';
-
-		if (txType == TxType.Contract2Contract
-			|| txType == TxType.Wallet2Contract
-			|| txType == TxType.Contract2Wallet) {
-			inOutString += smartString;
-		}
-
-		formattedResult += '<td><span class="d-inline d-lg-none"><strong>Type: </strong><span class="' + classString + '">' + inOutString + '</span></span><span class="d-inline d-lg-none float-end"><strong>Block: </strong>' + ((isMempool) ? item.outputs[0].creationHeight : '<a href="' + getBlockUrl(item.blockId) + '">' + blockNr + '</a>') + '</span><span class="d-none d-lg-inline">' + ((isMempool) ? item.outputs[0].creationHeight : '<a href="' + getBlockUrl(item.blockId) + '">' + blockNr + '</a>') + '</span></td>';
-		
-		// In or Out tx.
-		formattedResult += '<td class="d-none d-lg-table-cell"><span class="d-lg-none"><strong>Type: </strong></span><span class="' + classString + '">' + inOutString + '</span></td>';
-		
-		//From
-		addAddress(fromAddress);
-		let formattedAddressString = formatTxAddressString(fromAddress, null, walletAddress);
-
-		if (networkType != 'testnet' && (txType == TxType.Wallet2Contract || txType == TxType.Contract2Wallet)) {
-			formattedAddressString = getAddressFromErgotree(item.inputs[0].ergoTree, fromAddress, formattedAddressString);
-		}
-
-		formattedResult += '<td><span class="d-lg-none"><strong>From: </strong></span>' + formattedAddressString + '</td>';
-		
-		//To
-		addAddress(toAddress);
-		formattedAddressString = formatTxAddressString(toAddress, null, walletAddress);
-
-		if (txType == TxType.Wallet2Contract || txType == TxType.Contract2Wallet) {
-			formattedAddressString = getAddressFromErgotree(item.outputs[0].ergoTree, toAddress, formattedAddressString);
-		}
-
-		formattedResult += '<td><span class="d-lg-none"><strong>To: </strong></span>' + formattedAddressString + '</td>';
-
-		//Status
-		formattedResult += '<td><span class="d-lg-none"><strong>Status: </strong></span><span class="' + ((isMempool) ? 'text-warning' : 'text-success' ) + '">' + ((isMempool) ? 'Pending' : 'Confirmed') + '</span><span class="d-inline d-lg-none text-white float-end"><strong>Fee: </strong>' + formatErgValueString(fee) + '</span></td>';
-		
-		//Fee
-		formattedResult += '<td class="d-none d-lg-table-cell"><span class="d-lg-none"><strong>Fee: </strong></span>' + formatErgValueString(fee) + '</td>';
-
-		//Burn setup		
-		let assetKeys = Object.keys(totalTransferedAssets.assets);
-		for (let k = 0; k < assetKeys.length; k++) {
-			let asset = totalTransferedAssets.assets[assetKeys[k]];
-			asset.isBurned = false;
-			if (asset.amount < 0
-				&& burnedAssets[asset.tokenId] != undefined) {
-				asset.isBurned = true;
-			}
-		}
-
-		//Value
-		if (txInOut != TxInOut.Mixed) {
-			if (totalTransferedAssets.value < 0) totalTransferedAssets.value *= -1;
-
-			for (let k = 0; k < assetKeys.length; k++) {
-				let asset = totalTransferedAssets.assets[assetKeys[k]];
-				if (asset.amount < 0) asset.amount *= -1;
-			}
-		}
-
-		let assets = ' ';
-		let assetsFull = ' ';
-		let tokensToShow = 2;
-		let keys = Object.keys(totalTransferedAssets.assets)
-		let assetsI = 0;
-		let mixedPlus = '';
-		if (txInOut == TxInOut.Mixed || txInOut == TxInOut.In) {
-//			mixedPlus = '+';
-		}
-		let endAdd = '';
-		let assetITotal = 0;
-		for (let j = 0; j < keys.length; j++) {
-			let asset = totalTransferedAssets.assets[keys[j]];
-
-			if (asset.amount != 0) {
-				assetITotal++;
-			}
-		}
-
-		for (let j = 0; j < keys.length; j++) {
-			let asset = totalTransferedAssets.assets[keys[j]];
-
-			if (asset.amount == 0) {
-				continue;
-			}
-
-			let assetPrice = undefined;
-			if (gotPrices && prices[asset.tokenId] != undefined) {
-			//	assetPrice = formatAssetDollarPriceString(asset.amount, asset.decimals, asset.tokenId);
-			}
-
-			let isMinted = false;
-			if (minted) {
-				if (minted.tokenId == asset.tokenId) {
-					isMinted = true;
-				}
-			}
-			
-			let assetsString = '<br><strong>'+(isMinted ? '<span title="Minted">✨</span>' : '')+''+(asset.isBurned ? '<span title="Burned">🔥</span>' : '')+'<span class="">' + (asset.amount > 0 ? mixedPlus : '') + (txInOut == TxInOut.Out ? '-' : '') + formatAssetValueString(asset.amount, asset.decimals, 4) + '</span></strong> ' + getAssetTitle(asset, false, scamList.includes(asset.tokenId)) + (assetPrice == undefined ? '' : ' <span class="text-light">' + assetPrice +'</span>');
-
-			assetsFull += assetsString;
-			
-			if (assetsI > tokensToShow) {
-				assetsI++;
-				continue;
-			}
-
-			assets += assetsString;
-
-			if (assetsI == tokensToShow && assetITotal > tokensToShow + 1) {
-				assets += '<p>...</p><p><strong><a href="#" onclick="showFullValue(event, ' + (i + mempoolIndexOffset) + ')">Show all</a></strong></p>';
-
-				endAdd = '';
-			}
-
-			assetsI++;
-		}
-
-		if (endAdd != '') {
-			assetsFull += endAdd;
-		}
-
-		let ergDollarValue = undefined;
-		if (gotPrices) {
-		//	ergDollarValue = formatAssetDollarPrice(totalTransferedAssets.value, ERG_DECIMALS, 'ERG');
-		}
-
-		let ergValueString = '';
-		if (totalTransferedAssets.value != 0) {
-			ergValueString = (totalTransferedAssets.value > 0 ? mixedPlus : '') + (txInOut == TxInOut.Out ? '-' : '') + formatErgValueString(totalTransferedAssets.value, 4) + (ergDollarValue == undefined ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>')
-formatErgValueString(totalTransferedAssets.value, 4) + (ergDollarValue == undefined ? '' : ' <span class="text-light">' + formatDollarPriceString(ergDollarValue) + '</span>');
-		} else {
-			assetsFull = assets.substr(5);
-			assets = assets.substr(5);
-		}
-
-		if (totalTransferedAssets.value == 0 && assetsI == 0) {
-			assets = '/';
-			assetsFull = '/';
-		}
-
-		if (minted) {
-		//	let assetPrice = undefined;
-		//	assetsFull += '<br><strong><span class="text-white">' + (minted.amount > 0 ? mixedPlus : '') + formatAssetValueString(minted.amount, minted.decimals, 4) + '</span></strong> ' + getAssetTitle(minted, false) + (assetPrice == undefined ? '' : ' <span class="text-light">' + assetPrice +'</span>')
-		}
-
-		valueFields[i + mempoolIndexOffset] = ergValueString + assets;
-		valueFieldsFull[i + mempoolIndexOffset] = ergValueString + assetsFull;
-
-		formattedResult += '<td><span class="d-lg-none"><strong>Value: </strong></span><span id="txValue' + (i + mempoolIndexOffset) + '">' + valueFieldsFull[i + mempoolIndexOffset] + '</span></td></tr>';
-	}
-
-	if (isMempool) {
-		mempoolIndexOffset = transactionsJson.items.length;
-	}
-
-	return formattedResult;
+  if (
+    transactionsJson == undefined ||
+    transactionsJson == "" ||
+    transactionsJson.total == 0
+  ) {
+    return "";
+  }
+
+  let formattedResult = "";
+
+  for (let i = 0; i < transactionsJson.items.length; i++) {
+    const item = transactionsJson.items[i];
+
+    formattedResult += "<tr>";
+
+    //Fee
+    let fee = 0;
+    for (let j = 0; j < item.outputs.length; j++) {
+      if (item.outputs[j].address == FEE_ADDRESS) {
+        fee = item.outputs[j].value;
+      }
+    }
+
+    let outputsAddress = walletAddress;
+    let txType = getTxType(item);
+
+    let minted = undefined;
+    if (item.inputs[0]) {
+      let mintId = item.inputs[0].boxId;
+      for (let j = 0; j < item.outputs.length; j++) {
+        if (item.outputs[j].address == outputsAddress) {
+          //Sort
+          let tokensArray = sortTokens(item.outputs[j].assets);
+
+          for (let k = 0; k < tokensArray.length; k++) {
+            if (tokensArray[k].tokenId == mintId) {
+              minted = tokensArray[k];
+            }
+          }
+        }
+      }
+    }
+
+    let totalTransferedAssets = {
+      value: new BigNumber(0),
+      assets: {},
+    };
+
+    for (let j = 0; j < item.outputs.length; j++) {
+      if (item.outputs[j].address == outputsAddress) {
+        totalTransferedAssets.value = totalTransferedAssets.value.plus(
+          item.outputs[j].value,
+        );
+
+        //Sort
+        let tokensArray = sortTokens(item.outputs[j].assets);
+
+        for (let k = 0; k < tokensArray.length; k++) {
+          if (
+            totalTransferedAssets.assets[tokensArray[k].tokenId] == undefined
+          ) {
+            totalTransferedAssets.assets[tokensArray[k].tokenId] = {};
+            totalTransferedAssets.assets[tokensArray[k].tokenId].tokenId =
+              tokensArray[k].tokenId;
+            totalTransferedAssets.assets[tokensArray[k].tokenId].decimals =
+              tokensArray[k].decimals;
+            totalTransferedAssets.assets[tokensArray[k].tokenId].name =
+              tokensArray[k].name;
+            totalTransferedAssets.assets[tokensArray[k].tokenId].amount =
+              new BigNumber(tokensArray[k].amount);
+          } else {
+            totalTransferedAssets.assets[tokensArray[k].tokenId].amount =
+              totalTransferedAssets.assets[tokensArray[k].tokenId].amount.plus(
+                tokensArray[k].amount,
+              );
+          }
+        }
+      }
+    }
+
+    for (let j = 0; j < item.inputs.length; j++) {
+      if (item.inputs[j].address == outputsAddress) {
+        totalTransferedAssets.value = totalTransferedAssets.value.minus(
+          item.inputs[j].value,
+        );
+
+        //Sort
+        let tokensArray = sortTokens(item.inputs[j].assets);
+        for (let k = 0; k < tokensArray.length; k++) {
+          if (
+            totalTransferedAssets.assets[tokensArray[k].tokenId] == undefined
+          ) {
+            totalTransferedAssets.assets[tokensArray[k].tokenId] = {};
+            totalTransferedAssets.assets[tokensArray[k].tokenId].tokenId =
+              tokensArray[k].tokenId;
+            totalTransferedAssets.assets[tokensArray[k].tokenId].decimals =
+              tokensArray[k].decimals;
+            totalTransferedAssets.assets[tokensArray[k].tokenId].name =
+              tokensArray[k].name;
+            totalTransferedAssets.assets[tokensArray[k].tokenId].amount =
+              new BigNumber(-tokensArray[k].amount);
+          } else {
+            totalTransferedAssets.assets[tokensArray[k].tokenId].amount =
+              totalTransferedAssets.assets[tokensArray[k].tokenId].amount.minus(
+                tokensArray[k].amount,
+              );
+          }
+        }
+      }
+    }
+
+    let txInOut = getTxInOutType(totalTransferedAssets);
+    let analysis = analyzeTransfers(item, walletAddress);
+
+    let fromAddress;
+    let toAddress;
+    if (
+      (txInOut == TxInOut.Out || txInOut == TxInOut.Mixed) &&
+      totalTransferedAssets.value == -fee
+    ) {
+      let hasOtherAddresses = false;
+      let oneaddress = walletAddress;
+      for (let j = 0; j < item.inputs.length; j++) {
+        let input = item.inputs[j];
+
+        if (input.address != oneaddress && input.address != FEE_ADDRESS) {
+          hasOtherAddresses = true;
+        }
+      }
+      for (let j = 0; j < item.outputs.length; j++) {
+        let output = item.outputs[j];
+
+        if (output.address != oneaddress && output.address != FEE_ADDRESS) {
+          hasOtherAddresses = true;
+        }
+      }
+      if (!hasOtherAddresses) {
+        txInOut = undefined;
+      }
+      //			totalTransferedAssets.value = 0;
+    } else if (
+      (txType == TxType.Wallet2Wallet || txType == TxType.Wallet2Contract) &&
+      txInOut == TxInOut.Out
+    ) {
+      //			totalTransferedAssets.value += fee;
+    }
+
+    if (txInOut == TxInOut.In && txType != TxType.Origin) {
+      for (let j = 0; j < item.outputs.length; j++) {
+        let output = item.outputs[j];
+        if (output.address == walletAddress) {
+          toAddress = walletAddress;
+          fromAddress = item.inputs[0].address;
+          break;
+        }
+      }
+    }
+
+    //From/to address
+    if (txType == TxType.Origin) {
+      fromAddress = AddressType.NA;
+      toAddress = item.outputs[0].address;
+    } else if (txType == TxType.Wallet2Wallet) {
+      if (txInOut == TxInOut.In) {
+        //Input TX
+        fromAddress = item.inputs[0].address;
+        toAddress = walletAddress;
+
+        //Handle multiple input addresses
+        let otherAddresses = Array();
+        for (let j = 0; j < item.inputs.length; j++) {
+          let input = item.inputs[j];
+
+          if (
+            input.address != toAddress &&
+            !otherAddresses.includes(input.address)
+          ) {
+            otherAddresses.push(input.address);
+          }
+        }
+
+        if (fromAddress == toAddress) {
+          if (otherAddresses.length == 1) {
+            for (let j = 0; j < item.inputs.length; j++) {
+              let output = item.inputs[j];
+
+              if (output.address != toAddress) {
+                fromAddress = output.address;
+                break;
+              }
+            }
+          }
+        }
+
+        if (otherAddresses.length > 1) {
+          fromAddress = AddressType.Multiple;
+        }
+      } else if (txInOut == TxInOut.Out || txInOut == TxInOut.Mixed) {
+        //Output TX
+        fromAddress = walletAddress;
+        toAddress = item.outputs[0].address;
+
+        //Handle multiple output addresses
+        let otherAddresses = Array();
+        for (let j = 0; j < item.outputs.length; j++) {
+          let output = item.outputs[j];
+
+          if (
+            output.address != fromAddress &&
+            output.address != FEE_ADDRESS &&
+            !otherAddresses.includes(output.address)
+          ) {
+            otherAddresses.push(output.address);
+          }
+        }
+
+        if (fromAddress == toAddress) {
+          if (otherAddresses.length == 1) {
+            for (let j = 0; j < item.outputs.length; j++) {
+              let output = item.outputs[j];
+
+              if (
+                output.address != fromAddress &&
+                output.address != FEE_ADDRESS
+              ) {
+                toAddress = output.address;
+                break;
+              }
+            }
+          }
+        }
+
+        if (otherAddresses.length > 1) {
+          toAddress = AddressType.Multiple;
+        }
+      }
+    } else if (txType == TxType.Contract2Contract) {
+      //Is this contract
+      let isThisContract;
+      if (
+        item.inputs[0].address == item.outputs[0].address &&
+        item.inputs[0].address == walletAddress
+      ) {
+        isThisContract = true;
+      } else {
+        isThisContract = false;
+      }
+
+      if (txInOut == TxInOut.In) {
+        //Input TX
+        if (isThisContract) {
+          if (item.inputs.length > 1) {
+            fromAddress = item.inputs[1].address;
+          } else {
+            fromAddress = item.inputs[0].address;
+          }
+
+          toAddress = walletAddress;
+        } else {
+          fromAddress = item.inputs[0].address;
+          toAddress = walletAddress;
+        }
+      } else if (txInOut == TxInOut.Out || txInOut == TxInOut.Mixed) {
+        //Output TX
+        if (isThisContract) {
+          if (txInOut == TxInOut.Mixed && item.inputs.length == 2) {
+            fromAddress = item.inputs[1].address;
+          } else {
+            fromAddress = item.inputs[0].address;
+          }
+
+          toAddress = walletAddress;
+        } else {
+          fromAddress = walletAddress;
+          toAddress = item.outputs[0].address;
+        }
+
+        if (fromAddress == toAddress || txInOut == TxInOut.Mixed) {
+          let otherAddresses = Array();
+          for (let j = 0; j < item.outputs.length; j++) {
+            let output = item.outputs[j];
+
+            if (
+              output.address != fromAddress &&
+              output.address != FEE_ADDRESS &&
+              !otherAddresses.includes(output.address)
+            ) {
+              otherAddresses.push(output.address);
+            }
+          }
+
+          if (otherAddresses.length > 1) {
+            toAddress = AddressType.Multiple;
+          } else {
+            if (item.outputs.length > 1) {
+              toAddress = item.outputs[1].address;
+            } else {
+              toAddress = item.outputs[0].address;
+            }
+          }
+        }
+      }
+    } else if (txType == TxType.Wallet2Contract) {
+      fromAddress = item.inputs[0].address;
+      toAddress = item.outputs[0].address;
+
+      if (toAddress == FEE_ADDRESS) {
+        if (item.outputs.length > 1) {
+          toAddress = item.outputs[1].address;
+        }
+      }
+    } else if (txType == TxType.Contract2Wallet) {
+      fromAddress = item.inputs[0].address;
+      toAddress = item.outputs[0].address;
+    }
+
+    if (txInOut == undefined) {
+      fromAddress = toAddress = walletAddress;
+    }
+
+    if (txInOut == TxInOut.Out && txType == TxType.Contract2Wallet) {
+      let minDiff = 9999999999;
+      let minDiffIndex = -1;
+
+      for (let i = 0; i < item.outputs.length; i++) {
+        let output = item.outputs[i];
+
+        if (output.address == FEE_ADDRESS) continue;
+
+        let transferVal = Math.abs(totalTransferedAssets.value);
+
+        let newDiff = Math.abs(transferVal - output.value);
+        if (newDiff < minDiff) {
+          minDiff = newDiff;
+          minDiffIndex = i;
+        }
+      }
+
+      if (minDiffIndex > -1) {
+        toAddress = item.outputs[minDiffIndex].address;
+      }
+    }
+
+    let fromAddressIndex = 0;
+    let originalFromAddressIndex = 0;
+    for (let i = 0; i < item.inputs.length; i++) {
+      if (item.inputs[i].address == fromAddress) {
+        fromAddressIndex = i;
+        originalFromAddressIndex = i;
+        break;
+      }
+    }
+
+    if (txInOut != TxInOut.In) {
+      let hasEnough = true;
+      do {
+        hasEnough = true;
+
+        let totalSentFrom = {};
+        totalSentFrom.value = 0;
+        totalSentFrom.assets = {};
+
+        for (let i = 0; i < item.inputs.length; i++) {
+          let input = item.inputs[i];
+          if (input.address != fromAddress) continue;
+
+          totalSentFrom.value += input.value;
+          if (input.assets) {
+            for (let j = 0; j < input.assets.length; j++) {
+              let asset = input.assets[j];
+              if (totalSentFrom.assets[asset.tokenId] == undefined) {
+                totalSentFrom.assets[asset.tokenId] = {};
+                totalSentFrom.assets[asset.tokenId].amount = 0;
+                totalSentFrom.assets[asset.tokenId].decimals = asset.decimals;
+                totalSentFrom.assets[asset.tokenId].tokenId = asset.tokenId;
+              }
+
+              totalSentFrom.assets[asset.tokenId].amount += asset.amount;
+            }
+          }
+        }
+
+        if (totalSentFrom.value < totalTransferedAssets.value)
+          hasEnough = false;
+        for (let i = 0; i < totalTransferedAssets.assets.length; i++) {
+          let asset = totalTransferedAssets.assets[i];
+          for (let j = 0; j < totalSentFrom.assets.length; j++) {
+            let sentAsset = totalSentFrom.assets[j];
+            if (
+              sentAsset.tokenId == asset.tokenId &&
+              sentAsset.amount < totalTransferedAssets.amount
+            ) {
+              hasEnough = false;
+            }
+          }
+        }
+
+        if (!hasEnough) {
+          fromAddressIndex++;
+          if (fromAddressIndex < item.inputs.length) {
+            fromAddress = item.inputs[fromAddressIndex].address;
+          } else {
+            fromAddress = item.inputs[originalFromAddressIndex].address;
+            break;
+          }
+        }
+      } while (!hasEnough);
+    }
+
+    if (fromAddress != AddressType.Multiple) {
+      fromAddress = analysis.from;
+    }
+
+    if (toAddress != AddressType.Multiple) {
+      toAddress = analysis.to;
+    }
+
+    //check burn for single emissions
+    let burnedAssets = {};
+
+    for (let j = 0; j < item.inputs.length; j++) {
+      let tokensArray = sortTokens(item.inputs[j].assets);
+      for (let k = 0; k < tokensArray.length; k++) {
+        if (burnedAssets[tokensArray[k].tokenId] == undefined) {
+          burnedAssets[tokensArray[k].tokenId] = {};
+          burnedAssets[tokensArray[k].tokenId].tokenId = tokensArray[k].tokenId;
+          burnedAssets[tokensArray[k].tokenId].decimals =
+            tokensArray[k].decimals;
+          burnedAssets[tokensArray[k].tokenId].name = tokensArray[k].name;
+          burnedAssets[tokensArray[k].tokenId].amount = new BigNumber(
+            tokensArray[k].amount,
+          );
+        } else {
+          burnedAssets[tokensArray[k].tokenId].amount = burnedAssets[
+            tokensArray[k].tokenId
+          ].amount.plus(tokensArray[k].amount);
+        }
+      }
+    }
+
+    for (let j = 0; j < item.outputs.length; j++) {
+      //Sort
+      let tokensArray = sortTokens(item.outputs[j].assets);
+      for (let k = 0; k < tokensArray.length; k++) {
+        if (burnedAssets[tokensArray[k].tokenId] == undefined) {
+          burnedAssets[tokensArray[k].tokenId] = {};
+          burnedAssets[tokensArray[k].tokenId].tokenId = tokensArray[k].tokenId;
+          burnedAssets[tokensArray[k].tokenId].decimals =
+            tokensArray[k].decimals;
+          burnedAssets[tokensArray[k].tokenId].name = tokensArray[k].name;
+          burnedAssets[tokensArray[k].tokenId].amount = new BigNumber(
+            -tokensArray[k].amount,
+          );
+        } else {
+          burnedAssets[tokensArray[k].tokenId].amount = burnedAssets[
+            tokensArray[k].tokenId
+          ].amount.minus(tokensArray[k].amount);
+        }
+      }
+    }
+
+    let burnedAssetKeys = Object.keys(burnedAssets);
+    let hasBurnedAssets = false;
+    for (let i = 0; i < burnedAssetKeys.length; i++) {
+      let asset = burnedAssets[burnedAssetKeys[i]];
+
+      if (asset.amount == 0) {
+        delete burnedAssets[burnedAssetKeys[i]];
+      } else if (asset.amount > 0) {
+        hasBurnedAssets = true;
+      }
+    }
+
+    //Tx
+    formattedResult +=
+      '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' +
+      getTransactionsUrl(item.id) +
+      '"><i class="fas fa-link text-info"></i></a><span class="d-inline d-lg-none text-white float-end">' +
+      formatDateString(isMempool ? item.creationTimestamp : item.timestamp) +
+      "</span></td>";
+
+    //Timestamp
+    formattedResult +=
+      '<td class="d-none d-lg-table-cell"><span class="d-lg-none"><strong>Time: </strong></span>' +
+      formatDateString(isMempool ? item.creationTimestamp : item.timestamp) +
+      "</td>";
+
+    //Block nr.
+    let blockNr = item.inclusionHeight;
+
+    let classString;
+    let inOutString;
+    if (txInOut == TxInOut.In) {
+      classString = "text-success";
+      inOutString = "In";
+    } else if (txInOut == TxInOut.Out) {
+      classString = "text-danger";
+      inOutString = "Out";
+    } else if (txInOut == TxInOut.Mixed) {
+      classString = "text-warning";
+      inOutString = "Mixed";
+    } else if (txInOut == undefined) {
+      classString = "text-info";
+      inOutString = "Consolidation";
+    }
+
+    let smartString =
+      '<span class="text-info" title="Smart Contract interaction. Check transaction link for full details."> (SC)</span>';
+
+    if (
+      txType == TxType.Contract2Contract ||
+      txType == TxType.Wallet2Contract ||
+      txType == TxType.Contract2Wallet
+    ) {
+      inOutString += smartString;
+    }
+
+    formattedResult +=
+      '<td><span class="d-inline d-lg-none"><strong>Type: </strong><span class="' +
+      classString +
+      '">' +
+      inOutString +
+      '</span></span><span class="d-inline d-lg-none float-end"><strong>Block: </strong>' +
+      (isMempool
+        ? item.outputs[0].creationHeight
+        : '<a href="' + getBlockUrl(item.blockId) + '">' + blockNr + "</a>") +
+      '</span><span class="d-none d-lg-inline">' +
+      (isMempool
+        ? item.outputs[0].creationHeight
+        : '<a href="' + getBlockUrl(item.blockId) + '">' + blockNr + "</a>") +
+      "</span></td>";
+
+    // In or Out tx.
+    formattedResult +=
+      '<td class="d-none d-lg-table-cell"><span class="d-lg-none"><strong>Type: </strong></span><span class="' +
+      classString +
+      '">' +
+      inOutString +
+      "</span></td>";
+
+    //From
+    addAddress(fromAddress);
+    let formattedAddressString = formatTxAddressString(
+      fromAddress,
+      null,
+      walletAddress,
+    );
+
+    if (
+      networkType != "testnet" &&
+      (txType == TxType.Wallet2Contract || txType == TxType.Contract2Wallet)
+    ) {
+      formattedAddressString = getAddressFromErgotree(
+        item.inputs[0].ergoTree,
+        fromAddress,
+        formattedAddressString,
+      );
+    }
+
+    formattedResult +=
+      '<td><span class="d-lg-none"><strong>From: </strong></span>' +
+      formattedAddressString +
+      "</td>";
+
+    //To
+    addAddress(toAddress);
+    formattedAddressString = formatTxAddressString(
+      toAddress,
+      null,
+      walletAddress,
+    );
+
+    if (txType == TxType.Wallet2Contract || txType == TxType.Contract2Wallet) {
+      formattedAddressString = getAddressFromErgotree(
+        item.outputs[0].ergoTree,
+        toAddress,
+        formattedAddressString,
+      );
+    }
+
+    formattedResult +=
+      '<td><span class="d-lg-none"><strong>To: </strong></span>' +
+      formattedAddressString +
+      "</td>";
+
+    //Status
+    formattedResult +=
+      '<td><span class="d-lg-none"><strong>Status: </strong></span><span class="' +
+      (isMempool ? "text-warning" : "text-success") +
+      '">' +
+      (isMempool ? "Pending" : "Confirmed") +
+      '</span><span class="d-inline d-lg-none text-white float-end"><strong>Fee: </strong>' +
+      formatErgValueString(fee) +
+      "</span></td>";
+
+    //Fee
+    formattedResult +=
+      '<td class="d-none d-lg-table-cell"><span class="d-lg-none"><strong>Fee: </strong></span>' +
+      formatErgValueString(fee) +
+      "</td>";
+
+    //Burn setup
+    let assetKeys = Object.keys(totalTransferedAssets.assets);
+    for (let k = 0; k < assetKeys.length; k++) {
+      let asset = totalTransferedAssets.assets[assetKeys[k]];
+      asset.isBurned = false;
+      if (asset.amount < 0 && burnedAssets[asset.tokenId] != undefined) {
+        asset.isBurned = true;
+      }
+    }
+
+    //Value
+    if (txInOut != TxInOut.Mixed) {
+      if (totalTransferedAssets.value < 0) totalTransferedAssets.value *= -1;
+
+      for (let k = 0; k < assetKeys.length; k++) {
+        let asset = totalTransferedAssets.assets[assetKeys[k]];
+        if (asset.amount < 0) asset.amount *= -1;
+      }
+    }
+
+    let assets = " ";
+    let assetsFull = " ";
+    let tokensToShow = 2;
+    let keys = Object.keys(totalTransferedAssets.assets);
+    let assetsI = 0;
+    let mixedPlus = "";
+    if (txInOut == TxInOut.Mixed || txInOut == TxInOut.In) {
+      //			mixedPlus = '+';
+    }
+    let endAdd = "";
+    let assetITotal = 0;
+    for (let j = 0; j < keys.length; j++) {
+      let asset = totalTransferedAssets.assets[keys[j]];
+
+      if (asset.amount != 0) {
+        assetITotal++;
+      }
+    }
+
+    for (let j = 0; j < keys.length; j++) {
+      let asset = totalTransferedAssets.assets[keys[j]];
+
+      if (asset.amount == 0) {
+        continue;
+      }
+
+      let assetPrice = undefined;
+      if (gotPrices && prices[asset.tokenId] != undefined) {
+        //	assetPrice = formatAssetDollarPriceString(asset.amount, asset.decimals, asset.tokenId);
+      }
+
+      let isMinted = false;
+      if (minted) {
+        if (minted.tokenId == asset.tokenId) {
+          isMinted = true;
+        }
+      }
+
+      let assetsString =
+        "<br><strong>" +
+        (isMinted ? '<span title="Minted">✨</span>' : "") +
+        "" +
+        (asset.isBurned ? '<span title="Burned">🔥</span>' : "") +
+        '<span class="">' +
+        (asset.amount > 0 ? mixedPlus : "") +
+        (txInOut == TxInOut.Out ? "-" : "") +
+        formatAssetValueString(asset.amount, asset.decimals, 4) +
+        "</span></strong> " +
+        getAssetTitle(asset, false, scamList.includes(asset.tokenId)) +
+        (assetPrice == undefined
+          ? ""
+          : ' <span class="text-light">' + assetPrice + "</span>");
+
+      assetsFull += assetsString;
+
+      if (assetsI > tokensToShow) {
+        assetsI++;
+        continue;
+      }
+
+      assets += assetsString;
+
+      if (assetsI == tokensToShow && assetITotal > tokensToShow + 1) {
+        assets +=
+          '<p>...</p><p><strong><a href="#" onclick="showFullValue(event, ' +
+          (i + mempoolIndexOffset) +
+          ')">Show all</a></strong></p>';
+
+        endAdd = "";
+      }
+
+      assetsI++;
+    }
+
+    if (endAdd != "") {
+      assetsFull += endAdd;
+    }
+
+    let ergDollarValue = undefined;
+    if (gotPrices) {
+      //	ergDollarValue = formatAssetDollarPrice(totalTransferedAssets.value, ERG_DECIMALS, 'ERG');
+    }
+
+    let ergValueString = "";
+    if (totalTransferedAssets.value != 0) {
+      ergValueString =
+        (totalTransferedAssets.value > 0 ? mixedPlus : "") +
+        (txInOut == TxInOut.Out ? "-" : "") +
+        formatErgValueString(totalTransferedAssets.value, 4) +
+        (ergDollarValue == undefined
+          ? ""
+          : ' <span class="text-light">' +
+            formatDollarPriceString(ergDollarValue) +
+            "</span>");
+      formatErgValueString(totalTransferedAssets.value, 4) +
+        (ergDollarValue == undefined
+          ? ""
+          : ' <span class="text-light">' +
+            formatDollarPriceString(ergDollarValue) +
+            "</span>");
+    } else {
+      assetsFull = assets.substr(5);
+      assets = assets.substr(5);
+    }
+
+    if (totalTransferedAssets.value == 0 && assetsI == 0) {
+      assets = "/";
+      assetsFull = "/";
+    }
+
+    if (minted) {
+      //	let assetPrice = undefined;
+      //	assetsFull += '<br><strong><span class="text-white">' + (minted.amount > 0 ? mixedPlus : '') + formatAssetValueString(minted.amount, minted.decimals, 4) + '</span></strong> ' + getAssetTitle(minted, false) + (assetPrice == undefined ? '' : ' <span class="text-light">' + assetPrice +'</span>')
+    }
+
+    valueFields[i + mempoolIndexOffset] = ergValueString + assets;
+    valueFieldsFull[i + mempoolIndexOffset] = ergValueString + assetsFull;
+
+    formattedResult +=
+      '<td><span class="d-lg-none"><strong>Value: </strong></span><span id="txValue' +
+      (i + mempoolIndexOffset) +
+      '">' +
+      valueFieldsFull[i + mempoolIndexOffset] +
+      "</span></td></tr>";
+  }
+
+  if (isMempool) {
+    mempoolIndexOffset = transactionsJson.items.length;
+  }
+
+  return formattedResult;
 }
 
 function onGotOwnedNftInfo(nftInfos, message) {
-	if (nftInfos == undefined || nftInfos == null || nftInfos.length == 0) return;
+  if (nftInfos == undefined || nftInfos == null || nftInfos.length == 0) return;
 
-	nftInfos.sort((a, b) => {
-		return a.data.isBurned == 't' ? 1 : -1;
-	});
+  nftInfos.sort((a, b) => {
+    return a.data.isBurned == "t" ? 1 : -1;
+  });
 
-	nftInfos.sort((a, b) => {
-		if (a.data.isBurned != 't'
-			|| b.data.isBurned != 't') {
-			return 0;
-		}
+  nftInfos.sort((a, b) => {
+    if (a.data.isBurned != "t" || b.data.isBurned != "t") {
+      return 0;
+    }
 
-		return a.data.name > b.data.name ? 1 : -1;
-	});
+    return a.data.name > b.data.name ? 1 : -1;
+  });
 
-	nftInfos.sort((a, b) => {
-		if (a.data.isBurned == 't'
-			|| b.data.isBurned == 't') {
-			return 0;
-		}
+  nftInfos.sort((a, b) => {
+    if (a.data.isBurned == "t" || b.data.isBurned == "t") {
+      return 0;
+    }
 
-		return a.data.name > b.data.name ? 1 : -1;
-	});
+    return a.data.name > b.data.name ? 1 : -1;
+  });
 
-	let html = [];
-	nftsCount = 0;
-	html['token'] = '';
-	html[NFT_TYPE.Image] = '';
-	html[NFT_TYPE.Audio] = '';
-	html[NFT_TYPE.Video] = '';
-	html[NFT_TYPE.ArtCollection] = '';
-	html[NFT_TYPE.FileAttachment] = '';
-	html[NFT_TYPE.MembershipToken] = '';
-	for (let i = 0; i < nftInfos.length; i++) {
-		if (!nftInfos[i].isNft) continue;
+  let html = [];
+  nftsCount = 0;
+  html["token"] = "";
+  html[NFT_TYPE.Image] = "";
+  html[NFT_TYPE.Audio] = "";
+  html[NFT_TYPE.Video] = "";
+  html[NFT_TYPE.ArtCollection] = "";
+  html[NFT_TYPE.FileAttachment] = "";
+  html[NFT_TYPE.MembershipToken] = "";
+  for (let i = 0; i < nftInfos.length; i++) {
+    if (!nftInfos[i].isNft) continue;
 
-		let imgSrc = '';
-		let cSrc = '';
-		let nftHolderId = '';
-		let nftContentHolderId = '';
+    let imgSrc = "";
+    let cSrc = "";
+    let nftHolderId = "";
+    let nftContentHolderId = "";
 
-		switch (nftInfos[i].type) {
-			case NFT_TYPE.Image:
-				if (nftInfos[i].link.ipfsCid) {
-					cSrc = IPFS_PROVIDER_HOSTS[0] + '/ipfs/' + nftInfos[i].link.url;
-				} else {
-					cSrc = nftInfos[i].link.url;
-				}
+    switch (nftInfos[i].type) {
+      case NFT_TYPE.Image:
+        if (nftInfos[i].link.ipfsCid) {
+          cSrc = IPFS_PROVIDER_HOSTS[0] + "/ipfs/" + nftInfos[i].link.url;
+        } else {
+          cSrc = nftInfos[i].link.url;
+        }
 
-				if (nftInfos[i].cachedurl) {
-					cSrc = nftInfos[i].cachedurl;
-				}
+        if (nftInfos[i].cachedurl) {
+          cSrc = nftInfos[i].cachedurl;
+        }
 
-				if (nftInfos[i].data.nsfw) {
-					cSrc = '';
-				}
+        if (nftInfos[i].data.nsfw) {
+          cSrc = "";
+        }
 
-				imgSrc = './images/nft-image.png';
-				nftHolderId = '#nftImagesHolder';
-				nftContentHolderId = '#nftImagesContentHolder';
-				break;
-			case NFT_TYPE.Audio:
-				imgSrc = './images/nft-audio.png';
-				nftHolderId = '#nftAudioHolder';
-				nftContentHolderId = '#nftAudioContentHolder';
-				break;
-			case NFT_TYPE.Video:
-				imgSrc = './images/nft-video.png';
-				nftHolderId = '#nftVideoHolder';
-				nftContentHolderId = '#nftVideoContentHolder';
-				break;
-			case NFT_TYPE.ArtCollection:
-				imgSrc = './images/nft-artcollection.png';;
-				nftHolderId = '#nftArtCollectionHolder';
-				nftContentHolderId = '#nftArtCollectionContentHolder';
-				break;
-			case NFT_TYPE.FileAttachment:
-				imgSrc = './images/nft-file.png';
-				nftHolderId = '#nftFileHolder';
-				nftContentHolderId = '#nftFileContentHolder';
-				break;
-			case NFT_TYPE.MembershipToken:
-				imgSrc = './images/nft-membership.png';
-				nftHolderId = '#nftMembershipHolder';
-				nftContentHolderId = '#nftMembershipContentHolder';
-				break;
-		}
+        imgSrc = "./images/nft-image.png";
+        nftHolderId = "#nftImagesHolder";
+        nftContentHolderId = "#nftImagesContentHolder";
+        break;
+      case NFT_TYPE.Audio:
+        imgSrc = "./images/nft-audio.png";
+        nftHolderId = "#nftAudioHolder";
+        nftContentHolderId = "#nftAudioContentHolder";
+        break;
+      case NFT_TYPE.Video:
+        imgSrc = "./images/nft-video.png";
+        nftHolderId = "#nftVideoHolder";
+        nftContentHolderId = "#nftVideoContentHolder";
+        break;
+      case NFT_TYPE.ArtCollection:
+        imgSrc = "./images/nft-artcollection.png";
+        nftHolderId = "#nftArtCollectionHolder";
+        nftContentHolderId = "#nftArtCollectionContentHolder";
+        break;
+      case NFT_TYPE.FileAttachment:
+        imgSrc = "./images/nft-file.png";
+        nftHolderId = "#nftFileHolder";
+        nftContentHolderId = "#nftFileContentHolder";
+        break;
+      case NFT_TYPE.MembershipToken:
+        imgSrc = "./images/nft-membership.png";
+        nftHolderId = "#nftMembershipHolder";
+        nftContentHolderId = "#nftMembershipContentHolder";
+        break;
+    }
 
-		html[nftInfos[i].type] += '<a href="' + getTokenUrl(nftInfos[i].data.id) + '"><div class="card m-1" style="width: 100px;"><div class="cardImgHolder"><img onload="onNftImageLoaded(this, \'nft-img-owned\')" onerror="onNftImageLoaded(this, \'nft-img-owned\')" csrc="' + cSrc + '" src="' + imgSrc + '" class="nft-img-owned card-img-top p-4"></div><div class="card-body p-2"><p class="card-text">' + nftInfos[i].data.name + '</p></div></div></a>';
+    html[nftInfos[i].type] +=
+      '<a href="' +
+      getTokenUrl(nftInfos[i].data.id) +
+      '"><div class="card m-1" style="width: 100px;"><div class="cardImgHolder"><img onload="onNftImageLoaded(this, \'nft-img-owned\')" onerror="onNftImageLoaded(this, \'nft-img-owned\')" csrc="' +
+      cSrc +
+      '" src="' +
+      imgSrc +
+      '" class="nft-img-owned card-img-top p-4"></div><div class="card-body p-2"><p class="card-text">' +
+      nftInfos[i].data.name +
+      "</p></div></div></a>";
 
-		$(nftHolderId).show();
+    $(nftHolderId).show();
 
-		nftsCount++;
-	}
+    nftsCount++;
+  }
 
-	if (nftsCount > 0) {
-		$('#nftImagesContentHolder').html(html[NFT_TYPE.Image]);
-		$('#nftAudioContentHolder').html(html[NFT_TYPE.Audio]);
-		$('#nftVideoContentHolder').html(html[NFT_TYPE.Video]);
-		$('#nftArtCollectionContentHolder').html(html[NFT_TYPE.ArtCollection]);
-		$('#nftFileContentHolder').html(html[NFT_TYPE.FileAttachment]);
-		$('#nftMembershipContentHolder').html(html[NFT_TYPE.MembershipToken]);
+  if (nftsCount > 0) {
+    $("#nftImagesContentHolder").html(html[NFT_TYPE.Image]);
+    $("#nftAudioContentHolder").html(html[NFT_TYPE.Audio]);
+    $("#nftVideoContentHolder").html(html[NFT_TYPE.Video]);
+    $("#nftArtCollectionContentHolder").html(html[NFT_TYPE.ArtCollection]);
+    $("#nftFileContentHolder").html(html[NFT_TYPE.FileAttachment]);
+    $("#nftMembershipContentHolder").html(html[NFT_TYPE.MembershipToken]);
 
-		$('#nftsHolder').show();
-		$('#nftsTitle').html('<strong>Owned NFTs</strong> (' + nftsCount + ') ');
-		$('#hideAllNftsAction').hide();
-	}
+    $("#nftsHolder").show();
+    $("#nftsTitle").html("<strong>Owned NFTs</strong> (" + nftsCount + ") ");
+    $("#hideAllNftsAction").hide();
+  }
 
-	if (ownedNftsShown) {
-		loadingOwnedNfts = false;
-		showNfts(null);
-	}
+  if (ownedNftsShown) {
+    loadingOwnedNfts = false;
+    showNfts(null);
+  }
 }
 
 function loadOwnedNfts() {
-	if (!loadingOwnedNfts) {
-		loadingOwnedNfts = true;
+  if (!loadingOwnedNfts) {
+    loadingOwnedNfts = true;
 
-		loadMoreNfts(10, 'nft-img-owned');
-	}
+    loadMoreNfts(10, "nft-img-owned");
+  }
 }
 
 function loadIssuedNfts() {
-	if (!loadingIssuedNfts) {
-		loadingIssuedNfts = true;
+  if (!loadingIssuedNfts) {
+    loadingIssuedNfts = true;
 
-		loadMoreNfts(10, 'nft-img-issued');
-	}
+    loadMoreNfts(10, "nft-img-issued");
+  }
 }
 
 function loadMoreNfts(amount, type) {
-	let loadIndex = 0;
-	$('.' + type).each(function (index, element) {
-		let cSrc = $(element).attr('csrc');
-		let src = $(element).attr('src');
+  let loadIndex = 0;
+  $("." + type).each(function (index, element) {
+    let cSrc = $(element).attr("csrc");
+    let src = $(element).attr("src");
 
-		if (loadIndex >= amount) {
-			return;
-		}
+    if (loadIndex >= amount) {
+      return;
+    }
 
-		if (cSrc && cSrc != src) {
-			$(element).attr('src', cSrc);
+    if (cSrc && cSrc != src) {
+      $(element).attr("src", cSrc);
 
-			loadIndex++;
-		}
-	});
+      loadIndex++;
+    }
+  });
 }
 
 function onNftImageLoaded(element, type) {
-	let cSrc = $(element).attr('csrc');
-	let src = $(element).attr('src');
+  let cSrc = $(element).attr("csrc");
+  let src = $(element).attr("src");
 
-	if (cSrc == src) {
-		$(element).removeClass('p-4');
-		$(element).attr('csrc', '');
-		
-		setTimeout(loadMoreNfts, 50, 1, type);
-	}
+  if (cSrc == src) {
+    $(element).removeClass("p-4");
+    $(element).attr("csrc", "");
+
+    setTimeout(loadMoreNfts, 50, 1, type);
+  }
 }
 
 function showNfts(e) {
-	$('#nftsShowAll').show();
-	$('#showAllNftsAction').hide();
-	$('#hideAllNftsAction').show();
-	$('#nftsTitle').html('<strong>Owned NFTs</strong>');
+  $("#nftsShowAll").show();
+  $("#showAllNftsAction").hide();
+  $("#hideAllNftsAction").show();
+  $("#nftsTitle").html("<strong>Owned NFTs</strong>");
 
-	loadOwnedNfts();
+  loadOwnedNfts();
 
-	ownedNftsShown = true;
+  ownedNftsShown = true;
 
-	if (e) {
-		scrollToElement($('#nftsTitle'));
- 		e.preventDefault();
-	}
+  if (e) {
+    scrollToElement($("#nftsTitle"));
+    e.preventDefault();
+  }
 }
 
 function hideNfts(e) {
-	$('#nftsShowAll').hide();
-	$('#showAllNftsAction').show();
-	$('#hideAllNftsAction').hide();
-	$('#nftsTitle').html('<strong>Owned NFTs</strong> (' + nftsCount + ') ');
+  $("#nftsShowAll").hide();
+  $("#showAllNftsAction").show();
+  $("#hideAllNftsAction").hide();
+  $("#nftsTitle").html("<strong>Owned NFTs</strong> (" + nftsCount + ") ");
 
-	scrollToElement($('#nftsTitle'));
+  scrollToElement($("#nftsTitle"));
 
-	ownedNftsShown = false;
+  ownedNftsShown = false;
 
-	e.preventDefault();
+  e.preventDefault();
 }
 
 function printTransactions() {
-	if (getTxData) {
-		return;
-	}
+  if (getTxData) {
+    return;
+  }
 
-	if (!getTxData) {
-		getTxData = true;
-	}
+  if (!getTxData) {
+    getTxData = true;
+  }
 
-    if (offset == 0) {
-        getMempoolData()
-    } else {
-        mempoolRequestDone = true;
-    }
+  if (offset == 0) {
+    getMempoolData();
+  } else {
+    mempoolRequestDone = true;
+  }
 
-    getTransactionsData();
+  getTransactionsData();
 }
 
 function getMempoolData() {
-    let mempoolUrl = getMempoolUrl();
+  let mempoolUrl = getMempoolUrl();
 
-    fetch(mempoolUrl)
-	.then(async response => {
-		if (!response.ok) {
-            throw new Error('Network response was not ok');
+  fetch(mempoolUrl)
+    .then(async (response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      let abuffer = await response.arrayBuffer();
+      const buffer = new TextDecoder("utf-8").decode(abuffer);
+      const stringFromBuffer = buffer.toString("utf8");
+
+      let data = JSONbig.parse(stringFromBuffer);
+
+      mempoolData = data;
+      totalTransactions += mempoolData.total;
+      mempoolCount = mempoolData.total;
+
+      if (mempoolData.total > 0 && mempoolTxIds.length == 0) {
+        for (let i = 0; i < mempoolData.items.length; i++) {
+          mempoolTxIds.push(mempoolData.items[i].id);
         }
 
-        let abuffer = await response.arrayBuffer();
-		const buffer = new TextDecoder("utf-8").decode(abuffer);
-        const stringFromBuffer = buffer.toString('utf8');
-
-        let data = JSONbig.parse(stringFromBuffer);
-
-        mempoolData = data;
-		totalTransactions += mempoolData.total;
-		mempoolCount = mempoolData.total
-
-		if (mempoolData.total > 0 && mempoolTxIds.length == 0) {
-			for (let i = 0; i < mempoolData.items.length; i++) {
-				mempoolTxIds.push(mempoolData.items[i].id);
-			}
-
-			showNotificationPermissionToast();
-		}
+        showNotificationPermissionToast();
+      }
     })
-    .catch(function() {
-        console.log('Mempool transactions fetch failed.');
+    .catch(function () {
+      console.log("Mempool transactions fetch failed.");
     })
-    .finally(function() {
-        mempoolRequestDone = true;
-        onMempoolAndTransactionsDataFetched();
+    .finally(function () {
+      mempoolRequestDone = true;
+      onMempoolAndTransactionsDataFetched();
     });
 }
 
 function checkMempoolChanged() {
-	let mempoolUrl = getMempoolUrl();
+  let mempoolUrl = getMempoolUrl();
 
-    $.get(mempoolUrl, function(data) {
-    	let newMempoolCount = data.total;
+  $.get(mempoolUrl, function (data) {
+    let newMempoolCount = data.total;
 
-    	if (newMempoolCount != mempoolCount) {
-    		let balanceUrl = getTxsDataUrl();
+    if (newMempoolCount != mempoolCount) {
+      let balanceUrl = getTxsDataUrl();
 
-			var jqxhr = $.get(balanceUrl,
-			function(data) {
-				for (let i = 0; i < data.items.length; i++) {
-					let found = false;
-					for (let j = 0; j < mempoolTxIds.length; j++) {
-						if (data.items[i].id == mempoolTxIds[j]) {
-							onMempoolTxConfirmed();
-							found = true;
-							break;
-						}
-					}
+      var jqxhr = $.get(balanceUrl, function (data) {
+        for (let i = 0; i < data.items.length; i++) {
+          let found = false;
+          for (let j = 0; j < mempoolTxIds.length; j++) {
+            if (data.items[i].id == mempoolTxIds[j]) {
+              onMempoolTxConfirmed();
+              found = true;
+              break;
+            }
+          }
 
-					if (found) {
-						break;
-					}
+          if (found) {
+            break;
+          }
 
-					if (i == data.items.length - 1
-						&& !found
-						&& newMempoolCount == 0) {
-						onMempoolEmptyNoConfirmation();
-						break;
-					}
-				}
-			});    		
-    	}
-    });
+          if (i == data.items.length - 1 && !found && newMempoolCount == 0) {
+            onMempoolEmptyNoConfirmation();
+            break;
+          }
+        }
+      });
+    }
+  });
 }
 
 function onMempoolTxConfirmed() {
-	if (Notification.permission === 'granted') {
-		const img = 'https://ergexplorer.com/images/logo.png';
-		const text = 'Transaction on address ' + walletAddress + ' has been confirmed.';
-		txNotification = new Notification('Transaction confirmed', { body: text, icon: img });
-		
-		txNotification.onclick = function(x) {
-			window.focus();
-			this.close();
-			location.reload();
-		};
-	}
+  if (Notification.permission === "granted") {
+    const img = "https://ergexplorer.com/images/logo.png";
+    const text =
+      "Transaction on address " + walletAddress + " has been confirmed.";
+    txNotification = new Notification("Transaction confirmed", {
+      body: text,
+      icon: img,
+    });
 
-	if (mempoolInterval != undefined) {
-		clearTimeout(mempoolInterval);
-	}
+    txNotification.onclick = function (x) {
+      window.focus();
+      this.close();
+      location.reload();
+    };
+  }
 
-	if (document.hasFocus()) {
-		location.reload();
-	}
+  if (mempoolInterval != undefined) {
+    clearTimeout(mempoolInterval);
+  }
+
+  if (document.hasFocus()) {
+    location.reload();
+  }
 }
 
 function onMempoolEmptyNoConfirmation() {
-	if (Notification.permission === 'granted') {
-		const img = 'https://ergexplorer.com/images/logo.png';
-		const text = 'Transaction on address ' + walletAddress + ' status updated.';
-		const notification = new Notification('Transaction updated', { body: text, icon: img });
-		
-		notification.onclick = function(x) {
-			window.focus();
-			this.close();
-			location.reload();
-		};
-	}
+  if (Notification.permission === "granted") {
+    const img = "https://ergexplorer.com/images/logo.png";
+    const text = "Transaction on address " + walletAddress + " status updated.";
+    const notification = new Notification("Transaction updated", {
+      body: text,
+      icon: img,
+    });
 
-	if (mempoolInterval != undefined) {
-		clearTimeout(mempoolInterval);
-	}
+    notification.onclick = function (x) {
+      window.focus();
+      this.close();
+      location.reload();
+    };
+  }
 
-	if (document.hasFocus()) {
-		location.reload();
-	}
+  if (mempoolInterval != undefined) {
+    clearTimeout(mempoolInterval);
+  }
+
+  if (document.hasFocus()) {
+    location.reload();
+  }
 }
 
 function getTxsUrl() {
-	let balanceUrl = API_HOST_2 + 'addresses/' + walletAddress + '/balance/total';
-	if (networkType == 'testnet') {
-		balanceUrl = API_HOST + 'api/v1/addresses/' + walletAddress + '/balance/total';
-	}
+  let balanceUrl = API_HOST_2 + "addresses/" + walletAddress + "/balance/total";
+  if (networkType == "testnet") {
+    balanceUrl =
+      API_HOST + "api/v1/addresses/" + walletAddress + "/balance/total";
+  }
 
-	return balanceUrl;
+  return balanceUrl;
 }
 
 function getUnspentBoxesDataUrl() {
-	let balanceUrl = API_HOST_2 + 'boxes/unspent/byAddress/' + walletAddress;
-	if (networkType == 'testnet') {
-		balanceUrl = API_HOST + 'api/v1/boxes/unspent/byAddress/' + walletAddress;
-	}
+  let balanceUrl = API_HOST_2 + "boxes/unspent/byAddress/" + walletAddress;
+  if (networkType == "testnet") {
+    balanceUrl = API_HOST + "api/v1/boxes/unspent/byAddress/" + walletAddress;
+  }
 
-	return balanceUrl;	
+  return balanceUrl;
 }
 
 function getTxsDataUrl(attempt) {
-	if (params['filterTxs'] == undefined) {
-		if (attempt == 1) {
-			if (networkType == 'testnet') {
-				return API_HOST + 'api/v1/addresses/' + walletAddress + '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
-			}
+  if (params["filterTxs"] == undefined) {
+    if (attempt == 1) {
+      if (networkType == "testnet") {
+        return (
+          API_HOST +
+          "api/v1/addresses/" +
+          walletAddress +
+          "/transactions?offset=" +
+          offset +
+          "&limit=" +
+          ITEMS_PER_PAGE
+        );
+      }
 
-			return `https://api.sigmaspace.io/api/v1/addresses/${walletAddress}/transactions?offset=${offset}&limit=${ITEMS_PER_PAGE}`;
-		} else {
-			return API_HOST_2 + 'addresses/' + walletAddress + '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
-		}
-	} else {
-		let tokenId = params['tokenId'];
-		let minValue = params['minValue'];
-		let maxValue = params['maxValue'];
-		let fromDate = params['fromDate'];
-		let toDate = params['toDate'];
-		let txType = params['txType'];
+      return `https://api.sigmaspace.io/api/v1/addresses/${walletAddress}/transactions?offset=${offset}&limit=${ITEMS_PER_PAGE}`;
+    } else {
+      return (
+        API_HOST_2 +
+        "addresses/" +
+        walletAddress +
+        "/transactions?offset=" +
+        offset +
+        "&limit=" +
+        ITEMS_PER_PAGE
+      );
+    }
+  } else {
+    let tokenId = params["tokenId"];
+    let minValue = params["minValue"];
+    let maxValue = params["maxValue"];
+    let fromDate = params["fromDate"];
+    let toDate = params["toDate"];
+    let txType = params["txType"];
 
-		let filterApiUrl = ERGEXPLORER_API_HOST + 'user/getUserTransactions?filterTx&address=' + walletAddress + '&offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
+    let filterApiUrl =
+      ERGEXPLORER_API_HOST +
+      "user/getUserTransactions?filterTx&address=" +
+      walletAddress +
+      "&offset=" +
+      offset +
+      "&limit=" +
+      ITEMS_PER_PAGE;
 
-		if (tokenId != undefined) {
-			filterApiUrl += '&tokenId=' + tokenId;
-		}
+    if (tokenId != undefined) {
+      filterApiUrl += "&tokenId=" + tokenId;
+    }
 
-		if (minValue != undefined) {
-			filterApiUrl += '&minValue=' + minValue;
-		}
+    if (minValue != undefined) {
+      filterApiUrl += "&minValue=" + minValue;
+    }
 
-		if (maxValue != undefined) {
-			filterApiUrl += '&maxValue=' + maxValue;
-		}
+    if (maxValue != undefined) {
+      filterApiUrl += "&maxValue=" + maxValue;
+    }
 
-		if (fromDate != undefined) {
-			filterApiUrl += '&fromDate=' + fromDate;
-		}
+    if (fromDate != undefined) {
+      filterApiUrl += "&fromDate=" + fromDate;
+    }
 
-		if (toDate != undefined) {
-			filterApiUrl += '&toDate=' + toDate;
-		}
+    if (toDate != undefined) {
+      filterApiUrl += "&toDate=" + toDate;
+    }
 
-		if (txType != 'all') {
-			filterApiUrl += '&txType=' + txType;
-		}
+    if (txType != "all") {
+      filterApiUrl += "&txType=" + txType;
+    }
 
-		return filterApiUrl;
-	}
+    return filterApiUrl;
+  }
 }
 
 function getMempoolUrl() {
-	let mempoolUrl = API_HOST_2 + 'mempool/transactions/byAddress/' + walletAddress;
+  let mempoolUrl =
+    API_HOST_2 + "mempool/transactions/byAddress/" + walletAddress;
 
-    if (networkType == 'testnet') {
-        mempoolUrl = API_HOST_2 + 'api/v1/mempool/transactions/byAddress/' + walletAddress
-    }
+  if (networkType == "testnet") {
+    mempoolUrl =
+      API_HOST_2 + "api/v1/mempool/transactions/byAddress/" + walletAddress;
+  }
 
-    return mempoolUrl;
+  return mempoolUrl;
 }
 
 function trackTransaction() {
-	if (Notification.permission !== 'granted') {
-		return;
-	}
+  if (Notification.permission !== "granted") {
+    return;
+  }
 
-	if (mempoolInterval != undefined) {
-		return;
-	}
+  if (mempoolInterval != undefined) {
+    return;
+  }
 
-	showCustomToast('Monitoring mempool<span id="dots">...</span>');
-	setInterval(animateDots, 300);
+  showCustomToast('Monitoring mempool<span id="dots">...</span>');
+  setInterval(animateDots, 300);
 
-	mempoolInterval = setInterval(checkMempoolChanged, 30000);
+  mempoolInterval = setInterval(checkMempoolChanged, 30000);
 }
 
 function onNotificationToastYes() {
-	requestNotificationPermission(() => {
-		trackTransaction();
-	});
+  requestNotificationPermission(() => {
+    trackTransaction();
+  });
 
-	hideNotificationPermissionToast();	
-	trackTransaction();
+  hideNotificationPermissionToast();
+  trackTransaction();
 }
 
 function onNotificationToastNo() {
-	hideNotificationPermissionToast();
+  hideNotificationPermissionToast();
 }
 
 function getTransactionsData(attempt = 1) {
-	fetch(getTxsDataUrl(attempt))
-	.then(async response => {
-		if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
+  fetch(getTxsDataUrl(attempt))
+    .then(async (response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
 
-        let abuffer = await response.arrayBuffer();
-		const buffer = new TextDecoder("utf-8").decode(abuffer);
-        const stringFromBuffer = buffer.toString('utf8');
+      let abuffer = await response.arrayBuffer();
+      const buffer = new TextDecoder("utf-8").decode(abuffer);
+      const stringFromBuffer = buffer.toString("utf8");
 
-        let data = JSONbig.parse(stringFromBuffer);
+      let data = JSONbig.parse(stringFromBuffer);
 
-        transactionsData = data;
-		totalTransactions += transactionsData.total;
+      transactionsData = data;
+      totalTransactions += transactionsData.total;
 
-		attempt = 2;
+      attempt = 2;
     })
-    .catch(function() {
-		if (attempt == 1) {
-			getTransactionsData(2);
-		}
-        console.log('Transactions fetch failed.');
+    .catch(function () {
+      if (attempt == 1) {
+        getTransactionsData(2);
+      }
+      console.log("Transactions fetch failed.");
     })
-    .finally(function() {
-		if (attempt == 2) {
-			transactionsRequestDone = true;
-			onMempoolAndTransactionsDataFetched();
-		}
+    .finally(function () {
+      if (attempt == 2) {
+        transactionsRequestDone = true;
+        onMempoolAndTransactionsDataFetched();
+      }
     });
 }
 
 function onMempoolAndTransactionsDataFetched() {
-    if (!mempoolRequestDone || !transactionsRequestDone) {
-		return;
-	}
+  if (!mempoolRequestDone || !transactionsRequestDone) {
+    return;
+  }
 
-	if (printed) {
-		return;
-	}
+  if (printed) {
+    return;
+  }
 
-    getAddressInfo();
+  getAddressInfo();
 
-	let html = '';
+  let html = "";
 
-	html += getFormattedTransactionsString(mempoolData, true);
-	html += getFormattedTransactionsString(transactionsData, false);
+  html += getFormattedTransactionsString(mempoolData, true);
+  html += getFormattedTransactionsString(transactionsData, false);
 
-	let updateHtml = false;
-	if (formattedResult == '' || formattedResult != html) {
-		formattedResult = html;
-		updateHtml = true;
-	}
+  let updateHtml = false;
+  if (formattedResult == "" || formattedResult != html) {
+    formattedResult = html;
+    updateHtml = true;
+  }
 
-	setupPagination(transactionsData.total);
+  setupPagination(transactionsData.total);
 
-	$('#totalTransactions').html('<strong>Total transactions:</strong> ' + totalTransactions);
+  $("#totalTransactions").html(
+    "<strong>Total transactions:</strong> " + totalTransactions,
+  );
 
-	if (totalTransactions > 0) {
-		$('#transactionsTableBody').html(formattedResult);
-		$('#txView').show();
-	} else {
-		showLoadError('No transactions.');
-	}
+  if (totalTransactions > 0) {
+    $("#transactionsTableBody").html(formattedResult);
+    $("#txView").show();
+  } else {
+    showLoadError("No transactions.");
+  }
 
-	$('#txLoading').hide();
+  $("#txLoading").hide();
 
-	getAddressesInfo();
+  getAddressesInfo();
 
-	printed = true;
+  printed = true;
 }
 
 function getChart(tokenId, canvasId, holderId) {
-	let url = ERGEXPLORER_API_HOST + 'user/getAddressStats?address=' + walletAddress + '&tokenId=' + tokenId + '&type=1';
+  let url =
+    ERGEXPLORER_API_HOST +
+    "user/getAddressStats?address=" +
+    walletAddress +
+    "&tokenId=" +
+    tokenId +
+    "&type=1";
 
-	if (params['fromDate'] != undefined) {
-		url += '&fromDate=' + params['fromDate'];
-	}
+  if (params["fromDate"] != undefined) {
+    url += "&fromDate=" + params["fromDate"];
+  }
 
-	if (params['toDate'] != undefined) {
-		url += '&toDate=' + params['toDate'];
-	}
+  if (params["toDate"] != undefined) {
+    url += "&toDate=" + params["toDate"];
+  }
 
-	$.get(url, function(data) {
-		if (data.items.length < 2) {
-			return;
-		}
+  $.get(url, function (data) {
+    if (data.items.length < 2) {
+      return;
+    }
 
-		let step = 1;
-		if (data.items.length > 25) {
-			step = parseInt(data.items.length / 25);
-		}
+    let step = 1;
+    if (data.items.length > 25) {
+      step = parseInt(data.items.length / 25);
+    }
 
-		let lastStep;
-		let diff = 0;
-		let diffI = 0;
-		let newData = [];
-		data.items = data.items.filter(function (_, index) {
-			let item = data.items[index];
-			if (index == 0) {
-				newData.push(item);
-				lastStep = item.value;
-				diff = 0;
+    let lastStep;
+    let diff = 0;
+    let diffI = 0;
+    let newData = [];
+    data.items = data.items.filter(function (_, index) {
+      let item = data.items[index];
+      if (index == 0) {
+        newData.push(item);
+        lastStep = item.value;
+        diff = 0;
 
-				return true;
-			}
+        return true;
+      }
 
-			if (index == data.items.length - 1) {
-				if (tokenId != 'ERG') {
-					for (let i = 0; i < tokensArray.length; i++) {
-						let token = tokensArray[i];
-						if (token.tokenId == tokenId) {
-							item.value = token.amount / Math.pow(10, token.decimals);
-						}
-					}
-				}
+      if (index == data.items.length - 1) {
+        if (tokenId != "ERG") {
+          for (let i = 0; i < tokensArray.length; i++) {
+            let token = tokensArray[i];
+            if (token.tokenId == tokenId) {
+              item.value = token.amount / Math.pow(10, token.decimals);
+            }
+          }
+        }
 
-				newData.push(item);
+        newData.push(item);
 
-				return true;
-			}
+        return true;
+      }
 
-			let temp = Math.abs(lastStep - item.value);
-			if (temp > diff) {
-				diff = temp;
-				diffI = index;
-			}
+      let temp = Math.abs(lastStep - item.value);
+      if (temp > diff) {
+        diff = temp;
+        diffI = index;
+      }
 
-			if (index % step === 0) {
-				data.items[index].value = data.items[diffI].value;
+      if (index % step === 0) {
+        data.items[index].value = data.items[diffI].value;
 
-				newData.push(item);
-				lastStep = item.value;
-				diff = 0;
+        newData.push(item);
+        lastStep = item.value;
+        diff = 0;
 
-				return true;
-			}
+        return true;
+      }
 
-			return false;
-		});
+      return false;
+    });
 
-		const rootStyles = getComputedStyle(document.documentElement);
+    const rootStyles = getComputedStyle(document.documentElement);
 
-		// Get the value of the global CSS variable
-		const primaryColor = rootStyles.getPropertyValue('--main-color').trim();
+    // Get the value of the global CSS variable
+    const primaryColor = rootStyles.getPropertyValue("--main-color").trim();
 
-		new Chart(
-		    document.getElementById(canvasId),
-		    {
-		      type: 'line',
-		      options: {
-		      	responsive: true,
-		        animation: true,
-		        fill: false,
-		        borderColor: primaryColor,
-		        plugins: {
-		          legend: {
-		            display: false
-		          },
-		          tooltip: {
-		            enabled: true
-		          }
-		        },
-		        scales: {
-			        y: {
-			            beginAtZero: true
-			        }
-			    }
-		      },
-		      data: {
-		        labels: data.items.map(mapLabel),
-		        datasets: [
-		          {
-		            data: data.items.map(row => row.value)
-		          }
-		        ]
-		      }
-		    }
-		  );
+    new Chart(document.getElementById(canvasId), {
+      type: "line",
+      options: {
+        responsive: true,
+        animation: true,
+        fill: false,
+        borderColor: primaryColor,
+        plugins: {
+          legend: {
+            display: false,
+          },
+          tooltip: {
+            enabled: true,
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+          },
+        },
+      },
+      data: {
+        labels: data.items.map(mapLabel),
+        datasets: [
+          {
+            data: data.items.map((row) => row.value),
+          },
+        ],
+      },
+    });
 
-		$('#' + holderId).show();
-	});
+    $("#" + holderId).show();
+  });
 }
 
 function mapLabel(row, index) {
-	let dateString = new Date(parseInt(row.timestamp)).toLocaleDateString();
+  let dateString = new Date(parseInt(row.timestamp)).toLocaleDateString();
 
-	if (dateString != tempDate) {
-		tempDate = dateString;
-		return dateString;
-	} else {
-		return '';
-	}
+  if (dateString != tempDate) {
+    tempDate = dateString;
+    return dateString;
+  } else {
+    return "";
+  }
 }
 
 function getOfficialExplorereAddressUrl(address) {
-	if (networkType == 'testnet') {
-		return 'https://testnet.ergoplatform.com/addresses/' + address;
-	} else {
-		return 'https://explorer.ergoplatform.com/addresses/' + address;
-	}
+  if (networkType == "testnet") {
+    return "https://testnet.ergoplatform.com/addresses/" + address;
+  } else {
+    return "https://explorer.ergoplatform.com/addresses/" + address;
+  }
 }
 
 function showAllTokens(e) {
-	$('#otherTokens').html(tokensContentFull);
-	scrollToElement($('#tokensHolder'));
+  $("#otherTokens").html(tokensContentFull);
+  scrollToElement($("#tokensHolder"));
 
-	e.preventDefault();
+  e.preventDefault();
 }
 
 function hideAllTokens(e) {
-	$('#otherTokens').html(tokensContent);
-	scrollToElement($('#tokensHolder'));
+  $("#otherTokens").html(tokensContent);
+  scrollToElement($("#tokensHolder"));
 
-	e.preventDefault();
+  e.preventDefault();
 }
 
 function showAllFinancialTokens(e) {
-	$('#financialTokens').html(financialTokensContentFull);
-	scrollToElement($('#tokensHolder'));
+  $("#financialTokens").html(financialTokensContentFull);
+  scrollToElement($("#tokensHolder"));
 
-	e.preventDefault();
+  e.preventDefault();
 }
 
 function hideAllFinancialTokens(e) {
-	$('#financialTokens').html(financialTokensContent);
-	scrollToElement($('#tokensHolder'));
+  $("#financialTokens").html(financialTokensContent);
+  scrollToElement($("#tokensHolder"));
 
-	e.preventDefault();
+  e.preventDefault();
 }
 
 function showFullValue(e, index) {
-	$('#txValue' + index).html(valueFieldsFull[index]);
+  $("#txValue" + index).html(valueFieldsFull[index]);
 
-	e.preventDefault();
+  e.preventDefault();
 }
 
 function hideFullValue(e, index) {
-	$('#txValue' + index).html(valueFields[index]);
-	scrollToElement($('#txValue' + index));
+  $("#txValue" + index).html(valueFields[index]);
+  scrollToElement($("#txValue" + index));
 
-	e.preventDefault();
+  e.preventDefault();
 }
 
 function copyWalletAddress(e) {
-	copyToClipboard(e, walletAddress);
+  copyToClipboard(e, walletAddress);
 }
 
 function copyAddress(e, element) {
-	copyToClipboard(e, $(element).attr('title'));
+  copyToClipboard(e, $(element).attr("title"));
 }
 
 function setupQrCode() {
-	$('#showQRcodeBtn').on('click', function () {
-		showQRcode(walletAddress);
-	});
+  $("#showQRcodeBtn").on("click", function () {
+    showQRcode(walletAddress);
+  });
 
-	$('#qrCodeBack').on('click', function () {
-		$('#qrCodeBack').fadeOut();
+  $("#qrCodeBack").on("click", function () {
+    $("#qrCodeBack").fadeOut();
 
-		$('body').css('height', 'inherit');
-		$('body').css('overflow-y', 'auto');
-	});
+    $("body").css("height", "inherit");
+    $("body").css("overflow-y", "auto");
+  });
 }
 
 function filterTransactions(e) {
-	e.preventDefault();
+  e.preventDefault();
 
-	clearFilterParams();
+  clearFilterParams();
 
-	params['filterTxs'] = 'true';
+  params["filterTxs"] = "true";
 
-	let tokenId = $('#tokenId').val();
-	if (tokenId.trim() != '') {
-		params['tokenId'] = tokenId;
-	}
-	let minValue = $('#minValue').val();
-	if (minValue.trim() != '') {
-		params['minValue'] = minValue;
-	}
-	let maxValue = $('#maxValue').val();
-	if (maxValue.trim() != '') {
-		params['maxValue'] = maxValue;
-	}
+  let tokenId = $("#tokenId").val();
+  if (tokenId.trim() != "") {
+    params["tokenId"] = tokenId;
+  }
+  let minValue = $("#minValue").val();
+  if (minValue.trim() != "") {
+    params["minValue"] = minValue;
+  }
+  let maxValue = $("#maxValue").val();
+  if (maxValue.trim() != "") {
+    params["maxValue"] = maxValue;
+  }
 
-	if (datePickerFrom.dates._dates.length > 0) {
-		params['fromDate'] = datePickerFrom.dates._dates[0].getTime();
-	}
+  if (datePickerFrom.dates._dates.length > 0) {
+    params["fromDate"] = datePickerFrom.dates._dates[0].getTime();
+  }
 
-	if (datePickerTo.dates._dates.length > 0) {
-		params['toDate'] = datePickerTo.dates._dates[0].getTime();
-	}
+  if (datePickerTo.dates._dates.length > 0) {
+    params["toDate"] = datePickerTo.dates._dates[0].getTime();
+  }
 
-	let txType = $('#txType').val();
-	if (txType == undefined) {
-		params['txType'] = 'all';
-	} else {
-		params['txType'] = txType;
-	}
+  let txType = $("#txType").val();
+  if (txType == undefined) {
+    params["txType"] = "all";
+  } else {
+    params["txType"] = txType;
+  }
 
-	window.location.assign(getCurrentUrlWithParams());
+  window.location.assign(getCurrentUrlWithParams());
 }
 
 function clearFilter(e) {
-	e.preventDefault();	
+  e.preventDefault();
 
-	clearFilterParams();
+  clearFilterParams();
 
-	window.location.assign(getCurrentUrlWithParams());
+  window.location.assign(getCurrentUrlWithParams());
 }
 
 function clearFilterParams() {
-	delete params['filterTxs'];
-	delete params['tokenId'];
-	delete params['minValue'];
-	delete params['maxValue'];
-	delete params['fromDate'];
-	delete params['toDate'];
-	delete params['txType'];
+  delete params["filterTxs"];
+  delete params["tokenId"];
+  delete params["minValue"];
+  delete params["maxValue"];
+  delete params["fromDate"];
+  delete params["toDate"];
+  delete params["txType"];
 
-	params['offset'] = 0;
+  params["offset"] = 0;
 }
 
 function onGotIssuedNftInfo(nftInfos, message) {
-	if (nftInfos == undefined || nftInfos == null || nftInfos.length == 0) return;
+  if (nftInfos == undefined || nftInfos == null || nftInfos.length == 0) return;
 
-	nftInfos.sort((a, b) => {
-		return a.data.isBurned == 't' ? 1 : -1;
-	});
+  nftInfos.sort((a, b) => {
+    return a.data.isBurned == "t" ? 1 : -1;
+  });
 
-	nftInfos.sort((a, b) => {
-		if (a.data.isBurned != 't'
-			|| b.data.isBurned != 't') {
-			return 0;
-		}
+  nftInfos.sort((a, b) => {
+    if (a.data.isBurned != "t" || b.data.isBurned != "t") {
+      return 0;
+    }
 
-		return a.data.name > b.data.name ? 1 : -1;
-	});
+    return a.data.name > b.data.name ? 1 : -1;
+  });
 
-	nftInfos.sort((a, b) => {
-		if (a.data.isBurned == 't'
-			|| b.data.isBurned == 't') {
-			return 0;
-		}
+  nftInfos.sort((a, b) => {
+    if (a.data.isBurned == "t" || b.data.isBurned == "t") {
+      return 0;
+    }
 
-		return a.data.name > b.data.name ? 1 : -1;
-	});
+    return a.data.name > b.data.name ? 1 : -1;
+  });
 
-	let html = [];
-	issuedNftsCount = 0;
-	html['token'] = '';
-	html[NFT_TYPE.Image] = '';
-	html[NFT_TYPE.Audio] = '';
-	html[NFT_TYPE.Video] = '';
-	html[NFT_TYPE.ArtCollection] = '';
-	html[NFT_TYPE.FileAttachment] = '';
-	html[NFT_TYPE.MembershipToken] = '';
-	for (let i = 0; i < nftInfos.length; i++) {		
-		let nftHolderId = '';
-		let nftContentHolderId = '';
+  let html = [];
+  issuedNftsCount = 0;
+  html["token"] = "";
+  html[NFT_TYPE.Image] = "";
+  html[NFT_TYPE.Audio] = "";
+  html[NFT_TYPE.Video] = "";
+  html[NFT_TYPE.ArtCollection] = "";
+  html[NFT_TYPE.FileAttachment] = "";
+  html[NFT_TYPE.MembershipToken] = "";
+  for (let i = 0; i < nftInfos.length; i++) {
+    let nftHolderId = "";
+    let nftContentHolderId = "";
 
-		if (nftInfos[i].isNft) {
-			let imgSrc = '';
-			let cSrc = '';
+    if (nftInfos[i].isNft) {
+      let imgSrc = "";
+      let cSrc = "";
 
-			switch (nftInfos[i].type) {
-				case NFT_TYPE.Image:
-					if (nftInfos[i].link.ipfsCid) {
-						cSrc = IPFS_PROVIDER_HOSTS[0] + '/ipfs/' + nftInfos[i].link.url;
-					} else {
-						cSrc = nftInfos[i].link.url;
-					}
+      switch (nftInfos[i].type) {
+        case NFT_TYPE.Image:
+          if (nftInfos[i].link.ipfsCid) {
+            cSrc = IPFS_PROVIDER_HOSTS[0] + "/ipfs/" + nftInfos[i].link.url;
+          } else {
+            cSrc = nftInfos[i].link.url;
+          }
 
-					if (nftInfos[i].cachedurl) {
-						cSrc = nftInfos[i].cachedurl;
-					}
+          if (nftInfos[i].cachedurl) {
+            cSrc = nftInfos[i].cachedurl;
+          }
 
-					if (nftInfos[i].data.nsfw) {
-						cSrc = '';
-					}
+          if (nftInfos[i].data.nsfw) {
+            cSrc = "";
+          }
 
-					imgSrc = './images/nft-image.png';
-					nftHolderId = '#issuedNftImagesHolder';
-					nftContentHolderId = '#issuedNftImagesContentHolder';
-					break;
-				case NFT_TYPE.Audio:
-					imgSrc = './images/nft-audio.png';
-					nftHolderId = '#issuedNftAudioHolder';
-					nftContentHolderId = '#issuedNftAudioContentHolder';
-					break;
-				case NFT_TYPE.Video:
-					imgSrc = './images/nft-video.png';
-					nftHolderId = '#issuedNftVideoHolder';
-					nftContentHolderId = '#issuedNftVideoContentHolder';
-					break;
-				case NFT_TYPE.ArtCollection:
-					imgSrc = './images/nft-artcollection.png';;
-					nftHolderId = '#issuedNftArtCollectionHolder';
-					nftContentHolderId = '#issuedNftArtCollectionContentHolder';
-					break;
-				case NFT_TYPE.FileAttachment:
-					imgSrc = './images/nft-file.png';
-					nftHolderId = '#issuedNftFileHolder';
-					nftContentHolderId = '#issuedNftFileContentHolder';
-					break;
-				case NFT_TYPE.MembershipToken:
-					imgSrc = './images/nft-membership.png';
-					nftHolderId = '#issuedNftMembershipHolder';
-					nftContentHolderId = '#issuedNftMembershipContentHolder';
-					break;
-			}
+          imgSrc = "./images/nft-image.png";
+          nftHolderId = "#issuedNftImagesHolder";
+          nftContentHolderId = "#issuedNftImagesContentHolder";
+          break;
+        case NFT_TYPE.Audio:
+          imgSrc = "./images/nft-audio.png";
+          nftHolderId = "#issuedNftAudioHolder";
+          nftContentHolderId = "#issuedNftAudioContentHolder";
+          break;
+        case NFT_TYPE.Video:
+          imgSrc = "./images/nft-video.png";
+          nftHolderId = "#issuedNftVideoHolder";
+          nftContentHolderId = "#issuedNftVideoContentHolder";
+          break;
+        case NFT_TYPE.ArtCollection:
+          imgSrc = "./images/nft-artcollection.png";
+          nftHolderId = "#issuedNftArtCollectionHolder";
+          nftContentHolderId = "#issuedNftArtCollectionContentHolder";
+          break;
+        case NFT_TYPE.FileAttachment:
+          imgSrc = "./images/nft-file.png";
+          nftHolderId = "#issuedNftFileHolder";
+          nftContentHolderId = "#issuedNftFileContentHolder";
+          break;
+        case NFT_TYPE.MembershipToken:
+          imgSrc = "./images/nft-membership.png";
+          nftHolderId = "#issuedNftMembershipHolder";
+          nftContentHolderId = "#issuedNftMembershipContentHolder";
+          break;
+      }
 
-			html[nftInfos[i].type] += '<a href="' + getTokenUrl(nftInfos[i].data.id) + '"><div class="card m-1" style="width: 100px;' + (nftInfos[i].data.isBurned == 't' ? 'border:1.5px solid red;' : '') + '"><div class="cardImgHolder"><img onload="onNftImageLoaded(this, \'nft-img-issued\')" onerror="onNftImageLoaded(this, \'nft-img-issued\')" csrc="' + cSrc + '" ' + (nftInfos[i].data.isBurned == 't' ? 'style="opacity: 0.4;"' : '') + 'src="' + imgSrc + '" class="nft-img-issued card-img-top p-4"></div><div class="card-body p-2"><p class="card-text">' + nftInfos[i].data.name + '</p></div></div></a>';
-		} else {
-			nftHolderId = '#issuedTokenHolder';
-			nftContentHolderId = '#issuedTokenContentHolder';
+      html[nftInfos[i].type] +=
+        '<a href="' +
+        getTokenUrl(nftInfos[i].data.id) +
+        '"><div class="card m-1" style="width: 100px;' +
+        (nftInfos[i].data.isBurned == "t" ? "border:1.5px solid red;" : "") +
+        '"><div class="cardImgHolder"><img onload="onNftImageLoaded(this, \'nft-img-issued\')" onerror="onNftImageLoaded(this, \'nft-img-issued\')" csrc="' +
+        cSrc +
+        '" ' +
+        (nftInfos[i].data.isBurned == "t" ? 'style="opacity: 0.4;"' : "") +
+        'src="' +
+        imgSrc +
+        '" class="nft-img-issued card-img-top p-4"></div><div class="card-body p-2"><p class="card-text">' +
+        nftInfos[i].data.name +
+        "</p></div></div></a>";
+    } else {
+      nftHolderId = "#issuedTokenHolder";
+      nftContentHolderId = "#issuedTokenContentHolder";
 
-			html['token'] += '<p><a href="' + getTokenUrl(nftInfos[i].data.id) + '">' + nftInfos[i].data.name + ' - ' + formatAddressString(nftInfos[i].data.id) + '</a>' + (nftInfos[i].data.isBurned == 't' ? ' (<span class="text-danger">Burned</span>)' : '') + '</p>';
-		}
+      html["token"] +=
+        '<p><a href="' +
+        getTokenUrl(nftInfos[i].data.id) +
+        '">' +
+        nftInfos[i].data.name +
+        " - " +
+        formatAddressString(nftInfos[i].data.id) +
+        "</a>" +
+        (nftInfos[i].data.isBurned == "t"
+          ? ' (<span class="text-danger">Burned</span>)'
+          : "") +
+        "</p>";
+    }
 
-		$(nftHolderId).show();
+    $(nftHolderId).show();
 
-		issuedNftsCount++;
-	}
+    issuedNftsCount++;
+  }
 
-	$('#issuedTokenContentHolder').html(html['token']);
-	$('#issuedNftImagesContentHolder').html(html[NFT_TYPE.Image]);
-	$('#issuedNftAudioContentHolder').html(html[NFT_TYPE.Audio]);
-	$('#issuedNftVideoContentHolder').html(html[NFT_TYPE.Video]);
-	$('#issuedNftArtCollectionContentHolder').html(html[NFT_TYPE.ArtCollection]);
-	$('#issuedNftFileContentHolder').html(html[NFT_TYPE.FileAttachment]);
-	$('#issuedNftMembershipContentHolder').html(html[NFT_TYPE.MembershipToken]);
+  $("#issuedTokenContentHolder").html(html["token"]);
+  $("#issuedNftImagesContentHolder").html(html[NFT_TYPE.Image]);
+  $("#issuedNftAudioContentHolder").html(html[NFT_TYPE.Audio]);
+  $("#issuedNftVideoContentHolder").html(html[NFT_TYPE.Video]);
+  $("#issuedNftArtCollectionContentHolder").html(html[NFT_TYPE.ArtCollection]);
+  $("#issuedNftFileContentHolder").html(html[NFT_TYPE.FileAttachment]);
+  $("#issuedNftMembershipContentHolder").html(html[NFT_TYPE.MembershipToken]);
 
-	$('#issuedNftsHolder').show();
-	$('#issuedNftsTitle').html('<strong>Issued Assets</strong> (' + issuedNftsCount + ') ');
-	$('#hideIssuedNftsAction').hide();
+  $("#issuedNftsHolder").show();
+  $("#issuedNftsTitle").html(
+    "<strong>Issued Assets</strong> (" + issuedNftsCount + ") ",
+  );
+  $("#hideIssuedNftsAction").hide();
 
-	if (issuedNftsShown) {
-		loadingIssuedNfts = false;
-		showIssuedNfts(null);
-	}
+  if (issuedNftsShown) {
+    loadingIssuedNfts = false;
+    showIssuedNfts(null);
+  }
 }
 
 function showIssuedNfts(e) {
-	$('#nftsShowIssued').show();
-	$('#showIssuedNftsAction').hide();
-	$('#hideIssuedNftsAction').show();
-	$('#issuedNftsTitle').html('<strong>Issued Assets</strong>');
+  $("#nftsShowIssued").show();
+  $("#showIssuedNftsAction").hide();
+  $("#hideIssuedNftsAction").show();
+  $("#issuedNftsTitle").html("<strong>Issued Assets</strong>");
 
-	loadIssuedNfts();
+  loadIssuedNfts();
 
-	issuedNftsShown = true;
+  issuedNftsShown = true;
 
-	if (e) {
-		scrollToElement($('#issuedNftsTitle'));
-		e.preventDefault();
-	}
+  if (e) {
+    scrollToElement($("#issuedNftsTitle"));
+    e.preventDefault();
+  }
 }
 
 function hideIssuedNfts(e) {
-	$('#nftsShowIssued').hide();
-	$('#showIssuedNftsAction').show();
-	$('#hideIssuedNftsAction').hide();
-	$('#issuedNftsTitle').html('<strong>Issued Assets</strong> (' + issuedNftsCount + ') ');
+  $("#nftsShowIssued").hide();
+  $("#showIssuedNftsAction").show();
+  $("#hideIssuedNftsAction").hide();
+  $("#issuedNftsTitle").html(
+    "<strong>Issued Assets</strong> (" + issuedNftsCount + ") ",
+  );
 
-	scrollToElement($('#issuedNftsTitle'));
+  scrollToElement($("#issuedNftsTitle"));
 
-	issuedNftsShown = false;
+  issuedNftsShown = false;
 
-	e.preventDefault();
+  e.preventDefault();
 }
 
 function getErgopadVesting() {
-	$.ajax({
-	    type: 'POST',
-	    url: 'https://api.ergopad.io/vesting/v2/',
-	    data: JSON.stringify({addresses: [walletAddress]}),
-	    contentType: 'application/json; charset=utf-8',
-	    dataType: 'json',
-	    success: function(data) {
-	    	let ergopadVestingData = data;
+  $.ajax({
+    type: "POST",
+    url: "https://api.ergopad.io/vesting/v2/",
+    data: JSON.stringify({ addresses: [walletAddress] }),
+    contentType: "application/json; charset=utf-8",
+    dataType: "json",
+    success: function (data) {
+      let ergopadVestingData = data;
 
-			let keys = Object.keys(ergopadVestingData);
-			let totalVestingPrice = 0;
-			let totalReddemablePrice = 0;
-			for (let i = 0; i < tokensArray.length; i++) {
-				for (let j = 0; j < keys.length; j++) {
-					let vestingAsset = ergopadVestingData[keys[j]];
-					for (let k = 0; k < vestingAsset.length; k++) {
-						let vestingEntry = vestingAsset[k];
-						let vestingEntryKeyId = vestingEntry['Vesting Key Id'];
-						if (tokensArray[i].tokenId == vestingEntryKeyId) {
-							totalVestingPrice += vestingEntry['Remaining'] * pricesNames[keys[j]];
-							totalReddemablePrice += vestingEntry['Redeemable'] * pricesNames[keys[j]];
-						}	
-					}
-				}
-			}
+      let keys = Object.keys(ergopadVestingData);
+      let totalVestingPrice = 0;
+      let totalReddemablePrice = 0;
+      for (let i = 0; i < tokensArray.length; i++) {
+        for (let j = 0; j < keys.length; j++) {
+          let vestingAsset = ergopadVestingData[keys[j]];
+          for (let k = 0; k < vestingAsset.length; k++) {
+            let vestingEntry = vestingAsset[k];
+            let vestingEntryKeyId = vestingEntry["Vesting Key Id"];
+            if (tokensArray[i].tokenId == vestingEntryKeyId) {
+              totalVestingPrice +=
+                vestingEntry["Remaining"] * pricesNames[keys[j]];
+              totalReddemablePrice +=
+                vestingEntry["Redeemable"] * pricesNames[keys[j]];
+            }
+          }
+        }
+      }
 
-			if (totalVestingPrice > 0) {
-				$('#ergopadVesting').html('<a href="https://www.ergopad.io/dashboard"" target="_new"><img src="https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/d71693c49a84fbbecd4908c94813b46514b18b67a99952dc1e6e4791556de413.svg" class="token-icon"> Ergopad</a> vesting: <span class="text-light">$' + formatValue(totalVestingPrice, 2) + '</span>' + (totalReddemablePrice > 0 ? '<br><img src="https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/d71693c49a84fbbecd4908c94813b46514b18b67a99952dc1e6e4791556de413.svg" class="token-icon" style="visibility:hidden;"> <span style="font-size:0.9em;">Redeemable: $' + formatValue(totalReddemablePrice, 2) + '</span>' : ''));
-				$('#ergopadVesting').show();
-				$('#ergopad').show();
-			}
-	    }
-	});
+      if (totalVestingPrice > 0) {
+        $("#ergopadVesting").html(
+          '<a href="https://www.ergopad.io/dashboard"" target="_new"><img src="https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/d71693c49a84fbbecd4908c94813b46514b18b67a99952dc1e6e4791556de413.svg" class="token-icon"> Ergopad</a> vesting: <span class="text-light">$' +
+            formatValue(totalVestingPrice, 2) +
+            "</span>" +
+            (totalReddemablePrice > 0
+              ? '<br><img src="https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/d71693c49a84fbbecd4908c94813b46514b18b67a99952dc1e6e4791556de413.svg" class="token-icon" style="visibility:hidden;"> <span style="font-size:0.9em;">Redeemable: $' +
+                formatValue(totalReddemablePrice, 2) +
+                "</span>"
+              : ""),
+        );
+        $("#ergopadVesting").show();
+        $("#ergopad").show();
+      }
+    },
+  });
 }
 
 function getErgopadStaking() {
-	$.ajax({
-	    type: 'POST',
-	    url: 'https://api.ergopad.io/staking/staked-all/',
-	    data: JSON.stringify({addresses: [walletAddress]}),
-	    contentType: 'application/json; charset=utf-8',
-	    dataType: 'json',
-	    success: function(data) {
-	    	let ergopadStakingData = data;
+  $.ajax({
+    type: "POST",
+    url: "https://api.ergopad.io/staking/staked-all/",
+    data: JSON.stringify({ addresses: [walletAddress] }),
+    contentType: "application/json; charset=utf-8",
+    dataType: "json",
+    success: function (data) {
+      let ergopadStakingData = data;
 
-			let keys = Object.keys(pricesNames);
-			let totalVestingPrice = 0;
-			for (let i = 0; i < keys.length; i++) {
-				for (let j = 0; j < ergopadStakingData.length; j++) {
-					if (keys[i] == ergopadStakingData[j].tokenName) {
-						totalVestingPrice += ergopadStakingData[j]['addresses'][walletAddress].totalStaked * pricesNames[keys[i]];
-					}
-				}
-			}
+      let keys = Object.keys(pricesNames);
+      let totalVestingPrice = 0;
+      for (let i = 0; i < keys.length; i++) {
+        for (let j = 0; j < ergopadStakingData.length; j++) {
+          if (keys[i] == ergopadStakingData[j].tokenName) {
+            totalVestingPrice +=
+              ergopadStakingData[j]["addresses"][walletAddress].totalStaked *
+              pricesNames[keys[i]];
+          }
+        }
+      }
 
-			if (totalVestingPrice == 0) return;
+      if (totalVestingPrice == 0) return;
 
-			$('#ergopadStaking').html('<a href="https://www.ergopad.io/dashboard"" target="_new"><img src="https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/d71693c49a84fbbecd4908c94813b46514b18b67a99952dc1e6e4791556de413.svg" class="token-icon"> Ergopad</a> staking: <span class="text-light">$' + formatValue(totalVestingPrice, 2) + '</span>');
-			$('#ergopadStaking').show();
-			$('#ergopad').show();
-	    }
-	});
+      $("#ergopadStaking").html(
+        '<a href="https://www.ergopad.io/dashboard"" target="_new"><img src="https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/d71693c49a84fbbecd4908c94813b46514b18b67a99952dc1e6e4791556de413.svg" class="token-icon"> Ergopad</a> staking: <span class="text-light">$' +
+          formatValue(totalVestingPrice, 2) +
+          "</span>",
+      );
+      $("#ergopadStaking").show();
+      $("#ergopad").show();
+    },
+  });
 }
 
 function onInitRequestsFinished() {
-	if (!gotTokenIcons) return;
+  if (!gotTokenIcons) return;
 
-    printAddressSummary();
-	printTransactions();
-	printUnspentBoxes();
+  printAddressSummary();
+  printTransactions();
+  printUnspentBoxes();
 
-	if (rfT) {
-		clearTimeout(rfT);
-		rfT = null;
-	}
+  if (rfT) {
+    clearTimeout(rfT);
+    rfT = null;
+  }
 
-	rfT = setTimeout(refreshData, rfTimeout);
+  rfT = setTimeout(refreshData, rfTimeout);
 }
 
 function refreshData() {
-	printedUnspentBoxes = false;
-	printedAddressSummary = false;
-	mempoolRequestDone = false;
-	transactionsRequestDone = false;
-	printed = false;
-	getTxData = false;
-	totalTransactions = 0;
-	firstTime = false;
+  printedUnspentBoxes = false;
+  printedAddressSummary = false;
+  mempoolRequestDone = false;
+  transactionsRequestDone = false;
+  printed = false;
+  getTxData = false;
+  totalTransactions = 0;
+  firstTime = false;
 
-	getPrices(onInitRequestsFinished);
+  getPrices(onInitRequestsFinished);
 }
 
 function printUnspentBoxes() {
-	if (printedUnspentBoxes) {
-		return;
-	}
+  if (printedUnspentBoxes) {
+    return;
+  }
 
-	printedUnspentBoxes = true;
+  printedUnspentBoxes = true;
 
-	if (firstTime) {
-		hideUnspentBoxes(null);
-	}
+  if (firstTime) {
+    hideUnspentBoxes(null);
+  }
 
-	var jqxhr = $.get(getUnspentBoxesDataUrl(), function(data) {
-		let html = '';
-        for (let i = 0; i < data.items.length; i++) {
-        	html += formatBox(data.items[i], false, true).replace('row', 'col-12 col-md-6 ps-0 pe-0');
-        }
+  var jqxhr = $.get(getUnspentBoxesDataUrl(), function (data) {
+    let html = "";
+    for (let i = 0; i < data.items.length; i++) {
+      html += formatBox(data.items[i], false, true).replace(
+        "row",
+        "col-12 col-md-6 ps-0 pe-0",
+      );
+    }
 
-        unspentBoxesCount = data.total;
+    unspentBoxesCount = data.total;
 
-        $('#unspentBoxesHolder').html(html);
-        $('#unspentBoxesHeading').html('<strong>Unspent Boxes</strong> (' + unspentBoxesCount + ') ');
+    $("#unspentBoxesHolder").html(html);
+    $("#unspentBoxesHeading").html(
+      "<strong>Unspent Boxes</strong> (" + unspentBoxesCount + ") ",
+    );
 
-        $('#hideUnspentBoxesAction').hide();
+    $("#hideUnspentBoxesAction").hide();
+  })
+    .fail(function () {
+      console.log("Unspent boxes fetch failed.");
     })
-    .fail(function() {
-        console.log('Unspent boxes fetch failed.');
-    })
-    .always(function() {
-    	//onMempoolAndTransactionsDataFetched();
+    .always(function () {
+      //onMempoolAndTransactionsDataFetched();
     });
 }
 
 function showUnspentBoxes(e) {
-	$('#unspentBoxesHolder').show();
-	$('#showUnspentBoxesAction').hide();
-	$('#hideUnspentBoxesAction').show();
-	$('#unspentBoxesHeading').html('<strong>Unspent Boxes </strong>');
+  $("#unspentBoxesHolder").show();
+  $("#showUnspentBoxesAction").hide();
+  $("#hideUnspentBoxesAction").show();
+  $("#unspentBoxesHeading").html("<strong>Unspent Boxes </strong>");
 
-	scrollToElement($('#unspentBoxesHeading'));
+  scrollToElement($("#unspentBoxesHeading"));
 
-	e.preventDefault();
+  e.preventDefault();
 }
 
 function hideUnspentBoxes(e) {
-	$('#unspentBoxesHolder').hide();
-	$('#showUnspentBoxesAction').show();
-	$('#hideUnspentBoxesAction').hide();
-	$('#unspentBoxesHeading').html('<strong>Unspent Boxes</strong> (' + unspentBoxesCount + ') ');
+  $("#unspentBoxesHolder").hide();
+  $("#showUnspentBoxesAction").show();
+  $("#hideUnspentBoxesAction").hide();
+  $("#unspentBoxesHeading").html(
+    "<strong>Unspent Boxes</strong> (" + unspentBoxesCount + ") ",
+  );
 
-	if (e) {
-		scrollToElement($('#unspentBoxesHeading'));
+  if (e) {
+    scrollToElement($("#unspentBoxesHeading"));
 
-		e.preventDefault();
-	}
+    e.preventDefault();
+  }
 }
 
 function getAddressInfo() {
-	var jqxhr = $.get(ERGEXPLORER_API_HOST + 'addressbook/getAddressInfo?address=' + walletAddress,
-	function (data) {
-		if (data.total == 0) {
-			let newName = "";
-			console.log(transactionsData)
-			for (let i = 0; i < transactionsData.items[0].inputs.length; i++) {
-				let box = transactionsData.items[0].inputs[i];
-				if (box.address == walletAddress) {
-					newName = getAddressFromErgotree(box.ergoTree, "", newName);
-					break;
-				}
-			}
+  var jqxhr = $.get(
+    ERGEXPLORER_API_HOST +
+      "addressbook/getAddressInfo?address=" +
+      walletAddress,
+    function (data) {
+      if (data.total == 0) {
+        let newName = "";
+        console.log(transactionsData);
+        for (let i = 0; i < transactionsData.items[0].inputs.length; i++) {
+          let box = transactionsData.items[0].inputs[i];
+          if (box.address == walletAddress) {
+            newName = getAddressFromErgotree(box.ergoTree, "", newName);
+            break;
+          }
+        }
 
-			for (let i = 0; i < transactionsData.items[0].outputs.length; i++) {
-				let box = transactionsData.items[0].outputs[i];
-				if (box.address == walletAddress) {
-					newName = getAddressFromErgotree(box.ergoTree, "", newName);
-					break;
-				}
-			}
+        for (let i = 0; i < transactionsData.items[0].outputs.length; i++) {
+          let box = transactionsData.items[0].outputs[i];
+          if (box.address == walletAddress) {
+            newName = getAddressFromErgotree(box.ergoTree, "", newName);
+            break;
+          }
+        }
 
-			if (newName != "") {
-				$('#address').html(newName);
-			}
+        if (newName != "") {
+          $("#address").html(newName);
+        }
 
-			return;
-		}
+        return;
+      }
 
-		let title = data.items[0].name;
-		let type = ''
-		if (data.items[0].type != '') {
-			type += ' (<span class="' + getOwnerTypeClass(data.items[0].type) + '">' + data.items[0].type + '</span>)';
-		}
+      let title = data.items[0].name;
+      let type = "";
+      if (data.items[0].type != "") {
+        type +=
+          ' (<span class="' +
+          getOwnerTypeClass(data.items[0].type) +
+          '">' +
+          data.items[0].type +
+          "</span>)";
+      }
 
-		let html = title;
-		if (data.items[0].name != '') {
-			html = '<a href="' + data.items[0].url + '" target="_new"><span class="">' + title + '</span></a>' + type;
-		}
+      let html = title;
+      if (data.items[0].name != "") {
+        html =
+          '<a href="' +
+          data.items[0].url +
+          '" target="_new"><span class="">' +
+          title +
+          "</span></a>" +
+          type;
+      }
 
-		$('#verifiedOwner').html(html);
-		$('#verifiedOwnerHolder').show();
+      $("#verifiedOwner").html(html);
+      $("#verifiedOwnerHolder").show();
 
-		if (data.items[0].urltype != '') {
-			$('#addressName').html(data.items[0].urltype);
-			$('#addressNameHolder').show();
-		}
-	});
+      if (data.items[0].urltype != "") {
+        $("#addressName").html(data.items[0].urltype);
+        $("#addressNameHolder").show();
+      }
+    },
+  );
 }
 
 function findOtherAddress(item, totalTransferred, txInOut, firstAddress) {
-	let addresses = Array();
-	let totalTransferedAssets = {};
+  let addresses = Array();
+  let totalTransferedAssets = {};
 
-	for (let j = 0; j < item.outputs.length; j++) {
-		let newAddress = item.outputs[j].address;
-		if (!addresses.includes(newAddress)) {
-			addresses.push(newAddress);
-			totalTransferedAssets[newAddress] = {
-				value: 0,
-				assets: {}
-			};
-		}
-	}
+  for (let j = 0; j < item.outputs.length; j++) {
+    let newAddress = item.outputs[j].address;
+    if (!addresses.includes(newAddress)) {
+      addresses.push(newAddress);
+      totalTransferedAssets[newAddress] = {
+        value: 0,
+        assets: {},
+      };
+    }
+  }
 
-	for (let j = 0; j < item.inputs.length; j++) {
-		let newAddress = item.inputs[j].address;
-		if (!addresses.includes(newAddress)) {
-			addresses.push(newAddress);
-			totalTransferedAssets[newAddress] = {
-				value: 0,
-				assets: {}
-			};
-		}
-	}
+  for (let j = 0; j < item.inputs.length; j++) {
+    let newAddress = item.inputs[j].address;
+    if (!addresses.includes(newAddress)) {
+      addresses.push(newAddress);
+      totalTransferedAssets[newAddress] = {
+        value: 0,
+        assets: {},
+      };
+    }
+  }
 
-	for (let i = 0; i < addresses.length; i++) {
-		let address = addresses[i];
+  for (let i = 0; i < addresses.length; i++) {
+    let address = addresses[i];
 
-		for (let j = 0; j < item.inputs.length; j++) {
-			if (item.inputs[j].address == address) {
+    for (let j = 0; j < item.inputs.length; j++) {
+      if (item.inputs[j].address == address) {
+        totalTransferedAssets[address].value += item.inputs[j].value;
 
-				totalTransferedAssets[address].value += item.inputs[j].value;
-				
-				//Sort
-				let tokensArray = sortTokens(item.inputs[j].assets);
-				
-				for (let k = 0; k < tokensArray.length; k++) {
-					if (totalTransferedAssets[address].assets[tokensArray[k].tokenId] == undefined) {
-						totalTransferedAssets[address].assets[tokensArray[k].tokenId] = tokensArray[k];
-					} else {
-						totalTransferedAssets[address].assets[tokensArray[k].tokenId].amount += tokensArray[k].amount;
-					}
-				}
-			}
-		}
+        //Sort
+        let tokensArray = sortTokens(item.inputs[j].assets);
 
-		for (let j = 0; j < item.outputs.length; j++) {
-			if (item.outputs[j].address == add) {
-				totalTransferedAssets[address].value -= item.outputs[j].value;
-				
-				//Sort
-				let tokensArray = sortTokens(item.outputs[j].assets);
-				
-				for (let k = 0; k < tokensArray.length; k++) {
-					if (totalTransferedAssets[address].assets[tokensArray[k].tokenId] == undefined) {
-						totalTransferedAssets[address].assets[tokensArray[k].tokenId] = {};
-						totalTransferedAssets[address].assets[tokensArray[k].tokenId].tokenId = tokensArray[k].tokenId;
-						totalTransferedAssets[address].assets[tokensArray[k].tokenId].decimals = tokensArray[k].decimals;
-						totalTransferedAssets[address].assets[tokensArray[k].tokenId].name = tokensArray[k].name;
-						totalTransferedAssets[address].assets[tokensArray[k].tokenId].amount = -tokensArray[k].amount;
-					} else {
-						totalTransferedAssets[address].assets[tokensArray[k].tokenId].amount -= tokensArray[k].amount;
-					}
-				}
-			}
-		}
-	}
+        for (let k = 0; k < tokensArray.length; k++) {
+          if (
+            totalTransferedAssets[address].assets[tokensArray[k].tokenId] ==
+            undefined
+          ) {
+            totalTransferedAssets[address].assets[tokensArray[k].tokenId] =
+              tokensArray[k];
+          } else {
+            totalTransferedAssets[address].assets[
+              tokensArray[k].tokenId
+            ].amount += tokensArray[k].amount;
+          }
+        }
+      }
+    }
 
-	for (let i = 0; i < addresses.length; i++) {
-		let exactMatch = true;
-		let address = addresses[i];
+    for (let j = 0; j < item.outputs.length; j++) {
+      if (item.outputs[j].address == add) {
+        totalTransferedAssets[address].value -= item.outputs[j].value;
 
-				if (address == firstAddress || address != '2JowFgqdee4yFVaXNsYuiAh1ge7HGxNSaDLiXQRKhtCYYRKgwMCeqMPi54qxpovt5TtjRVNNRabtZ7awzrcnqnmALG2Hjkwe2okjFn9odM7M3uhA9RQ2uBkkVsrY1P3FW8bUTx6qRjy4yHdtdS8YUzFCvmGZVHLteknL6RN9dueHbpLYRkyV2e5mYEzptufdxy81DwNpJphyJa9Y21ELHo75vk2t24kZS5Lgt5GDByQHRu3G4GTnPb4vMvew4wUFJh8xAwM1ffoEG946YZaWkSu48UUV4tw6Y5a4uDxZPEEiSDM36wookGfTixFeWVfM9YApPytQm8y1L1bsbcocQ9JTvBjixevx1BRagnvaJrwduuDbKYr3wwpo9PfK85xXprxrFgHBVwEof9gQs5TQFJ3ddKf1pftx6SJrHyNygX6CS4Vm3TG9dU32bs8inxSn4eVdwfRdhNiECZavPBBrzgfa9ismVpkwrcNbFZrAdNSFUpoKfiuFcsP6Be5tsE4ZsPD9sWEArhbGPqya88U8TftP9DqoD3xVPUmhMsB6pb6GfwQ1QxsenMhynSMBZ4fc6eyjdZWvzWeBKKs6AbVMX6EsSoptPvsbvpd664kBq99DsZ5Br6rQGjPDM1zPYsCpGUSW849qigHzHyNmYUCoVkDgfQA26TYKwFPLi7rxsJbSfAEhwQj5czRmfg11HafTYMcuSgryKP8ZzxTfTj5LxZFsXVjY9JWScT1tA5ZFjXZHxGENBporNPMbqWzusqMKvmyzTkZDwwyJV6nzcAFRDEjHd4MjzzsHbztt9XoYtWcYyKCYyMiAxsEqvc7VvuKXvTMEyzHnR1dSpqoP6bKpCwNKKZvrYX35GdxNdEKzQS6ccbNe98zvFQPrgQPa7BjYs1hgCWv6LLLWmqhhy9J6ca332st262t1BYjVLhYLEHSvLbsmM36hDtDjyoniTuW3zVmN51nV7bkZU1L1PQobFqp7uLvdieFt234Pz2RBgezeVTqkKqJLv7D2xKveVTUGJqsM8P7BghcLTyzEY9CZ3dXZRQVh2sXbhQEFqHdKpXL92eZTLZbg1AQYRpfL2p8AVVrbeWEuha3gmA5mv95zkmi5MPbDtxEekDaTLc9KXoWtSEPSy8zRMyhiws5') {
-			continue;
-		}
+        //Sort
+        let tokensArray = sortTokens(item.outputs[j].assets);
 
-	//	console.log(totalTransferedAssets[address].value, totalTransferred.value);
-		if (totalTransferedAssets[address].value != totalTransferred.value) {
-			exactMatch = false;
-			continue;
-		}
+        for (let k = 0; k < tokensArray.length; k++) {
+          if (
+            totalTransferedAssets[address].assets[tokensArray[k].tokenId] ==
+            undefined
+          ) {
+            totalTransferedAssets[address].assets[tokensArray[k].tokenId] = {};
+            totalTransferedAssets[address].assets[
+              tokensArray[k].tokenId
+            ].tokenId = tokensArray[k].tokenId;
+            totalTransferedAssets[address].assets[
+              tokensArray[k].tokenId
+            ].decimals = tokensArray[k].decimals;
+            totalTransferedAssets[address].assets[tokensArray[k].tokenId].name =
+              tokensArray[k].name;
+            totalTransferedAssets[address].assets[
+              tokensArray[k].tokenId
+            ].amount = -tokensArray[k].amount;
+          } else {
+            totalTransferedAssets[address].assets[
+              tokensArray[k].tokenId
+            ].amount -= tokensArray[k].amount;
+          }
+        }
+      }
+    }
+  }
 
-		console.log(`Value match for address ${address}`);
+  for (let i = 0; i < addresses.length; i++) {
+    let exactMatch = true;
+    let address = addresses[i];
 
-		let assetKeys1 = Object.keys(totalTransferedAssets[address].assets);
-		let assetKeys2 = Object.keys(totalTransferred.assets);
+    if (
+      address == firstAddress ||
+      address !=
+        "2JowFgqdee4yFVaXNsYuiAh1ge7HGxNSaDLiXQRKhtCYYRKgwMCeqMPi54qxpovt5TtjRVNNRabtZ7awzrcnqnmALG2Hjkwe2okjFn9odM7M3uhA9RQ2uBkkVsrY1P3FW8bUTx6qRjy4yHdtdS8YUzFCvmGZVHLteknL6RN9dueHbpLYRkyV2e5mYEzptufdxy81DwNpJphyJa9Y21ELHo75vk2t24kZS5Lgt5GDByQHRu3G4GTnPb4vMvew4wUFJh8xAwM1ffoEG946YZaWkSu48UUV4tw6Y5a4uDxZPEEiSDM36wookGfTixFeWVfM9YApPytQm8y1L1bsbcocQ9JTvBjixevx1BRagnvaJrwduuDbKYr3wwpo9PfK85xXprxrFgHBVwEof9gQs5TQFJ3ddKf1pftx6SJrHyNygX6CS4Vm3TG9dU32bs8inxSn4eVdwfRdhNiECZavPBBrzgfa9ismVpkwrcNbFZrAdNSFUpoKfiuFcsP6Be5tsE4ZsPD9sWEArhbGPqya88U8TftP9DqoD3xVPUmhMsB6pb6GfwQ1QxsenMhynSMBZ4fc6eyjdZWvzWeBKKs6AbVMX6EsSoptPvsbvpd664kBq99DsZ5Br6rQGjPDM1zPYsCpGUSW849qigHzHyNmYUCoVkDgfQA26TYKwFPLi7rxsJbSfAEhwQj5czRmfg11HafTYMcuSgryKP8ZzxTfTj5LxZFsXVjY9JWScT1tA5ZFjXZHxGENBporNPMbqWzusqMKvmyzTkZDwwyJV6nzcAFRDEjHd4MjzzsHbztt9XoYtWcYyKCYyMiAxsEqvc7VvuKXvTMEyzHnR1dSpqoP6bKpCwNKKZvrYX35GdxNdEKzQS6ccbNe98zvFQPrgQPa7BjYs1hgCWv6LLLWmqhhy9J6ca332st262t1BYjVLhYLEHSvLbsmM36hDtDjyoniTuW3zVmN51nV7bkZU1L1PQobFqp7uLvdieFt234Pz2RBgezeVTqkKqJLv7D2xKveVTUGJqsM8P7BghcLTyzEY9CZ3dXZRQVh2sXbhQEFqHdKpXL92eZTLZbg1AQYRpfL2p8AVVrbeWEuha3gmA5mv95zkmi5MPbDtxEekDaTLc9KXoWtSEPSy8zRMyhiws5"
+    ) {
+      continue;
+    }
 
-		if (assetKeys1.length != assetKeys2.length) {
-			exactMatch = false;
-			continue;
-		}
+    //	console.log(totalTransferedAssets[address].value, totalTransferred.value);
+    if (totalTransferedAssets[address].value != totalTransferred.value) {
+      exactMatch = false;
+      continue;
+    }
 
-		console.log(`Asset length match for address ${address}`);
+    console.log(`Value match for address ${address}`);
 
-		for (let j = 0; j < assetKeys1.length; j++) {
-			let asset1 = totalTransferedAssets[address].assets[assetKeys1[j]];		
-			let foundAsset = false;
-			for (let k = 0; k < assetKeys2.length; k++) {
-				let asset2 = totalTransferred.assets[assetKeys2[k]];
-				if (asset2 && asset1.tokenId == asset2.tokenId) {
-					foundAsset = true;
-					if (asset1.amount != asset2.amount) {
-						exactMatch = false;
-					}
-					break;
-				}
-			}
+    let assetKeys1 = Object.keys(totalTransferedAssets[address].assets);
+    let assetKeys2 = Object.keys(totalTransferred.assets);
 
-			if (!foundAsset || !exactMatch) {
-				exactMatch = false;
-				break;
-			}
-		}
+    if (assetKeys1.length != assetKeys2.length) {
+      exactMatch = false;
+      continue;
+    }
 
-		if (exactMatch) {
-			console.log(`Exact match: ${address}`);	
-		}
-	}
+    console.log(`Asset length match for address ${address}`);
+
+    for (let j = 0; j < assetKeys1.length; j++) {
+      let asset1 = totalTransferedAssets[address].assets[assetKeys1[j]];
+      let foundAsset = false;
+      for (let k = 0; k < assetKeys2.length; k++) {
+        let asset2 = totalTransferred.assets[assetKeys2[k]];
+        if (asset2 && asset1.tokenId == asset2.tokenId) {
+          foundAsset = true;
+          if (asset1.amount != asset2.amount) {
+            exactMatch = false;
+          }
+          break;
+        }
+      }
+
+      if (!foundAsset || !exactMatch) {
+        exactMatch = false;
+        break;
+      }
+    }
+
+    if (exactMatch) {
+      console.log(`Exact match: ${address}`);
+    }
+  }
 }
 
-function findMinDiffBox(totalTransferred, boxes) {
-
-}
+function findMinDiffBox(totalTransferred, boxes) {}
 
 function getAddressFromErgotree(ergoTree, fromAddress, formattedAddress) {
-				if (ergoTree.substring(ergoTree.length - N2T_SWAP_SELL_TEMPLATE_ERG.length) == N2T_SWAP_SELL_TEMPLATE_ERG
-				||
-				ergoTree.substring(ergoTree.length - N2T_SWAP_SELL_TEMPLATE_SPF.length) == N2T_SWAP_SELL_TEMPLATE_SPF
-				||
-				ergoTree.substring(ergoTree.length - N2T_SWAP_BUY_TEMPLATE_ERG.length) == N2T_SWAP_BUY_TEMPLATE_ERG
-				||
-				ergoTree.substring(ergoTree.length - N2T_SWAP_BUY_TEMPLATE_SPF.length) == N2T_SWAP_BUY_TEMPLATE_SPF) {
-				return formatTxAddressString(fromAddress, 'Spectrum Finance N2T Swap Contract');
-			}
+  if (
+    ergoTree.substring(ergoTree.length - N2T_SWAP_SELL_TEMPLATE_ERG.length) ==
+      N2T_SWAP_SELL_TEMPLATE_ERG ||
+    ergoTree.substring(ergoTree.length - N2T_SWAP_SELL_TEMPLATE_SPF.length) ==
+      N2T_SWAP_SELL_TEMPLATE_SPF ||
+    ergoTree.substring(ergoTree.length - N2T_SWAP_BUY_TEMPLATE_ERG.length) ==
+      N2T_SWAP_BUY_TEMPLATE_ERG ||
+    ergoTree.substring(ergoTree.length - N2T_SWAP_BUY_TEMPLATE_SPF.length) ==
+      N2T_SWAP_BUY_TEMPLATE_SPF
+  ) {
+    return formatTxAddressString(
+      fromAddress,
+      "Spectrum Finance N2T Swap Contract",
+    );
+  }
 
-			if (ergoTree.substring(ergoTree.length - T2T_SWAP_TEMPLATE_ERG.length) == T2T_SWAP_TEMPLATE_ERG
-				||
-				ergoTree.substring(ergoTree.length - T2T_SWAP_TEMPLATE_SPF.length) == T2T_SWAP_TEMPLATE_SPF) {
-				return formatTxAddressString(fromAddress, 'Spectrum Finance T2T Swap Contract');
-			}
+  if (
+    ergoTree.substring(ergoTree.length - T2T_SWAP_TEMPLATE_ERG.length) ==
+      T2T_SWAP_TEMPLATE_ERG ||
+    ergoTree.substring(ergoTree.length - T2T_SWAP_TEMPLATE_SPF.length) ==
+      T2T_SWAP_TEMPLATE_SPF
+  ) {
+    return formatTxAddressString(
+      fromAddress,
+      "Spectrum Finance T2T Swap Contract",
+    );
+  }
 
-			if (ergoTree.substring(ergoTree.length - SPECTRUM_LP_DEPOSIT.length) == SPECTRUM_LP_DEPOSIT) {
-				return formatTxAddressString(fromAddress, 'Spectrum Finance LP Deposit Contract');
-			}
+  if (
+    ergoTree.substring(ergoTree.length - SPECTRUM_LP_DEPOSIT.length) ==
+    SPECTRUM_LP_DEPOSIT
+  ) {
+    return formatTxAddressString(
+      fromAddress,
+      "Spectrum Finance LP Deposit Contract",
+    );
+  }
 
-			if (ergoTree.substring(ergoTree.length - SPECTRUM_LP_REDEEM.length) == SPECTRUM_LP_REDEEM) {
-				return formatTxAddressString(fromAddress, 'Spectrum Finance LP Redeem Contract');
-			}
+  if (
+    ergoTree.substring(ergoTree.length - SPECTRUM_LP_REDEEM.length) ==
+    SPECTRUM_LP_REDEEM
+  ) {
+    return formatTxAddressString(
+      fromAddress,
+      "Spectrum Finance LP Redeem Contract",
+    );
+  }
 
-			if (ergoTree.substring(ergoTree.length - SPECTRUM_YF_DEPOSIT.length) == SPECTRUM_YF_DEPOSIT) {
-				return formatTxAddressString(fromAddress, 'Spectrum Finance YF Deposit Contract');
-			}
+  if (
+    ergoTree.substring(ergoTree.length - SPECTRUM_YF_DEPOSIT.length) ==
+    SPECTRUM_YF_DEPOSIT
+  ) {
+    return formatTxAddressString(
+      fromAddress,
+      "Spectrum Finance YF Deposit Contract",
+    );
+  }
 
-			if (ergoTree.substring(ergoTree.length - SPECTRUM_YF_REDEEM.length) == SPECTRUM_YF_REDEEM) {
-				return formatTxAddressString(fromAddress, 'Spectrum Finance YF Redeem Contract');
-			}
+  if (
+    ergoTree.substring(ergoTree.length - SPECTRUM_YF_REDEEM.length) ==
+    SPECTRUM_YF_REDEEM
+  ) {
+    return formatTxAddressString(
+      fromAddress,
+      "Spectrum Finance YF Redeem Contract",
+    );
+  }
 
-			return formattedAddress;
+  return formattedAddress;
 }
 
 function analyzeTransfers(txData, inputAddress) {
-    // Initialize result object
-    const result = {
-        isSending: false,
-        isReceiving: false,
-        isMinting: false,
-        isBurning: false,
-        sendingTo: new Set(),
-        receivingFrom: new Set(),
-        assetsSent: [],
-        assetsReceived: [],
-        assetsMinted: [],
-        assetsBurned: [],
-        from: '',
-        to: ''
-    };
+  // Initialize result object
+  const result = {
+    isSending: false,
+    isReceiving: false,
+    isMinting: false,
+    isBurning: false,
+    sendingTo: new Set(),
+    receivingFrom: new Set(),
+    assetsSent: [],
+    assetsReceived: [],
+    assetsMinted: [],
+    assetsBurned: [],
+    from: "",
+    to: "",
+  };
 
-    // Get all boxes for the input address
-    const inputBoxes = txData.inputs.filter(box => box.address === inputAddress);
-    const outputBoxes = txData.outputs.filter(box => box.address === inputAddress);
+  // Get all boxes for the input address
+  const inputBoxes = txData.inputs.filter(
+    (box) => box.address === inputAddress,
+  );
+  const outputBoxes = txData.outputs.filter(
+    (box) => box.address === inputAddress,
+  );
 
-    // Special address that receives payment
-    const PAYMENT_ADDRESS = '2iHkR7CWvD1R4j1yZg5bkeDRQavjAaVPeTDFGGLZduHyfWMuYpmhHocX8GJoaieTx78FntzJbCBVL6rf96ocJoZdmWBL2fci7NqWgAirppPQmZ7fN9V6z13Ay6brPriBKYqLp1bT2Fk4FkFLCfdPpe';
+  // Special address that receives payment
+  const PAYMENT_ADDRESS =
+    "2iHkR7CWvD1R4j1yZg5bkeDRQavjAaVPeTDFGGLZduHyfWMuYpmhHocX8GJoaieTx78FntzJbCBVL6rf96ocJoZdmWBL2fci7NqWgAirppPQmZ7fN9V6z13Ay6brPriBKYqLp1bT2Fk4FkFLCfdPpe";
 
-    // Helper function to get total assets for boxes
-    function getBoxAssets(boxes) {
-        const assets = new Map(); // Map of tokenId to amount
-        boxes.forEach(box => {
-            // Add ERG value
-            if (!assets.has('ERG')) {
-                assets.set('ERG', 0);
+  // Helper function to get total assets for boxes
+  function getBoxAssets(boxes) {
+    const assets = new Map(); // Map of tokenId to amount
+    boxes.forEach((box) => {
+      // Add ERG value
+      if (!assets.has("ERG")) {
+        assets.set("ERG", 0);
+      }
+      assets.set("ERG", assets.get("ERG") + box.value);
+
+      // Add other assets
+      box.assets.forEach((asset) => {
+        if (!assets.has(asset.tokenId)) {
+          assets.set(asset.tokenId, 0);
+        }
+        assets.set(asset.tokenId, assets.get(asset.tokenId) + asset.amount);
+      });
+    });
+    return assets;
+  }
+
+  // Get all assets in the transaction
+  const inputAssets = getBoxAssets(inputBoxes);
+  const outputAssets = getBoxAssets(outputBoxes);
+  const allTxInputAssets = getBoxAssets(txData.inputs);
+  const allTxOutputAssets = getBoxAssets(txData.outputs);
+
+  // Check for minting (new assets appearing in output)
+  for (const [tokenId, outputAmount] of outputAssets) {
+    const inputAmount = inputAssets.get(tokenId) || 0;
+    const totalTxInputAmount = allTxInputAssets.get(tokenId) || 0;
+    const totalTxOutputAmount = allTxOutputAssets.get(tokenId) || 0;
+
+    if (
+      totalTxOutputAmount > totalTxInputAmount &&
+      outputAmount > inputAmount
+    ) {
+      result.isMinting = true;
+      result.assetsMinted.push({
+        tokenId,
+        amount: Math.min(
+          outputAmount - inputAmount,
+          totalTxOutputAmount - totalTxInputAmount,
+        ),
+      });
+    }
+  }
+
+  // Check for burning (assets disappearing from input)
+  for (const [tokenId, inputAmount] of inputAssets) {
+    const outputAmount = outputAssets.get(tokenId) || 0;
+    const totalTxInputAmount = allTxInputAssets.get(tokenId) || 0;
+    const totalTxOutputAmount = allTxOutputAssets.get(tokenId) || 0;
+
+    if (
+      totalTxOutputAmount < totalTxInputAmount &&
+      inputAmount > outputAmount
+    ) {
+      result.isBurning = true;
+      result.assetsBurned.push({
+        tokenId,
+        amount: Math.min(
+          inputAmount - outputAmount,
+          totalTxInputAmount - totalTxOutputAmount,
+        ),
+      });
+    }
+  }
+
+  // Track which assets are only burned (not sent to other addresses)
+  const onlyBurnedAssets = new Set(
+    result.assetsBurned.map((asset) => asset.tokenId),
+  );
+
+  // Compare input and output assets to determine transfers
+  for (const [tokenId, inputAmount] of inputAssets) {
+    const outputAmount = outputAssets.get(tokenId) || 0;
+    if (inputAmount > outputAmount) {
+      // Find if this asset is actually being sent to someone
+      const isActuallySent = txData.outputs.some(
+        (box) =>
+          box.address !== inputAddress &&
+          box.address !== PAYMENT_ADDRESS &&
+          ((tokenId === "ERG" && box.value > 0) ||
+            box.assets.some(
+              (asset) => asset.tokenId === tokenId && asset.amount > 0,
+            )),
+      );
+
+      if (isActuallySent) {
+        onlyBurnedAssets.delete(tokenId);
+        result.isSending = true;
+        // Find recipients (excluding payment address)
+        txData.outputs
+          .filter(
+            (box) =>
+              box.address !== inputAddress && box.address !== PAYMENT_ADDRESS,
+          )
+          .forEach((box) => {
+            if (tokenId === "ERG" && box.value > 0) {
+              result.sendingTo.add(box.address);
+            } else {
+              const assetExists = box.assets.some(
+                (asset) => asset.tokenId === tokenId && asset.amount > 0,
+              );
+              if (assetExists) {
+                result.sendingTo.add(box.address);
+              }
             }
-            assets.set('ERG', assets.get('ERG') + box.value);
-            
-            // Add other assets
-            box.assets.forEach(asset => {
-                if (!assets.has(asset.tokenId)) {
-                    assets.set(asset.tokenId, 0);
-                }
-                assets.set(asset.tokenId, assets.get(asset.tokenId) + asset.amount);
-            });
+          });
+      }
+
+      result.assetsSent.push({
+        tokenId,
+        amount: inputAmount - outputAmount,
+      });
+    }
+  }
+
+  // Remove assets that are only burned from assetsSent
+  result.assetsSent = result.assetsSent.filter(
+    (asset) => !onlyBurnedAssets.has(asset.tokenId),
+  );
+
+  // Check for receiving assets
+  for (const [tokenId, outputAmount] of outputAssets) {
+    const inputAmount = inputAssets.get(tokenId) || 0;
+    if (outputAmount > inputAmount) {
+      result.isReceiving = true;
+      // Find senders
+      txData.inputs
+        .filter((box) => box.address !== inputAddress)
+        .forEach((box) => {
+          if (tokenId === "ERG" && box.value > 0) {
+            result.receivingFrom.add(box.address);
+          } else {
+            const assetExists = box.assets.some(
+              (asset) => asset.tokenId === tokenId && asset.amount > 0,
+            );
+            if (assetExists) {
+              result.receivingFrom.add(box.address);
+            }
+          }
         });
-        return assets;
+      result.assetsReceived.push({
+        tokenId,
+        amount: outputAmount - inputAmount,
+      });
     }
+  }
 
-    // Get all assets in the transaction
-    const inputAssets = getBoxAssets(inputBoxes);
-    const outputAssets = getBoxAssets(outputBoxes);
-    const allTxInputAssets = getBoxAssets(txData.inputs);
-    const allTxOutputAssets = getBoxAssets(txData.outputs);
-
-    // Check for minting (new assets appearing in output)
-    for (const [tokenId, outputAmount] of outputAssets) {
-        const inputAmount = inputAssets.get(tokenId) || 0;
-        const totalTxInputAmount = allTxInputAssets.get(tokenId) || 0;
-        const totalTxOutputAmount = allTxOutputAssets.get(tokenId) || 0;
-
-        if (totalTxOutputAmount > totalTxInputAmount && outputAmount > inputAmount) {
-            result.isMinting = true;
-            result.assetsMinted.push({
-                tokenId,
-                amount: Math.min(outputAmount - inputAmount, totalTxOutputAmount - totalTxInputAmount)
+  if (result.isSending && (!result.isBurning || result.sendingTo.size > 0)) {
+    result.from = inputAddress;
+    // If sending to single address, use that
+    if (result.sendingTo.size === 1) {
+      result.to = Array.from(result.sendingTo)[0];
+    }
+    // If sending to multiple addresses, use the one receiving the most value
+    else if (result.sendingTo.size > 1) {
+      let maxValue = 0;
+      let maxAddress = "";
+      Array.from(result.sendingTo).forEach((address) => {
+        let totalValue = 0;
+        txData.outputs
+          .filter((box) => box.address === address)
+          .forEach((box) => {
+            totalValue += box.value; // Add ERG value
+            // Add other assets value (simplified - just adding amounts)
+            box.assets.forEach((asset) => {
+              totalValue += asset.amount;
             });
+          });
+        if (totalValue > maxValue) {
+          maxValue = totalValue;
+          maxAddress = address;
         }
+      });
+      result.to = maxAddress;
     }
-
-    // Check for burning (assets disappearing from input)
-    for (const [tokenId, inputAmount] of inputAssets) {
-        const outputAmount = outputAssets.get(tokenId) || 0;
-        const totalTxInputAmount = allTxInputAssets.get(tokenId) || 0;
-        const totalTxOutputAmount = allTxOutputAssets.get(tokenId) || 0;
-
-        if (totalTxOutputAmount < totalTxInputAmount && inputAmount > outputAmount) {
-            result.isBurning = true;
-            result.assetsBurned.push({
-                tokenId,
-                amount: Math.min(inputAmount - outputAmount, totalTxInputAmount - totalTxOutputAmount)
+  }
+  // If primarily receiving
+  else if (result.isReceiving) {
+    result.to = inputAddress;
+    // If receiving from single address, use that
+    if (result.receivingFrom.size === 1) {
+      result.from = Array.from(result.receivingFrom)[0];
+    }
+    // If receiving from multiple addresses, use the one sending the most value
+    else if (result.receivingFrom.size > 1) {
+      let maxValue = 0;
+      let maxAddress = "";
+      Array.from(result.receivingFrom).forEach((address) => {
+        let totalValue = 0;
+        txData.inputs
+          .filter((box) => box.address === address)
+          .forEach((box) => {
+            totalValue += box.value; // Add ERG value
+            // Add other assets value (simplified - just adding amounts)
+            box.assets.forEach((asset) => {
+              totalValue += asset.amount;
             });
+          });
+        if (totalValue > maxValue) {
+          maxValue = totalValue;
+          maxAddress = address;
         }
+      });
+      result.from = maxAddress;
     }
+  }
+  // If only burning
+  else if (result.isBurning && !result.isSending) {
+    result.from = inputAddress;
+    result.to = PAYMENT_ADDRESS;
+  }
+  // If only minting
+  else if (result.isMinting && !result.isReceiving) {
+    result.from = inputAddress;
+    result.to = inputAddress;
+  }
 
-    // Track which assets are only burned (not sent to other addresses)
-    const onlyBurnedAssets = new Set(
-        result.assetsBurned.map(asset => asset.tokenId)
-    );
+  if (
+    !result.isMinting &&
+    !result.isBurning &&
+    !result.isSending &&
+    !result.isReceiving
+  ) {
+    result.from = inputAddress;
+    result.to = inputAddress;
+  }
 
-    // Compare input and output assets to determine transfers
-    for (const [tokenId, inputAmount] of inputAssets) {
-        const outputAmount = outputAssets.get(tokenId) || 0;
-        if (inputAmount > outputAmount) {
-            // Find if this asset is actually being sent to someone
-            const isActuallySent = txData.outputs
-                .some(box => 
-                    box.address !== inputAddress && 
-                    box.address !== PAYMENT_ADDRESS && 
-                    (
-                        (tokenId === 'ERG' && box.value > 0) ||
-                        box.assets.some(asset => asset.tokenId === tokenId && asset.amount > 0)
-                    )
-                );
-
-            if (isActuallySent) {
-                onlyBurnedAssets.delete(tokenId);
-                result.isSending = true;
-                // Find recipients (excluding payment address)
-                txData.outputs
-                    .filter(box => box.address !== inputAddress && box.address !== PAYMENT_ADDRESS)
-                    .forEach(box => {
-                        if (tokenId === 'ERG' && box.value > 0) {
-                            result.sendingTo.add(box.address);
-                        } else {
-                            const assetExists = box.assets.some(asset => 
-                                asset.tokenId === tokenId && asset.amount > 0);
-                            if (assetExists) {
-                                result.sendingTo.add(box.address);
-                            }
-                        }
-                    });
-            }
-            
-            result.assetsSent.push({
-                tokenId,
-                amount: inputAmount - outputAmount
-            });
-        }
-    }
-
-    // Remove assets that are only burned from assetsSent
-    result.assetsSent = result.assetsSent.filter(
-        asset => !onlyBurnedAssets.has(asset.tokenId)
-    );
-
-    // Check for receiving assets
-    for (const [tokenId, outputAmount] of outputAssets) {
-        const inputAmount = inputAssets.get(tokenId) || 0;
-        if (outputAmount > inputAmount) {
-            result.isReceiving = true;
-            // Find senders
-            txData.inputs
-                .filter(box => box.address !== inputAddress)
-                .forEach(box => {
-                    if (tokenId === 'ERG' && box.value > 0) {
-                        result.receivingFrom.add(box.address);
-                    } else {
-                        const assetExists = box.assets.some(asset => 
-                            asset.tokenId === tokenId && asset.amount > 0);
-                        if (assetExists) {
-                            result.receivingFrom.add(box.address);
-                        }
-                    }
-                });
-            result.assetsReceived.push({
-                tokenId,
-                amount: outputAmount - inputAmount
-            });
-        }
-    }
-
-	if (result.isSending && (!result.isBurning || result.sendingTo.size > 0)) {
-        result.from = inputAddress;
-        // If sending to single address, use that
-        if (result.sendingTo.size === 1) {
-            result.to = Array.from(result.sendingTo)[0];
-        } 
-        // If sending to multiple addresses, use the one receiving the most value
-        else if (result.sendingTo.size > 1) {
-            let maxValue = 0;
-            let maxAddress = '';
-            Array.from(result.sendingTo).forEach(address => {
-                let totalValue = 0;
-                txData.outputs
-                    .filter(box => box.address === address)
-                    .forEach(box => {
-                        totalValue += box.value; // Add ERG value
-                        // Add other assets value (simplified - just adding amounts)
-                        box.assets.forEach(asset => {
-                            totalValue += asset.amount;
-                        });
-                    });
-                if (totalValue > maxValue) {
-                    maxValue = totalValue;
-                    maxAddress = address;
-                }
-            });
-            result.to = maxAddress;
-        }
-    }
-    // If primarily receiving
-    else if (result.isReceiving) {
-        result.to = inputAddress;
-        // If receiving from single address, use that
-        if (result.receivingFrom.size === 1) {
-            result.from = Array.from(result.receivingFrom)[0];
-        }
-        // If receiving from multiple addresses, use the one sending the most value
-        else if (result.receivingFrom.size > 1) {
-            let maxValue = 0;
-            let maxAddress = '';
-            Array.from(result.receivingFrom).forEach(address => {
-                let totalValue = 0;
-                txData.inputs
-                    .filter(box => box.address === address)
-                    .forEach(box => {
-                        totalValue += box.value; // Add ERG value
-                        // Add other assets value (simplified - just adding amounts)
-                        box.assets.forEach(asset => {
-                            totalValue += asset.amount;
-                        });
-                    });
-                if (totalValue > maxValue) {
-                    maxValue = totalValue;
-                    maxAddress = address;
-                }
-            });
-            result.from = maxAddress;
-        }
-    }
-    // If only burning
-    else if (result.isBurning && !result.isSending) {
-        result.from = inputAddress;
-        result.to = PAYMENT_ADDRESS;
-    }
-    // If only minting
-    else if (result.isMinting && !result.isReceiving) {
-        result.from = inputAddress;
-        result.to = inputAddress;
-    }
-
-	if (!result.isMinting
-		&& !result.isBurning
-		&& !result.isSending
-		&& !result.isReceiving
-	) {
-		result.from = inputAddress;
-		result.to = inputAddress;
-	}
-
-    return {
-        ...result,
-        sendingTo: Array.from(result.sendingTo),
-        receivingFrom: Array.from(result.receivingFrom)
-    };
+  return {
+    ...result,
+    sendingTo: Array.from(result.sendingTo),
+    receivingFrom: Array.from(result.receivingFrom),
+  };
 }

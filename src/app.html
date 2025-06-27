@@ -1,57 +1,124 @@
 <!doctype html>
-<html id="index" class="no-js" data-bs-theme="light" lang="en" data-sveltekit-preload-data="hover">
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<link rel="icon" type="image/png" href="%sveltekit.assets%/favicon.png">
-		<link rel="apple-touch-icon" type="image/png" href="%sveltekit.assets%/apple-touch-icon.png">
-		
-		<!-- Bootstrap 5 CSS -->
-		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-		
-		<!-- Additional theme file -->
-		<link id="additionalTheme" href="" rel="stylesheet" media="(prefers-color-scheme: dark)">
-		
-		<!-- Font Awesome CSS -->
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-		
-		%sveltekit.head%
-	</head>
-	<body data-sveltekit-preload-data="hover">
-		<div style="display: contents">%sveltekit.body%</div>
-		
-		<!-- Bootstrap Toast Containers -->
-		<div class="toast-container position-fixed bottom-0 end-0 p-3">
-			<div id="customToast" data-bs-config='{"autohide":false}' class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-				<div id="customToastBody" class="toast-body"></div>
-			</div>
-		</div>
-		
-		<div class="toast-container position-fixed bottom-0 end-0 p-3">
-			<div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-				<div id="toastBody" class="toast-body">
-					Copied to clipboard!
-				</div>
-			</div>
-		</div>
-		
-		<div class="toast-container position-fixed bottom-0 end-0 p-3">
-			<div id="notificationToast" data-bs-config='{"autohide":false}' class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-				<div id="notificationToastBody" class="toast-body d-flex align-items-end">
-					<p id="notificationToastText">Transaction pending. Do you want to get notified when it confirms?</p>
-					<br>
-					<button class="btn btn-primary m-1 end-0" onclick="onNotificationToastNo()">No</button> 
-					<button class="btn btn-info m-1 end-0" onclick="onNotificationToastYes()">Yes</button>
-				</div>
-			</div>
-		</div>
+<html
+  id="index"
+  class="no-js"
+  data-bs-theme="light"
+  lang="en"
+  data-sveltekit-preload-data="hover"
+>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/png" href="%sveltekit.assets%/favicon.png" />
+    <link
+      rel="apple-touch-icon"
+      type="image/png"
+      href="%sveltekit.assets%/apple-touch-icon.png"
+    />
 
-		<!-- External Scripts -->
-		<script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
-		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
-		<script src="https://cdn.jsdelivr.net/npm/json-bigint-parser-browser@1.0.4/json-bigint-browser.min.js"></script>
-		<script src="/scripts/common/config.js"></script>
-		<script src="/scripts/main.js"></script>
-	</body>
+    <!-- Bootstrap 5 CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
+      crossorigin="anonymous"
+    />
+
+    <!-- Additional theme file -->
+    <link
+      id="additionalTheme"
+      href=""
+      rel="stylesheet"
+      media="(prefers-color-scheme: dark)"
+    />
+
+    <!-- Font Awesome CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
+
+    %sveltekit.head%
+  </head>
+  <body data-sveltekit-preload-data="hover">
+    <div style="display: contents">%sveltekit.body%</div>
+
+    <!-- Bootstrap Toast Containers -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div
+        id="customToast"
+        data-bs-config='{"autohide":false}'
+        class="toast"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div id="customToastBody" class="toast-body"></div>
+      </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div
+        id="liveToast"
+        class="toast"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div id="toastBody" class="toast-body">Copied to clipboard!</div>
+      </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div
+        id="notificationToast"
+        data-bs-config='{"autohide":false}'
+        class="toast"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div
+          id="notificationToastBody"
+          class="toast-body d-flex align-items-end"
+        >
+          <p id="notificationToastText">
+            Transaction pending. Do you want to get notified when it confirms?
+          </p>
+          <br />
+          <button
+            class="btn btn-primary m-1 end-0"
+            onclick="onNotificationToastNo()"
+          >
+            No
+          </button>
+          <button
+            class="btn btn-info m-1 end-0"
+            onclick="onNotificationToastYes()"
+          >
+            Yes
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- External Scripts -->
+    <script
+      src="https://code.jquery.com/jquery-3.6.4.min.js"
+      integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/json-bigint-parser-browser@1.0.4/json-bigint-browser.min.js"></script>
+    <script src="/scripts/common/config.js"></script>
+    <script src="/scripts/main.js"></script>
+  </body>
 </html>

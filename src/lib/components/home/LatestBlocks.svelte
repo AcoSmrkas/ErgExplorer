@@ -13,7 +13,7 @@
 			<tr>
 				<th scope="col">Height</th>
 				<th scope="col">Time</th>
-				<th scope="col">Transactions</th>
+				<th scope="col">TXs</th>
 				<th scope="col">Reward</th>
 			</tr>
 		</thead>

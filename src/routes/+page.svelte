@@ -232,4 +232,4 @@
 <DailyStats {statsData} ergPrice={ergPriceValue} />
 
 <br>
-
+<br>
