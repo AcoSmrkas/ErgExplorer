@@ -116,11 +116,11 @@
 	}
 
 	function getTypeClass(type) {
-		switch(type) {
+		switch(type.toLowerCase()) {
 			case 'exchange': return 'badge-info';
 			case 'service': return 'badge-primary';
-			case 'mining-pool': return 'badge-warning';
-			case 'nft-artist': return 'badge-success';
+			case 'mining pool': return 'badge-warning';
+			case 'nft artist': return 'badge-success';
 			default: return 'badge-secondary';
 		}
 	}
@@ -269,7 +269,7 @@
 							<div class="glass-card">
 								<div class="card-header">
 									<h2 class="section-title">{group.name}</h2>
-									<span class="badge {getTypeClass(group.type)}" style="background-color: {getBadgeColor(group.type)} !important; color: {getBadgeTextColor(group.type)} !important;">{group.type}</span>
+									<span class="badge {getTypeClass(group.type)}">{group.type}</span>
 								</div>
 								<div class="card-content">
 									{#if group.url}
@@ -455,40 +455,6 @@
 
 	.address-link:hover {
 		color: var(--main-color);
-	}
-
-	/* Force badge colors with global scope to override Svelte scoping */
-	:global(.glass-card .card-header .badge) {
-		font-size: 0.75rem;
-		font-weight: 500;
-		padding: 0.35em 0.65em;
-		border-radius: 6px;
-		display: inline-block;
-	}
-
-	:global(.glass-card .card-header .badge-info) { 
-		background-color: #17a2b8 !important; 
-		color: white !important;
-	}
-
-	:global(.glass-card .card-header .badge-primary) { 
-		background-color: var(--main-color) !important; 
-		color: white !important;
-	}
-
-	:global(.glass-card .card-header .badge-warning) { 
-		background-color: #ffc107 !important; 
-		color: #000 !important;
-	}
-
-	:global(.glass-card .card-header .badge-success) { 
-		background-color: #28a745 !important; 
-		color: white !important;
-	}
-
-	:global(.glass-card .card-header .badge-secondary) { 
-		background-color: #6c757d !important; 
-		color: white !important;
 	}
 
 	@media (max-width: 768px) {
