@@ -1,5 +1,6 @@
 <script>
 	import { DONATION_ADDRESS } from '$lib/utils/constants.js';
+	import PageHeader from '$lib/components/ui/PageHeader.svelte';
 </script>
 
 <svelte:head>
@@ -10,16 +11,12 @@
 <div class="container-fluid p-0">
 	<div class="row p-0">
 		<div class="col-12 p-0">
-			<div class="page-header mb-0 px-0">
-				<div class="header-content">
-					<h1 class="page-title">
-						<i class="fas fa-info-circle me-3 title-icon"></i>
-						About Erg Explorer
-					</h1>
-				</div>
-			</div>
+			<PageHeader 
+				title="About Erg Explorer" 
+				icon="fa-info-circle" 
+			/>
 
-			<div class="about-content">
+			<div class="about-content mt-3">
 				<div class="glass-card">
 					<div class="card-header">
 						<h2 class="section-title">About</h2>
@@ -126,27 +123,6 @@
 <div class="page-bottom-margin"></div>
 
 <style>
-	.header-content {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		flex-wrap: wrap;
-		gap: 1rem;
-	}
-
-	.page-title {
-		color: var(--text-strong);
-		font-weight: 700;
-		font-size: 2rem;
-		margin: 0;
-		display: flex;
-		align-items: center;
-	}
-
-	.title-icon {
-		color: #17a2b8;
-		font-size: 1.8rem;
-	}
 
 	.about-content {
 		display: flex;
@@ -160,7 +136,7 @@
 	}
 
 	.glass-card .card-content {
-		padding: 2rem;
+		padding: 1.5rem;
 	}
 
 	.contact-label {
@@ -227,8 +203,8 @@
 			font-size: 1.4rem;
 		}
 
-		.card-content {
-			padding: 1.5rem;
+		.glass-card .card-content {
+			padding: 1rem;
 		}
 
 		.contact-item {

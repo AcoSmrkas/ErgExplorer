@@ -24,7 +24,7 @@ export function getLatestBlocksHeaders() {
       render: (value) => formatDateString(value),
     },
     {
-      label: "Transactions",
+      label: "TXs",
       field: "transactionsCount",
       render: (value) => formatNumber(value),
     },

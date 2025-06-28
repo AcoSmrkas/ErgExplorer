@@ -4,8 +4,7 @@
 	import StatsOverview from '$lib/components/home/StatsOverview.svelte';
 	import TokenTables from '$lib/components/home/TokenTables.svelte';
 	import WhaleTransactions from '$lib/components/home/WhaleTransactions.svelte';
-	import DataTable from '$lib/components/data/DataTable.svelte';
-	import { getLatestBlocksHeaders } from '$lib/config/tableConfigs.js';
+	import BlockList from '$lib/components/blocks/BlockList.svelte';
 	import DailyStats from '$lib/components/home/DailyStats.svelte';
 	import { isTestnet } from '$lib/stores/network.svelte.js';
 	import { ergPrice, currentPrices, updatePrices } from '$lib/stores/priceStore.js';
@@ -217,9 +216,8 @@
 
 <div class="row w-100">
 	<h2 class="subtitle ps-1 ps-sm-0">Latest blocks</h2>
-	<DataTable 
-		headers={getLatestBlocksHeaders()}
-		data={latestBlocks} 
+	<BlockList 
+		blocks={latestBlocks}
 		loading={latestBlocks.length === 0}
 		emptyMessage="Loading blocks..."
 	/>

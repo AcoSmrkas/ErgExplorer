@@ -76,52 +76,59 @@
 		/>
 	</div>
 	
-	<!-- Mobile Simple List -->
-	<div class="d-lg-none mobile-whale-txs glass-table-container">
+	<!-- Mobile Card Layout -->
+	<div class="d-lg-none mobile-whale-cards">
 		{#if whaleTxs.length > 0}
-			{#each whaleTxs as tx, index (tx.txid + '_' + index)}
-				<div class="mobile-tx-item">
-					<div class="d-flex justify-content-between align-items-center mb-2 row">
-						<a href="/transactions/{tx.txid}" data-transaction-hover="{tx.txid}" class="text-info" aria-label="View transaction {tx.txid}">
-							<i class="fas fa-link me-1"></i> Transaction
-						</a>
-						<span class="text-light small">{formatDateString(parseInt(tx.time))}</span>
-					</div>
-					
-					<div class="row mb-1">
-						<div class="col-3 text-muted small">From:</div>
-						<div class="col-9">
-							<AddressLink address={tx.fromaddress} startChars={15} endChars={4} />
+			{#each whaleTxs.slice(0, 5) as tx, index (tx.txid + '_' + index)}
+				<div class="glass-card whale-tx-card">
+					<div class="card-header">
+						<div class="tx-header-content">
+						<div class="tx-icon">
+							<i class="fas fa-exchange-alt"></i>
+						</div>
+							<div class="tx-info">
+								<a href="/transactions/{tx.txid}" data-transaction-hover="{tx.txid}" class="tx-link" aria-label="View transaction {tx.txid}">
+									{formatAddress(tx.txid, 9, 4)}
+								</a>
+								<div class="tx-time">{formatDateString(parseInt(tx.time))}</div>
+							</div>
 						</div>
 					</div>
-					
-					<div class="row mb-1">
-						<div class="col-3 text-muted small">To:</div>
-						<div class="col-9">
-							<AddressLink address={tx.toaddress} startChars={15} endChars={4} />
+					<div class="card-content">
+						<div class="detail-row">
+							<span class="detail-label">From:</span>
+							<span class="detail-value">
+								<AddressLink address={tx.fromaddress} startChars={9} endChars={4} />
+							</span>
 						</div>
-					</div>
-					
-					<div class="row">
-						<div class="col-3 text-muted small">Value:</div>
-						<div class="col-9 text-white">
-							{@html formatValue(tx.value / Math.pow(10, tx.decimals), tx.decimals)}
-							{@html getAssetTitleParams(null, tx.tokenId, tx.ticker, false)}
-							{#if tx.value && currentPrices[tx.tokenid]}
-								<span class="text-light small">
-									({formatPriceUSD(tx.value, tx.decimals, currentPrices[tx.tokenid])})
-								</span>
-							{/if}
+						<div class="detail-row">
+							<span class="detail-label">To:</span>
+							<span class="detail-value">
+								<AddressLink address={tx.toaddress} startChars={9} endChars={4} />
+							</span>
+						</div>
+						<div class="detail-row">
+							<span class="detail-label">Value:</span>
+							<span class="detail-value">
+								{@html formatValue(tx.value / Math.pow(10, tx.decimals), tx.decimals)} {@html getAssetTitleParams(null, tx.tokenId, tx.ticker, false)}
+								{#if tx.value && currentPrices[tx.tokenid]}
+									<small class="text-light">
+										{formatPriceUSD(tx.value, tx.decimals, currentPrices[tx.tokenid])}
+									</small>
+								{/if}
+							</span>
 						</div>
 					</div>
 				</div>
 			{/each}
 		{:else}
-			<div class="text-center py-4 text-light">
+			<div class="mobile-empty-state">
 				{#if isTestnet()}
-					Whale transactions not available on testnet
+					<i class="fas fa-whale fa-3x text-muted mb-3"></i>
+					<p class="text-muted">Whale transactions not available on testnet</p>
 				{:else}
-					<i class="fas fa-spinner fa-spin me-2"></i>Loading whale transactions...
+					<i class="fas fa-spinner fa-spin fa-3x text-muted mb-3"></i>
+					<p class="text-muted">Loading whale transactions...</p>
 				{/if}
 			</div>
 		{/if}
@@ -129,28 +136,104 @@
 </div>
 
 <style>
-	/* Use glass-table-container from common components */
-	.mobile-whale-txs {
-		/* Extends glass-table-container from common-components.css */
+	.mobile-whale-cards {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
 	}
 
-	.mobile-tx-item {
-		padding: 1rem 0;
-		border-bottom: 1px solid var(--glass-border-light);
+	.whale-tx-card {
+		background: var(--glass-bg-medium);
 	}
 
-	.mobile-tx-item:last-child {
-		border-bottom: none;
+
+	.tx-icon {
+		flex-shrink: 0;
+		width: 48px;
+		height: 48px;
+		border-radius: 8px;
+		background: var(--glass-bg-light);
+		border: 2px solid var(--borders);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 1.5rem;
+		color: var(--main-color);
 	}
 
-	/* Transaction link styling */
-	.mobile-tx-item a.text-info {
-		color: var(--main-color) !important;
+	.tx-header-content {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		width: 100%;
+		gap: 1rem;
+	}
+
+	.tx-info {
+		flex-grow: 1;
+		min-width: 0;
+	}
+
+	.tx-link {
+		color: var(--text-strong);
 		text-decoration: none;
 		font-weight: 600;
+		font-size: 1.1rem;
+		transition: color 0.2s ease;
+		display: block;
 	}
 
-	.mobile-tx-item a.text-info:hover {
-		color: var(--main-color-hover) !important;
+	.tx-link:hover {
+		color: var(--main-color);
+	}
+
+	.tx-time {
+		font-size: 0.9rem;
+		color: var(--text-light);
+		flex-shrink: 0;
+		text-align: left;
+	}
+
+	.whale-tx-card .card-content {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.detail-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 1rem;
+	}
+
+	.detail-label {
+		font-weight: 500;
+		color: var(--text-light);
+		font-size: 0.9rem;
+		flex-shrink: 0;
+		min-width: 70px;
+	}
+
+	.detail-value {
+		color: var(--text-strong);
+		font-size: 0.9rem;
+		text-align: right;
+		word-break: break-word;
+	}
+
+	.mobile-empty-state {
+		text-align: center;
+		padding: 3rem 1rem;
+		background: var(--glass-bg-subtle);
+		border-radius: 12px;
+		backdrop-filter: var(--glass-blur-sm);
+	}
+
+	/* Responsive adjustments */
+	@media (max-width: 576px) {
+		.mobile-whale-cards :global(.glass-card) {
+			margin: 0 -0.5rem;
+		}
 	}
 </style>

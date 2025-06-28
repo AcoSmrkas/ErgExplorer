@@ -16,7 +16,7 @@
 				{#if !statsData}
 					<i class="fas fa-spinner fa-spin me-2"></i>Loading statistics...
 				{:else}
-				<div class="row w-100 p-0 gx-5">
+				<div class="row w-100 p-0 gx-0 gx-md-5">
 				<!-- Left Column -->
 				<div class="col-md-6 ps-0">
 					<h3 class="p-0 erg-span">Block summary</h3>

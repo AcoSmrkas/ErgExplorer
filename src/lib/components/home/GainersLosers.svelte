@@ -74,12 +74,13 @@
 
 	@media (max-width: 768px) {
 		.header-with-controls {
-			flex-direction: column;
-			align-items: flex-start;
+			justify-content: space-between;
+			align-items: center;
 		}
 		
-		.period-controls {
-			align-self: flex-end;
+		.period-controls .btn {
+			padding: 0.2rem 0.5rem;
+			font-size: 0.8rem;
 		}
 	}
 </style>

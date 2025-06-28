@@ -224,7 +224,7 @@
 			<div class="container-fluid p-0">
 				<!-- Filters -->
 				<div class="row mb-4 p-0">
-					<div class="col-md-6 ps-0">
+					<div class="col-md-6 ps-3 ps-md-0 pe-3 pe-md-unset">
 						<label class="form-label" for="orderBy">Order:</label>
 						<select bind:value={orderBy} class="form-select" id="orderBy" onchange={handleFilterChange}>
 							{#each orderOptions as option}
@@ -232,7 +232,7 @@
 							{/each}
 						</select>
 					</div>
-					<div class="col-md-6 pe-0">
+					<div class="col-md-6 ps-3 ps-md-0 pe-3 pe-md-0 mt-2 md-md-0">
 						<label class="form-label" for="addressType">Filter:</label>
 						<select bind:value={addressType} class="form-select" id="addressType" onchange={handleFilterChange}>
 							{#each addressTypes as type}
@@ -291,16 +291,19 @@
 											{#each group.addresses as address, index}
 												<div class="address-item" class:mb-0={index === group.addresses.length - 1}>
 													<div class="address-row">
-														{#if address.urltype}
-															<span class="address-type {getAddressTypeClass(address.urltype)}">{address.urltype}</span>
-														{/if}
-														<a 
-															href="/addresses/{address.address}" 
-															class="address-link"
-															data-address={address.address}
-														>
-															{formatAddress(address.address, 32, 6)}
-														</a>
+														<div class="address-content">
+															{#if address.urltype}
+																<span class="address-type {getAddressTypeClass(address.urltype)}">{address.urltype}</span>
+															{/if}
+															<a 
+																href="/addresses/{address.address}" 
+																class="address-link"
+																data-address={address.address}
+															>
+																<span class="d-none d-md-inline">{formatAddress(address.address, 32, 6)}</span>
+																<span class="d-md-none">{formatAddress(address.address, 15, 4)}</span>
+															</a>
+														</div>
 														<CopyButton 
 															text={address.address} 
 															label="Copy address" 
@@ -400,6 +403,13 @@
 		gap: 1rem;
 	}
 
+	.address-content {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		flex: 1;
+	}
+
 	.address-type {
 		font-size: 0.75rem;
 		font-weight: 600;
@@ -485,11 +495,15 @@
 		.address-content {
 			flex-direction: column;
 			align-items: flex-start;
-			gap: 0.75rem;
+			gap: 0.5rem;
 		}
 
 		.address-link {
 			word-break: break-all;
+		}
+
+		.address-type {
+			align-self: flex-start;
 		}
 	}
 </style>
