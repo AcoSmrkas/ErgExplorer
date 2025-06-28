@@ -208,26 +208,30 @@
 	<ErrorMessage message={error} type="warning" dismissible />
 {/if}
 
-<StatsOverview />
+<div class="component-holder">
+	<StatsOverview />
 
-<TokenTables {topVolumeTokens} {gainersLosersData} {selectedPeriod} onPeriodChange={handlePeriodChange} />	
-	
-<WhaleTransactions {whaleTxs} currentPrices={currentPricesValue} />
+	<TokenTables {topVolumeTokens} {gainersLosersData} {selectedPeriod} onPeriodChange={handlePeriodChange} />	
+		
+	<WhaleTransactions {whaleTxs} currentPrices={currentPricesValue} />
 
-<div class="row w-100">
-	<h2 class="subtitle ps-1 ps-sm-0">Latest blocks</h2>
-	<BlockList 
-		blocks={latestBlocks}
-		loading={latestBlocks.length === 0}
-		emptyMessage="Loading blocks..."
-	/>
+	<div class="row w-100 p-0 pb-4">
+		<h2 class="subtitle ps-1 ps-sm-0">Latest blocks</h2>
+		<BlockList 
+			blocks={latestBlocks}
+			loading={latestBlocks.length === 0}
+			emptyMessage="Loading blocks..."
+		/>
+	</div>
+
+	<DailyStats {statsData} ergPrice={ergPriceValue} />
 </div>
 
 <br>
 <br>
 
-<DailyStats {statsData} ergPrice={ergPriceValue} />
-
-<br>
-<br>
-
+<style>
+	:global(.component-holder > *:not(:last-child)) {
+		margin-bottom: 15px;
+	}
+</style>

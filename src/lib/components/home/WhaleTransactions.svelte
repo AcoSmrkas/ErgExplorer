@@ -5,7 +5,6 @@
 	import { getAssetTitleParams } from '$lib/utils/tokenIcons.js';
 	import AddressLink from '$lib/components/ui/AddressLink.svelte';
 	import DataTable from '$lib/components/data/DataTable.svelte';
-    import { onMount } from 'svelte';
 
 	export let whaleTxs = [];
 	export let currentPrices = {};
@@ -15,15 +14,31 @@
 	const headers = [
 		{ label: 'Tx', field: 'txid', render: (value) => `<a href="/transactions/${value}" data-transaction-hover="${value}" aria-label="View transaction ${value}"><i class="fas fa-link text-info"></i></a>` },
 		{ label: 'Time', field: 'time', render: (value) => formatDateString(parseInt(value)) },
-		{ label: 'From', field: 'fromaddress', render: (value) => renderAddressCell(value, 9, 4) },
-		{ label: 'To', field: 'toaddress', render: (value) => renderAddressCell(value, 9, 4) },
+		{ 
+			label: 'From', 
+			field: 'fromaddress',
+			component: AddressLink,
+			componentProps: (row) => ({
+				address: row.fromaddress || "",
+				startChars: 9,
+				endChars: 4,
+				showCopy: false
+			})
+		},
+		{ 
+			label: 'To', 
+			field: 'toaddress',
+			component: AddressLink,
+			componentProps: (row) => ({
+				address: row.toaddress || "",
+				startChars: 9,
+				endChars: 4,
+				showCopy: false
+			})
+		},
 		{ label: 'Value', field: 'value', render: (value, row) => renderValueCell(value, row) }
 	];
 
-	function renderAddressCell(address, startChars, endChars) {
-		if (!address) return '';
-		return `<span data-address-wrapper="${address}" data-start-chars="${startChars}" data-end-chars="${endChars}"></span>`;
-	}
 
 	function renderValueCell(value, row) {
 		let result = `${formatValue(row.value / Math.pow(10, row.decimals), row.decimals)} ${getAssetTitleParams(null, row.tokenId, row.ticker, false)}`;

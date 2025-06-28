@@ -8,7 +8,7 @@
 	export let onPeriodChange = () => {};
 </script>
 
-<div class="row w-100 mt-3" role="region" aria-label="Token data tables">
+<div class="row w-100" role="region" aria-label="Token data tables">
 	<TopVolumeTokens {topVolumeTokens} />
 	<GainersLosers {gainersLosersData} {selectedPeriod} {onPeriodChange} />
 </div>

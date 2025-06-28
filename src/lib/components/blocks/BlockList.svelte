@@ -10,7 +10,7 @@
 </script>
 
 <!-- Desktop Table View -->
-<div class="d-none d-lg-block custom-table-wrapper">
+<div class="d-none d-lg-block custom-table-wrapper p-0">
 	<DataTable 
 		headers={getLatestBlocksHeaders()}
 		data={blocks} 
