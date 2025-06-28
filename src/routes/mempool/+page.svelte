@@ -24,6 +24,7 @@
 	let isSocketConnected = false;
 	let showConflicts = false;
 	let showInfoCard = true;
+	let lastUpdate = null;
 
 	// Load dismissed state from localStorage
 	if (browser) {
@@ -522,34 +523,5 @@
 	@keyframes fa-spin {
 		0% { transform: rotate(0deg); }
 		100% { transform: rotate(360deg); }
-	}
-
-	@media (max-width: 768px) {
-		.page-header {
-			padding: 1rem 1.5rem;
-		}
-
-		.page-title {
-			font-size: 1.5rem;
-		}
-
-		.title-icon {
-			font-size: 1.4rem;
-		}
-
-		.header-content {
-			flex-direction: column;
-			align-items: flex-start;
-		}
-
-		.header-controls {
-			align-items: flex-start;
-		}
-
-		.control-group {
-			flex-direction: column;
-			align-items: flex-start;
-			gap: 0.5rem;
-		}
 	}
 </style>

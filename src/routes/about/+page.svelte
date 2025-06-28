@@ -126,11 +126,6 @@
 <div class="page-bottom-margin"></div>
 
 <style>
-	.page-header {
-		padding: 1.5rem 2rem;
-		margin-bottom: 1.5rem;
-	}
-
 	.header-content {
 		display: flex;
 		justify-content: space-between;
@@ -224,10 +219,6 @@
 	}
 
 	@media (max-width: 768px) {
-		.page-header {
-			padding: 1rem 1.5rem;
-		}
-
 		.page-title {
 			font-size: 1.5rem;
 		}

@@ -17,8 +17,6 @@
 	// Client-side state for all data  
 	let ergPriceValue = null;
 	let currentPricesValue = {};
-	let networkStats = null;
-	let protocolInfo = null;
 	let statsData = null;
 	let latestBlocks = [];
 	let topVolumeTokens = [];
@@ -63,16 +61,7 @@
 	
 	async function loadEssentialData() {
 		try {
-			// Load critical data that affects page layout
-			const [networkStatsRes, protocolInfoRes] = await Promise.allSettled([
-				api.getNetworkStats(),
-				api.getProtocolInfo()
-			]);
-			
-			networkStats = networkStatsRes.status === 'fulfilled' ? networkStatsRes.value : null;
-			protocolInfo = protocolInfoRes.status === 'fulfilled' ? protocolInfoRes.value : null;
-			
-			// Essential data loaded, stop main loading
+			// StatsOverview is now fully self-contained, just stop loading
 			loading = false;
 			
 		} catch (err) {
@@ -89,7 +78,7 @@
 			if (data) statsData = data;
 		}).catch(err => console.warn('Failed to load stats:', err));
 		
-		// Load latest blocks (5 for homepage)
+		// Load latest blocks (5 for the bottom DataTable)
 		fetch(`${api.API_ENDPOINTS.ERGOPLATFORM}blocks?limit=5&sortBy=height&sortDirection=desc`)
 			.then(r => r.json())
 			.then(data => {
@@ -220,7 +209,7 @@
 	<ErrorMessage message={error} type="warning" dismissible />
 {/if}
 
-<StatsOverview ergPrice={ergPriceValue} {protocolInfo} {latestBlocks} {networkStats} />
+<StatsOverview />
 
 <TokenTables {topVolumeTokens} {gainersLosersData} {selectedPeriod} onPeriodChange={handlePeriodChange} />	
 	
