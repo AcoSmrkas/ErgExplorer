@@ -4,7 +4,8 @@
 	import StatsOverview from '$lib/components/home/StatsOverview.svelte';
 	import TokenTables from '$lib/components/home/TokenTables.svelte';
 	import WhaleTransactions from '$lib/components/home/WhaleTransactions.svelte';
-	import LatestBlocks from '$lib/components/home/LatestBlocks.svelte';
+	import DataTable from '$lib/components/data/DataTable.svelte';
+	import { getLatestBlocksHeaders } from '$lib/config/tableConfigs.js';
 	import DailyStats from '$lib/components/home/DailyStats.svelte';
 	import { isTestnet } from '$lib/stores/network.svelte.js';
 	import { ergPrice, currentPrices, updatePrices } from '$lib/stores/priceStore.js';
@@ -88,7 +89,7 @@
 			if (data) statsData = data;
 		}).catch(err => console.warn('Failed to load stats:', err));
 		
-		// Load latest blocks
+		// Load latest blocks (5 for homepage)
 		fetch(`${api.API_ENDPOINTS.ERGOPLATFORM}blocks?limit=5&sortBy=height&sortDirection=desc`)
 			.then(r => r.json())
 			.then(data => {
@@ -215,8 +216,6 @@
 	<title>Erg Explorer - Ergo Blockchain Explorer</title>
 </svelte:head>
 
-<br>
-
 {#if error}
 	<ErrorMessage message={error} type="warning" dismissible />
 {/if}
@@ -227,11 +226,21 @@
 	
 <WhaleTransactions {whaleTxs} currentPrices={currentPricesValue} />
 
-<LatestBlocks {latestBlocks} />
+<div class="row w-100">
+	<h2 class="subtitle ps-1 ps-sm-0">Latest blocks</h2>
+	<DataTable 
+		headers={getLatestBlocksHeaders()}
+		data={latestBlocks} 
+		loading={latestBlocks.length === 0}
+		emptyMessage="Loading blocks..."
+	/>
+</div>
 
+<br>
 <br>
 
 <DailyStats {statsData} ergPrice={ergPriceValue} />
 
 <br>
 <br>
+

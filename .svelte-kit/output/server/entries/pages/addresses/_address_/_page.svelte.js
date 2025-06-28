@@ -1,12 +1,12 @@
-import { D as store_get, P as head, G as escape_html, I as unsubscribe_stores, C as pop, z as push, E as attr, O as stringify } from "../../../../chunks/index.js";
+import { E as store_get, Q as head, G as escape_html, I as unsubscribe_stores, D as pop, z as push, J as attr, P as stringify } from "../../../../chunks/index.js";
 import { p as page } from "../../../../chunks/stores.js";
 import { D as DataTable } from "../../../../chunks/DataTable.js";
 import "../../../../chunks/AddressFormatter.svelte_svelte_type_style_lang.js";
 import "../../../../chunks/TokenDisplay.svelte_svelte_type_style_lang.js";
-import "../../../../chunks/Pagination.svelte_svelte_type_style_lang.js";
+/* empty css                                                          */
 /* empty css                                                       */
-import "../../../../chunks/ErrorMessage.svelte_svelte_type_style_lang.js";
-import { f as formatNumber, a as formatErgValue, b as formatDateString, g as formatPriceUSD } from "../../../../chunks/formatting.js";
+/* empty css                                                            */
+import { b as formatNumber, c as formatErgValue, d as formatDateString, i as formatPriceUSD } from "../../../../chunks/formatting.js";
 function _page($$payload, $$props) {
   push();
   var $$store_subs;
@@ -14,6 +14,7 @@ function _page($$payload, $$props) {
   let address = store_get($$store_subs ??= {}, "$page", page).params.address;
   let transactions = [];
   let loading = true;
+  let ergPrice = null;
   const txHeaders = [
     {
       label: "Transaction ID",
@@ -44,7 +45,7 @@ function _page($$payload, $$props) {
       render: (value, row) => {
         const relevantOutputs = value?.filter((o) => o.address === address) || [];
         const totalValue = relevantOutputs.reduce((sum, output) => sum + (parseInt(output.value) || 0), 0);
-        return `${formatErgValue(totalValue)} ERG<br><small class="text-muted">${formatPriceUSD()}</small>`;
+        return `${formatErgValue(totalValue)} ERG<br><small class="text-muted">${formatPriceUSD(totalValue, ergPrice)}</small>`;
       }
     }
   ];

@@ -66,7 +66,7 @@
 				
 				{#if balance?.unconfirmed?.nanoErgs !== undefined && balance.unconfirmed.nanoErgs > 0}
 					<div class="address-unconfirmed">
-						<strong>Unconfirmed:</strong> {formatErgValue(balance.unconfirmed.nanoErgs)} ERG
+						<strong>Unconfirmed:</strong> {@html formatErgValue(balance.unconfirmed.nanoErgs)}
 					</div>
 				{/if}
 				

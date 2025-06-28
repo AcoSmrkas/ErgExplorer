@@ -2083,13 +2083,11 @@ var qfleetSDKcore;
                 );
               }
             }
-            this.outputs
-              .toArray()
-              .map((output) =>
-                output.setCreationHeight(this._creationHeight, {
-                  replace: false,
-                }),
-              );
+            this.outputs.toArray().map((output) =>
+              output.setCreationHeight(this._creationHeight, {
+                replace: false,
+              }),
+            );
             const outputs = this.outputs.clone();
             if (common.isDefined(this._feeAmount)) {
               outputs.add(new OutputBuilder(this._feeAmount, FEE_CONTRACT));

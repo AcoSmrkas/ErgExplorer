@@ -1,4 +1,4 @@
-import { E as ERG_DECIMALS } from "./api.js";
+import { E as ERG_DECIMALS } from "./constants.js";
 function nFormatter(num, digits = 2, noLetter = false, noDecimal = false) {
   const lookup = [
     { value: 1, symbol: "" },
@@ -33,7 +33,10 @@ function nFormatter(num, digits = 2, noLetter = false, noDecimal = false) {
   if (noDecimal) {
     options = {};
   }
-  return item ? (isMinus ? "-" : "") + (num / item.value).toLocaleString("en-US", { maximumFractionDigits: digits, minimumFractionDigits }).replace(rx, "$1") + item.symbol : (isMinus ? "-" : "") + new Intl.NumberFormat("en-US", options).format(num);
+  return item ? (isMinus ? "-" : "") + (num / item.value).toLocaleString("en-US", {
+    maximumFractionDigits: digits,
+    minimumFractionDigits
+  }).replace(rx, "$1") + item.symbol : (isMinus ? "-" : "") + new Intl.NumberFormat("en-US", options).format(num);
 }
 function formatNumber$1(value, maxDecimals = 0, minDecimals = 0) {
   if (value == null || isNaN(value)) return "—";
@@ -42,26 +45,102 @@ function formatNumber$1(value, maxDecimals = 0, minDecimals = 0) {
     minimumFractionDigits: minDecimals
   });
 }
+function formatValue(value, digits = 2, autodigits = false, same = false) {
+  if (value == null || isNaN(value)) return "—";
+  if (autodigits) {
+    digits = getAutoDigits(value, digits);
+  }
+  let vstring = "";
+  let minimumFractionDigits = 2;
+  if (digits < minimumFractionDigits) {
+    minimumFractionDigits = digits;
+  }
+  if (!isFloat(value) && isLargerThanMaxSafeInteger(value)) {
+    vstring = formatBigIntToLocaleString(value);
+  } else {
+    vstring = value.toLocaleString("en-US", {
+      maximumFractionDigits: digits,
+      minimumFractionDigits
+    });
+  }
+  if (same) {
+    return `<span title="${vstring}">${vstring}</span>`;
+  } else {
+    return `<span title="${vstring}">${nFormatter(value, digits)}</span>`;
+  }
+}
+function getAutoDigits(value, digits = 2, additionalDigits = 2) {
+  let temp = value.toString().split(".");
+  if (temp.length > 1) {
+    let realSmall = temp[1].split("-");
+    if (realSmall.length > 1) {
+      digits = parseInt(realSmall[1]) + 1;
+    } else {
+      for (let j = 0; j < temp[1].length; j++) {
+        if (temp[1][j] != "0" && j > 1) {
+          digits = j + additionalDigits;
+          if (j + 1 < temp[1].length && temp[1][j] != "0") {
+            digits = j + additionalDigits + 1;
+          }
+          break;
+        }
+      }
+    }
+  }
+  return digits;
+}
+function isFloat(value) {
+  return typeof value === "number" && !Number.isInteger(value) && !isNaN(value);
+}
+function isLargerThanMaxSafeInteger(numberAsString) {
+  let parsedNumber = BigInt(numberAsString);
+  return parsedNumber > Number.MAX_SAFE_INTEGER;
+}
+function formatBigIntToLocaleString(bigIntNumber) {
+  let bigIntAsString = bigIntNumber.toString();
+  let chunks = [];
+  while (bigIntAsString.length > 0) {
+    chunks.unshift(bigIntAsString.slice(-3));
+    bigIntAsString = bigIntAsString.slice(0, -3);
+  }
+  let formattedString = chunks.join(",");
+  return formattedString;
+}
+function formatPercentage(value, decimals = 2) {
+  if (value == null || isNaN(value)) return "—";
+  const formatted = value.toFixed(decimals);
+  const className = value >= 0 ? "text-success" : "text-danger";
+  const sign = value >= 0 ? "+" : "";
+  return `<span class="${className}">${sign}${formatted}%</span>`;
+}
 function formatHashRate$1(value) {
   if (value == null || isNaN(value)) return "—";
   return (value / 1e12).toLocaleString("en-US") + " TH/s";
 }
 function formatKbSize(size) {
   if (size == null || isNaN(size)) return "—";
-  return (size / 1e3).toLocaleString("en-US", { maximumFractionDigits: 2, minimumFractionDigits: 2 }) + " kB";
+  return (size / 1e3).toLocaleString("en-US", {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2
+  }) + " kB";
 }
+const ERG_SPAN = ' <span class="erg-span">ERG</span>';
 function formatErgValue(value, decimals = ERG_DECIMALS, showDecimals = true) {
-  if (!value && value !== 0) return "0";
+  if (!value && value !== 0) return `0 ${ERG_SPAN}`;
+  let maxDecimals = ERG_DECIMALS;
   const num = parseFloat(value);
   const divisor = Math.pow(10, decimals);
   const ergValue = num / divisor;
+  if (ergValue > 1) {
+    maxDecimals = 2;
+  }
   if (!showDecimals && ergValue >= 1) {
-    return Math.floor(ergValue).toLocaleString();
+    return Math.floor(ergValue).toLocaleString() + ` ${ERG_SPAN}`;
   }
   return ergValue.toLocaleString(void 0, {
     minimumFractionDigits: 0,
-    maximumFractionDigits: Math.min(decimals, 8)
-  });
+    maximumFractionDigits: Math.min(decimals, maxDecimals)
+  }) + ERG_SPAN;
 }
 function formatTokenAmount(amount, decimals = 0) {
   if (!amount && amount !== 0) return "0";
@@ -111,8 +190,26 @@ function formatNumber(num, decimals = 0, addCommas = true) {
   }
   return parseFloat(num).toFixed(decimals);
 }
-function formatPriceUSD(ergAmount, ergPrice) {
-  return "$0.00";
+function formatNumberLarge(num, decimals = 2) {
+  if (num == null || isNaN(num)) return "0";
+  return nFormatter(num, decimals);
+}
+function formatCurrency(amount, decimals = 2) {
+  if (amount == null || isNaN(amount)) return "$0.00";
+  return "$" + formatNumber$1(amount, decimals, decimals);
+}
+function formatPercentageStyled(value, decimals = 2) {
+  if (value == null || isNaN(value)) return "—";
+  return formatPercentage(value, decimals);
+}
+function formatPriceUSD(amount, decimals, usdPrice) {
+  if (!amount || !usdPrice) return "($0.00)";
+  const erg = parseFloat(amount) / Math.pow(10, decimals);
+  const usdValue = erg * parseFloat(usdPrice);
+  return " ($" + usdValue.toLocaleString(void 0, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }) + ")";
 }
 function formatDifficulty(difficulty) {
   if (!difficulty) return "0";
@@ -128,6 +225,11 @@ function formatDifficulty(difficulty) {
   }
   return formatNumber(num, 0, true);
 }
+function formatAddress(address, startLength = 6, endLength = 6) {
+  if (!address) return "";
+  if (address.length <= startLength + endLength) return address;
+  return `${address.slice(0, startLength)}...${address.slice(-endLength)}`;
+}
 function formatMiningTime(milliseconds) {
   if (!milliseconds) return "0s";
   const minutes = Math.floor(milliseconds / 6e4);
@@ -142,15 +244,20 @@ function formatHashRate(hashRate) {
   return formatHashRate$1(hashRate);
 }
 export {
-  formatErgValue as a,
-  formatDateString as b,
-  formatKbSize as c,
-  formatMiningTime as d,
-  formatHashRate as e,
-  formatNumber as f,
-  formatPriceUSD as g,
-  formatTokenAmount as h,
-  formatDifficulty as i,
-  formatFileSize as j,
-  nFormatter as n
+  ERG_SPAN as E,
+  formatValue as a,
+  formatNumber as b,
+  formatErgValue as c,
+  formatDateString as d,
+  formatKbSize as e,
+  formatAddress as f,
+  formatCurrency as g,
+  formatPercentageStyled as h,
+  formatPriceUSD as i,
+  formatNumberLarge as j,
+  formatMiningTime as k,
+  formatHashRate as l,
+  formatFileSize as m,
+  formatDifficulty as n,
+  formatTokenAmount as o
 };

@@ -1,4 +1,4 @@
-import { K as fallback, S as ensure_array_like, F as attr_class, G as escape_html, O as stringify, E as attr, N as bind_props, C as pop, z as push } from "./index.js";
+import { M as fallback, T as ensure_array_like, G as escape_html, J as attr, X as spread_props, O as bind_props, D as pop, z as push } from "./index.js";
 /* empty css                                        */
 import { h as html } from "./html.js";
 function DataTable($$payload, $$props) {
@@ -9,38 +9,27 @@ function DataTable($$payload, $$props) {
   let sortable = fallback($$props["sortable"], true);
   let loading = fallback($$props["loading"], false);
   let emptyMessage = fallback($$props["emptyMessage"], "No data available");
-  let sortKey = "";
   function sortData(items, key, direction) {
     return items;
   }
   function getNestedValue(obj, key) {
+    if (!key) return null;
     return key.split(".").reduce((value, k) => value?.[k], obj);
-  }
-  function getSortIcon(key) {
-    if (sortKey !== key) return "fas fa-sort";
-    return "fas fa-sort-up";
   }
   sortedData = loading ? [] : sortData(data);
   const each_array = ensure_array_like(headers);
-  $$payload.out += `<div class="table-responsive"><table class="table table-hover svelte-86bima"><thead class="svelte-86bima"><tr class="svelte-86bima"><!--[-->`;
+  $$payload.out += `<div class="table-responsive glass-table-container p-0 svelte-pl0dr2"><table class="table glass-table svelte-pl0dr2"><thead class="svelte-pl0dr2"><tr class="svelte-pl0dr2"><!--[-->`;
   for (let $$index = 0, $$length = each_array.length; $$index < $$length; $$index++) {
     let header = each_array[$$index];
-    $$payload.out += `<th${attr_class("svelte-86bima", void 0, { "sortable": sortable && header.sortKey })}>${escape_html(header.label)} `;
-    if (sortable && header.sortKey) {
-      $$payload.out += "<!--[-->";
-      $$payload.out += `<i${attr_class(`${stringify(getSortIcon(header.sortKey))} ms-1`, "svelte-86bima")}></i>`;
-    } else {
-      $$payload.out += "<!--[!-->";
-    }
-    $$payload.out += `<!--]--></th>`;
+    $$payload.out += `<th class="svelte-pl0dr2">${escape_html(header.label)}</th>`;
   }
-  $$payload.out += `<!--]--></tr></thead><tbody class="svelte-86bima">`;
+  $$payload.out += `<!--]--></tr></thead><tbody class="svelte-pl0dr2">`;
   if (loading) {
     $$payload.out += "<!--[-->";
-    $$payload.out += `<tr class="svelte-86bima"><td${attr("colspan", headers.length)} class="text-center py-4 svelte-86bima"><div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>`;
+    $$payload.out += `<tr class="svelte-pl0dr2"><td${attr("colspan", headers.length)} class="text-center py-4 svelte-pl0dr2"><div class="spinner-border spinner-border-sm text-primary svelte-pl0dr2" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>`;
   } else if (sortedData.length === 0) {
     $$payload.out += "<!--[1-->";
-    $$payload.out += `<tr class="svelte-86bima"><td${attr("colspan", headers.length)} class="text-center py-4 text-muted svelte-86bima">${escape_html(emptyMessage)}</td></tr>`;
+    $$payload.out += `<tr class="svelte-pl0dr2"><td${attr("colspan", headers.length)} class="text-center py-4 text-muted svelte-pl0dr2">${escape_html(emptyMessage)}</td></tr>`;
   } else {
     $$payload.out += "<!--[!-->";
     const each_array_1 = ensure_array_like(sortedData);
@@ -48,14 +37,16 @@ function DataTable($$payload, $$props) {
     for (let index = 0, $$length = each_array_1.length; index < $$length; index++) {
       let row = each_array_1[index];
       const each_array_2 = ensure_array_like(headers);
-      $$payload.out += `<tr class="svelte-86bima"><!--[-->`;
+      $$payload.out += `<tr class="svelte-pl0dr2"><!--[-->`;
       for (let $$index_1 = 0, $$length2 = each_array_2.length; $$index_1 < $$length2; $$index_1++) {
         let header = each_array_2[$$index_1];
-        $$payload.out += `<td class="svelte-86bima">`;
+        $$payload.out += `<td class="svelte-pl0dr2">`;
         if (header.component) {
           $$payload.out += "<!--[-->";
           $$payload.out += `<!---->`;
-          header.component?.($$payload, { data: row, field: header.field });
+          header.component?.($$payload, spread_props([
+            header.componentProps ? header.componentProps(row, getNestedValue(row, header.field), index) : { data: row, field: header.field }
+          ]));
           $$payload.out += `<!---->`;
         } else if (header.render) {
           $$payload.out += "<!--[1-->";

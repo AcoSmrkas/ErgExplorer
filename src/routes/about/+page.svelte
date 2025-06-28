@@ -160,32 +160,12 @@
 		margin-bottom: 2rem;
 	}
 
-	.card-header {
-		background: var(--glass-bg-medium);
-		padding: 1.5rem 2rem 1rem 2rem;
-		border-bottom: 2px solid var(--main-color);
-		border-top-left-radius: 16px;
-		border-top-right-radius: 16px;
-	}
-
-	.section-title {
-		color: var(--text-strong);
-		font-weight: 700;
+	.glass-card .section-title {
 		font-size: 1.5rem;
-		margin: 0;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
 	}
 
-	.card-content {
+	.glass-card .card-content {
 		padding: 2rem;
-	}
-
-	.contact-item {
-		display: flex;
-		align-items: center;
-		margin-bottom: 1rem;
-		gap: 1rem;
 	}
 
 	.contact-label {

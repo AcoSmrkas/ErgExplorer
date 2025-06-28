@@ -1,0 +1,637 @@
+/* Common component styles - consolidating duplicate patterns */
+
+/* =============================================================================
+   TABLE STYLES - Used across DataTable and various page tables
+   ============================================================================= */
+
+/* Height links in tables */
+:global(.height-link) {
+  color: var(--text-strong);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+:global(.height-link:hover) {
+  color: var(--main-color);
+}
+
+/* Address links in tables */
+:global(.address-link) {
+  color: var(--text-strong);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+:global(.address-link:hover) {
+  color: var(--main-color);
+}
+
+/* Prevent line breaks in reward columns */
+:global(.glass-table td:nth-child(4)) {
+  white-space: nowrap;
+}
+
+:global(.glass-table td:nth-child(5)) {
+  white-space: nowrap;
+}
+
+/* =============================================================================
+   BUTTON STYLES - Consolidating refresh and action buttons
+   ============================================================================= */
+
+.btn-refresh,
+.btn-action {
+  background: var(--glass-bg-subtle);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: 1px solid var(--glass-border-light);
+  box-shadow: var(--glass-shadow-sm);
+  color: var(--text-strong);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.btn-refresh:hover,
+.btn-action:hover {
+  background: var(--main-color);
+  border-color: var(--main-color);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--glass-shadow-md);
+}
+
+.btn-refresh:disabled,
+.btn-action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =============================================================================
+   FORM STYLES - Checkboxes and form controls
+   ============================================================================= */
+
+.form-check-input:checked {
+  background-color: var(--main-color);
+  border-color: var(--main-color);
+}
+
+.form-check-label {
+  color: var(--text-strong);
+  font-weight: 500;
+}
+
+/* =============================================================================
+   INFO CARD STYLES - Reusable info cards across components
+   ============================================================================= */
+
+.info-card {
+  background: var(--glass-bg-subtle);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: 1px solid var(--glass-border-light);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.info-card .info-icon {
+  color: var(--main-color);
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.info-card .info-content {
+  flex: 1;
+  color: var(--text-color);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.info-card .dismiss-btn {
+  background: none;
+  border: none;
+  color: var(--text-light);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  margin-left: auto;
+  transition: color 0.3s ease;
+}
+
+.info-card .dismiss-btn:hover {
+  color: var(--text-strong);
+}
+
+/* =============================================================================
+   LAYOUT UTILITIES - Common spacing and layout patterns
+   ============================================================================= */
+
+.page-bottom-margin {
+  height: 2rem;
+}
+
+.section-spacing {
+  margin-bottom: 1.5rem;
+}
+
+.mobile-spacing {
+  margin-bottom: 1rem;
+}
+
+/* =============================================================================
+   MOBILE RESPONSIVE STYLES - Common mobile adaptations
+   ============================================================================= */
+
+@media (max-width: 768px) {
+  .mobile-hide {
+    display: none !important;
+  }
+
+  .mobile-show {
+    display: block !important;
+  }
+
+  .mobile-full-width {
+    width: 100% !important;
+  }
+
+  .mobile-center {
+    text-align: center !important;
+  }
+
+  .mobile-spacing {
+    margin-bottom: 0.75rem;
+  }
+}
+
+/* =============================================================================
+   PRICE CHANGE INDICATORS - Common across multiple components
+   ============================================================================= */
+
+.price-change {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.price-change.positive {
+  color: #22c55e;
+}
+
+.price-change.negative {
+  color: #ef4444;
+}
+
+.price-change small {
+  font-size: 0.75em;
+  font-weight: normal;
+  opacity: 0.7;
+}
+
+/* =============================================================================
+   LOADING AND STATE STYLES
+   ============================================================================= */
+
+.loading-placeholder {
+  background: var(--glass-bg-light);
+  border-radius: 8px;
+  height: 1.5rem;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-light);
+  font-style: italic;
+}
+
+/* =============================================================================
+   TRANSACTION AND BLOCK ITEMS - Mobile cards
+   ============================================================================= */
+
+.mobile-item {
+  background: var(--glass-bg-light);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--glass-border-light);
+  transition: all 0.3s ease;
+}
+
+.mobile-item:hover {
+  background: var(--glass-bg-medium);
+  transform: translateY(-1px);
+  box-shadow: var(--glass-shadow-sm);
+}
+
+.mobile-item-header {
+  display: flex;
+  justify-content: between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--glass-border-light);
+}
+
+.mobile-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mobile-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mobile-item-label {
+  color: var(--text-light);
+  font-size: 0.85rem;
+  font-weight: 500;
+  min-width: fit-content;
+  margin-right: 0.5rem;
+}
+
+.mobile-item-value {
+  color: var(--text-strong);
+  font-size: 0.9rem;
+  text-align: right;
+  word-break: break-all;
+}
+
+/* =============================================================================
+   GLASS TABLE CONTAINER - Mobile table wrapper
+   ============================================================================= */
+
+.glass-table-container {
+  background: var(--glass-bg-subtle);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  box-shadow: var(--glass-shadow-sm);
+  border-radius: 16px;
+  overflow: hidden;
+  padding: 1rem;
+}
+
+/* =============================================================================
+   CARD SYSTEM - Consolidate card styles across all pages
+   ============================================================================= */
+
+.card {
+  border: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--glass-bg-light);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+}
+
+.card-header {
+  background: var(--glass-bg-medium);
+  color: var(--text-strong);
+  border: none;
+  border-bottom: 2px solid var(--main-color);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  font-size: 0.95rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.card-title {
+  font-weight: 600;
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.section-title {
+  color: var(--text-strong);
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.card-body {
+  padding: 1.5rem;
+  color: var(--text-strong);
+}
+
+.card-content {
+  padding: 1.5rem;
+}
+
+/* Glass card system for consistent styling across pages */
+
+.contact-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.contact-item.mb-0 {
+  margin-bottom: 0;
+}
+
+.contact-label {
+  color: var(--text-light);
+  font-weight: 500;
+  font-size: 0.9rem;
+  min-width: fit-content;
+  flex-shrink: 0;
+}
+
+.contact-link {
+  color: var(--text-strong);
+  text-decoration: none;
+  transition: color 0.3s ease;
+  word-break: break-all;
+}
+
+.contact-link:hover {
+  color: var(--main-color);
+  text-decoration: none;
+}
+
+@media (max-width: 768px) {
+  .glass-card .card-header {
+    padding: 1rem 1.25rem;
+  }
+
+  .glass-card .card-content {
+    padding: 1.25rem;
+  }
+
+  .contact-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .contact-label {
+    min-width: auto;
+  }
+}
+
+/* =============================================================================
+   COLOR UTILITIES - Standardize color classes
+   ============================================================================= */
+
+.text-primary {
+  color: var(--main-color) !important;
+}
+.text-info {
+  color: #17a2b8 !important;
+}
+.text-success {
+  color: #28a745 !important;
+}
+.text-warning {
+  color: #ffc107 !important;
+}
+.text-danger {
+  color: #dc3545 !important;
+}
+.text-light {
+  color: var(--text-light) !important;
+}
+.text-muted {
+  color: var(--text-light) !important;
+}
+
+/* Background colors */
+.bg-primary {
+  background-color: var(--main-color) !important;
+}
+.bg-success {
+  background-color: #28a745 !important;
+}
+.bg-warning {
+  background-color: #ffc107 !important;
+  color: #000 !important;
+}
+.bg-info {
+  background-color: #17a2b8 !important;
+}
+.bg-danger {
+  background-color: #dc3545 !important;
+}
+.bg-secondary {
+  background-color: #6c757d !important;
+}
+
+/* =============================================================================
+   BUTTON VARIANTS - Consolidate button styles
+   ============================================================================= */
+
+.btn-link:hover {
+  color: var(--main-color) !important;
+  text-decoration: none;
+}
+
+.btn-outline-light {
+  border-color: rgba(255, 255, 255, 0.5);
+  color: white;
+  background: transparent;
+}
+
+.btn-outline-light:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: white;
+  color: white;
+}
+
+.btn-outline-primary {
+  border-color: var(--main-color);
+  color: var(--main-color);
+  background: transparent;
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--main-color);
+  border-color: var(--main-color);
+  color: white;
+}
+
+/* =============================================================================
+   RAW DATA DISPLAY - Standardize code display
+   ============================================================================= */
+
+.raw-data-display {
+  background: #1a1a1a;
+  color: #f8f9fa;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  font-family: "Courier New", "DejaVu", monospace;
+  font-size: 0.85rem;
+  max-height: 400px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  line-height: 1.4;
+  border: 1px solid var(--glass-border-light);
+}
+
+/* =============================================================================
+   RESPONSIVE TABLE ENHANCEMENTS
+   ============================================================================= */
+
+.table td {
+  vertical-align: middle;
+  border-color: var(--glass-border-light);
+}
+
+.table th {
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+/* =============================================================================
+   BADGE STYLES - Standardize badge appearance
+   ============================================================================= */
+
+.badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.35em 0.65em;
+}
+
+.badge-success {
+  background-color: #28a745;
+  color: white;
+}
+
+.badge-warning {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.badge-info {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.badge-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.badge-primary {
+  background-color: var(--main-color);
+  color: white;
+}
+
+/* Additional badge color variants for addressbook */
+.badge.badge-info {
+  background-color: #17a2b8 !important;
+  color: white !important;
+}
+
+.badge.badge-primary {
+  background-color: var(--main-color) !important;
+  color: white !important;
+}
+
+.badge.badge-warning {
+  background-color: #ffc107 !important;
+  color: #000 !important;
+}
+
+.badge.badge-success {
+  background-color: #28a745 !important;
+  color: white !important;
+}
+
+.badge.badge-secondary {
+  background-color: #6c757d !important;
+  color: white !important;
+}
+
+/* =============================================================================
+   COPY BUTTON STYLES - Standardize copy functionality
+   ============================================================================= */
+
+.copy-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-light);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.copy-btn:hover {
+  color: var(--main-color);
+  background: var(--glass-bg-subtle);
+}
+
+/* =============================================================================
+   UTILITY CLASSES - Common layout and spacing
+   ============================================================================= */
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.text-truncate-custom {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+/* =============================================================================
+   TOAST ENHANCEMENTS
+   ============================================================================= */
+
+.toast {
+  border: none;
+  box-shadow: var(--glass-shadow-md);
+}
+
+.toast.bg-success {
+  background: #28a745 !important;
+}
+
+.toast.bg-danger {
+  background: #dc3545 !important;
+}

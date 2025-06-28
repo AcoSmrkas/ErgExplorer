@@ -1,33 +1,5 @@
 import { w as writable } from "./index3.js";
-import { A as API_ENDPOINTS } from "./api.js";
-const tokenCache = writable(/* @__PURE__ */ new Map());
-const CACHE_DURATION = 5 * 60 * 1e3;
-function clearExpiredCache() {
-  const now = Date.now();
-  tokenCache.update((cache) => {
-    const newCache = /* @__PURE__ */ new Map();
-    for (const [key, value] of cache.entries()) {
-      if (now - value.timestamp < CACHE_DURATION) {
-        newCache.set(key, value);
-      }
-    }
-    return newCache;
-  });
-}
-if (typeof window !== "undefined") {
-  setInterval(clearExpiredCache, CACHE_DURATION);
-}
-const priceStore = writable({});
-const ergPrice = writable(null);
-const currentPrices = writable({});
-priceStore.subscribe((prices) => {
-  if (prices.ERG) {
-    ergPrice.set(prices.ERG);
-  }
-  const tokenPrices = { ...prices };
-  delete tokenPrices.ERG;
-  currentPrices.set(tokenPrices);
-});
+import { A as API_ENDPOINTS } from "./constants.js";
 const addressBook = writable([]);
 const pendingAddresses = /* @__PURE__ */ new Set();
 let pendingPromise = null;
@@ -41,6 +13,9 @@ function getApiHost() {
   return API_ENDPOINTS.ERGEXPLORER;
 }
 function addAddress(address) {
+  if (address == "N/A" || address == "Multiple") {
+    return;
+  }
   if (!address || pendingAddresses.has(address)) {
     return;
   }
@@ -59,24 +34,31 @@ async function fetchAddressesInfo() {
   addressesToFetch.length = 0;
   pendingPromise = null;
   try {
-    const response = await fetch(getApiHost() + "addressbook/getAddressesInfo", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      body: new URLSearchParams({
-        addresses: addressesToQuery
-      })
+    const formData = new URLSearchParams();
+    addressesToQuery.forEach((address) => {
+      formData.append("addresses[]", address);
     });
+    const response = await fetch(
+      getApiHost() + "addressbook/getAddressesInfo",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: formData.toString()
+      }
+    );
     if (!response.ok) {
       throw new Error(`API request failed: ${response.statusText}`);
     }
     const data = await response.json();
-    if (data.total > 0 && data.items) {
+    if (data.items && data.items.length > 0) {
       addressBook.update((currentBook) => {
         const newBook = [...currentBook];
         for (const item of data.items) {
-          const existingIndex = newBook.findIndex((entry) => entry.address === item.address);
+          const existingIndex = newBook.findIndex(
+            (entry) => entry.address === item.address
+          );
           if (existingIndex >= 0) {
             newBook[existingIndex] = item;
           } else {
@@ -112,20 +94,8 @@ function getOwner(address, currentAddressBook) {
   }
   return owner;
 }
-function clearAddressBook() {
-  addressBook.set([]);
-  pendingAddresses.clear();
-  addressesToFetch.length = 0;
-  if (pendingPromise) {
-    clearTimeout(pendingPromise);
-    pendingPromise = null;
-  }
-}
 export {
-  addressBook as a,
-  addAddress as b,
-  clearAddressBook as c,
-  currentPrices as d,
-  ergPrice as e,
+  addAddress as a,
+  addressBook as b,
   getOwner as g
 };

@@ -1,404 +1,495 @@
 <script>
 	import { onMount } from 'svelte';
-	import DataTable from '$lib/components/data/DataTable.svelte';
-	import AddressFormatter from '$lib/components/data/AddressFormatter.svelte';
+	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
+	import CopyButton from '$lib/components/ui/CopyButton.svelte';
 	import ErrorMessage from '$lib/components/ui/ErrorMessage.svelte';
-	import { formatNumber } from '$lib/utils/formatting.js';
+	import Pagination from '$lib/components/ui/Pagination.svelte';
+	import Loading from '$lib/components/ui/Loading.svelte';
+	import PageHeader from '$lib/components/ui/PageHeader.svelte';
+	import { formatNumber, formatAddress } from '$lib/utils/formatting.js';
+	import { getApiHost } from '$lib/utils/api.js';
+	import { isTestnet } from '$lib/stores/network.svelte.js';
 
 	let addresses = [];
+	let tokens = [];
 	let loading = true;
 	let error = null;
-	let searchQuery = '';
-	let selectedCategory = 'all';
+	let addressType = 'all';
+	let orderBy = 'nameAsc';
+	let totalPages = 1;
+	let totalItems = 0;
 
-	$: filteredAddresses = filterAddresses(addresses, searchQuery, selectedCategory);
+	const ITEMS_PER_PAGE = 20;
 
-	// Known addresses - in a real app this would come from an API
-	const knownAddresses = [
-		{
-			address: '9hiaAS3pCydq12CS7xrTBBn2YTfdfSRCsXyQn9KZHVpVyEPk9zk',
-			name: 'ErgExplorer Donation',
-			category: 'service',
-			description: 'Official donation address for ErgExplorer development',
-			verified: true
-		},
-		{
-			address: '9fRAWhdxEsTcdb8PhGNrpfhBmXNpUGcGVCKVNEJUQCrEQpGpBZR',
-			name: 'Ergo Foundation',
-			category: 'foundation',
-			description: 'Official Ergo Foundation address',
-			verified: true
-		},
-		{
-			address: '9f5ZKbECVTm25JTRQHDHGM5ehC8tUw5g1fCBQ4aaE9rEhQvQv3u',
-			name: 'Spectrum Finance',
-			category: 'defi',
-			description: 'Spectrum Finance DEX protocol',
-			verified: true
-		},
-		{
-			address: '9h7L7sUHZk43VQC3PHtSp5ujAWcZtYmWATBH746YReeCVVt1dDL',
-			name: 'SigmaUSD Bank',
-			category: 'defi',
-			description: 'SigmaUSD algorithmic stablecoin protocol',
-			verified: true
-		},
-		{
-			address: '9iE2MadGSrn1ivHmRZJWWxmZrWqu3YjvjmTSV4qWVx5mRd8sBJT',
-			name: 'ErgoMixer',
-			category: 'privacy',
-			description: 'Non-interactive mixing protocol for privacy',
-			verified: true
-		},
-		{
-			address: '9fVtBCMJPpGvTuWNZhZwN7X6Vf7TsWc3VnKnFX8Ysj9X6eLVx5K',
-			name: 'Mining Pool Hub',
-			category: 'mining',
-			description: 'Popular Ergo mining pool',
-			verified: false
-		},
-		{
-			address: '9gE8XqmJvQQgBJpToGhUhLKh6FeSkNBV7sQVv5Rt4RyXv8ZWKtu',
-			name: 'NightOwl Casino',
-			category: 'gaming',
-			description: 'Decentralized casino on Ergo',
-			verified: false
-		},
-		{
-			address: '9fRfAMqvhGT4dB8B3NYXqH5fHVwWuAhgFXY3UjPKWVR9fQp7Lmo',
-			name: 'CYTI Token',
-			category: 'token',
-			description: 'CYTI governance token address',
-			verified: true
-		}
+	// Get pagination params from URL
+	$: limit = parseInt($page.url.searchParams.get('limit') || ITEMS_PER_PAGE.toString(), 10);
+	$: offset = parseInt($page.url.searchParams.get('offset') || '0', 10);
+	$: currentPage = Math.floor(offset / limit) + 1;
+
+	// Get filter params from URL
+	$: {
+		const urlType = $page.url.searchParams.get('type');
+		const urlOrder = $page.url.searchParams.get('order');
+		if (urlType) addressType = urlType;
+		if (urlOrder) orderBy = urlOrder;
+	}
+
+	// Watch for URL parameter changes and reload data
+	$: if ($page.url.pathname === '/addressbook') {
+		loadAddresses();
+	}
+
+	// Group addresses by name
+	$: groupedAddresses = groupAddressesByName(addresses);
+
+	const addressTypes = [
+		{ value: 'all', label: 'All' },
+		{ value: 'exchange', label: 'Exchange' },
+		{ value: 'service', label: 'Service' },
+		{ value: 'mining-pool', label: 'Mining Pool' },
+		{ value: 'nft-artist', label: 'NFT Artist' }
 	];
 
-	const headers = [
-		{ 
-			label: 'Name', 
-			field: 'name',
-			render: (value, row) => `
-				<div class="d-flex align-items-center">
-					<div>
-						<div class="fw-bold">${value}</div>
-						${row.verified ? '<span class="badge bg-success ms-2"><i class="fas fa-check-circle"></i> Verified</span>' : ''}
-					</div>
-				</div>
-			`
-		},
-		{ 
-			label: 'Address', 
-			field: 'address',
-			render: (value) => `<span class="address-cell" data-address="${value}"></span>`
-		},
-		{ 
-			label: 'Category', 
-			field: 'category',
-			render: (value) => `<span class="badge bg-primary">${getCategoryLabel(value)}</span>`
-		},
-		{ 
-			label: 'Description', 
-			field: 'description',
-			render: (value) => value || '—'
-		},
-		{ 
-			label: 'Actions', 
-			field: 'address',
-			render: (value) => `
-				<div class="btn-group btn-group-sm">
-					<a href="/addresses/${value}" class="btn btn-outline-primary">
-						<i class="fas fa-eye"></i> View
-					</a>
-					<button class="btn btn-outline-secondary copy-address" data-address="${value}">
-						<i class="fas fa-copy"></i>
-					</button>
-				</div>
-			`
-		}
-	];
-
-	const categories = [
-		{ value: 'all', label: 'All Categories' },
-		{ value: 'service', label: 'Services' },
-		{ value: 'foundation', label: 'Foundation' },
-		{ value: 'defi', label: 'DeFi' },
-		{ value: 'privacy', label: 'Privacy' },
-		{ value: 'mining', label: 'Mining' },
-		{ value: 'gaming', label: 'Gaming' },
-		{ value: 'token', label: 'Tokens' }
+	const orderOptions = [
+		{ value: 'nameAsc', label: 'Alphabetical: A to Z' },
+		{ value: 'nameDesc', label: 'Alphabetical: Z to A' }
 	];
 
 	onMount(() => {
 		loadAddresses();
 	});
 
-	function loadAddresses() {
-		loading = true;
-		// Simulate API loading
-		setTimeout(() => {
-			addresses = knownAddresses;
-			loading = false;
-			
-			// Enhance address cells after render
-			setTimeout(() => enhanceAddressCells(), 100);
-		}, 500);
-	}
-
-	function enhanceAddressCells() {
-		const addressCells = document.querySelectorAll('.address-cell');
-		addressCells.forEach(cell => {
-			const address = cell.dataset.address;
-			if (address) {
-				cell.innerHTML = `
-					<span class="font-monospace">${address.slice(0, 12)}...${address.slice(-12)}</span>
-				`;
-			}
-		});
-
-		// Add copy functionality to copy buttons
-		const copyButtons = document.querySelectorAll('.copy-address');
-		copyButtons.forEach(button => {
-			button.addEventListener('click', () => {
-				const address = button.dataset.address;
-				copyToClipboard(address);
-			});
-		});
-	}
-
-	async function copyToClipboard(text) {
+	async function loadAddresses() {
 		try {
-			await navigator.clipboard.writeText(text);
+			loading = true;
+			error = null;
+
+			const apiUrl = `${getApiHost()}addressbook/getAddresses?offset=${offset}&limit=${limit}&type=${addressType}&order=${orderBy}&testnet=${isTestnet() ? '1' : '0'}`;
 			
-			// Show toast notification
-			const toast = document.getElementById('liveToast');
-			if (toast) {
-				const bsToast = new bootstrap.Toast(toast);
-				bsToast.show();
+			const response = await fetch(apiUrl);
+			if (!response.ok) {
+				throw new Error(`Failed to fetch addresses: ${response.statusText}`);
 			}
+
+			const data = await response.json();
+			addresses = data.items || [];
+			tokens = data.tokens || [];
+			totalItems = data.total || 0;
+			totalPages = Math.ceil(totalItems / limit);
+
+			// Debug: log the actual data to see what types we have
+			console.log('API Response:', data);
+			console.log('First few addresses:', addresses.slice(0, 3));
+			if (addresses.length > 0) {
+				console.log('Available types:', [...new Set(addresses.map(addr => addr.type))]);
+			}
+
 		} catch (err) {
-			console.error('Failed to copy address:', err);
+			error = err.message;
+			console.error('Failed to load addressbook:', err);
+		} finally {
+			loading = false;
 		}
 	}
 
-	function filterAddresses(addressList, query, category) {
-		return addressList.filter(addr => {
-			// Category filter
-			if (category !== 'all' && addr.category !== category) return false;
-			
-			// Search filter
-			if (query) {
-				const searchLower = query.toLowerCase();
-				return (
-					addr.name.toLowerCase().includes(searchLower) ||
-					addr.address.toLowerCase().includes(searchLower) ||
-					addr.description?.toLowerCase().includes(searchLower)
-				);
+	function groupAddressesByName(addressList) {
+		const groups = {};
+		
+		addressList.forEach(item => {
+			if (!groups[item.name]) {
+				groups[item.name] = {
+					name: item.name,
+					type: item.type,
+					url: item.url,
+					addresses: []
+				};
 			}
-			
-			return true;
+			groups[item.name].addresses.push(item);
 		});
+		
+		return Object.values(groups);
 	}
 
-	function getCategoryLabel(category) {
-		const cat = categories.find(c => c.value === category);
-		return cat ? cat.label : category;
+	function getTokenForName(name) {
+		return tokens.find(token => token.addressname === name);
 	}
 
-	function handleSearch(event) {
-		if (event.key === 'Enter' || event.type === 'click') {
-			// Filter will update automatically due to reactive statement
+	function getTypeClass(type) {
+		switch(type) {
+			case 'exchange': return 'badge-info';
+			case 'service': return 'badge-primary';
+			case 'mining-pool': return 'badge-warning';
+			case 'nft-artist': return 'badge-success';
+			default: return 'badge-secondary';
 		}
 	}
 
-	function clearFilters() {
-		searchQuery = '';
-		selectedCategory = 'all';
+	function getAddressTypeClass(urltype) {
+		if (!urltype) return '';
+		
+		const type = urltype.toLowerCase();
+		if (type.includes('hot')) return 'hot';
+		if (type.includes('cold')) return 'cold';
+		if (type.includes('wallet')) return 'wallet';
+		if (type.includes('exchange')) return 'exchange';
+		return '';
+	}
+
+	function getBadgeColor(type) {
+		console.log('Badge type:', type); // Debug log
+		if (!type) return '#6c757d';
+		
+		const normalizedType = type.toLowerCase().trim().replace(/\s+/g, '-');
+		console.log('Normalized type:', normalizedType); // Debug log
+		
+		let color = '#6c757d'; // default gray
+		
+		// More flexible matching
+		if (normalizedType.includes('exchange')) color = '#17a2b8';
+		else if (normalizedType.includes('service')) color = '#ff851b';
+		else if (normalizedType.includes('mining')) color = '#ffc107';
+		else if (normalizedType.includes('nft') || normalizedType.includes('artist')) color = '#28a745';
+		
+		console.log('Returning color:', color, 'for type:', type); // Debug log
+		return color;
+	}
+
+	function getBadgeTextColor(type) {
+		if (!type) return 'white';
+		const normalizedType = type.toLowerCase().trim();
+		
+		// Yellow background needs black text for readability
+		if (normalizedType.includes('mining')) return '#000';
+		return 'white';
+	}
+
+	async function handleFilterChange() {
+		const url = new URL($page.url);
+		
+		if (addressType === 'all') {
+			url.searchParams.delete('type');
+		} else {
+			url.searchParams.set('type', addressType);
+		}
+		
+		if (orderBy === 'nameAsc') {
+			url.searchParams.delete('order');
+		} else {
+			url.searchParams.set('order', orderBy);
+		}
+		
+		url.searchParams.delete('offset');
+		await goto(url.pathname + url.search, { replaceState: false });
+	}
+
+	async function handlePageChange(event) {
+		const newPage = event.detail.page;
+		const newOffset = (newPage - 1) * limit;
+		const url = new URL($page.url);
+		
+		if (newOffset === 0) {
+			url.searchParams.delete('offset');
+		} else {
+			url.searchParams.set('offset', newOffset.toString());
+		}
+		
+		await goto(url.pathname + url.search, { replaceState: false });
+		window.scrollTo({ top: 0, behavior: 'smooth' });
+	}
+
+	// Generate info text for page header
+	function getInfoText() {
+		if (loading || !groupedAddresses.length) return '';
+		const start = offset + 1;
+		const end = Math.min(offset + limit, totalItems);
+		return `Showing ${start}-${end} of ${formatNumber(totalItems)} entries`;
 	}
 </script>
 
 <svelte:head>
 	<title>Address Book - Erg Explorer</title>
-	<meta name="description" content="Directory of known and verified addresses on the Ergo blockchain including services, DeFi protocols, and notable entities.">
+	<meta name="description" content="Directory of known addresses on the Ergo blockchain">
 </svelte:head>
 
-<div class="container-fluid">
-	<div class="row">
-		<div class="col-12">
-			<div class="d-flex justify-content-between align-items-center mb-4">
-				<h1 class="h3 mb-0">
-					<i class="fas fa-address-book me-2 text-primary"></i>
-					Address Book
-				</h1>
-				<div class="text-muted">
-					{#if !loading && filteredAddresses.length > 0}
-						{filteredAddresses.length} of {addresses.length} addresses
-					{/if}
-				</div>
-			</div>
+<div class="container-fluid p-0">
+	<div class="row p-0">
+		<div class="col-12 p-0">
+			<PageHeader 
+				title="Address Book" 
+				icon="fa-address-book" 
+				info={getInfoText()}
+			/>
 
-			<div class="alert alert-info d-flex align-items-center mb-4" role="alert">
-				<i class="fas fa-info-circle me-2"></i>
-				<div>
-					<strong>Address Directory:</strong> A curated list of known addresses on the Ergo blockchain. 
-					<span class="badge bg-success ms-2"><i class="fas fa-check-circle"></i> Verified</span> addresses are officially confirmed.
-				</div>
-			</div>
-
-			<!-- Filters -->
-			<div class="card mb-4">
-				<div class="card-body">
-					<div class="row g-3">
-						<div class="col-md-6">
-							<label class="form-label">Search addresses</label>
-							<div class="input-group">
-								<input 
-									bind:value={searchQuery}
-									onkeydown={handleSearch}
-									type="text" 
-									class="form-control" 
-									placeholder="Search by name, address, or description..."
-								>
-								<button class="btn btn-outline-primary" type="button" onclick={handleSearch}>
-									<i class="fas fa-search"></i>
-								</button>
-							</div>
-						</div>
-						<div class="col-md-4">
-							<label class="form-label">Category</label>
-							<select bind:value={selectedCategory} class="form-select">
-								{#each categories as category}
-									<option value={category.value}>{category.label}</option>
-								{/each}
-							</select>
-						</div>
-						<div class="col-md-2 d-flex align-items-end">
-							<button class="btn btn-outline-secondary w-100" onclick={clearFilters}>
-								<i class="fas fa-times me-1"></i>
-								Clear
-							</button>
-						</div>
+			<div class="container-fluid p-0">
+				<!-- Filters -->
+				<div class="row mb-4 p-0">
+					<div class="col-md-6 ps-0">
+						<label class="form-label" for="orderBy">Order:</label>
+						<select bind:value={orderBy} class="form-select" id="orderBy" onchange={handleFilterChange}>
+							{#each orderOptions as option}
+								<option value={option.value}>{option.label}</option>
+							{/each}
+						</select>
+					</div>
+					<div class="col-md-6 pe-0">
+						<label class="form-label" for="addressType">Filter:</label>
+						<select bind:value={addressType} class="form-select" id="addressType" onchange={handleFilterChange}>
+							{#each addressTypes as type}
+								<option value={type.value}>{type.label}</option>
+							{/each}
+						</select>
 					</div>
 				</div>
-			</div>
 
-			{#if error}
+			{#if loading}
+				<Loading text="Loading address book..." />
+			{:else if error}
 				<ErrorMessage message={error} type="danger" dismissible />
-			{/if}
-
-			<div class="card">
-				<div class="card-body p-0">
-					<DataTable 
-						{headers} 
-						data={filteredAddresses} 
-						{loading}
-						emptyMessage="No addresses found matching your criteria"
-						sortable={true}
-					/>
+			{:else if groupedAddresses.length === 0}
+				<div class="div-cell-dark">
+					There are no entries in the address book.
 				</div>
-			</div>
-
-			{#if !loading && addresses.length > 0}
-				<div class="mt-4">
-					<div class="row text-center">
-						<div class="col-md-2">
-							<div class="stat-card">
-								<div class="stat-value">{formatNumber(addresses.length)}</div>
-								<div class="stat-label">Total</div>
-							</div>
-						</div>
-						<div class="col-md-2">
-							<div class="stat-card">
-								<div class="stat-value">
-									{formatNumber(addresses.filter(a => a.verified).length)}
-								</div>
-								<div class="stat-label">Verified</div>
-							</div>
-						</div>
-						{#each categories.slice(1) as category}
-							<div class="col-md-2">
-								<div class="stat-card">
-									<div class="stat-value">
-										{formatNumber(addresses.filter(a => a.category === category.value).length)}
-									</div>
-									<div class="stat-label">{category.label}</div>
-								</div>
-							</div>
-						{/each}
+			{:else}
+				<!-- Pagination -->
+				{#if totalPages > 1}
+					<div class="mb-4">
+						<Pagination 
+							{currentPage} 
+							{totalPages}
+							on:pageChange={handlePageChange}
+						/>
 					</div>
+				{/if}
+
+				<!-- Address Groups -->
+				<div class="row w-100">
+					{#each groupedAddresses as group}
+						<div class="col-12 mb-4 p-0 glass-card-holder">
+							<div class="glass-card">
+								<div class="card-header">
+									<h2 class="section-title">{group.name}</h2>
+									<span class="badge {getTypeClass(group.type)}" style="background-color: {getBadgeColor(group.type)} !important; color: {getBadgeTextColor(group.type)} !important;">{group.type}</span>
+								</div>
+								<div class="card-content">
+									{#if group.url}
+										<div class="contact-item">
+											<span class="contact-label">Website:</span>
+											<a href="{group.url}" target="_blank" rel="noopener" class="contact-link">
+												{group.url}
+												<i class="fas fa-external-link-alt ms-1"></i>
+											</a>
+										</div>
+									{/if}
+									
+									<div class="addresses-section">
+										<h6 class="addresses-label">
+											<i class="fas fa-wallet me-2"></i>
+											Address{group.addresses.length > 1 ? 'es' : ''}
+										</h6>
+										<div class="addresses-list">
+											{#each group.addresses as address, index}
+												<div class="address-item" class:mb-0={index === group.addresses.length - 1}>
+													<div class="address-row">
+														{#if address.urltype}
+															<span class="address-type {getAddressTypeClass(address.urltype)}">{address.urltype}</span>
+														{/if}
+														<a 
+															href="/addresses/{address.address}" 
+															class="address-link"
+															data-address={address.address}
+														>
+															{formatAddress(address.address, 32, 6)}
+														</a>
+														<CopyButton 
+															text={address.address} 
+															label="Copy address" 
+															successMessage="Address copied to clipboard!"
+														/>
+													</div>
+												</div>
+											{/each}
+										</div>
+									</div>
+
+									{#if getTokenForName(group.name)}
+										{@const token = getTokenForName(group.name)}
+										<div class="contact-item mb-0">
+											<span class="contact-label">Token:</span>
+											<a 
+												href="/tokens/{token.id}" 
+												data-token-id={token.id}
+												data-token-name={token.name || ''}
+												class="contact-link token-link"
+												title="Click to view token details"
+											>
+												{token.id}
+											</a>
+										</div>
+									{/if}
+								</div>
+							</div>
+						</div>
+					{/each}
 				</div>
+
+				<!-- Bottom Pagination -->
+				{#if totalPages > 1}
+					<div class="mt-2">
+						<Pagination 
+							{currentPage} 
+							{totalPages}
+							on:pageChange={handlePageChange}
+						/>
+					</div>
+				{/if}
 			{/if}
+			</div>
 		</div>
 	</div>
 </div>
 
+<div class="page-bottom-margin"></div>
+
 <style>
-	.card {
-		border: none;
-		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-		border-radius: 12px;
+	.glass-card-holder:last-child {
+		margin-bottom: 0 !important;
+	}
+
+	.addresses-section {
+		margin: 1.5rem 0;
+	}
+
+	.addresses-label {
+		color: var(--text-strong);
+		font-weight: 600;
+		font-size: 1rem;
+		margin-bottom: 1rem;
+		display: flex;
+		align-items: center;
+	}
+
+	.addresses-label i {
+		color: var(--main-color);
+	}
+
+	.addresses-list {
+		background: var(--glass-bg-subtle);
+		border: 1px solid var(--glass-border-light);
+		border-radius: 8px;
 		overflow: hidden;
 	}
 
-	.h3 {
-		color: var(--bs-body-color);
+	.address-item {
+		border-bottom: 1px solid var(--glass-border-light);
+		transition: background-color 0.2s ease;
+	}
+
+	.address-item:hover {
+		background: var(--glass-bg-light);
+	}
+
+	.address-item.mb-0 {
+		border-bottom: none;
+	}
+
+	.address-row {
+		display: flex;
+		align-items: center;
+		padding: 0.75rem 1rem;
+		gap: 1rem;
+	}
+
+	.address-type {
+		font-size: 0.75rem;
 		font-weight: 600;
-	}
-
-	.text-primary {
-		color: var(--main-color) !important;
-	}
-
-	.btn-outline-primary {
-		border-color: var(--main-color);
-		color: var(--main-color);
-	}
-
-	.btn-outline-primary:hover {
-		background-color: var(--main-color);
-		border-color: var(--main-color);
-	}
-
-	.alert-info {
-		background-color: rgba(var(--bs-info-rgb), 0.1);
-		border-color: rgba(var(--bs-info-rgb), 0.2);
-		color: var(--bs-info-text-emphasis);
-	}
-
-	.stat-card {
-		padding: 1rem;
-		background: rgba(var(--bs-primary-rgb), 0.05);
-		border-radius: 8px;
-		margin-bottom: 1rem;
-	}
-
-	.stat-value {
-		font-size: 1.25rem;
-		font-weight: bold;
-		color: var(--main-color);
-		margin-bottom: 0.25rem;
-	}
-
-	.stat-label {
-		font-size: 0.8rem;
-		color: var(--bs-secondary-color);
 		text-transform: uppercase;
-		letter-spacing: 0.05em;
+		letter-spacing: 0.5px;
+		padding: 0.2rem 0.5rem;
+		border-radius: 4px;
+		min-width: fit-content;
+		background-color: var(--main-color);
+		color: white;
 	}
 
-	.badge {
+	/* Color coding for address types */
+	.address-type.hot {
+		background-color: #dc3545;
+		color: white;
+	}
+
+	.address-type.cold {
+		background-color: #17a2b8;
+		color: white;
+	}
+
+	.address-type.wallet {
+		background-color: #28a745;
+		color: white;
+	}
+
+	.address-type.exchange {
+		background-color: #ffc107;
+		color: #000;
+	}
+
+	.address-link {
+		font-family: monospace;
+		font-size: 0.95rem;
+		color: var(--text-strong);
+		text-decoration: none;
+		font-weight: 500;
+		flex: 1;
+		transition: color 0.3s ease;
+	}
+
+	.address-link:hover {
+		color: var(--main-color);
+	}
+
+	/* Force badge colors with global scope to override Svelte scoping */
+	:global(.glass-card .card-header .badge) {
 		font-size: 0.75rem;
+		font-weight: 500;
+		padding: 0.35em 0.65em;
+		border-radius: 6px;
+		display: inline-block;
 	}
 
-	.bg-success {
-		background-color: #28a745 !important;
+	:global(.glass-card .card-header .badge-info) { 
+		background-color: #17a2b8 !important; 
+		color: white !important;
 	}
 
-	.bg-primary {
-		background-color: var(--main-color) !important;
+	:global(.glass-card .card-header .badge-primary) { 
+		background-color: var(--main-color) !important; 
+		color: white !important;
 	}
 
-	:global(.btn-group-sm > .btn) {
-		padding: 0.25rem 0.5rem;
-		font-size: 0.75rem;
+	:global(.glass-card .card-header .badge-warning) { 
+		background-color: #ffc107 !important; 
+		color: #000 !important;
+	}
+
+	:global(.glass-card .card-header .badge-success) { 
+		background-color: #28a745 !important; 
+		color: white !important;
+	}
+
+	:global(.glass-card .card-header .badge-secondary) { 
+		background-color: #6c757d !important; 
+		color: white !important;
+	}
+
+	@media (max-width: 768px) {
+		.address-content {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 0.75rem;
+		}
+
+		.address-link {
+			word-break: break-all;
+		}
 	}
 </style>

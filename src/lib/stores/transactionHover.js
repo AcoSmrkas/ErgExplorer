@@ -22,7 +22,7 @@ export function showTransactionPopup(transactionId, event) {
   clearTimeout(hideTimeout);
   currentTransactionId = transactionId;
 
-  // Set popup position using cursor coordinates like other popups
+  // Set popup position
   const x = event.clientX + 15;
   const y = event.clientY - 10;
 

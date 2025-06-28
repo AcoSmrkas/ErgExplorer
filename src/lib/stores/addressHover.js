@@ -26,7 +26,7 @@ export async function handleAddressHover(event) {
     }
 
     // Set popup position
-    const x = event.clientX + 15;
+    const x = event.clientX + 20;
     const y = event.clientY - 10;
 
     // Show basic popup immediately with loading state

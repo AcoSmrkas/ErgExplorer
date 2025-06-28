@@ -1,12 +1,13 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import DataTable from '$lib/components/data/DataTable.svelte';
 	import Pagination from '$lib/components/ui/Pagination.svelte';
 	import ErrorMessage from '$lib/components/ui/ErrorMessage.svelte';
+	import PageHeader from '$lib/components/ui/PageHeader.svelte';
 	import { getMempool } from '$lib/utils/api.js';
+	import { createPaginationHandler } from '$lib/utils/usePagination.js';
 	import { FEE_ERGOTREE, ERG_DECIMALS } from '$lib/utils/constants.js';
 	import { formatErgValue, formatFileSize, formatNumber, formatPriceUSD, formatAddress } from '$lib/utils/formatting.js';
 	import { ergPrice } from '$lib/stores/priceStore.js';
@@ -17,6 +18,7 @@
 	let loading = true;
 	let error = null;
 	let totalPages = 1;
+	let totalItems = 0;
 	let useRealTime = true;
 	let refreshInterval;
 	let isSocketConnected = false;
@@ -44,10 +46,9 @@
 	let unsubscribeMempool;
 	let unsubscribeLastUpdate;
 
-	// Get pagination params from URL
-	$: limit = parseInt($page.url.searchParams.get('limit') || DEFAULT_LIMIT.toString(), 10);
-	$: offset = parseInt($page.url.searchParams.get('offset') || '0', 10);
-	$: currentPage = Math.floor(offset / limit) + 1;
+	// Use pagination utility
+	$: pagination = createPaginationHandler($page, loadTransactions, DEFAULT_LIMIT);
+	$: ({ limit, offset, currentPage } = pagination);
 
 	// Function to detect and group conflicting transactions
 	function groupConflictingTransactions(txs) {
@@ -225,7 +226,8 @@
 			});
 			
 			transactions = data.items || [];
-			totalPages = Math.ceil((data.total || 0) / limit);
+			totalItems = data.total || 0;
+			totalPages = Math.ceil(totalItems / limit);
 			
 		} catch (err) {
 			error = err.message;
@@ -272,28 +274,9 @@
 
 	async function handlePageChange(event) {
 		const newPage = event.detail.page;
-		const newOffset = (newPage - 1) * limit;
-		const url = new URL($page.url);
 		
-		// Update offset and limit in URL
-		if (newOffset === 0) {
-			url.searchParams.delete('offset');
-		} else {
-			url.searchParams.set('offset', newOffset.toString());
-		}
-		
-		if (limit === DEFAULT_LIMIT) {
-			url.searchParams.delete('limit');
-		} else {
-			url.searchParams.set('limit', limit.toString());
-		}
-		
-		// Update URL without full page reload
-		await goto(url.pathname + url.search, { 
-			replaceState: false,
-			noScroll: false,
-			keepFocus: false
-		});
+		// Use pagination utility
+		await pagination.handlePageChange(event);
 		
 		// Manage real-time updates based on page
 		if (newPage === 1 && useRealTime) {
@@ -301,9 +284,6 @@
 		} else {
 			startFallbackPolling();
 		}
-		
-		// Smooth scroll to top
-		window.scrollTo({ top: 0, behavior: 'smooth' });
 	}
 
 	async function handleRefresh() {
@@ -319,21 +299,11 @@
 <div class="container-fluid p-0">
 	<div class="row p-0">
 		<div class="col-12 p-0">
-			<div class="page-header mb-0 px-0">
-				<div class="header-content p-0">
-					<h1 class="page-title p-0">
-						<i class="fas fa-clock me-3 title-icon"></i>
-						Mempool Transactions
-					</h1>
-					<div class="header-info">
-						{#if !loading && displayTransactions.length > 0}
-							<span class="info-text">
-								Showing {offset + 1} - {Math.min(offset + limit, offset + displayTransactions.length)} transactions
-							</span>
-						{/if}
-					</div>
-				</div>
-			</div>
+			<PageHeader 
+				title="Mempool Transactions" 
+				icon="fa-clock" 
+				info={pagination.getInfoText(displayTransactions, totalItems, loading)}
+			/>
 
 			{#if error}
 				<ErrorMessage message={error} type="danger" dismissible />
@@ -352,7 +322,7 @@
 					</div>
 				{/if}
 				
-				<div class="controls-card">
+				<div class="info-card">
 					<div class="control-section">
 						<div class="connection-status">
 							<div class="status-indicator" class:connected={isSocketConnected} class:disconnected={!isSocketConnected}>
@@ -392,14 +362,12 @@
 				</div>
 			</div>
 
-			<div class="glass-container">
-				<DataTable 
-					{headers} 
-					data={displayTransactions} 
-					{loading}
-					emptyMessage={showConflicts ? "No conflicting transactions found" : "No pending transactions in mempool"}
-				/>
-			</div>
+			<DataTable 
+				{headers} 
+				data={displayTransactions} 
+				{loading}
+				emptyMessage={showConflicts ? "No conflicting transactions found" : "No pending transactions in mempool"}
+			/>
 
 			{#if !loading && totalPages > 1}
 				<div class="mt-2">
@@ -417,114 +385,12 @@
 <div class="page-bottom-margin"></div>
 
 <style>
-	.glass-container {
-		background: var(--glass-bg-subtle);
-		backdrop-filter: var(--glass-blur-md);
-		-webkit-backdrop-filter: var(--glass-blur-md);
-		box-shadow: var(--glass-shadow-sm);
-		border-radius: 16px;
-		overflow: hidden;
-		padding: 0;
-	}
-
-	.page-header {
-		padding: 1.5rem 2rem;
-		margin-bottom: 1.5rem;
-	}
-
-	.header-content {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		flex-wrap: wrap;
-		gap: 1rem;
-	}
-
-	.page-title {
-		color: var(--text-strong);
-		font-weight: 700;
-		font-size: 2rem;
-		margin: 0;
-		display: flex;
-		align-items: center;
-	}
-
-	.title-icon {
-		color: #ffc107;
-		font-size: 1.8rem;
-	}
-
-
-	.info-text {
-		color: var(--text-light);
-		font-size: 0.95rem;
-		font-weight: 500;
-	}
-
-	.form-check-input:checked {
-		background-color: var(--main-color);
-		border-color: var(--main-color);
-	}
-
-	.form-check-label {
-		color: var(--text-strong);
-		font-weight: 500;
-	}
-
-	.btn-refresh {
-		background: var(--glass-bg-subtle);
-		backdrop-filter: var(--glass-blur-sm);
-		-webkit-backdrop-filter: var(--glass-blur-sm);
-		border: 1px solid var(--glass-border-light);
-		box-shadow: var(--glass-shadow-sm);
-		color: var(--text-strong);
-		padding: 0.5rem 1rem;
-		border-radius: 8px;
-		font-weight: 500;
-		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-		cursor: pointer;
-	}
-
-	.btn-refresh:hover {
-		background: var(--main-color);
-		border-color: var(--main-color);
-		color: white;
-		transform: translateY(-2px);
-		box-shadow: var(--glass-shadow-md);
-	}
-
-	.btn-refresh:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
-		transform: none;
-	}
-
 	.mempool-info {
 		margin-bottom: 1.5rem;
 	}
 
-	.info-card {
-		background: var(--glass-bg-subtle);
-		backdrop-filter: var(--glass-blur-sm);
-		-webkit-backdrop-filter: var(--glass-blur-sm);
-		border: 1px solid var(--glass-border-light);
-		border-radius: 12px;
-		padding: 1rem 1.5rem;
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		margin-bottom: 1rem;
-		position: relative;
-	}
-
-	.dismiss-btn {
-		background: none;
-		border: none;
-		color: var(--text-light);
-		cursor: pointer;
-		padding: 0.25rem;
-		border-radius: 4px;
-		margin-left: auto;
+	/* Custom dismiss button override */
+	.info-card .dismiss-btn {
 		transition: all 0.3s ease;
 		display: flex;
 		align-items: center;
@@ -533,19 +399,11 @@
 		height: 24px;
 	}
 
-	.dismiss-btn:hover {
+	.info-card .dismiss-btn:hover {
 		background: var(--glass-bg-subtle);
 		color: var(--main-color);
 	}
 
-	.controls-card {
-		background: var(--glass-bg-subtle);
-		backdrop-filter: var(--glass-blur-sm);
-		-webkit-backdrop-filter: var(--glass-blur-sm);
-		border: 1px solid var(--glass-border-light);
-		border-radius: 12px;
-		padding: 1rem 1.5rem;
-	}
 
 	.control-section {
 		display: flex;

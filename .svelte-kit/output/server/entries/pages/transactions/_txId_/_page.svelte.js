@@ -1,10 +1,10 @@
-import { D as store_get, P as head, I as unsubscribe_stores, C as pop, z as push, G as escape_html, E as attr, O as stringify } from "../../../../chunks/index.js";
+import { E as store_get, Q as head, I as unsubscribe_stores, D as pop, z as push, G as escape_html, J as attr, P as stringify } from "../../../../chunks/index.js";
 import { p as page } from "../../../../chunks/stores.js";
 /* empty css                                                         */
 import "../../../../chunks/AddressFormatter.svelte_svelte_type_style_lang.js";
 import "../../../../chunks/TokenDisplay.svelte_svelte_type_style_lang.js";
 import { L as Loading } from "../../../../chunks/Loading.js";
-import "../../../../chunks/ErrorMessage.svelte_svelte_type_style_lang.js";
+/* empty css                                                            */
 function _page($$payload, $$props) {
   push();
   var $$store_subs;

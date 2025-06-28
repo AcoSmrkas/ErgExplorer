@@ -10,6 +10,9 @@
 /* Import centralized glass system */
 @import url("./lib/styles/glass-system.css");
 
+/* Import common component styles */
+@import url("./lib/styles/common-components.css");
+
 /* Global styles matching original */
 html {
   overflow-y: scroll;

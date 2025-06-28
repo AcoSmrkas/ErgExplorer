@@ -1,4 +1,4 @@
-import { H as HYDRATION_ERROR, g as get_next_sibling, d as define_property, s as set_active_reaction, a as set_active_effect, i as is_array, b as active_effect, c as active_reaction, e as init_operations, f as get_first_child, h as HYDRATION_START, j as HYDRATION_END, k as hydration_failed, l as clear_text_content, m as array_from, n as component_root, o as create_text, p as branch, q as push, r as component_context, t as pop, u as set, L as LEGACY_PROPS, v as get, w as flushSync, x as mutable_source, y as render, z as push$1, A as setContext, C as pop$1 } from "./index.js";
+import { H as HYDRATION_ERROR, g as get_next_sibling, d as define_property, s as set_active_reaction, a as set_active_effect, i as is_array, b as active_effect, c as active_reaction, e as init_operations, f as get_first_child, C as COMMENT_NODE, h as HYDRATION_START, j as HYDRATION_END, k as hydration_failed, l as clear_text_content, m as array_from, n as component_root, o as create_text, p as branch, q as push, r as component_context, t as pop, u as set, L as LEGACY_PROPS, v as get, w as flushSync, x as mutable_source, y as render, z as push$1, A as setContext, D as pop$1 } from "./index.js";
 import "clsx";
 let base = "";
 let assets = base;
@@ -166,7 +166,7 @@ function hydrate(component, options2) {
       /** @type {TemplateNode} */
       get_first_child(target)
     );
-    while (anchor && (anchor.nodeType !== 8 || /** @type {Comment} */
+    while (anchor && (anchor.nodeType !== COMMENT_NODE || /** @type {Comment} */
     anchor.data !== HYDRATION_START)) {
       anchor = /** @type {TemplateNode} */
       get_next_sibling(anchor);
@@ -181,7 +181,7 @@ function hydrate(component, options2) {
     );
     hydrate_next();
     const instance = _mount(component, { ...options2, anchor });
-    if (hydrate_node === null || hydrate_node.nodeType !== 8 || /** @type {Comment} */
+    if (hydrate_node === null || hydrate_node.nodeType !== COMMENT_NODE || /** @type {Comment} */
     hydrate_node.data !== HYDRATION_END) {
       hydration_mismatch();
       throw HYDRATION_ERROR;
@@ -480,43 +480,84 @@ const options = {
   root,
   service_worker: false,
   templates: {
-    app: ({ head, body, assets: assets2, nonce, env }) => '<!doctype html>\n<html id="index" class="no-js" data-bs-theme="light" lang="en" data-sveltekit-preload-data="hover">\n	<head>\n		<meta charset="utf-8">\n		<meta name="viewport" content="width=device-width, initial-scale=1">\n		<link rel="icon" type="image/png" href="' + assets2 + '/favicon.png">\n		<link rel="apple-touch-icon" type="image/png" href="' + assets2 + '/apple-touch-icon.png">\n		\n		<!-- Bootstrap 5 CSS -->\n		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">\n		\n		<!-- Additional theme file -->\n		<link id="additionalTheme" href="" rel="stylesheet" media="(prefers-color-scheme: dark)">\n		\n		<!-- Font Awesome CSS -->\n		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">\n		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">\n		\n		' + head + '\n	</head>\n	<body data-sveltekit-preload-data="hover">\n		<div style="display: contents">' + body + `</div>
-		
-		<!-- Bootstrap Toast Containers -->
-		<div class="toast-container position-fixed bottom-0 end-0 p-3">
-			<div id="customToast" data-bs-config='{"autohide":false}' class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-				<div id="customToastBody" class="toast-body"></div>
-			</div>
-		</div>
-		
-		<div class="toast-container position-fixed bottom-0 end-0 p-3">
-			<div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-				<div id="toastBody" class="toast-body">
-					Copied to clipboard!
-				</div>
-			</div>
-		</div>
-		
-		<div class="toast-container position-fixed bottom-0 end-0 p-3">
-			<div id="notificationToast" data-bs-config='{"autohide":false}' class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-				<div id="notificationToastBody" class="toast-body d-flex align-items-end">
-					<p id="notificationToastText">Transaction pending. Do you want to get notified when it confirms?</p>
-					<br>
-					<button class="btn btn-primary m-1 end-0" onclick="onNotificationToastNo()">No</button> 
-					<button class="btn btn-info m-1 end-0" onclick="onNotificationToastYes()">Yes</button>
-				</div>
-			</div>
-		</div>
+    app: ({ head, body, assets: assets2, nonce, env }) => '<!doctype html>\n<html\n  id="index"\n  class="no-js"\n  data-bs-theme="light"\n  lang="en"\n  data-sveltekit-preload-data="hover"\n>\n  <head>\n    <meta charset="utf-8" />\n    <meta name="viewport" content="width=device-width, initial-scale=1" />\n    <link rel="icon" type="image/png" href="' + assets2 + '/favicon.png" />\n    <link\n      rel="apple-touch-icon"\n      type="image/png"\n      href="' + assets2 + '/apple-touch-icon.png"\n    />\n\n    <!-- Bootstrap 5 CSS -->\n    <link\n      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"\n      rel="stylesheet"\n      integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"\n      crossorigin="anonymous"\n    />\n\n    <!-- Additional theme file -->\n    <link\n      id="additionalTheme"\n      href=""\n      rel="stylesheet"\n      media="(prefers-color-scheme: dark)"\n    />\n\n    <!-- Font Awesome CSS -->\n    <link\n      rel="stylesheet"\n      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"\n    />\n    <link\n      rel="stylesheet"\n      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"\n    />\n\n    ' + head + '\n  </head>\n  <body data-sveltekit-preload-data="hover">\n    <div style="display: contents">' + body + `</div>
 
-		<!-- External Scripts -->
-		<script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"><\/script>
-		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"><\/script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/bignumber.js/8.0.2/bignumber.min.js" integrity="sha512-7UzDjRNKHpQnkh1Wf1l6i/OPINS9P2DDzTwQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous" referrerpolicy="no-referrer"><\/script>
-		<script src="https://cdn.jsdelivr.net/npm/json-bigint-parser-browser@1.0.4/json-bigint-browser.min.js"><\/script>
-		<script src="/scripts/common/config.js"><\/script>
-		<script src="/scripts/main.js"><\/script>
-	</body>
-</html>`,
+    <!-- Bootstrap Toast Containers -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div
+        id="customToast"
+        data-bs-config='{"autohide":false}'
+        class="toast"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div id="customToastBody" class="toast-body"></div>
+      </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div
+        id="liveToast"
+        class="toast"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div id="toastBody" class="toast-body">Copied to clipboard!</div>
+      </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div
+        id="notificationToast"
+        data-bs-config='{"autohide":false}'
+        class="toast"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div
+          id="notificationToastBody"
+          class="toast-body d-flex align-items-end"
+        >
+          <p id="notificationToastText">
+            Transaction pending. Do you want to get notified when it confirms?
+          </p>
+          <br />
+          <button
+            class="btn btn-primary m-1 end-0"
+            onclick="onNotificationToastNo()"
+          >
+            No
+          </button>
+          <button
+            class="btn btn-info m-1 end-0"
+            onclick="onNotificationToastYes()"
+          >
+            Yes
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- External Scripts -->
+    <script
+      src="https://code.jquery.com/jquery-3.6.4.min.js"
+      integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8="
+      crossorigin="anonymous"
+    ><\/script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+      crossorigin="anonymous"
+    ><\/script>
+    <script src="https://cdn.jsdelivr.net/npm/json-bigint-parser-browser@1.0.4/json-bigint-browser.min.js"><\/script>
+    <script src="/scripts/common/config.js"><\/script>
+    <script src="/scripts/main.js"><\/script>
+  </body>
+</html>
+`,
     error: ({ status, message }) => '<!doctype html>\n<html lang="en">\n	<head>\n		<meta charset="utf-8" />\n		<title>' + message + `</title>
 
 		<style>
@@ -588,7 +629,7 @@ const options = {
 		<div class="error">
 			<span class="status">` + status + '</span>\n			<div class="message">\n				<h1>' + message + "</h1>\n			</div>\n		</div>\n	</body>\n</html>\n"
   },
-  version_hash: "l38xn7"
+  version_hash: "1pss1sj"
 };
 async function get_hooks() {
   let handle;

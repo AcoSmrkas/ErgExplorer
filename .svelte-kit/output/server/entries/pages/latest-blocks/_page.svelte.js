@@ -1,82 +1,92 @@
-import { P as head, C as pop, z as push } from "../../../chunks/index.js";
+import { E as store_get, Q as head, I as unsubscribe_stores, D as pop, z as push } from "../../../chunks/index.js";
+import { p as page } from "../../../chunks/stores.js";
 import "../../../chunks/client.js";
 import { D as DataTable } from "../../../chunks/DataTable.js";
-import "../../../chunks/AddressFormatter.svelte_svelte_type_style_lang.js";
-import "../../../chunks/Pagination.svelte_svelte_type_style_lang.js";
-/* empty css                                                    */
-import "../../../chunks/ErrorMessage.svelte_svelte_type_style_lang.js";
-import { f as formatNumber, b as formatDateString, a as formatErgValue, g as formatPriceUSD, i as formatDifficulty, j as formatFileSize } from "../../../chunks/formatting.js";
+import { P as PageHeader, a as Pagination } from "../../../chunks/PageHeader.js";
+import { E as ErrorMessage } from "../../../chunks/ErrorMessage.js";
+import { getBlocks } from "../../../chunks/api.js";
+import { g as getLatestBlocksHeaders } from "../../../chunks/tableConfigs.js";
 function _page($$payload, $$props) {
   push();
+  var $$store_subs;
+  let limit, offset, currentPage;
   let blocks = [];
   let loading = true;
-  const headers = [
-    {
-      label: "Height",
-      field: "height",
-      sortKey: "height",
-      render: (value, row) => `<a href="/blocks/${row.id}" data-block-id="${row.id}" aria-label="View block ${value}"><i class="fas fa-link text-info me-1"></i></a><span class="fw-bold">${formatNumber(value, 0, true)}</span>`
-    },
-    {
-      label: "Time",
-      field: "timestamp",
-      sortKey: "timestamp",
-      render: (value) => formatDateString(value)
-    },
-    {
-      label: "Transactions",
-      field: "transactionsCount",
-      sortKey: "transactionsCount",
-      render: (value) => formatNumber(value)
-    },
-    {
-      label: "Mined by",
-      field: "miner",
-      render: (value) => `<span class="miner-cell" data-address="${value.address}" data-name="${value.name}"></span>`
-    },
-    {
-      label: "Reward",
-      field: "minerReward",
-      sortKey: "minerReward",
-      render: (value) => `${formatErgValue(value)} ERG<br><small class="text-muted">${formatPriceUSD()}</small>`
-    },
-    {
-      label: "Difficulty",
-      field: "difficulty",
-      sortKey: "difficulty",
-      render: (value) => formatDifficulty(value)
-    },
-    {
-      label: "Size",
-      field: "size",
-      sortKey: "size",
-      render: (value) => formatFileSize(value)
+  let error = null;
+  let totalPages = 1;
+  let totalItems = 0;
+  const DEFAULT_LIMIT = 20;
+  async function loadBlocks() {
+    try {
+      loading = true;
+      error = null;
+      const data = await getBlocks({
+        limit,
+        offset,
+        sortBy: "height",
+        sortDirection: "desc"
+      });
+      blocks = data.items || [];
+      totalItems = data.total || 0;
+      totalPages = Math.ceil(totalItems / limit);
+    } catch (err) {
+      error = err.message;
+      console.error("Failed to load blocks:", err);
+    } finally {
+      loading = false;
     }
-  ];
+  }
+  function getInfoText() {
+    if (loading || !blocks.length) return "";
+    const start = offset + 1;
+    const end = Math.min(offset + limit, offset + blocks.length);
+    return `Showing ${start} - ${end}${totalItems ? ` of ${totalItems}` : ""} blocks`;
+  }
+  limit = parseInt(store_get($$store_subs ??= {}, "$page", page).url.searchParams.get("limit") || DEFAULT_LIMIT.toString(), 10);
+  offset = parseInt(store_get($$store_subs ??= {}, "$page", page).url.searchParams.get("offset") || "0", 10);
+  currentPage = Math.floor(offset / limit) + 1;
+  if (store_get($$store_subs ??= {}, "$page", page).url.pathname === "/latest-blocks") {
+    loadBlocks();
+  }
   head($$payload, ($$payload2) => {
     $$payload2.title = `<title>Latest Blocks - Erg Explorer</title>`;
     $$payload2.out += `<meta name="description" content="View the latest blocks mined on the Ergo blockchain with details about transactions, miners, and rewards."/>`;
   });
-  $$payload.out += `<div class="container-fluid"><div class="row"><div class="col-12"><div class="d-flex justify-content-between align-items-center mb-4"><h1 class="h3 mb-0 svelte-1k3v57u"><i class="fas fa-cubes me-2 text-primary svelte-1k3v57u"></i> Latest Blocks</h1> <div class="text-muted">`;
-  {
+  $$payload.out += `<div class="container-fluid p-0"><div class="row p-0"><div class="col-12 p-0">`;
+  PageHeader($$payload, {
+    title: "Latest Blocks",
+    icon: "fa-cubes",
+    info: getInfoText()
+  });
+  $$payload.out += `<!----> `;
+  if (error) {
+    $$payload.out += "<!--[-->";
+    ErrorMessage($$payload, {
+      message: error,
+      type: "danger",
+      dismissible: true
+    });
+  } else {
     $$payload.out += "<!--[!-->";
   }
-  $$payload.out += `<!--]--></div></div> `;
-  {
-    $$payload.out += "<!--[!-->";
-  }
-  $$payload.out += `<!--]--> <div class="card svelte-1k3v57u"><div class="card-body p-0">`;
+  $$payload.out += `<!--]--> `;
   DataTable($$payload, {
-    headers,
+    headers: getLatestBlocksHeaders(),
     data: blocks,
     loading,
     emptyMessage: "No blocks found"
   });
-  $$payload.out += `<!----></div></div> `;
-  {
+  $$payload.out += `<!----> `;
+  if (!loading && totalPages > 1) {
+    $$payload.out += "<!--[-->";
+    $$payload.out += `<div class="mt-2">`;
+    Pagination($$payload, { currentPage, totalPages });
+    $$payload.out += `<!----></div>`;
+  } else {
     $$payload.out += "<!--[!-->";
   }
-  $$payload.out += `<!--]--></div></div></div>`;
+  $$payload.out += `<!--]--></div></div></div> <div class="page-bottom-margin"></div>`;
+  if ($$store_subs) unsubscribe_stores($$store_subs);
   pop();
 }
 export {

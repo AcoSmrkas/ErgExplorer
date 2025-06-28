@@ -97,17 +97,5 @@
 		gap: 4px;
 	}
 	
-	.price-change.positive {
-		color: #22c55e;
-	}
-	
-	.price-change.negative {
-		color: #ef4444;
-	}
-	
-	.price-change small {
-		font-size: 0.75em;
-		font-weight: normal;
-		opacity: 0.7;
-	}
+	/* Price change styles moved to common-components.css */
 </style>

@@ -1,4 +1,4 @@
-import { K as fallback, F as attr_class, G as escape_html, N as bind_props, O as stringify } from "./index.js";
+import { M as fallback, F as attr_class, G as escape_html, O as bind_props, P as stringify } from "./index.js";
 /* empty css                                      */
 function Loading($$payload, $$props) {
   let size = fallback($$props["size"], "md");

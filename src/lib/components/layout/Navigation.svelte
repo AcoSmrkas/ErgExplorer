@@ -68,7 +68,7 @@
 					<a class="nav-link" class:active={isActive('/mempool')} href="/mempool">Mempool</a>
 				</li>
 				<li class="nav-item">
-					<a class="nav-link" class:active={isActive('/addressbook')} href="/addressbook" target="_blank" rel="noopener">Address book</a>
+					<a class="nav-link" class:active={isActive('/addressbook')} href="/addressbook"rel="noopener">Address book</a>
 				</li>
 				<li class="nav-item">
 					<a class="nav-link" href="https://live.ergexplorer.com" target="_blank" rel="noopener">Live</a>

@@ -29,7 +29,7 @@
 	}
 </script>
 
-<div class="table-responsive glass-table-container">
+<div class="table-responsive glass-table-container p-0">
 	<table class="table glass-table">
 		<thead>
 			<tr>
@@ -61,7 +61,7 @@
 						{#each headers as header}
 							<td>
 								{#if header.component}
-									<svelte:component this={header.component} data={row} field={header.field} />
+									<svelte:component this={header.component} {...(header.componentProps ? header.componentProps(row, getNestedValue(row, header.field), index) : { data: row, field: header.field })} />
 								{:else if header.render}
 									{@html header.render(getNestedValue(row, header.field), row, index)}
 								{:else}

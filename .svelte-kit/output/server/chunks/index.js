@@ -50,11 +50,13 @@ const INERT = 1 << 13;
 const DESTROYED = 1 << 14;
 const EFFECT_RAN = 1 << 15;
 const EFFECT_TRANSPARENT = 1 << 16;
+const INSPECT_EFFECT = 1 << 18;
 const HEAD_EFFECT = 1 << 19;
 const EFFECT_HAS_DERIVED = 1 << 20;
 const EFFECT_IS_UPDATING = 1 << 21;
 const STATE_SYMBOL = Symbol("$state");
 const LEGACY_PROPS = Symbol("legacy props");
+const COMMENT_NODE = 8;
 function effect_update_depth_exceeded() {
   {
     throw new Error(`https://svelte.dev/e/effect_update_depth_exceeded`);
@@ -414,7 +416,9 @@ function mutable_source(initial_value, immutable = false, trackable = true) {
   return s;
 }
 function set(source2, value, should_proxy = false) {
-  if (active_reaction !== null && !untracking && is_runes() && (active_reaction.f & (DERIVED | BLOCK_EFFECT)) !== 0 && !(reaction_sources?.[1].includes(source2) && reaction_sources[0] === active_reaction)) {
+  if (active_reaction !== null && // since we are untracking the function inside `$inspect.with` we need to add this check
+  // to ensure we error if state is set inside an inspect effect
+  (!untracking || (active_reaction.f & INSPECT_EFFECT) !== 0) && is_runes() && (active_reaction.f & (DERIVED | BLOCK_EFFECT | INSPECT_EFFECT)) !== 0 && !(reaction_sources?.[1].includes(source2) && reaction_sources[0] === active_reaction)) {
     state_unsafe_mutation();
   }
   let new_value = should_proxy ? proxy(value) : value;
@@ -1396,6 +1400,22 @@ function head(payload, fn) {
   fn(head_payload);
   head_payload.out += BLOCK_CLOSE;
 }
+function spread_props(props) {
+  const merged_props = {};
+  let key;
+  for (let i = 0; i < props.length; i++) {
+    const obj = props[i];
+    for (key in obj) {
+      const desc = Object.getOwnPropertyDescriptor(obj, key);
+      if (desc) {
+        Object.defineProperty(merged_props, key, desc);
+      } else {
+        merged_props[key] = obj[key];
+      }
+    }
+  }
+  return merged_props;
+}
 function stringify(value) {
   return typeof value === "string" ? value : value == null ? "" : value + "";
 }
@@ -1429,11 +1449,19 @@ function unsubscribe_stores(store_values) {
 function slot(payload, $$props, name, slot_props, fallback_fn) {
   var slot_fn = $$props.$$slots?.[name];
   if (slot_fn === true) {
-    slot_fn = $$props["children"];
+    slot_fn = $$props[name === "default" ? "children" : name];
   }
   if (slot_fn !== void 0) {
     slot_fn(payload, slot_props);
   }
+}
+function sanitize_slots(props) {
+  const sanitized = {};
+  if (props.children) sanitized.default = true;
+  for (const key in props.$$slots) {
+    sanitized[key] = true;
+  }
+  return sanitized;
 }
 function bind_props(props_parent, props_now) {
   for (const key in props_now) {
@@ -1456,26 +1484,31 @@ function maybe_selected(payload, value) {
 export {
   setContext as A,
   BROWSER as B,
-  pop as C,
-  store_get as D,
-  attr as E,
+  COMMENT_NODE as C,
+  pop as D,
+  store_get as E,
   attr_class as F,
   escape_html as G,
   HYDRATION_ERROR as H,
   unsubscribe_stores as I,
-  maybe_selected as J,
-  fallback as K,
+  attr as J,
+  maybe_selected as K,
   LEGACY_PROPS as L,
-  attr_style as M,
-  bind_props as N,
-  stringify as O,
-  head as P,
-  slot as Q,
-  getContext as R,
-  ensure_array_like as S,
-  clsx as T,
-  noop as U,
-  safe_not_equal as V,
+  fallback as M,
+  attr_style as N,
+  bind_props as O,
+  stringify as P,
+  head as Q,
+  slot as R,
+  getContext as S,
+  ensure_array_like as T,
+  sanitize_slots as U,
+  clsx as V,
+  current_component as W,
+  spread_props as X,
+  noop as Y,
+  safe_not_equal as Z,
+  subscribe_to_store as _,
   set_active_effect as a,
   active_effect as b,
   active_reaction as c,
