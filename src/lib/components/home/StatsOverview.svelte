@@ -1,6 +1,6 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
-	import { formatNumber, formatCurrency, formatErgValue } from '$lib/utils/formatting.js';
+	import { formatNumber, formatCurrency, formatErgValue, formatHashRate } from '$lib/utils/formatting.js';
 	import { getTheme } from '$lib/stores/theme.svelte.js';
 	import * as api from '$lib/utils/api.js';
 
@@ -104,7 +104,6 @@
 	
 	async function pollForUpdates() {
 		try {
-			
 			// Store previous values to detect changes
 			const prevHeight = internalLatestBlocks[0]?.height;
 			const prevTxCount = internalNetworkStats?.maxTxGix;
@@ -137,6 +136,7 @@
 			
 			// Update internal protocol info
 			if (protocolRes.status === 'fulfilled' && protocolRes.value) {
+				console.log(protocolRes.value)
 				internalProtocolInfo = protocolRes.value;
 			}
 			
@@ -214,78 +214,98 @@
 </script>
 
 
-<div class="row w-100 div-cell-dark">
-	<div class="col-md-6 col-lg-4 p-1 pe-0 ps-0 pe-lg-3">
-		<div class="d-flex align-items-center">
-			<div class="me-3 text-center mx-auto index-card-symbol-holder">
-				<img id="erg-logo" src={getLogoSrc()} alt="Ergo coin" style="width:50px; height:50px;">
-			</div>
-			<div class="flex-grow-1">
-				<p class="mb-1"><span class="erg-span"><b>ERG</b></span> price</p>
-				<div class="d-flex align-items-center gap-2">
-					<h2 class="text-strong index-card-values mb-0 {priceAnimating ? 'value-animating' : ''}">
-						{#if animatedPrice > 0}
-							{formatCurrency(animatedPrice, 2)}
-						{:else}
-							--
-						{/if}
-					</h2>
-					{#if internalErgPrice && internalErgPrice.difference}
-						<span class="price-change {parseFloat(internalErgPrice.difference) >= 0 ? 'positive' : 'negative'}">
-							{parseFloat(internalErgPrice.difference) >= 0 ? '+' : ''}{formatNumber(parseFloat(internalErgPrice.difference), 2)}%
-						</span>
-					{/if}
-				</div>
-			</div>
+<div class="row w-100 div-cell-dark"><!-- Column 1 -->
+<div class="col-md-6 col-lg-4 p-1 pe-0 ps-0 pe-lg-3">
+	<!-- ERG Price -->
+	<div class="d-flex align-items-stretch">
+		<div class="me-3 d-flex align-items-center justify-content-center index-card-symbol-holder">
+			<img id="erg-logo" src={getLogoSrc()} alt="Ergo coin" style="width:auto; height:48px;">
 		</div>
-		<hr class="my-3">
-		<div class="d-flex align-items-center">
-			<div class="me-3 text-center mx-auto index-card-symbol-holder">
-				<i class="fas fa-globe erg-span index-card-symbol"></i>
-			</div>
-			<div class="flex-grow-1">
-				<p class="mb-1"><strong class="erg-span"></strong>Market cap</p>
-				<h2 class="text-strong index-card-values mb-0 {marketCapAnimating ? 'value-animating' : ''}">
-					{animatedMarketCap > 0 ? formatCurrency(animatedMarketCap, 0) : '--'}
+		<div class="d-flex flex-column justify-content-between flex-grow-1 box-holder py-2">
+			<p class="mb-1">
+				<span class="erg-span"><b>ERG</b></span> price
+			</p>
+			<div class="d-flex align-items-center gap-2">
+				<h2 class="text-strong index-card-values mb-0 {priceAnimating ? 'value-animating' : ''}">
+					{#if animatedPrice > 0}
+						{formatCurrency(animatedPrice, 2)}
+					{:else}
+						--
+					{/if}
 				</h2>
+				{#if internalErgPrice && internalErgPrice.difference}
+					<span class="price-change {parseFloat(internalErgPrice.difference) >= 0 ? 'positive' : 'negative'}">
+						{parseFloat(internalErgPrice.difference) >= 0 ? '+' : ''}{formatNumber(parseFloat(internalErgPrice.difference), 2)}%
+					</span>
+				{/if}
 			</div>
 		</div>
 	</div>
-	<hr class="my-3 d-block d-md-none">
-	<div class="col-md-6 col-lg-4 p-1 pe-0 ps-0 pe-lg-3">
-		<div class="d-flex align-items-center">
-			<div class="me-3 text-center mx-auto index-card-symbol-holder">
-				<i class="fas fa-bars erg-span index-card-symbol"></i>
-			</div>
-			<div class="flex-grow-1">
-				<p class="mb-1">Block height</p>
-				<h2 class="text-strong index-card-values mb-0 {heightAnimating ? 'value-animating' : ''}">
-					{animatedHeight > 0 ? formatNumber(animatedHeight, 0) : '--'}
-				</h2>
-			</div>
+
+	<hr class="my-3">
+
+	<!-- Market Cap -->
+	<div class="d-flex align-items-stretch">
+		<div class="me-3 d-flex align-items-center justify-content-center index-card-symbol-holder">
+			<i class="fas fa-globe erg-span index-card-symbol"></i>
 		</div>
-		<hr class="my-3">
-		<div class="d-flex align-items-center">
-			<div class="me-3 text-center mx-auto index-card-symbol-holder">
-				<i class="fas fa-list erg-span index-card-symbol"></i>
-			</div>
-			<div class="flex-grow-1">
-				<p class="mb-1"><strong class="erg-span"></strong>Total transactions</p>
-				<h2 class="text-strong index-card-values mb-0 {txAnimating ? 'value-animating' : ''}">
-					{animatedTxCount > 0 ? formatNumber(animatedTxCount, 0) : '--'}
-				</h2>
-			</div>
+		<div class="d-flex flex-column justify-content-between flex-grow-1 box-holder py-2">
+			<p class="mb-1 d-flex align-items-center">
+				<strong class="erg-span me-1"></strong>Market cap
+			</p>
+			<h2 class="text-strong index-card-values mb-0 d-flex align-items-center {marketCapAnimating ? 'value-animating' : ''}">
+				{animatedMarketCap > 0 ? formatCurrency(animatedMarketCap, 0) : '--'}
+			</h2>
 		</div>
-	</div>		
+	</div>
+</div>
+
+<!-- Spacer for mobile -->
+<hr class="my-3 d-block d-md-none">
+
+<!-- Column 2 -->
+<div class="col-md-6 col-lg-4 p-1 pe-0 ps-0 pe-lg-3">
+	<!-- Block Height -->
+	<div class="d-flex align-items-stretch">
+		<div class="me-3 d-flex align-items-center justify-content-center index-card-symbol-holder">
+			<i class="fas fa-bars erg-span index-card-symbol"></i>
+		</div>
+		<div class="d-flex flex-column justify-content-between flex-grow-1 box-holder py-2">
+			<p class="mb-1">Block height</p>
+			<h2 class="text-strong index-card-values mb-0 {heightAnimating ? 'value-animating' : ''}">
+				{animatedHeight > 0 ? formatNumber(animatedHeight, 0) : '--'}
+			</h2>
+		</div>
+	</div>
+
+	<hr class="my-3">
+
+	<!-- Total Transactions -->
+	<div class="d-flex align-items-stretch">
+		<div class="me-3 d-flex align-items-center justify-content-center index-card-symbol-holder">
+			<i class="fas fa-list erg-span index-card-symbol"></i>
+		</div>
+		<div class="d-flex flex-column justify-content-between flex-grow-1 box-holder py-2">
+			<p class="mb-1">
+				<strong class="erg-span"></strong>Total transactions
+			</p>
+			<h2 class="text-strong index-card-values mb-0 {txAnimating ? 'value-animating' : ''}">
+				{animatedTxCount > 0 ? formatNumber(animatedTxCount, 0) : '--'}
+			</h2>
+		</div>
+	</div>
+</div>
+
 	<hr class="my-3 d-block d-lg-none">
 	<div class="col p-1 ps-lg-3 border-lg-start">
-		<h2 class="erg-span" style="font-size:1.7em; margin-bottom: 0;">Protocol information</h2>
-		<br>
-		<h5 style="font-size:1em" class="text-light">Version: <span class="text-white">{internalProtocolInfo?.version || 'Unknown'}</span></h5>
+		<h2 class="erg-span" style="font-size:1.7em; margin-bottom: 16px;">Protocol information</h2>
+		
+		<h5 style="font-size:1em" class="text-light">Version: <span class="text-white">{internalProtocolInfo?.version || '--'}</span></h5>
+		<h5 style="font-size:1em" class="text-light">Hashrate: <span class="text-white">{internalProtocolInfo?.hashRate ? formatHashRate(internalProtocolInfo?.hashRate) : '--'}</span></h5>
 		<h5 style="font-size:1em" class="text-light">Circulating Supply: <span class="text-white">
 			{@html internalProtocolInfo?.supply ? formatErgValue(internalProtocolInfo.supply / 1e9, 0) : '--'}
 		</span></h5>
-		<h5 style="font-size:1em" class="text-light">Max Supply: <span class="text-white">97,739,924 <span class="erg-span">ERG</span></span></h5>
+		<h5 style="font-size:1em" class="text-light mb-0">Max Supply: <span class="text-white">97,739,924 <span class="erg-span">ERG</span></span></h5>
 	</div>
 </div>
 
@@ -298,11 +318,13 @@
 		align-items: center;
 		gap: 4px;
 	}
-	
-	/* Price change styles moved to common-components.css */
-	
-	/* Number animation styles - removed annoying pulse */
-	.value-animating {
-		/* No visual effects during animation - just the number counting */
+
+	.box-holder > p {
+		margin-top: -2px;
+	}
+
+	.box-holder > h2,
+	.box-holder > div {
+		margin-top: -3px;
 	}
 </style>

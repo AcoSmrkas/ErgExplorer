@@ -111,10 +111,10 @@ export function formatNumber(num, decimals = 0, addCommas = true) {
 }
 
 // Large number formatting with abbreviated suffixes (M, B, T)
-export function formatNumberLarge(num, decimals = 2) {
+export function formatNumberLarge(num, decimals = 2, symbol = true) {
   if (num == null || isNaN(num)) return "0";
 
-  return nFormatter(num, decimals);
+  return nFormatter(num, decimals, !symbol);
 }
 
 // Currency formatting with consistent decimal places

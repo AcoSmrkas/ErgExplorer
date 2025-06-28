@@ -1,5 +1,4 @@
 // Global server-side data loading for all pages
-import { error } from "@sveltejs/kit";
 import { cache } from "$lib/utils/cache.js";
 
 // API Constants
