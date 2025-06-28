@@ -2,12 +2,11 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import DataTable from '$lib/components/data/DataTable.svelte';
 	import Pagination from '$lib/components/ui/Pagination.svelte';
 	import ErrorMessage from '$lib/components/ui/ErrorMessage.svelte';
 	import PageHeader from '$lib/components/ui/PageHeader.svelte';
+	import BlockList from '$lib/components/blocks/BlockList.svelte';
 	import { getBlocks } from '$lib/utils/api.js';
-	import { getLatestBlocksHeaders } from '$lib/config/tableConfigs.js';
 
 	let blocks = [];
 	let loading = true;
@@ -109,23 +108,34 @@
 
 			{#if error}
 				<ErrorMessage message={error} type="danger" dismissible />
-			{/if}
+			{:else}
+				<!-- Pagination -->
+				{#if !loading && totalPages > 1}
+					<div class="mb-1">
+						<Pagination 
+							{currentPage} 
+							{totalPages}
+							on:pageChange={handlePageChange}
+						/>
+					</div>
+				{/if}
 
-			<DataTable 
-				headers={getLatestBlocksHeaders()}
-				data={blocks} 
-				{loading}
-				emptyMessage="No blocks found"
-			/>
+				<BlockList 
+					{blocks}
+					{loading}
+					emptyMessage="No blocks found"
+				/>
 
-			{#if !loading && totalPages > 1}
-				<div class="mt-2">
-					<Pagination 
-						{currentPage} 
-						{totalPages}
-						on:pageChange={handlePageChange}
-					/>
-				</div>
+				<!-- Bottom Pagination -->
+				{#if !loading && totalPages > 1}
+					<div class="mt-2">
+						<Pagination 
+							{currentPage} 
+							{totalPages}
+							on:pageChange={handlePageChange}
+						/>
+					</div>
+				{/if}
 			{/if}
 		</div>
 	</div>
