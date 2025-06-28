@@ -470,18 +470,6 @@
   color: white;
 }
 
-.btn-outline-primary {
-  border-color: var(--main-color);
-  color: var(--main-color);
-  background: transparent;
-}
-
-.btn-outline-primary:hover {
-  background-color: var(--main-color);
-  border-color: var(--main-color);
-  color: white;
-}
-
 /* =============================================================================
    RAW DATA DISPLAY - Standardize code display
    ============================================================================= */

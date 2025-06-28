@@ -476,6 +476,23 @@ html[data-theme="mew"] body {
   box-shadow: var(--glass-shadow-sm);
 }
 
+.form-control,
+.form-select {
+	border: none;
+	outline: none !important;
+	background: var(--glass-bg-subtle) !important;
+	color: var(--text-strong) !important;
+	box-shadow: var(--glass-shadow-sm);
+}
+
+.form-control:focus,
+.form-select:focus {
+	background: var(--glass-bg-subtle) !important;
+	color: var(--text-strong) !important;	
+	box-shadow: 0 0 0 1px rgba(var(--main-color-rgb), 1), var(--glass-shadow-sm);
+	outline: none !important;
+}
+
 .form-control-lg {
   background: var(--glass-bg-light);
   backdrop-filter: var(--glass-blur-sm);
@@ -493,7 +510,7 @@ html[data-theme="mew"] body {
     var(--glass-shadow-sm);
 }
 
-.btn-info {
+.btn-info, .btn-info:focus {
   background: var(--main-color);
   backdrop-filter: var(--glass-blur-sm);
   -webkit-backdrop-filter: var(--glass-blur-sm);
@@ -503,7 +520,7 @@ html[data-theme="mew"] body {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-  color: white;
+  color: white !important;
 }
 
 .btn-info::before {
@@ -591,7 +608,7 @@ footer {
   background: var(--glass-bg-light);
   backdrop-filter: var(--glass-blur-sm);
   -webkit-backdrop-filter: var(--glass-blur-sm);
-  border: 1px solid var(--glass-border-light);
+  border: 1px solid #ffffff00;
   box-shadow: var(--glass-shadow-sm);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -599,7 +616,20 @@ footer {
   color: var(--text-strong) !important;
 }
 
-.btn-primary::before {
+.btn-outline-primary {
+  background: var(--glass-bg-light);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: 1px solid var(--main-color);
+  box-shadow: var(--glass-shadow-sm);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  color: var(--text-strong) !important;
+}
+
+.btn-primary::before,
+.btn-outline-primary::before {
   content: "";
   position: absolute;
   top: 0;
@@ -615,16 +645,21 @@ footer {
   transition: left 0.5s ease;
 }
 
-.btn-primary:hover::before {
+.btn-primary:hover::before,
+.btn-outline-primary:hover::before {
   left: 100%;
 }
 
-.btn-primary:hover {
-  background: var(--main-color);
-  border-color: var(--main-color);
+.btn-primary:hover,
+.btn-primary:active,
+.btn-primary:focus,
+.btn-outline-primary:hover,
+.btn-outline-primary:active,
+.btn-outline-primary:focus {
+  background: var(--glass-bg-light) !important;
+  border-color: var(--main-color) !important;
   color: white !important;
-  box-shadow: var(--glass-shadow-sm);
-  transform: translateY(-1px);
+  box-shadow: var(--glass-shadow-sm) !important;
 }
 
 .btn-secondary {
@@ -640,25 +675,6 @@ footer {
 .btn-secondary:hover {
   background: var(--glass-bg-medium);
   border-color: var(--glass-border-medium);
-  box-shadow: var(--glass-shadow-sm);
-  transform: translateY(-1px);
-}
-
-.btn-outline-primary {
-  background: transparent;
-  backdrop-filter: var(--glass-blur-sm);
-  -webkit-backdrop-filter: var(--glass-blur-sm);
-  border: 1px solid var(--main-color);
-  color: var(--main-color);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.btn-outline-primary:hover {
-  background: var(--main-color);
-  border-color: var(--main-color);
-  color: white !important;
-  backdrop-filter: var(--glass-blur-md);
-  -webkit-backdrop-filter: var(--glass-blur-md);
   box-shadow: var(--glass-shadow-sm);
   transform: translateY(-1px);
 }

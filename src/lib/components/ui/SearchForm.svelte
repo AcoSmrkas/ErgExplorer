@@ -108,7 +108,7 @@
 						<option value="4">Box</option>
 					</select>
 					<!-- svelte-ignore a11y_consider_explicit_label -->
-					<button onclick={handleSearch} class="btn btn-lg btn-info" type="button">
+					<button onclick={handleSearch} class="btn btn-lg btn-primary" type="button">
 						<i class="fas fa-search"></i>
 					</button>
 				</div>
@@ -132,16 +132,12 @@
 	.form-control,
 	.form-select {
 		border: none;
-		box-shadow: none !important;
 		outline: none !important;
-		background: var(--glass-bg-subtle) !important;
-		color: var(--text-strong) !important;
+		box-shadow: none !important;
 	}
 
 	.form-control:focus,
 	.form-select:focus {
-		background: var(--glass-bg-subtle) !important;
-		color: var(--text-strong) !important;
 		box-shadow: none !important;
 		outline: none !important;
 	}
@@ -161,28 +157,8 @@
 		border: none;
 	}
 
-	.input-group .btn {
-		border-top-left-radius: 0 !important;
-		border-bottom-left-radius: 0 !important;
-		border-top-right-radius: 8px !important;
-		border-bottom-right-radius: 8px !important;
-		box-shadow: none !important;
-		border: none;
-	}
-
 	select, option {
 		text-align: end;
-	}
-
-	/* Button styling to match original */
-	.btn-info {
-		background-color: var(--main-color);
-		border-color: var(--main-color);
-	}
-
-	.btn-info:hover {
-		background-color: var(--main-color-hover);
-		border-color: var(--main-color-hover);
 	}
 
 	/* Responsive widths for search input */

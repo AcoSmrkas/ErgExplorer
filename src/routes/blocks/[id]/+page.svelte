@@ -260,32 +260,4 @@
 		vertical-align: middle;
 		border-color: var(--bs-border-color-translucent);
 	}
-
-	pre {
-		max-height: 400px;
-		white-space: pre-wrap;
-		word-wrap: break-word;
-	}
-
-	.btn-outline-light {
-		border-color: rgba(255, 255, 255, 0.5);
-		color: white;
-	}
-
-	.btn-outline-light:hover {
-		background-color: rgba(255, 255, 255, 0.1);
-		border-color: white;
-		color: white;
-	}
-
-	.btn-outline-primary {
-		border-color: var(--main-color);
-		color: var(--main-color);
-	}
-
-	.btn-outline-primary:hover {
-		background-color: var(--main-color);
-		border-color: var(--main-color);
-		color: white;
-	}
 </style>

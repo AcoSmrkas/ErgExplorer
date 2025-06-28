@@ -253,7 +253,7 @@
 			{:else}
 				<!-- Pagination -->
 				{#if totalPages > 1}
-					<div class="mb-4">
+					<div class="mb-1">
 						<Pagination 
 							{currentPage} 
 							{totalPages}

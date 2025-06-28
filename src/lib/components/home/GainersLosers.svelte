@@ -71,28 +71,6 @@
 		font-weight: 500;
 	}
 
-	.btn-info {
-		background-color: var(--main-color);
-		border-color: var(--main-color);
-		color: white !important;
-	}
-
-	.btn-info:hover {
-		background-color: var(--main-color-hover);
-		border-color: var(--main-color-hover);
-	}
-
-	.btn-primary {
-		background-color: var(--glass-bg-medium);
-		border-color: var(--glass-border-light);
-		color: var(--text-strong);
-	}
-
-	.btn-primary:hover {
-		background-color: var(--glass-bg-light);
-		border-color: var(--main-color);
-		color: var(--main-color);
-	}
 
 	@media (max-width: 768px) {
 		.header-with-controls {

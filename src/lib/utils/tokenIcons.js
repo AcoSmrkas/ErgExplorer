@@ -48,8 +48,6 @@ export function getAssetTitleParams(
   let imgSrc = "";
   if (hasIcon(tokenId)) {
     imgSrc = getIcon(tokenId);
-  } else {
-    console.log("No icon found for", tokenId);
   }
 
   if (name == "Crooks Finance Stake Key") {

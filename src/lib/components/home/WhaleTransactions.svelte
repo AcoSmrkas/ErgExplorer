@@ -70,7 +70,7 @@
 	<div class="d-none d-lg-block p-0" bind:this={tableContainer}>
 		<DataTable 
 			{headers} 
-			data={whaleTxs} 
+			data={whaleTxs}
 			{loading}
 			emptyMessage={isTestnet() ? "Whale transactions not available on testnet" : "Loading whale transactions..."}
 		/>
