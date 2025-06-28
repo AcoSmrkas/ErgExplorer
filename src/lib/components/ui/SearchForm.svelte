@@ -129,6 +129,11 @@
 		box-shadow: 0 0 0 1px rgba(var(--main-color-rgb), 1), var(--glass-shadow-sm);
 	}
 
+	/* Remove border when button is focused */
+	.search-wrapper:has(button:focus) {
+		box-shadow: var(--glass-shadow-sm);
+	}
+
 	.form-control,
 	.form-select {
 		border: none;
@@ -138,6 +143,11 @@
 
 	.form-control:focus,
 	.form-select:focus {
+		box-shadow: none !important;
+		outline: none !important;
+	}
+
+	.btn:focus {
 		box-shadow: none !important;
 		outline: none !important;
 	}
