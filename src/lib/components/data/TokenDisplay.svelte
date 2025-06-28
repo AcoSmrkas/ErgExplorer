@@ -93,8 +93,8 @@
 	}
 	
 	.token-icon {
-		width: 24px;
-		height: 24px;
+		width: 25px;
+		height: 25px;
 		border-radius: 50%;
 		overflow: hidden;
 		background-color: var(--bs-light);

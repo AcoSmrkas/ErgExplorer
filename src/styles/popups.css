@@ -7,12 +7,37 @@
    ================================ */
 
 /* Apply centralized glass system to popups */
-.token-popup,
 .address-popup,
 .block-popup,
 .transaction-popup {
   position: fixed;
   z-index: 1000;
+}
+
+.address-popup,
+.block-popup,
+.transaction-popup {
+  color: var(--text-strong);
+  font-size: 0.9em;
+  display: none;
+  pointer-events: auto;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  padding: 20px;
+  background: var(--glass-bg-subtle);
+  backdrop-filter: var(--glass-blur-xl);
+  -webkit-backdrop-filter: var(--glass-blur-xl);
+  border: 1px solid var(--glass-border-light);
+  box-shadow: var(--glass-shadow-sm);
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: scale(0.95) translateY(5px);
+  opacity: 0;
+}
+
+.token-popup {
+  position: fixed;
+  z-index: 1100;
   color: var(--text-strong);
   font-size: 0.9em;
   display: none;

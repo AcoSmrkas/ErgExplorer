@@ -301,9 +301,18 @@ tbody {
   max-width: 25px;
   max-height: 25px;
   line-height: 25px;
-  padding-bottom: 3px;
   display: inline-block;
-  vertical-align: middle;
+}
+
+.token-link {
+	display: flex;
+	line-height: 25px;
+}
+
+.token-title {
+	display: inline-block;
+	height: 25px;
+	line-height: 25px;
 }
 
 /* Token link styling to match original */
