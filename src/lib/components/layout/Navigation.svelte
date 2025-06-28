@@ -2,10 +2,25 @@
 	import { page } from '$app/stores';
 	import { switchTheme, getTheme } from '$lib/stores/theme.svelte.js';
 	import { switchToMainnet, switchToTestnet, getNetwork } from '$lib/stores/network.svelte.js';
+	import { browser } from '$app/environment';
 
 	let theme = $derived(getTheme());
 	let network = $derived(getNetwork());
 	let currentPath = $derived($page.url.pathname);
+
+	// Close mobile menu on page change
+	$effect(() => {
+		if (browser && currentPath) {
+			const navbarCollapse = document.getElementById('navbarNav');
+			if (navbarCollapse?.classList.contains('show')) {
+				// Use Bootstrap's collapse API to properly close the menu
+				const bsCollapse = new window.bootstrap.Collapse(navbarCollapse, {
+					toggle: false
+				});
+				bsCollapse.hide();
+			}
+		}
+	});
 
 	function isActive(path) {
 		if (path === '/' && currentPath === '/') return true;

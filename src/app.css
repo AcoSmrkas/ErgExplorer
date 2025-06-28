@@ -305,14 +305,14 @@ tbody {
 }
 
 .token-link {
-	display: flex;
-	line-height: 25px;
+  display: flex;
+  line-height: 25px;
 }
 
 .token-title {
-	display: inline-block;
-	height: 25px;
-	line-height: 25px;
+  display: inline-block;
+  height: 25px;
+  line-height: 25px;
 }
 
 /* Token link styling to match original */
@@ -478,19 +478,21 @@ html[data-theme="mew"] body {
 
 .form-control,
 .form-select {
-	border: none;
-	outline: none !important;
-	background: var(--glass-bg-subtle) !important;
-	color: var(--text-strong) !important;
-	box-shadow: var(--glass-shadow-sm);
+  border: none;
+  outline: none !important;
+  background: var(--glass-bg-subtle) !important;
+  color: var(--text-strong) !important;
+  box-shadow: var(--glass-shadow-sm);
 }
 
 .form-control:focus,
 .form-select:focus {
-	background: var(--glass-bg-subtle) !important;
-	color: var(--text-strong) !important;	
-	box-shadow: 0 0 0 1px rgba(var(--main-color-rgb), 1), var(--glass-shadow-sm);
-	outline: none !important;
+  background: var(--glass-bg-subtle) !important;
+  color: var(--text-strong) !important;
+  box-shadow:
+    0 0 0 1px rgba(var(--main-color-rgb), 1),
+    var(--glass-shadow-sm);
+  outline: none !important;
 }
 
 .form-control-lg {
@@ -510,7 +512,8 @@ html[data-theme="mew"] body {
     var(--glass-shadow-sm);
 }
 
-.btn-info, .btn-info:focus {
+.btn-info,
+.btn-info:focus {
   background: var(--main-color);
   backdrop-filter: var(--glass-blur-sm);
   -webkit-backdrop-filter: var(--glass-blur-sm);

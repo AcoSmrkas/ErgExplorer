@@ -2,10 +2,11 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
-	import DataTable from '$lib/components/data/DataTable.svelte';
 	import Pagination from '$lib/components/ui/Pagination.svelte';
 	import ErrorMessage from '$lib/components/ui/ErrorMessage.svelte';
 	import PageHeader from '$lib/components/ui/PageHeader.svelte';
+	import MempoolControls from '$lib/components/mempool/MempoolControls.svelte';
+	import MempoolList from '$lib/components/mempool/MempoolList.svelte';
 	import { getMempool } from '$lib/utils/api.js';
 	import { createPaginationHandler } from '$lib/utils/usePagination.js';
 	import { FEE_ERGOTREE, ERG_DECIMALS } from '$lib/utils/constants.js';
@@ -41,6 +42,7 @@
 	
 	const DEFAULT_LIMIT = 50;
 	const FALLBACK_REFRESH_INTERVAL = 10000; // 10 seconds
+	const SOCKET_WAIT_TIME = 3000; // Wait 3 seconds for socket connection before fallback
 
 	// Socket store unsubscribe functions
 	let unsubscribeConnection;
@@ -70,9 +72,6 @@
 		let conflictGroupId = 1;
 		for (const [boxId, spendingTxs] of boxToTxMap) {
 			if (spendingTxs.length > 1) {
-				console.log(`Conflict detected: ${spendingTxs.length} transactions trying to spend box ${boxId}`);
-				console.log('Conflicting transactions:', spendingTxs.map(tx => tx.id));
-				
 				// Multiple transactions trying to spend same box - assign same group ID
 				spendingTxs.forEach(tx => {
 					if (!conflicts.has(tx.id)) {
@@ -183,13 +182,24 @@
 				lastUpdate = timestamp;
 			});
 
-			// Initial load
-			await loadTransactions();
-			
-			// Start fallback polling if not using real-time or not on first page
-			if (!useRealTime || currentPage !== 1) {
-				startFallbackPolling();
-			}
+			// Wait for socket connection before falling back to API
+			setTimeout(async () => {
+				if (!isSocketConnected || !useRealTime || currentPage !== 1) {
+					await loadTransactions();
+					
+					// Start fallback polling if not using real-time or not on first page
+					if (!useRealTime || currentPage !== 1) {
+						startFallbackPolling();
+					}
+				} else {
+					// Socket is connected, but if no data comes in after another second, load via API
+					setTimeout(async () => {
+						if (loading) {
+							await loadTransactions();
+						}
+					}, 1000);
+				}
+			}, SOCKET_WAIT_TIME);
 		}
 		
 		return () => {
@@ -310,64 +320,18 @@
 				<ErrorMessage message={error} type="danger" dismissible />
 			{/if}
 
-			<div class="mempool-info">
-				{#if showInfoCard}
-					<div class="info-card">
-						<i class="fas fa-info-circle info-icon"></i>
-						<div class="info-content">
-							<strong>Mempool Overview:</strong> These are unconfirmed transactions waiting to be included in the next block.
-						</div>
-						<button class="dismiss-btn" onclick={dismissInfoCard} title="Dismiss">
-							<i class="fas fa-times"></i>
-						</button>
-					</div>
-				{/if}
-				
-				<div class="info-card">
-					<div class="control-section">
-						<div class="connection-status">
-							<div class="status-indicator" class:connected={isSocketConnected} class:disconnected={!isSocketConnected}>
-								<i class="fas fa-circle"></i>
-							</div>
-							<span class="status-text">
-								{isSocketConnected ? 'Real-time' : 'Fallback'}
-							</span>
-						</div>
-						
-						<div class="form-check form-switch">
-							<input 
-								class="form-check-input" 
-								type="checkbox" 
-								id="realTimeToggle"
-								bind:checked={useRealTime}
-								onchange={toggleRealTime}
-								disabled={!isSocketConnected || currentPage !== 1}
-							>
-							<label class="form-check-label" for="realTimeToggle">
-								Real-time updates
-							</label>
-						</div>
-						
-						<div class="form-check form-switch">
-							<input 
-								class="form-check-input" 
-								type="checkbox" 
-								id="conflictsToggle"
-								bind:checked={showConflicts}
-							>
-							<label class="form-check-label" for="conflictsToggle">
-								Show conflicts only
-							</label>
-						</div>
-					</div>
-				</div>
-			</div>
+			<MempoolControls 
+				{isSocketConnected}
+				bind:showConflicts
+				{showInfoCard}
+				onDismissInfo={dismissInfoCard}
+			/>
 
-			<DataTable 
-				{headers} 
-				data={displayTransactions} 
+			<MempoolList 
+				transactions={displayTransactions}
+				{headers}
 				{loading}
-				emptyMessage={showConflicts ? "No conflicting transactions found" : "No pending transactions in mempool"}
+				emptyMessage={showConflicts ? "No double-spend transactions found" : "No pending transactions in mempool"}
 			/>
 
 			{#if !loading && totalPages > 1}
@@ -386,109 +350,6 @@
 <div class="page-bottom-margin"></div>
 
 <style>
-	.mempool-info {
-		margin-bottom: 1.5rem;
-	}
-
-	/* Custom dismiss button override */
-	.info-card .dismiss-btn {
-		transition: all 0.3s ease;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 24px;
-		height: 24px;
-	}
-
-	.info-card .dismiss-btn:hover {
-		background: var(--glass-bg-subtle);
-		color: var(--main-color);
-	}
-
-
-	.control-section {
-		display: flex;
-		align-items: center;
-		gap: 2rem;
-		flex-wrap: wrap;
-	}
-
-	.info-icon {
-		color: #17a2b8;
-		font-size: 1.2rem;
-		flex-shrink: 0;
-	}
-
-	.info-content {
-		color: var(--text-strong);
-		font-size: 0.95rem;
-	}
-
-	.refresh-badge {
-		color: white;
-		padding: 0.25rem 0.5rem;
-		border-radius: 6px;
-		font-size: 0.75rem;
-		font-weight: 600;
-		margin-left: 0.5rem;
-	}
-
-	.refresh-badge.realtime {
-		background: #28a745;
-	}
-
-	.refresh-badge.polling {
-		background: #ffc107;
-		color: #212529;
-	}
-
-	.connection-status {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		font-size: 0.9rem;
-	}
-
-	.header-info {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-	}
-
-	.header-info > * {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	.status-indicator {
-		font-size: 0.7rem;
-	}
-
-	.status-indicator.connected {
-		color: #28a745;
-	}
-
-	.status-indicator.disconnected {
-		color: #dc3545;
-	}
-
-	.status-text {
-		color: var(--text-light);
-		font-weight: 500;
-	}
-
-	:global(.conflict-badge) {
-		background: #dc3545;
-		color: white;
-		padding: 0.15rem 0.4rem;
-		border-radius: 4px;
-		font-size: 0.7rem;
-		font-weight: 600;
-		margin-left: 0.5rem;
-		display: inline-block;
-	}
-
 	.page-bottom-margin {
 		height: 2rem;
 	}
@@ -514,6 +375,17 @@
 
 	:global(.height-link:hover) {
 		color: var(--main-color);
+	}
+
+	:global(.conflict-badge) {
+		background: #dc3545;
+		color: white;
+		padding: 0.15rem 0.4rem;
+		border-radius: 4px;
+		font-size: 0.7rem;
+		font-weight: 600;
+		margin-left: 0.5rem;
+		display: inline-block;
 	}
 
 	:global(.fa-spin) {
