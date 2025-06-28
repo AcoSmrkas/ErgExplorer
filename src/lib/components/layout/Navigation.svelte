@@ -180,7 +180,7 @@
 	
 	.mobile-menu-toggle:hover {
 		background: var(--main-color);
-		backdrop-filter: blur(10px);
+		/* backdrop-filter: blur(10px); */
 		transform: scale(1.05);
 	}
 	
@@ -307,7 +307,7 @@
 
 	.theme-switcher:hover {
 		background: rgba(255, 255, 255, 0.1);
-		backdrop-filter: blur(10px);
+		/* backdrop-filter: blur(10px); */
 		transform: scale(1.1);
 	}
 
@@ -318,7 +318,7 @@
 	.dropdown-menu {
 		border: none;
 		background: var(--glass-bg-medium);
-		backdrop-filter: var(--glass-blur-md);
+		/* backdrop-filter: var(--glass-blur-md); */
 		border-radius: 12px;
 		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 		border: 1px solid rgba(255, 255, 255, 0.1);

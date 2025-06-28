@@ -77,16 +77,6 @@
 </div>
 
 <style>
-	.glass-table-container {
-		border-radius: 16px;
-		overflow: hidden;
-		background: var(--glass-bg-subtle);
-		backdrop-filter: var(--glass-blur-md);
-		-webkit-backdrop-filter: var(--glass-blur-md);
-		box-shadow: var(--glass-shadow-sm);
-		border: none !important;
-	}
-
 	.table-responsive {
 		border: none !important;
 	}
@@ -94,7 +84,7 @@
 	.glass-table {
 		margin-bottom: 0;
 		border: none !important;
-		background: transparent;
+		background: var(--glass-bg-light);
 		border-collapse: collapse !important;
 	}
 	
@@ -126,9 +116,6 @@
 	.glass-table thead th:last-child {
 		border-top-right-radius: 16px;
 	}
-	
-	
-	
 	
 	.glass-table tbody tr:nth-child(even) {
 		background: var(--striped-1);

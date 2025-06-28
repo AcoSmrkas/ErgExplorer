@@ -47,15 +47,15 @@
 
 .glass-light {
   background: var(--glass-bg-light);
-  backdrop-filter: var(--glass-blur-md);
-  -webkit-backdrop-filter: var(--glass-blur-md);
+  /* backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md); */
   border: 1px solid var(--glass-border-light);
 }
 
 .glass-medium {
   background: var(--glass-bg-medium);
-  backdrop-filter: var(--glass-blur-lg);
-  -webkit-backdrop-filter: var(--glass-blur-lg);
+  /* backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg); */
   border: 1px solid var(--glass-border-medium);
 }
 
@@ -91,8 +91,8 @@
 /* Combined glass effects */
 .glass-card {
   background: var(--glass-bg-light);
-  backdrop-filter: var(--glass-blur-md);
-  -webkit-backdrop-filter: var(--glass-blur-md);
+  /* backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md); */
   box-shadow: var(--glass-shadow-md), var(--glass-highlight);
   border-radius: 16px;
   overflow: hidden;
@@ -223,38 +223,10 @@ html[data-theme="mew"] {
 /* Navigation glass */
 .glass-nav {
   background: var(--glass-bg-medium);
-  backdrop-filter: var(--glass-blur-lg);
-  -webkit-backdrop-filter: var(--glass-blur-lg);
+  /* backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg); */
   border-bottom: 1px solid var(--glass-border-light);
   box-shadow: var(--glass-shadow-md);
-}
-
-/* Table glass */
-.glass-table {
-  background: var(--glass-bg-subtle);
-  backdrop-filter: var(--glass-blur-md);
-  -webkit-backdrop-filter: var(--glass-blur-md);
-  border: 1px solid var(--glass-border-light);
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.glass-table thead th {
-  background: var(--glass-bg-light);
-  backdrop-filter: var(--glass-blur-lg);
-  -webkit-backdrop-filter: var(--glass-blur-lg);
-  border-bottom: 1px solid var(--glass-border-medium);
-}
-
-.glass-table tbody tr {
-  background: var(--glass-bg-subtle);
-  transition: all 0.2s ease;
-}
-
-.glass-table tbody tr:hover {
-  background: var(--glass-bg-light);
-  transform: translateY(-1px);
-  box-shadow: var(--glass-shadow-sm);
 }
 
 /* Form glass */
@@ -275,8 +247,8 @@ html[data-theme="mew"] {
 /* Stats card glass */
 .glass-stats {
   background: var(--glass-bg-light);
-  backdrop-filter: var(--glass-blur-lg);
-  -webkit-backdrop-filter: var(--glass-blur-lg);
+  /* backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg); */
   border: 1px solid var(--glass-border-light);
   box-shadow: var(--glass-shadow-lg), var(--glass-highlight);
   border-radius: 12px;

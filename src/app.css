@@ -57,8 +57,8 @@ button:focus:not(:focus-visible) {
 
 select {
   background: var(--glass-bg-light) !important;
-  backdrop-filter: var(--glass-blur-sm);
-  -webkit-backdrop-filter: var(--glass-blur-sm);
+  /* backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm); */
   border: none !important;
   border-radius: 12px !important;
   box-shadow: var(--glass-shadow-sm);
@@ -207,8 +207,8 @@ tbody {
 
 .div-cell {
   background: var(--glass-bg-light);
-  backdrop-filter: var(--glass-blur-sm);
-  -webkit-backdrop-filter: var(--glass-blur-sm);
+  /* backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm); */
   border: none;
   border-radius: 16px;
   padding: 15px;
@@ -433,8 +433,8 @@ html[data-theme="mew"] body {
 
 .table {
   background: var(--glass-bg-subtle);
-  backdrop-filter: var(--glass-blur-md);
-  -webkit-backdrop-filter: var(--glass-blur-md);
+  /* backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md); */
   border: none;
   border-radius: 16px;
   box-shadow: var(--glass-shadow-sm);
@@ -443,8 +443,8 @@ html[data-theme="mew"] body {
 
 .table thead th {
   background: var(--glass-bg-medium);
-  backdrop-filter: var(--glass-blur-md);
-  -webkit-backdrop-filter: var(--glass-blur-md);
+  /* backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md); */
   border: none;
   border-bottom: 2px solid var(--main-color);
   color: var(--text-strong);
@@ -470,8 +470,8 @@ html[data-theme="mew"] body {
 
 .navbar {
   background: var(--glass-bg-subtle);
-  backdrop-filter: var(--glass-blur-lg);
-  -webkit-backdrop-filter: var(--glass-blur-lg);
+  /* backdrop-filter: var(--glass-blur-lg); */
+  /* -webkit-backdrop-filter: var(--glass-blur-lg); */
   border: none;
   box-shadow: var(--glass-shadow-sm);
 }
@@ -497,8 +497,8 @@ html[data-theme="mew"] body {
 
 .form-control-lg {
   background: var(--glass-bg-light);
-  backdrop-filter: var(--glass-blur-sm);
-  -webkit-backdrop-filter: var(--glass-blur-sm);
+  /* backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm); */
   border: none;
   border-radius: 12px;
   transition: all 0.3s ease;
@@ -515,8 +515,8 @@ html[data-theme="mew"] body {
 .btn-info,
 .btn-info:focus {
   background: var(--main-color);
-  backdrop-filter: var(--glass-blur-sm);
-  -webkit-backdrop-filter: var(--glass-blur-sm);
+  /* backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm); */
   border: none;
   border-radius: 12px;
   box-shadow: var(--glass-shadow-sm);
@@ -554,8 +554,8 @@ html[data-theme="mew"] body {
 
 .pagination .page-item .page-link {
   background: var(--glass-bg-light);
-  backdrop-filter: var(--glass-blur-sm);
-  -webkit-backdrop-filter: var(--glass-blur-sm);
+  /* backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm); */
   border: 1px solid var(--glass-border-light);
   box-shadow: var(--glass-shadow-sm);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -600,8 +600,8 @@ html[data-theme="mew"] body {
 .footer,
 footer {
   background: var(--glass-bg-subtle) !important;
-  backdrop-filter: var(--glass-blur-sm);
-  -webkit-backdrop-filter: var(--glass-blur-sm);
+  /* backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm); */
   border: none;
   box-shadow: var(--glass-shadow-sm);
 }
@@ -609,8 +609,8 @@ footer {
 /* Enhanced button glass effects */
 .btn-primary {
   background: var(--glass-bg-light);
-  backdrop-filter: var(--glass-blur-sm);
-  -webkit-backdrop-filter: var(--glass-blur-sm);
+  /* backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm); */
   border: 1px solid #ffffff00;
   box-shadow: var(--glass-shadow-sm);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -621,8 +621,8 @@ footer {
 
 .btn-outline-primary {
   background: var(--glass-bg-light);
-  backdrop-filter: var(--glass-blur-sm);
-  -webkit-backdrop-filter: var(--glass-blur-sm);
+  /* backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm); */
   border: 1px solid var(--main-color);
   box-shadow: var(--glass-shadow-sm);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -667,8 +667,8 @@ footer {
 
 .btn-secondary {
   background: var(--glass-bg-light);
-  backdrop-filter: var(--glass-blur-sm);
-  -webkit-backdrop-filter: var(--glass-blur-sm);
+  /* backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm); */
   border: 1px solid var(--glass-border-light);
   box-shadow: var(--glass-shadow-sm);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

@@ -285,13 +285,13 @@
    ============================================================================= */
 
 .glass-table-container {
-  background: var(--glass-bg-subtle);
-  backdrop-filter: var(--glass-blur-md);
-  -webkit-backdrop-filter: var(--glass-blur-md);
-  box-shadow: var(--glass-shadow-sm);
-  border-radius: 16px;
-  overflow: hidden;
-  padding: 1rem;
+		border-radius: 16px;
+		overflow: hidden;
+		background: var(--glass-bg-subtle);
+		/* backdrop-filter: var(--glass-blur-md); */
+		/* -webkit-backdrop-filter: var(--glass-blur-md); */
+		box-shadow: var(--glass-shadow-sm);
+		border: none !important;
 }
 
 /* =============================================================================
