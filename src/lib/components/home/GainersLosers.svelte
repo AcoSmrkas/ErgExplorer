@@ -22,19 +22,19 @@
 		<h2 class="subtitle ps-1 ps-sm-0">Top 5 profit/loss</h2>
 		<div class="period-controls">
 			<button 
-				class="btn btn-sm {selectedPeriod === '24h' ? 'btn-info' : 'btn-primary'}" 
+				class="btn-period {selectedPeriod === '24h' ? 'active' : ''}" 
 				onclick={() => onPeriodChange('24h')}
 				type="button">
 				24h
 			</button>
 			<button 
-				class="btn btn-sm {selectedPeriod === '7d' ? 'btn-info' : 'btn-primary'}" 
+				class="btn-period {selectedPeriod === '7d' ? 'active' : ''}" 
 				onclick={() => onPeriodChange('7d')}
 				type="button">
 				7d
 			</button>
 			<button 
-				class="btn btn-sm {selectedPeriod === '30d' ? 'btn-info' : 'btn-primary'}" 
+				class="btn-period {selectedPeriod === '30d' ? 'active' : ''}" 
 				onclick={() => onPeriodChange('30d')}
 				type="button">
 				30d
@@ -64,23 +64,12 @@
 		gap: 0.25rem;
 	}
 
-	.period-controls .btn {
-		padding: 0.25rem 0.75rem;
-		font-size: 0.875rem;
-		border-radius: 6px;
-		font-weight: 500;
-	}
-
+	/* Button styles handled by global .btn-period class */
 
 	@media (max-width: 768px) {
 		.header-with-controls {
 			justify-content: space-between;
 			align-items: center;
-		}
-		
-		.period-controls .btn {
-			padding: 0.2rem 0.5rem;
-			font-size: 0.8rem;
 		}
 	}
 </style>

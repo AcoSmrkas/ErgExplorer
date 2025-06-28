@@ -9,7 +9,7 @@
 <div class="row mb-4">
 	{#each stats as stat}
 		<div class="{columnClass} mb-3">
-			<div class="card h-100 stat-card">
+			<div class="card h-100 stat-card hover-lift">
 				<div class="card-body text-center">
 					{#if stat.icon}
 						<div class="stat-icon mb-2">
@@ -35,14 +35,10 @@
 
 <style>
 	.stat-card {
-		transition: all 0.3s ease;
 		cursor: default;
 	}
 	
-	.stat-card:hover {
-		transform: translateY(-2px);
-		box-shadow: var(--glass-shadow-md);
-	}
+	/* Hover effects handled by global .hover-lift class */
 	
 	.stat-icon {
 		font-size: 2rem;

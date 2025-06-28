@@ -146,7 +146,7 @@
 		let color = '#6c757d'; // default gray
 		
 		// More flexible matching
-		if (normalizedType.includes('exchange')) color = '#17a2b8';
+		if (normalizedType.includes('exchange')) color = 'var(--info-color)';
 		else if (normalizedType.includes('service')) color = '#ff851b';
 		else if (normalizedType.includes('mining')) color = '#ffc107';
 		else if (normalizedType.includes('nft') || normalizedType.includes('artist')) color = '#28a745';
@@ -429,7 +429,7 @@
 	}
 
 	.address-type.cold {
-		background-color: #17a2b8;
+		background-color: var(--info-color);
 		color: white;
 	}
 

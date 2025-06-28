@@ -240,7 +240,7 @@
 	}
 
 	.text-info {
-		color: #17a2b8 !important;
+		color: var(--info-color) !important;
 	}
 
 	.text-success {

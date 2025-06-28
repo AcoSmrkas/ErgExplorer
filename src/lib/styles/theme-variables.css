@@ -1,13 +1,21 @@
 /* Centralized CSS custom properties for easy theme management */
 :root {
+  /* Main brand colors */
+  --main-color: #fb5c16;
+  --main-color-hover: #ff8418;
+  --main-color-rgb: 251, 92, 22;
+  
   /* Enhanced color system */
-  --color-primary: var(--main-color, #fb5c16);
-  --color-primary-hover: var(--main-color-hover, #ff8418);
+  --color-primary: var(--main-color);
+  --color-primary-hover: var(--main-color-hover);
   --color-secondary: #6c757d;
   --color-success: #28a745;
   --color-warning: #ffc107;
   --color-danger: #dc3545;
   --color-info: #17a2b8;
+  
+  /* Info/blue color for transaction chains and info elements */
+  --info-color: #17a2b8;
 
   /* Typography system */
   --font-family-base:
@@ -284,45 +292,105 @@ html[data-theme="mew"] .enhanced-button--primary:hover {
   background-color: var(--main-color-hover);
 }
 
-/* Glassmorphism utility classes */
-.glass {
-  background: var(--glass-bg-light);
-  /* backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur); */
-  border: var(--glass-border);
-  box-shadow: var(--glass-shadow);
+/* Glass utility classes are defined in glass-system.css */
+
+/* =============================================================================
+   THEME-SPECIFIC OVERRIDES - Consolidated from legacy vars.css
+   ============================================================================= */
+
+html[data-bs-theme="dark"] {
+  --striped-1: #25252588;
+  --text-color: #aaa;
+  --forms-bg: #333;
+  --borders: #4f4f4f;
+  --text-light: #999;
+  --text-strong: #ccc;
+  --background: #222;
+  --footer: var(--forms-bg);
 }
 
-.glass-subtle {
-  background: var(--glass-bg-dark);
-  /* backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur); */
-  border: var(--glass-border);
-  box-shadow: var(--glass-shadow);
+html[data-bs-theme="dark"] #dropdown > .dropdown-menu > li > a:hover {
+  color: var(--background) !important;
 }
 
-.glass-accent {
-  background: var(--glass-bg-accent);
-  /* backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur); */
-  border: var(--glass-border);
-  box-shadow: var(--glass-shadow);
+html[data-bs-theme="light"] {
+  --striped-1: #e9e9e9;
+  --text-color: #444;
+  --forms-bg: #fff;
+  --borders: #ccc;
+  --text-light: #444;
+  --text-strong: #222;
+  --background: #f4f4f4;
+  --footer: var(--forms-bg);
 }
 
-/* Dark theme glass enhancements */
-html[data-bs-theme="dark"] .glass {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+html[data-theme="mew"] {
+  --info-color: #04dfff;
+  --text-color: #ffffff88;
+  --forms-bg: #271843;
+  --borders: #ffffff22;
+  --text-light: #ffffff77;
+  --text-strong: #ccc;
+  --background: #160d25;
+  --footer: #0e0917;
+  --striped-1: var(--background);
+  --main-color: #f9d72d;
+  --main-color-hover: #ff8418;
+  --main-color-rgb: 249, 215, 45;
 }
 
-html[data-bs-theme="dark"] .glass-subtle {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+html[data-theme="mew"] #dropdown > a {
+  color: var(--text-light) !important;
 }
 
-html[data-bs-theme="dark"] .glass-accent {
-  background: rgba(251, 92, 22, 0.15);
-  border: 1px solid rgba(251, 92, 22, 0.3);
+html[data-theme="mew"] #dropdown > .dropdown-menu > li > a:hover {
+  color: var(--background) !important;
+}
+
+html[data-theme="mew"] .card {
+  background-color: var(--footer);
+}
+
+html[data-theme="mew"] .page-link {
+  background-color: var(--forms-bg);
+}
+
+html[data-theme="mew"] .page-item.disabled .page-link {
+  background-color: var(--footer);
+}
+
+html[data-theme="mew"] body {
+  color: #eee;
+}
+
+html[data-theme="mew"] .networkType {
+  color: var(--text-light);
+}
+
+html[data-theme="mew"] .btn {
+  color: var(--text-strong) !important;
+}
+
+html[data-theme="mew"] .btn-primary:hover {
+  background: var(--main-color) !important;
+  color: var(--footer) !important;
+}
+
+html[data-theme="mew"] .btn-primary {
+  background: var(--glass-bg-light) !important;
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: none !important;
+  border-radius: 12px !important;
+  color: var(--text-strong) !important;
+}
+
+html[data-theme="mew"] .btn-info {
+  color: var(--footer) !important;
+}
+
+html[data-theme="mew"] .btn-info:hover {
+  color: var(--footer) !important;
 }
 
 html[data-theme="mew"] .dropdown-item:hover {

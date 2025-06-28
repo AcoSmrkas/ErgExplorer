@@ -4,7 +4,23 @@
    TABLE STYLES - Used across DataTable and various page tables
    ============================================================================= */
 
-/* Height links in tables */
+/* =============================================================================
+   LINK STYLES - Consolidated link patterns
+   ============================================================================= */
+
+/* Primary link style - most common pattern */
+:global(.link-primary) {
+  color: var(--text-strong);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+:global(.link-primary:hover) {
+  color: var(--main-color);
+  text-decoration: none;
+}
+
+/* Height/Block links in tables */
 :global(.height-link) {
   color: var(--text-strong);
   text-decoration: none;
@@ -16,7 +32,7 @@
   color: var(--main-color);
 }
 
-/* Address links in tables */
+/* Address links */
 :global(.address-link) {
   color: var(--text-strong);
   text-decoration: none;
@@ -28,13 +44,155 @@
   color: var(--main-color);
 }
 
-/* Prevent line breaks in reward columns */
+/* Transaction links */
+:global(.tx-link) {
+  color: var(--text-strong);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+:global(.tx-link:hover) {
+  color: var(--main-color);
+}
+
+/* Asset/Token links */
+:global(.asset-link) {
+  color: var(--text-strong);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+:global(.asset-link:hover) {
+  color: var(--main-color);
+  text-decoration: none;
+}
+
+/* =============================================================================
+   GLASS TABLE SYSTEM - Unified table styling
+   ============================================================================= */
+
+.table-responsive {
+  border: none !important;
+}
+
+.glass-table {
+  margin-bottom: 0;
+  border: none !important;
+  background: var(--glass-bg-light);
+  border-collapse: collapse !important;
+}
+
+.glass-table > :not(caption) > * > * {
+  background: transparent;
+  border-color: var(--glass-border-light);
+}
+
+.glass-table thead {
+  background: var(--glass-bg-medium);
+}
+
+.glass-table thead th {
+  background: transparent;
+  color: var(--text-strong);
+  border: none;
+  border-bottom: 2px solid var(--main-color);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  padding: 1.25rem 1rem;
+}
+
+.glass-table thead th:first-child {
+  border-top-left-radius: 16px;
+}
+
+.glass-table thead th:last-child {
+  border-top-right-radius: 16px;
+}
+
+.glass-table tbody td {
+  padding: 1rem;
+  color: var(--text-strong);
+  border-bottom: 1px solid var(--glass-border-light);
+  vertical-align: middle;
+}
+
+.glass-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.glass-table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 16px;
+}
+
+.glass-table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 16px;
+}
+
+.glass-table tbody tr:nth-child(even) {
+  background: var(--striped-1);
+}
+
+.glass-table tbody tr:nth-child(odd) {
+  background: var(--striped-2);
+}
+
+.glass-table td {
+  vertical-align: middle;
+  border-color: var(--glass-border-light);
+  border-width: 1px;
+  padding: 1rem;
+  color: var(--text-strong);
+  font-weight: 500;
+}
+
+.glass-table td:first-child {
+  font-weight: 600;
+}
+
+/* Loading and empty states */
+.glass-table .spinner-border {
+  color: var(--main-color);
+}
+
+.glass-table .text-muted {
+  color: var(--text-light) !important;
+  font-style: italic;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .glass-table thead th {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .glass-table td {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Prevent line breaks in specific columns */
 :global(.glass-table td:nth-child(4)) {
   white-space: nowrap;
 }
 
 :global(.glass-table td:nth-child(5)) {
   white-space: nowrap;
+}
+
+/* Table responsive styling */
+:global(.table td) {
+  vertical-align: middle;
+  border-color: var(--glass-border-light);
+}
+
+:global(.table th) {
+  font-weight: 600;
+  color: var(--text-strong);
 }
 
 /* =============================================================================
@@ -70,6 +228,88 @@
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+/* =============================================================================
+   BUTTON VARIANTS - Extended button patterns
+   ============================================================================= */
+
+/* Period/toggle control buttons */
+.btn-period {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+  border-radius: 6px;
+  font-weight: 500;
+  border: 1px solid var(--glass-border-light);
+  background: var(--glass-bg-subtle);
+  color: var(--text-strong);
+  transition: all 0.3s ease;
+}
+
+.btn-period:hover {
+  background: var(--main-color);
+  border-color: var(--main-color);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.btn-period.active {
+  background: var(--main-color);
+  border-color: var(--main-color);
+  color: white;
+}
+
+/* Small dismiss/close buttons */
+.btn-dismiss {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-light);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.btn-dismiss:hover {
+  background: var(--glass-bg-subtle);
+  color: var(--main-color);
+}
+
+/* Icon-only buttons */
+.btn-icon {
+  background: transparent;
+  border: 1px solid var(--borders);
+  padding: 4px 6px;
+  font-size: 0.8em;
+  line-height: 1;
+  opacity: 0.8;
+  color: var(--text-light);
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.btn-icon:hover:not(:disabled) {
+  opacity: 1;
+  color: var(--main-color);
+  transform: scale(1.05);
+}
+
+.btn-icon:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Mobile responsive button adjustments */
+@media (max-width: 768px) {
+  .btn-period {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.8rem;
+  }
 }
 
 /* =============================================================================
@@ -172,6 +412,80 @@
   .mobile-spacing {
     margin-bottom: 0.75rem;
   }
+
+  /* Common responsive patterns for info rows */
+  .info-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.25rem !important;
+  }
+
+  .info-label {
+    min-width: auto !important;
+  }
+
+  .info-value {
+    text-align: left !important;
+  }
+
+  /* Common responsive patterns for asset/register items */
+  .asset-info, .register-item {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
+  }
+
+  .register-key {
+    min-width: auto !important;
+  }
+
+  /* Common mobile card layouts */
+  .mobile-card-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 0.75rem !important;
+    padding-bottom: 0.5rem !important;
+    border-bottom: 1px solid var(--glass-border-light) !important;
+  }
+
+  .mobile-card-content {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+
+  .mobile-card-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+
+  /* Mobile control sections */
+  .mobile-control-section {
+    flex-direction: column !important;
+    gap: 1rem !important;
+    width: 100% !important;
+  }
+
+  .mobile-connection-status {
+    order: -1 !important;
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 0.5rem !important;
+    background: var(--glass-bg-light) !important;
+    border-radius: 8px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+
+  /* Card header and content responsive */
+  .glass-card .card-header {
+    padding: 1rem 1.25rem !important;
+  }
+
+  .glass-card .card-content {
+    padding: 1.25rem !important;
+  }
 }
 
 /* =============================================================================
@@ -208,6 +522,10 @@
   animation: pulse 1.5s ease-in-out infinite;
 }
 
+/* =============================================================================
+   GLOBAL ANIMATIONS - Consolidated keyframes for reuse
+   ============================================================================= */
+
 @keyframes pulse {
   0%,
   100% {
@@ -216,6 +534,60 @@
   50% {
     opacity: 0.8;
   }
+}
+
+/* Enhanced pulse animation for logos and interactive elements */
+@keyframes pulse-logo {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.05); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Spinner animation for loading states */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Float animation for subtle hover effects */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+/* Global animation utility classes */
+.animate-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.animate-pulse-logo {
+  animation: pulse-logo 2s ease-in-out infinite;
+}
+
+.animate-spin {
+  animation: spin 1s infinite linear;
+}
+
+.animate-float {
+  animation: float 2s ease-in-out infinite;
+}
+
+/* Hover animations */
+.hover-scale {
+  transition: transform 0.3s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.hover-lift {
+  transition: all 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--glass-shadow-md);
 }
 
 .empty-state {
@@ -410,7 +782,7 @@
   color: var(--main-color) !important;
 }
 .text-info {
-  color: #17a2b8 !important;
+  color: var(--info-color) !important;
 }
 .text-success {
   color: #28a745 !important;
@@ -440,7 +812,7 @@
   color: #000 !important;
 }
 .bg-info {
-  background-color: #17a2b8 !important;
+  background-color: var(--info-color) !important;
 }
 .bg-danger {
   background-color: #dc3545 !important;
@@ -511,57 +883,46 @@
   font-size: 0.75rem;
   font-weight: 500;
   padding: 0.35em 0.65em;
+  border-radius: 6px;
 }
 
-.badge-success {
-  background-color: #28a745;
-  color: white;
+/* Status badge specific styling */
+.status-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35em 0.65em;
+  border-radius: 6px;
 }
 
-.badge-warning {
-  background-color: #ffc107;
-  color: #000;
-}
-
-.badge-info {
-  background-color: #17a2b8;
-  color: white;
-}
-
-.badge-secondary {
-  background-color: #6c757d;
-  color: white;
-}
-
-.badge-primary {
+/* Unified badge color system */
+.badge-primary, .status-badge.text-primary {
   background-color: var(--main-color);
   color: white;
 }
 
-/* Additional badge color variants for addressbook */
-.badge.badge-info {
-  background-color: #17a2b8 !important;
-  color: white !important;
+.badge-success, .status-badge.text-success {
+  background-color: #28a745;
+  color: white;
 }
 
-.badge.badge-primary {
-  background-color: var(--main-color) !important;
-  color: white !important;
+.badge-warning, .status-badge.text-warning {
+  background-color: #ffc107;
+  color: #000;
 }
 
-.badge.badge-warning {
-  background-color: #ffc107 !important;
-  color: #000 !important;
+.badge-danger, .status-badge.text-danger {
+  background-color: #dc3545;
+  color: white;
 }
 
-.badge.badge-success {
-  background-color: #28a745 !important;
-  color: white !important;
+.badge-info, .status-badge.text-info {
+  background-color: var(--info-color);
+  color: white;
 }
 
-.badge.badge-secondary {
-  background-color: #6c757d !important;
-  color: white !important;
+.badge-secondary, .status-badge.text-muted {
+  background-color: #6c757d;
+  color: white;
 }
 
 /* =============================================================================
@@ -622,4 +983,79 @@
 
 .toast.bg-danger {
   background: #dc3545 !important;
+}
+
+/* =============================================================================
+   ANIMATION SYSTEM - Consolidated keyframes and utilities
+   ============================================================================= */
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes pulse-logo {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes fa-spin {
+  0% { 
+    transform: rotate(0deg); 
+  }
+  100% { 
+    transform: rotate(360deg); 
+  }
+}
+
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0px); 
+  }
+  50% { 
+    transform: translateY(-4px); 
+  }
+}
+
+/* Animation utility classes */
+.animate-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.animate-pulse-logo {
+  animation: pulse-logo 2s ease-in-out infinite;
+}
+
+.animate-spin {
+  animation: fa-spin 1s infinite linear;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Hover effect utilities */
+.hover-scale {
+  transition: transform 0.2s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.hover-lift {
+  transition: all 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--glass-shadow-md);
 }

@@ -389,11 +389,8 @@
 	}
 
 	:global(.fa-spin) {
-		animation: fa-spin 1s infinite linear;
+		animation: spin 1s infinite linear;
 	}
 
-	@keyframes fa-spin {
-		0% { transform: rotate(0deg); }
-		100% { transform: rotate(360deg); }
-	}
+	/* Global keyframes defined in common-components.css */
 </style>

@@ -2,6 +2,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { formatNumber, formatCurrency, formatErgValue, formatHashRate } from '$lib/utils/formatting.js';
 	import { getTheme } from '$lib/stores/theme.svelte.js';
+	import { API_ENDPOINTS } from '$lib/utils/constants.js';
 	import * as api from '$lib/utils/api.js';
 
 	// No props needed - component is fully self-contained
@@ -114,7 +115,7 @@
 			// Fetch latest data in parallel
 			const [networkStatsRes, latestBlocksRes, priceRes, protocolRes] = await Promise.allSettled([
 				api.getNetworkStats(),
-				fetch(`${api.API_ENDPOINTS.ERGOPLATFORM}blocks?limit=1&sortBy=height&sortDirection=desc`).then(r => r.json()),
+				fetch(`${API_ENDPOINTS.ERGOPLATFORM}blocks?limit=1&sortBy=height&sortDirection=desc`).then(r => r.json()),
 				api.getPrices(),
 				api.getProtocolInfo()
 			]);

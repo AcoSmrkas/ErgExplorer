@@ -21,3 +21,13 @@ export const API_ENDPOINTS = {
   MEWFINANCE: "https://api.mewfinance.com/",
   SOCKET: "https://socket.ergexplorer.com",
 };
+
+// Get API host with dev environment support
+export function getApiHost() {
+  if (typeof window !== "undefined") {
+    if (window.location.host === "dev.ergexplorer.com") {
+      return "https://devapi.ergexplorer.com/";
+    }
+  }
+  return API_ENDPOINTS.ERGEXPLORER;
+}

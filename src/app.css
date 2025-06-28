@@ -1,5 +1,4 @@
-/* Import existing CSS variables */
-@import url("/styles/vars.css");
+/* Legacy vars.css has been consolidated into theme-variables.css */
 
 /* Import popup styles */
 @import url("./styles/popups.css");
@@ -327,14 +326,14 @@ a:hover {
 
 /* Button styling superseded by glass system below */
 
-/* Override any Bootstrap blue defaults */
+/* Override any Bootstrap blue defaults - replaced with orange theme */
 .btn:focus,
 .btn:active:focus,
 .btn.active:focus {
   box-shadow: none !important;
 }
 
-/* Remove blue outline from buttons */
+/* Remove blue outline from buttons - using orange theme */
 button:focus {
   outline: none !important;
   box-shadow: none !important;
@@ -631,6 +630,27 @@ footer {
   color: var(--text-strong) !important;
 }
 
+.btn-period {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+  border-radius: 6px;
+  font-weight: 500;
+  border: 1px solid var(--glass-border-light);
+  background: var(--glass-bg-subtle);
+  color: var(--text-strong);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  z-index: 0;
+}
+
+.btn-period.active {
+  background: var(--main-color) !important;
+  border-color: var(--main-color);
+  color: white;
+}
+
+.btn-period::before,
 .btn-primary::before,
 .btn-outline-primary::before {
   content: "";
@@ -646,23 +666,36 @@ footer {
     transparent
   );
   transition: left 0.5s ease;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
 }
 
+.btn-period:hover::before,
 .btn-primary:hover::before,
 .btn-outline-primary:hover::before {
   left: 100%;
 }
 
+/* Ensure button content stays above gradient */
+.btn-period > *,
+.btn-primary > *,
+.btn-outline-primary > * {
+  position: relative;
+  z-index: 2;
+}
+
+.btn-period:hover,
 .btn-primary:hover,
 .btn-primary:active,
 .btn-primary:focus,
 .btn-outline-primary:hover,
 .btn-outline-primary:active,
 .btn-outline-primary:focus {
-  background: var(--glass-bg-light) !important;
-  border-color: var(--main-color) !important;
-  color: white !important;
-  box-shadow: var(--glass-shadow-sm) !important;
+  background: var(--glass-bg-light);
+  border-color: var(--main-color);
+  color: white;
+  box-shadow: var(--glass-shadow-sm);
 }
 
 .btn-secondary {

@@ -117,15 +117,10 @@
 	}
 
 	.tx-link {
-		color: var(--text-strong);
-		text-decoration: none;
-		transition: color 0.2s ease;
 		word-break: break-all;
 	}
-
-	.tx-link:hover {
-		color: var(--main-color);
-	}
+	
+	/* Base .tx-link styles are defined globally in common-components.css */
 
 	.conflict-badge {
 		background: #dc3545;

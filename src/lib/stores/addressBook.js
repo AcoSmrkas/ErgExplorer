@@ -1,6 +1,6 @@
 // Global address book service
 import { writable } from "svelte/store";
-import { API_ENDPOINTS } from "../utils/api.js";
+import { getApiHost } from "../utils/constants.js";
 import axios from "axios";
 
 // Store for address book data
@@ -12,17 +12,6 @@ let pendingPromise = null;
 
 // Array to collect addresses before batch fetching
 const addressesToFetch = [];
-
-// Get API host from environment or default
-function getApiHost() {
-  if (typeof window !== "undefined") {
-    // Check if we're on dev environment
-    if (window.location.host === "dev.ergexplorer.com") {
-      return "https://devapi.ergexplorer.com/";
-    }
-  }
-  return API_ENDPOINTS.ERGEXPLORER;
-}
 
 // Add address to be fetched in next batch
 export function addAddress(address) {

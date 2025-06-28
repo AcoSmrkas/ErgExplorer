@@ -1,4 +1,5 @@
 import { writable } from "svelte/store";
+import { API_ENDPOINTS } from "../utils/constants.js";
 
 // Block popup state
 export const blockPopupState = writable({
@@ -118,7 +119,7 @@ async function handleGlobalBlockHover(event) {
     // Fetch detailed block data if not in cache
     try {
       const response = await fetch(
-        `https://api.ergoplatform.com/api/v1/blocks/${blockId}`,
+        `${API_ENDPOINTS.ERGOPLATFORM}blocks/${blockId}`,
       );
       if (response.ok) {
         const blockData = await response.json();

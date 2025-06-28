@@ -8,6 +8,7 @@
 	import DailyStats from '$lib/components/home/DailyStats.svelte';
 	import { isTestnet } from '$lib/stores/network.svelte.js';
 	import { ergPrice, currentPrices, updatePrices } from '$lib/stores/priceStore.js';
+	import { API_ENDPOINTS } from '$lib/utils/constants.js';
 	import * as api from '$lib/utils/api.js';
 	
 	// Receive server data
@@ -78,7 +79,7 @@
 		}).catch(err => console.warn('Failed to load stats:', err));
 		
 		// Load latest blocks (5 for the bottom DataTable)
-		fetch(`${api.API_ENDPOINTS.ERGOPLATFORM}blocks?limit=5&sortBy=height&sortDirection=desc`)
+		fetch(`${API_ENDPOINTS.ERGOPLATFORM}blocks?limit=5&sortBy=height&sortDirection=desc`)
 			.then(r => r.json())
 			.then(data => {
 				if (data?.items) latestBlocks = data.items;
@@ -104,7 +105,7 @@
 		if (!isTestnet()) {
 			api.getWhaleTxs().then(data => {
 				if (data?.items) {
-					whaleTxs = data.items;
+					whaleTxs = data.items.slice(0, 5);
 				}
 			}).catch(err => console.warn('Failed to load whale transactions:', err));
 		}

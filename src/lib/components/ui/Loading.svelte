@@ -5,7 +5,7 @@
 
 <div class="loading-container">
 	<div class="spinner-container">
-		<img src="/images/logo-new.png" alt="Loading" class="loading-logo {size}">
+		<img src="/images/logo-new.png" alt="Loading" class="loading-logo {size} animate-pulse-logo">
 	</div>
 	{#if text}
 		<p class="loading-text">{text}</p>
@@ -25,9 +25,7 @@
 		margin-bottom: 1rem;
 	}
 	
-	.loading-logo {
-		animation: pulse 2s ease-in-out infinite;
-	}
+	/* Animation applied via global class animate-pulse-logo */
 	
 	.loading-logo.sm {
 		width: 32px;
@@ -50,9 +48,5 @@
 		font-size: 0.9rem;
 	}
 	
-	@keyframes pulse {
-		0% { opacity: 1; transform: scale(1); }
-		50% { opacity: 0.6; transform: scale(1.05); }
-		100% { opacity: 1; transform: scale(1); }
-	}
+	/* Global keyframes defined in common-components.css */
 </style>

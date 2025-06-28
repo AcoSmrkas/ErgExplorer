@@ -12,7 +12,7 @@
 			<div class="info-content">
 				<strong>Mempool Overview:</strong> These are unconfirmed transactions waiting to be included in the next block.
 			</div>
-			<button class="dismiss-btn" on:click={onDismissInfo} title="Dismiss">
+			<button class="btn-dismiss" on:click={onDismissInfo} title="Dismiss">
 				<i class="fas fa-times"></i>
 			</button>
 		</div>
@@ -49,24 +49,7 @@
 		margin-bottom: 1.5rem;
 	}
 
-	.info-card .dismiss-btn {
-		transition: all 0.3s ease;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 24px;
-		height: 24px;
-		background: transparent;
-		border: none;
-		color: var(--text-light);
-		cursor: pointer;
-		border-radius: 4px;
-	}
-
-	.info-card .dismiss-btn:hover {
-		background: var(--glass-bg-subtle);
-		color: var(--main-color);
-	}
+	/* Dismiss button styles handled by global .btn-dismiss class */
 
 	.control-section {
 		display: flex;
@@ -76,7 +59,7 @@
 	}
 
 	.info-icon {
-		color: #17a2b8;
+		color: var(--main-color);
 		font-size: 1.2rem;
 		flex-shrink: 0;
 	}
@@ -113,18 +96,11 @@
 	/* Mobile responsive adjustments */
 	@media (max-width: 768px) {
 		.control-section {
-			gap: 1rem;
-			width: 100%;
+			/* Apply global mobile control section class */
 		}
 		
 		.connection-status {
-			order: -1;
-			width: 100%;
-			justify-content: center;
-			padding: 0.5rem;
-			background: var(--glass-bg-light);
-			border-radius: 8px;
-			border: 1px solid rgba(255, 255, 255, 0.1);
+			/* Apply global mobile connection status class */
 		}
 		
 		.form-check {

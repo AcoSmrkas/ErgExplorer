@@ -34,7 +34,7 @@
 	}
 	
 	// Determine final CSS class based on props
-	$: finalClass = inline ? 'copy-btn-inline' : buttonClass;
+	$: finalClass = inline ? 'btn-icon copy-btn-inline' : `btn-icon ${buttonClass}`;
 	$: sizeClass = size === 'small' ? 'copy-btn-small' : size === 'large' ? 'copy-btn-large' : '';
 </script>
 
@@ -49,59 +49,18 @@
 </button>
 
 <style>
-	/* Base copy button styles */
-	.copy-btn {
-		background: none;
-		border: 1px solid var(--borders);
-		color: var(--text-light);
-		padding: 4px 6px;
-		font-size: 0.8em;
-		border-radius: 3px;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		line-height: 1;
-		opacity: 0.8;
-	}
+	/* Component-specific variations on top of global .btn-icon class */
 	
-	.copy-btn:hover:not(:disabled) {
-		background: var(--main-color);
-		border-color: var(--main-color);
-		color: #EEE;
-		opacity: 1;
-		transform: scale(1.05);
-	}
-	
-	.copy-btn:disabled {
-		opacity: 0.3;
-		cursor: not-allowed;
-	}
-	
-	/* Inline variant (for use within text flows) */
+	/* Inline variant */
 	.copy-btn-inline {
-		background: none;
-		border: 1px solid var(--borders);
-		color: var(--text-light);
 		padding: 2px 4px;
 		font-size: 0.7em;
-		border-radius: 3px;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		line-height: 1;
 		opacity: 0.7;
 		margin-left: 6px;
 	}
 	
 	.copy-btn-inline:hover:not(:disabled) {
-		background: var(--main-color);
-		border-color: var(--main-color);
-		color: #EEE;
-		opacity: 1;
 		transform: scale(1.1);
-	}
-	
-	.copy-btn-inline:disabled {
-		opacity: 0.3;
-		cursor: not-allowed;
 	}
 	
 	/* Size variants */
@@ -114,4 +73,6 @@
 		padding: 6px 8px;
 		font-size: 0.9em;
 	}
+	
+	/* Base styles inherited from global .btn-icon class */
 </style>

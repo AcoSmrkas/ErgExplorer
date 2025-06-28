@@ -1,5 +1,5 @@
 // Token icon utilities using Svelte store
-import { API_ENDPOINTS } from "./api.js";
+import { API_ENDPOINTS } from "./constants.js";
 import {
   hasTokenIcon,
   getTokenIcon,

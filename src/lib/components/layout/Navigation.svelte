@@ -49,13 +49,13 @@
 		<!-- Desktop Logo -->
 		<ul class="navbar-nav ms-auto d-none d-md-block" style="position: absolute; left: 15px;">
 			<a class="navbar-brand" href="/">
-				<img id="erg-logo" src="/images/logo.png" alt="Erg" height="30">
+				<img id="erg-logo" src="/images/logo.png" alt="Erg" height="30" class="hover-scale">
 			</a>
 		</ul>
 		
 		<!-- Mobile Logo -->
 		<a class="navbar-brand d-block d-md-none" href="/">
-			<img src="/images/logo.png" alt="Logo" height="35">
+			<img src="/images/logo.png" alt="Logo" height="35" class="hover-scale">
 		</a>
 		
 		<!-- Mobile Menu Toggle -->
@@ -155,13 +155,7 @@
 		font-weight: 600;
 	}
 	
-	.navbar-brand img {
-		transition: transform 0.2s ease;
-	}
-	
-	.navbar-brand:hover img {
-		transform: scale(1.05);
-	}
+	/* Logo hover effects handled by global .hover-scale class */
 	
 	/* Enhanced Mobile Menu Toggle */
 	.mobile-menu-toggle {

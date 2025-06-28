@@ -94,7 +94,7 @@
 	<!-- Mobile Card Layout -->
 	<div class="d-lg-none mobile-whale-cards">
 		{#if whaleTxs.length > 0}
-			{#each whaleTxs.slice(0, 5) as tx, index (tx.txid + '_' + index)}
+			{#each whaleTxs as tx, index (tx.txid + '_' + index)}
 				<div class="glass-card whale-tx-card">
 					<div class="card-header">
 						<div class="tx-header-content">

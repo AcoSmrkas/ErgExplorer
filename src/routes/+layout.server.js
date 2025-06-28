@@ -1,14 +1,6 @@
 // Global server-side data loading for all pages
 import { cache } from "$lib/utils/cache.js";
-
-// API Constants
-const API_HOSTS = {
-  ERGEXPLORER: "https://api.ergexplorer.com/",
-  ERGOPLATFORM: "https://api.ergoplatform.com/api/v1/",
-  ERGOPLATFORM_BASE: "https://api.ergoplatform.com/",
-  SPECTRUM: "https://api.spectrum.fi/v1/",
-  MEWFINANCE: "https://api.mewfinance.com/",
-};
+import { API_ENDPOINTS } from "$lib/utils/constants.js";
 
 // Load current prices for token calculations (used across multiple pages)
 async function loadCurrentPrices() {
@@ -17,7 +9,7 @@ async function loadCurrentPrices() {
 
     // Load ERG price first
     const ergResponse = await fetch(
-      `${API_HOSTS.ERGEXPLORER}tokens/getErgPrice`,
+      `${API_ENDPOINTS.ERGEXPLORER}tokens/getErgPrice`,
     );
     const ergData = await ergResponse.json();
     if (ergData.items?.[0]) {
@@ -32,8 +24,8 @@ async function loadCurrentPrices() {
 
     // Get token prices from Spectrum
     const [marketsResponse, poolsResponse] = await Promise.all([
-      fetch(`${API_HOSTS.SPECTRUM}price-tracking/markets`),
-      fetch(`${API_HOSTS.SPECTRUM}amm/pools/stats`),
+      fetch(`${API_ENDPOINTS.SPECTRUM}price-tracking/markets`),
+      fetch(`${API_ENDPOINTS.SPECTRUM}amm/pools/stats`),
     ]);
 
     const marketsData = await marketsResponse.json();
@@ -76,7 +68,7 @@ async function loadTokenIcons() {
 
   try {
     const response = await fetch(
-      `${API_HOSTS.ERGEXPLORER}tokens/getTokenIcons`,
+      `${API_ENDPOINTS.ERGEXPLORER}tokens/getTokenIcons`,
     );
     const data = await response.json();
 

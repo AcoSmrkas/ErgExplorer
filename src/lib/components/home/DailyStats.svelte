@@ -135,21 +135,14 @@
 		color: var(--text-strong);
 	}
 
+	/* Using global card system - styles defined in common-components.css */
+	
 	.card-header {
-		background: var(--glass-bg-medium);
 		padding: 1.5rem 2rem 1rem 2rem;
-		border-bottom: 2px solid var(--main-color);
-		border-top-left-radius: 16px;
-		border-top-right-radius: 16px;
 	}
 
 	.section-title {
-		color: var(--text-strong);
-		font-weight: 700;
 		font-size: 1.5rem;
-		margin: 0;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
 	}
 
 	.card-content {

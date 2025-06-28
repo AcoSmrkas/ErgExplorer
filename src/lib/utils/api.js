@@ -1,16 +1,7 @@
-import { API_ENDPOINTS } from "./constants.js";
+import { API_ENDPOINTS, getApiHost } from "./constants.js";
 
-// Re-export for backward compatibility
-export { API_ENDPOINTS };
-
-export function getApiHost() {
-  if (typeof window !== "undefined") {
-    if (window.location.host === "dev.ergexplorer.com") {
-      return "https://devapi.ergexplorer.com/";
-    }
-  }
-  return API_ENDPOINTS.ERGEXPLORER;
-}
+// Re-export for backwards compatibility
+export { API_ENDPOINTS, getApiHost };
 
 class ApiError extends Error {
   constructor(message, status, response) {
