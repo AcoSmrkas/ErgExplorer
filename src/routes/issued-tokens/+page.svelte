@@ -130,8 +130,8 @@
 			// Fetch detailed token data for each token
 			await loadTokenDetails(tokens);
 
-			// Fetch transaction dates for each token
-			await loadTokenDates(tokensWithDetails);
+			// Show data immediately and load dates in background
+			loadTokenDates(tokensWithDetails);
 
 		} catch (err) {
 			error = err.message;
@@ -180,10 +180,10 @@
 	async function loadTokenDates(tokenList) {
 		if (!tokenList.length) return;
 
-		// Initialize all tokens with loading state
+		// Initialize all tokens with empty date (no loading state to avoid delay)
 		tokensWithDetails = tokenList.map(token => ({
 			...token,
-			mintDate: 'Loading...'
+			mintDate: ''
 		}));
 
 		// Load dates for each token with fallback strategies
@@ -349,7 +349,7 @@
 	function renderTokenCell(token) {
 		const imageHtml = token.cachedurl 
 			? `<img src="${token.cachedurl}" alt="${token.name || 'NFT'}" class="token-nft-image me-2" style="width: 32px; height: 32px; border-radius: 6px; object-fit: cover;" onerror="this.style.display='none'"/>` 
-			: token.iconurl 
+			: (token.iconurl && !token.cachedurl)
 				? `<img src="${token.iconurl}" alt="${token.name || 'Token'}" class="token-icon-image me-2" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'"/>` 
 				: '';
 		
