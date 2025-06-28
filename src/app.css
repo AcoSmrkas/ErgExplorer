@@ -222,8 +222,8 @@ tbody {
 
 .div-summary {
   background: var(--glass-bg-medium);
-  backdrop-filter: var(--glass-blur-md);
-  -webkit-backdrop-filter: var(--glass-blur-md);
+  /* backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md); */
   border: 1px solid var(--main-color);
   border-radius: 16px;
   padding: 15px;
@@ -422,8 +422,8 @@ html[data-theme="mew"] body {
 /* Apply centralized glass system to existing components */
 .div-cell-dark {
   background: var(--glass-bg-light);
-  backdrop-filter: var(--glass-blur-md);
-  -webkit-backdrop-filter: var(--glass-blur-md);
+  /* backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md); */
   border: none;
   box-shadow: var(--glass-shadow-sm);
   border-radius: 16px;
@@ -579,8 +579,8 @@ html[data-theme="mew"] body {
 
 .card {
   background: var(--glass-bg-light);
-  backdrop-filter: var(--glass-blur-md);
-  -webkit-backdrop-filter: var(--glass-blur-md);
+  /* backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md); */
   border: 1px solid var(--glass-border-light);
   box-shadow: var(--glass-shadow-sm);
   border-radius: 12px;
@@ -589,8 +589,8 @@ html[data-theme="mew"] body {
 
 .dropdown-menu {
   background: var(--glass-bg-medium);
-  backdrop-filter: var(--glass-blur-xl);
-  -webkit-backdrop-filter: var(--glass-blur-xl);
+  /* backdrop-filter: var(--glass-blur-xl);
+  -webkit-backdrop-filter: var(--glass-blur-xl); */
   border: 1px solid var(--glass-border-medium);
   box-shadow: var(--glass-shadow-sm);
   border-radius: 16px;

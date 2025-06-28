@@ -79,7 +79,7 @@
 		padding: 3rem 1rem;
 		background: var(--glass-bg-subtle);
 		border-radius: 12px;
-		backdrop-filter: var(--glass-blur-sm);
+		/* backdrop-filter: var(--glass-blur-sm); */
 	}
 
 	.mobile-blocks-grid {

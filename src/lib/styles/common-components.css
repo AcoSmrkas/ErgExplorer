@@ -44,8 +44,8 @@
 .btn-refresh,
 .btn-action {
   background: var(--glass-bg-subtle);
-  backdrop-filter: var(--glass-blur-sm);
-  -webkit-backdrop-filter: var(--glass-blur-sm);
+  /* backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm); */
   border: 1px solid var(--glass-border-light);
   box-shadow: var(--glass-shadow-sm);
   color: var(--text-strong);
@@ -92,8 +92,8 @@
 
 .info-card {
   background: var(--glass-bg-subtle);
-  backdrop-filter: var(--glass-blur-sm);
-  -webkit-backdrop-filter: var(--glass-blur-sm);
+  /* backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm); */
   border: 1px solid var(--glass-border-light);
   border-radius: 12px;
   padding: 1rem 1.5rem;
@@ -304,8 +304,8 @@
   border-radius: 12px;
   overflow: hidden;
   background: var(--glass-bg-light);
-  backdrop-filter: var(--glass-blur-md);
-  -webkit-backdrop-filter: var(--glass-blur-md);
+  /* backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md); */
 }
 
 .card-header {

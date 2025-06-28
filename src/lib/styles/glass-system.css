@@ -40,8 +40,8 @@
 /* Basic glass backgrounds */
 .glass-subtle {
   background: var(--glass-bg-subtle);
-  backdrop-filter: var(--glass-blur-sm);
-  -webkit-backdrop-filter: var(--glass-blur-sm);
+  /* backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm); */
   border: 1px solid var(--glass-border-subtle);
 }
 
@@ -61,8 +61,8 @@
 
 .glass-strong {
   background: var(--glass-bg-strong);
-  backdrop-filter: var(--glass-blur-xl);
-  -webkit-backdrop-filter: var(--glass-blur-xl);
+  /* backdrop-filter: var(--glass-blur-xl);
+  -webkit-backdrop-filter: var(--glass-blur-xl); */
   border: 1px solid var(--glass-border-strong);
 }
 
@@ -101,8 +101,8 @@
 
 .glass-popup {
   background: var(--glass-bg-medium);
-  backdrop-filter: var(--glass-blur-xl);
-  -webkit-backdrop-filter: var(--glass-blur-xl);
+  /* backdrop-filter: var(--glass-blur-xl);
+  -webkit-backdrop-filter: var(--glass-blur-xl); */
   border: 1px solid var(--glass-border-medium);
   box-shadow: var(--glass-shadow-xl), var(--glass-highlight);
   border-radius: 16px;
@@ -110,8 +110,8 @@
 
 .glass-button {
   background: var(--glass-bg-light);
-  backdrop-filter: var(--glass-blur-sm);
-  -webkit-backdrop-filter: var(--glass-blur-sm);
+  /* backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm); */
   border: 1px solid var(--glass-border-light);
   box-shadow: var(--glass-shadow-sm);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -232,8 +232,8 @@ html[data-theme="mew"] {
 /* Form glass */
 .glass-input {
   background: var(--glass-bg-light);
-  backdrop-filter: var(--glass-blur-sm);
-  -webkit-backdrop-filter: var(--glass-blur-sm);
+  /* backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm); */
   border: 1px solid var(--glass-border-light);
   transition: all 0.3s ease;
 }
@@ -284,14 +284,14 @@ html[data-theme="mew"] {
   from {
     opacity: 0;
     transform: scale(0.95) translateY(10px);
-    backdrop-filter: blur(0px);
-    -webkit-backdrop-filter: blur(0px);
+    /* backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px); */
   }
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
-    backdrop-filter: var(--glass-blur-lg);
-    -webkit-backdrop-filter: var(--glass-blur-lg);
+    /* backdrop-filter: var(--glass-blur-lg);
+    -webkit-backdrop-filter: var(--glass-blur-lg); */
   }
 }
 

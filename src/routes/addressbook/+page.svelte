@@ -232,7 +232,7 @@
 							{/each}
 						</select>
 					</div>
-					<div class="col-md-6 ps-3 ps-md-0 pe-3 pe-md-0 mt-2 md-md-0">
+					<div class="col-md-6 ps-3 ps-md-0 pe-3 pe-md-0 mt-2 mt-md-0">
 						<label class="form-label" for="addressType">Filter:</label>
 						<select bind:value={addressType} class="form-select" id="addressType" onchange={handleFilterChange}>
 							{#each addressTypes as type}
