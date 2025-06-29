@@ -1,7 +1,6 @@
 <script>
 	import { formatErgValue, formatAddress, formatNumber, formatPriceUSD } from '$lib/utils/formatting.js';
-	import { fade } from 'svelte/transition';
-	import CopyButton from './CopyButton.svelte';
+	import BasePopup from './BasePopup.svelte';
 	import { getAssetTitleParams } from '$lib/utils/tokenIcons.js';
 	import { addAddress, getOwner, addressBook } from '$lib/stores/addressBook.js';
 	import { currentPrices } from '$lib/stores/priceStore.js';
@@ -13,6 +12,7 @@
 	export let x = 0;
 	export let y = 0;
 	export let loading = false;
+	
 	
 	$: hasBalanceData = balance !== null && balance !== undefined;
 	
@@ -76,99 +76,105 @@
 	}
 </script>
 
-{#if visible && address}
-	<div 
-		class="address-popup show" 
-		style="left: {x}px; top: {y}px;"
-		in:fade={{ duration: 200 }}
-		out:fade={{ duration: 150 }}
-	>
-		<div class="address-header">
-			<div class="address-icon">
-				<i class="fas fa-wallet"></i>
-			</div>
-			<div class="address-title">
-				<div class="address-name">{friendlyName ? friendlyName : 'Address Balance'}</div>
-			</div>
+<BasePopup
+	{visible}
+	{x}
+	{y}
+	{loading}
+	popupClass="address-popup"
+	icon="fa-wallet"
+	iconColor="text-info"
+	title={displayAddress}
+	copyText={address}
+	copyLabel="Copy address"
+	copyMessage="Address copied to clipboard!"
+	viewDetailsUrl="/addresses/{address}"
+	viewDetailsText="View Details"
+>
+	{#if friendlyName}
+		<div class="friendly-name">
+			<strong>{friendlyName}</strong>
 		</div>
-		
-		<!-- Full address with copy button (always shown) -->
-		<div class="address-id-section mb-2">
-			<div class="address-full">{displayAddress}</div>
-			<CopyButton text={address}
-				label="Copy full address"
-				successMessage="Address copied to clipboard!"
-			/>
+	{/if}
+	
+	{#if hasBalanceData}
+		<div class="address-details">
+			{#if balance?.confirmed?.nanoErgs !== undefined}
+				<div class="address-detail-row">
+					<strong>Confirmed Balance:</strong> {@html formatErgValue(balance.confirmed.nanoErgs)}
+				</div>
+			{/if}
+			
+			{#if balance?.unconfirmed?.nanoErgs !== undefined && balance.unconfirmed.nanoErgs > 0}
+				<div class="address-detail-row">
+					<strong>Unconfirmed:</strong> {@html formatErgValue(balance.unconfirmed.nanoErgs)}
+				</div>
+			{/if}
+			
+			{#if balance?.confirmed?.nanoErgs !== undefined}
+				<div class="address-detail-row">
+					<strong class="erg-span">Total Balance:</strong> {@html formatErgValue((balance.confirmed?.nanoErgs || 0) + (balance.unconfirmed?.nanoErgs || 0))}
+				</div>
+			{/if}
+			
+			<!-- Token Balances -->
+			{#if topTokens.length > 0}
+				<div class="token-balances">
+					<div class="token-section-header">
+						<i class="fas fa-coins me-2"></i>
+						<strong>Top Token Holdings</strong>
+					</div>
+					<div class="token-list">
+						{#each topTokens as token}
+							<div class="token-row">
+								<div class="token-name-section">
+									{@html getAssetTitleParams(null, token.tokenId, token.name, true)}
+								</div>
+								<div class="token-amount-section">
+									{#if token.hasPrice}
+										{@html formatTokenAmount(token.amount, token.decimals)} <span class="text-light">{@html formatPriceUSD(token.amount, token.decimals, $currentPrices[token.tokenId])}</span>
+									{:else}
+										{formatTokenAmount(token.amount, token.decimals)}
+									{/if}
+								</div>
+							</div>
+						{/each}
+						{#if balance?.confirmed?.tokens?.length > 5}
+							<div class="more-tokens">
+								<i class="fas fa-plus me-1"></i>
+								{balance.confirmed.tokens.length - 5} more tokens
+							</div>
+						{/if}
+					</div>
+				</div>
+			{/if}
 		</div>
-		
-		{#if loading && !hasBalanceData}
-			<div class="loading-section" in:fade={{ duration: 200 }}>
-				<div class="loading-spinner-small" style="display: inline-block"></div>
-				<span class="loading-text">Loading balance...</span>
-			</div>
-		{/if}
-		
-		{#if hasBalanceData}
-			<div class="address-details" in:fade={{ duration: 300, delay: 100 }}>
-				{#if balance?.confirmed?.nanoErgs !== undefined}
-					<div class="address-balance">
-						<strong>Confirmed Balance:</strong> {@html formatErgValue(balance.confirmed.nanoErgs)}
-					</div>
-				{/if}
-				
-				{#if balance?.unconfirmed?.nanoErgs !== undefined && balance.unconfirmed.nanoErgs > 0}
-					<div class="address-unconfirmed">
-						<strong>Unconfirmed:</strong> {@html formatErgValue(balance.unconfirmed.nanoErgs)}
-					</div>
-				{/if}
-				
-				{#if balance?.confirmed?.nanoErgs !== undefined}
-					<div class="address-total">
-						<strong class="erg-span">Total Balance:</strong> {@html formatErgValue((balance.confirmed?.nanoErgs || 0) + (balance.unconfirmed?.nanoErgs || 0))}
-					</div>
-				{/if}
-				
-				<!-- Token Balances -->
-				{#if topTokens.length > 0}
-					<div class="token-balances">
-						<div class="token-section-header">
-							<i class="fas fa-coins me-2"></i>
-							<strong>Top Token Holdings</strong>
-						</div>
-						<div class="token-list">
-							{#each topTokens as token}
-								<div class="token-row">
-									<div class="token-name-section">
-										{@html getAssetTitleParams(null, token.tokenId, token.name, true)}
-									</div>
-									<div class="token-amount-section">
-										{#if token.hasPrice}
-											{@html formatTokenAmount(token.amount, token.decimals)} <span class="text-light">{@html formatPriceUSD(token.amount, token.decimals, $currentPrices[token.tokenId])}</span>
-										{:else}
-											{formatTokenAmount(token.amount, token.decimals)}
-										{/if}
-									</div>
-								</div>
-							{/each}
-							{#if balance?.confirmed?.tokens?.length > 5}
-								<div class="more-tokens">
-									<i class="fas fa-plus me-1"></i>
-									{balance.confirmed.tokens.length - 5} more tokens
-								</div>
-							{/if}
-						</div>
-					</div>
-				{/if}
-			</div>
-		{/if}
-	</div>
-{/if}
+	{/if}
+</BasePopup>
 
 <style>
+	.friendly-name {
+		margin-bottom: 0.75rem;
+		padding-bottom: 0.5rem;
+		border-bottom: 1px solid var(--glass-border-light);
+		color: var(--text-strong);
+		font-size: 0.9rem;
+	}
+
+	.address-details > .address-detail-row {
+		margin-bottom: 0.5rem;
+		font-size: 0.85rem;
+		line-height: 1.4;
+	}
+
+	.address-details > .address-detail-row:last-child {
+		margin-bottom: 0;
+	}
+
 	.token-balances {
 		margin-top: 1rem;
 		padding-top: 1rem;
-		border-top: 1px solid rgba(255, 255, 255, 0.1);
+		border-top: 1px solid var(--glass-border-light);
 	}
 
 	.token-section-header {

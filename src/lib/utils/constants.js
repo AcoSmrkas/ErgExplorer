@@ -15,8 +15,8 @@ export const NANOERG_TO_ERG = 1000000000;
 // API endpoints
 export const API_ENDPOINTS = {
   ERGEXPLORER: "https://api.ergexplorer.com/",
-  ERGOPLATFORM: "https://api.ergoplatform.com/api/v1/",
-  ERGOPLATFORM_BASE: "https://api.ergoplatform.com/",
+  ERGOPLATFORM: "https://api-p2p.ergoplatform.com/api/v1/",
+  ERGOPLATFORM_BASE: "https://api-p2p.ergoplatform.com/",
   SPECTRUM: "https://api.spectrum.fi/v1/",
   MEWFINANCE: "https://api.mewfinance.com/",
   SOCKET: "https://socket.ergexplorer.com",

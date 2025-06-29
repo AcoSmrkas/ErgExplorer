@@ -124,7 +124,7 @@ export async function getNetworkStats() {
 
 export async function getProtocolInfo() {
   try {
-    const url = `https://api.ergoplatform.com/info`;
+    const url = `${API_ENDPOINTS.ERGOPLATFORM_BASE}info`;
     return apiRequest(url);
   } catch (error) {
     console.warn("Failed to fetch protocol info:", error);
@@ -134,7 +134,7 @@ export async function getProtocolInfo() {
 
 export async function getStats() {
   try {
-    const url = `https://api.ergoplatform.com/stats`;
+    const url = `${API_ENDPOINTS.ERGOPLATFORM_BASE}stats`;
     return apiRequest(url);
   } catch (error) {
     console.warn("Failed to fetch stats:", error);

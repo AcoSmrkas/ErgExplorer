@@ -8,24 +8,31 @@
 	import AddressPopup from '$lib/components/ui/AddressPopup.svelte';
 	import BlockPopup from '$lib/components/ui/BlockPopup.svelte';
 	import TransactionPopup from '$lib/components/ui/TransactionPopup.svelte';
+	import BoxPopup from '$lib/components/ui/BoxPopup.svelte';
 	import { initializeTheme } from '$lib/stores/theme.svelte.js';
-	import { initializeGlobalTokenHover, tokenPopupState } from '$lib/stores/tokenHover.js';
 	import { updatePrices } from '$lib/stores/priceStore.js';
-	import { initializeGlobalAddressHover, addressPopupState } from '$lib/stores/addressHover.js';
-	import { initializeGlobalBlockHover, blockPopupState } from '$lib/stores/blockHover.js';
-	import { initializeGlobalTransactionHover, transactionPopupState } from '$lib/stores/transactionHover.js';
 	import { initializeTokenIcons } from '$lib/stores/tokenIconsStore.js';
+	
+	// New centralized popup system
+	import { initializeTokenPopup, tokenPopupState } from '$lib/stores/popups/tokenPopup.js';
+	import { initializeAddressPopup, addressPopupState } from '$lib/stores/popups/addressPopup.js';
+	import { initializeBlockPopup, blockPopupState } from '$lib/stores/popups/blockPopup.js';
+	import { initializeTransactionPopup, transactionPopupState } from '$lib/stores/popups/transactionPopup.js';
+	import { initializeBoxPopup, boxPopupState } from '$lib/stores/popups/boxPopup.js';
 	import '../app.css';
 
 	/** @type {import('./$types').LayoutData} */
-	export let data;
+	let { data } = $props();
 
 	onMount(() => {
 		initializeTheme();
-		initializeGlobalTokenHover();
-		initializeGlobalAddressHover();
-		initializeGlobalBlockHover();
-		initializeGlobalTransactionHover();
+		
+		// Initialize centralized popup system
+		initializeTokenPopup();
+		initializeAddressPopup();
+		initializeBlockPopup();
+		initializeTransactionPopup();
+		initializeBoxPopup();
 		
 		// Update global prices from server data
 		if (data.currentPrices) {
@@ -38,100 +45,167 @@
 		}
 	});
 	
-	// Subscribe to global popup states
-	let tokenPopup = {
+	// Subscribe to centralized popup states
+	let tokenPopup = $state({
 		visible: false,
 		x: 0,
 		y: 0,
-		token: null,
-		tokenId: '',
-		tokenName: '',
-		tokenPrice: null,
+		data: null,
+		id: '',
 		loading: false
-	};
-	
-	let addressPopup = {
-		visible: false,
-		x: 0,
-		y: 0,
-		address: '',
-		balance: null,
-		loading: false
-	};
-	
-	let blockPopup = {
-		visible: false,
-		x: 0,
-		y: 0,
-		block: null,
-		blockId: '',
-		loading: false
-	};
-	
-	let transactionPopup = {
-		visible: false,
-		x: 0,
-		y: 0,
-		transaction: null,
-		transactionId: '',
-		loading: false
-	};
-	
-	tokenPopupState.subscribe(state => {
-		tokenPopup = state;
 	});
 	
-	addressPopupState.subscribe(state => {
-		addressPopup = state;
+	let addressPopup = $state({
+		visible: false,
+		x: 0,
+		y: 0,
+		data: null,
+		id: '',
+		loading: false
 	});
 	
-	blockPopupState.subscribe(state => {
-		blockPopup = state;
+	let blockPopup = $state({
+		visible: false,
+		x: 0,
+		y: 0,
+		data: null,
+		id: '',
+		loading: false
 	});
 	
-	transactionPopupState.subscribe(state => {
-		transactionPopup = state;
+	let transactionPopup = $state({
+		visible: false,
+		x: 0,
+		y: 0,
+		data: null,
+		id: '',
+		loading: false
+	});
+	
+	let boxPopup = $state({
+		visible: false,
+		x: 0,
+		y: 0,
+		data: null,
+		id: '',
+		loading: false
+	});
+	
+	// Subscribe to popup states
+	$effect(() => {
+		const unsubToken = tokenPopupState.subscribe(state => {
+			tokenPopup = { 
+				visible: state.visible,
+				x: state.x,
+				y: state.y,
+				data: state.data,
+				id: state.id,
+				loading: state.loading,
+				tokenName: state.tokenName || '',
+				tokenPrice: state.tokenPrice || null
+			};
+		});
+		const unsubAddress = addressPopupState.subscribe(state => {
+			addressPopup = { 
+				visible: state.visible,
+				x: state.x,
+				y: state.y,
+				data: state.data,
+				id: state.id,
+				loading: state.loading
+			};
+		});
+		const unsubBlock = blockPopupState.subscribe(state => {
+			blockPopup = { 
+				visible: state.visible,
+				x: state.x,
+				y: state.y,
+				data: state.data,
+				id: state.id,
+				loading: state.loading
+			};
+		});
+		const unsubTransaction = transactionPopupState.subscribe(state => {
+			transactionPopup = { 
+				visible: state.visible,
+				x: state.x,
+				y: state.y,
+				data: state.data,
+				id: state.id,
+				loading: state.loading
+			};
+		});
+		const unsubBox = boxPopupState.subscribe(state => {
+			boxPopup = { 
+				visible: state.visible,
+				x: state.x,
+				y: state.y,
+				data: state.data,
+				id: state.id,
+				loading: state.loading
+			};
+		});
+		
+		return () => {
+			unsubToken();
+			unsubAddress();
+			unsubBlock();
+			unsubTransaction();
+			unsubBox();
+		};
 	});
 	
 	// Hide all popups on page navigation
-	page.subscribe(() => {
-		tokenPopupState.set({
-			visible: false,
-			x: 0,
-			y: 0,
-			token: null,
-			tokenId: '',
-			tokenName: '',
-			tokenPrice: null,
-			loading: false
+	$effect(() => {
+		const unsubscribe = page.subscribe(() => {
+			// Hide all popups when navigating
+			tokenPopupState.set({
+				visible: false,
+				x: 0,
+				y: 0,
+				data: null,
+				id: '',
+				loading: false
+			});
+			
+			addressPopupState.set({
+				visible: false,
+				x: 0,
+				y: 0,
+				data: null,
+				id: '',
+				loading: false
+			});
+			
+			blockPopupState.set({
+				visible: false,
+				x: 0,
+				y: 0,
+				data: null,
+				id: '',
+				loading: false
+			});
+			
+			transactionPopupState.set({
+				visible: false,
+				x: 0,
+				y: 0,
+				data: null,
+				id: '',
+				loading: false
+			});
+			
+			boxPopupState.set({
+				visible: false,
+				x: 0,
+				y: 0,
+				data: null,
+				id: '',
+				loading: false
+			});
 		});
 		
-		addressPopupState.set({
-			visible: false,
-			x: 0,
-			y: 0,
-			address: '',
-			balance: null,
-			loading: false
-		});
-		
-		blockPopupState.set({
-			visible: false,
-			x: 0,
-			y: 0,
-			block: null,
-			blockId: '',
-			loading: false
-		});
-		
-		transactionPopupState.set({
-			visible: false,
-			x: 0,
-			y: 0,
-			transaction: null,
-			transactionId: '',
-			loading: false
-		});
+		return unsubscribe;
 	});
 </script>
 
@@ -190,10 +264,10 @@
 	visible={tokenPopup.visible}
 	x={tokenPopup.x}
 	y={tokenPopup.y}
-	token={tokenPopup.token}
-	tokenId={tokenPopup.tokenId}
-	name={tokenPopup.tokenName}
-	price={tokenPopup.tokenPrice}
+	token={tokenPopup.data}
+	tokenId={tokenPopup.id}
+	name={tokenPopup.tokenName || ''}
+	price={tokenPopup.tokenPrice || null}
 	loading={tokenPopup.loading}
 />
 
@@ -201,17 +275,18 @@
 	visible={addressPopup.visible}
 	x={addressPopup.x}
 	y={addressPopup.y}
-	address={addressPopup.address}
-	balance={addressPopup.balance}
+	address={addressPopup.id}
+	balance={addressPopup.data}
 	loading={addressPopup.loading}
 />
+
 
 <BlockPopup 
 	visible={blockPopup.visible}
 	x={blockPopup.x}
 	y={blockPopup.y}
-	block={blockPopup.block}
-	blockId={blockPopup.blockId}
+	block={blockPopup.data}
+	blockId={blockPopup.id}
 	loading={blockPopup.loading}
 />
 
@@ -219,9 +294,18 @@
 	visible={transactionPopup.visible}
 	x={transactionPopup.x}
 	y={transactionPopup.y}
-	transaction={transactionPopup.transaction}
-	transactionId={transactionPopup.transactionId}
+	transaction={transactionPopup.data}
+	transactionId={transactionPopup.id}
 	loading={transactionPopup.loading}
+/>
+
+<BoxPopup 
+	visible={boxPopup.visible}
+	x={boxPopup.x}
+	y={boxPopup.y}
+	boxData={boxPopup.data}
+	boxId={boxPopup.id}
+	loading={boxPopup.loading}
 />
 
 <style>

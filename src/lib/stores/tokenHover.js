@@ -111,12 +111,14 @@ export function initializeGlobalTokenHover() {
     if (event.target && typeof event.target.closest === "function") {
       const link = event.target.closest("[data-token-id]");
       if (link) {
-        // Only hide if we're really leaving the token element and not going to popup
+        // Only hide if we're really leaving the token element and not going to popup or another token
         const relatedTarget = event.relatedTarget;
         if (
           !relatedTarget ||
           (!link.contains(relatedTarget) &&
-            (!relatedTarget.closest || !relatedTarget.closest(".token-popup")))
+            (!relatedTarget.closest || 
+             (!relatedTarget.closest(".token-popup") && 
+              !relatedTarget.closest("[data-token-id]"))))
         ) {
           hideTokenPopup();
         }

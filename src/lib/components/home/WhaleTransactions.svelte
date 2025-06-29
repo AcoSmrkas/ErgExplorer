@@ -95,7 +95,7 @@
 	<div class="d-lg-none mobile-whale-cards">
 		{#if whaleTxs.length > 0}
 			{#each whaleTxs as tx, index (tx.txid + '_' + index)}
-				<div class="glass-card whale-tx-card">
+				<div class="glass-card">
 					<div class="card-header">
 						<div class="tx-header-content">
 						<div class="tx-icon">
@@ -207,12 +207,6 @@
 		color: var(--text-light);
 		flex-shrink: 0;
 		text-align: left;
-	}
-
-	.whale-tx-card .card-content {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
 	}
 
 	.detail-row {

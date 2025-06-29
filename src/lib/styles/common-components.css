@@ -115,7 +115,6 @@
 .glass-table tbody td {
   padding: 0.8rem 0.9rem;
   color: var(--text-strong);
-  border-bottom: 1px solid var(--glass-border-light);
   vertical-align: middle;
 }
 
@@ -455,11 +454,16 @@
 
   /* Card header and content responsive */
   .glass-card .card-header {
-    padding: 1rem 1.25rem !important;
+    padding: 1rem 1rem !important;
   }
 
   .glass-card .card-content {
-    padding: 1.25rem !important;
+    padding: 1rem !important;
+  }
+
+  .card-body {
+    padding: 1.5rem;
+    color: var(--text-strong);
   }
 }
 
@@ -641,6 +645,10 @@
 		border: none !important;
 }
 
+.glass-table-container > .glass-table {
+  background: unset !important;
+}
+
 /* =============================================================================
    CARD SYSTEM - Consolidate card styles across all pages
    ============================================================================= */
@@ -687,12 +695,9 @@
 }
 
 .card-body {
-  padding: 1.5rem;
+  padding: 1rem;
   color: var(--text-strong);
-}
-
-.card-content {
-  padding: 1.5rem;
+  background-color: var(--glass-bg-light);
 }
 
 /* Glass card system for consistent styling across pages */

@@ -97,57 +97,51 @@ async function loadTransactionData(transactionId) {
 export function initializeGlobalTransactionHover() {
   if (typeof window === "undefined") return;
 
-  // Add global event listeners for transaction hover
+  // Mouse over handler for transaction links and popup
   document.addEventListener("mouseover", async (event) => {
     if (event.target && typeof event.target.closest === "function") {
       const link = event.target.closest("[data-transaction-hover]");
       if (link) {
         const transactionId = link.getAttribute("data-transaction-hover");
         if (transactionId) {
+          // Clear any existing timeout when hovering over transaction link
+          clearTimeout(hideTimeout);
           showTransactionPopup(transactionId, event);
         }
       }
-    }
-  });
-
-  document.addEventListener("mouseout", (event) => {
-    if (event.target && typeof event.target.closest === "function") {
-      const link = event.target.closest("[data-transaction-hover]");
-      if (link) {
-        // Only hide if we're really leaving the transaction element and not going to popup
-        const relatedTarget = event.relatedTarget;
-        if (
-          !relatedTarget ||
-          (!link.contains(relatedTarget) &&
-            (!relatedTarget.closest ||
-              !relatedTarget.closest(".transaction-popup")))
-        ) {
-          hideTransactionPopup();
-        }
+      
+      // Also handle hovering over the popup itself
+      const popup = event.target.closest(".transaction-popup");
+      if (popup) {
+        // Clear timeout when entering popup area
+        clearTimeout(hideTimeout);
       }
     }
   });
 
-  // Prevent popup from hiding when hovering over the popup itself
-  document.addEventListener("mouseover", (event) => {
-    if (
-      event.target &&
-      typeof event.target.closest === "function" &&
-      event.target.closest(".transaction-popup")
-    ) {
-      cancelHideTransactionPopup();
-    }
-  });
-
-  // Hide popup when leaving the popup
+  // Mouse out handler
   document.addEventListener("mouseout", (event) => {
     if (event.target && typeof event.target.closest === "function") {
+      const link = event.target.closest("[data-transaction-hover]");
       const popup = event.target.closest(".transaction-popup");
-      if (popup) {
+      
+      if (link || popup) {
         const relatedTarget = event.relatedTarget;
-        if (!relatedTarget || !popup.contains(relatedTarget)) {
-          hideTransactionPopup();
+        
+        // Don't hide if moving to popup, staying within link, or moving to another transaction link
+        if (relatedTarget) {
+          const movingToPopup = relatedTarget.closest(".transaction-popup");
+          const movingToTransactionLink = relatedTarget.closest("[data-transaction-hover]");
+          const stayingInLink = link && link.contains(relatedTarget);
+          const stayingInPopup = popup && popup.contains(relatedTarget);
+          
+          if (movingToPopup || movingToTransactionLink || stayingInLink || stayingInPopup) {
+            return; // Don't hide popup
+          }
         }
+        
+        // Hide popup with delay
+        hideTransactionPopup();
       }
     }
   });

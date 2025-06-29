@@ -44,12 +44,14 @@ export function initializeGlobalBlockHover() {
     if (event.target && typeof event.target.closest === "function") {
       const link = event.target.closest("[data-block-id]");
       if (link) {
-        // Only hide if we're really leaving the block element and not going to popup
+        // Only hide if we're really leaving the block element and not going to popup or another block
         const relatedTarget = event.relatedTarget;
         if (
           !relatedTarget ||
           (!link.contains(relatedTarget) &&
-            (!relatedTarget.closest || !relatedTarget.closest(".block-popup")))
+            (!relatedTarget.closest || 
+             (!relatedTarget.closest(".block-popup") &&
+              !relatedTarget.closest("[data-block-id]"))))
         ) {
           hideBlockPopup();
         }

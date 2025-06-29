@@ -131,14 +131,6 @@
 		margin-bottom: 2rem;
 	}
 
-	.glass-card .section-title {
-		font-size: 1.5rem;
-	}
-
-	.glass-card .card-content {
-		padding: 1.5rem;
-	}
-
 	.contact-label {
 		color: var(--main-color);
 		font-weight: 600;
@@ -195,18 +187,6 @@
 	}
 
 	@media (max-width: 768px) {
-		.page-title {
-			font-size: 1.5rem;
-		}
-
-		.title-icon {
-			font-size: 1.4rem;
-		}
-
-		.glass-card .card-content {
-			padding: 1rem;
-		}
-
 		.contact-item {
 			flex-direction: column;
 			align-items: flex-start;

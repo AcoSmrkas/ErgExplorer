@@ -40,6 +40,24 @@ export function nFormatter(
     minimumFractionDigits = digits;
   }
 
+  let split = num.toString().split['.'];
+  if (split?.length == 2) {
+    let allZero = true;
+    for (let i = 0; i < split[1].length; i++) {
+      if (split[1][i] !== '0') {
+        allZero = false;
+        break;
+      }
+    }
+    console.log(allZero);
+    if (allZero) {
+      digits = 0;
+    }
+  } else {
+    digits = 0;
+    minimumFractionDigits = 0;
+  }
+
   const rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
   var item = lookup
     .slice()
@@ -103,6 +121,7 @@ export function formatValue(
   digits = 2,
   autodigits = false,
   same = false,
+  noLetter = false
 ) {
   if (value == null || isNaN(value)) return "—";
 
@@ -128,7 +147,7 @@ export function formatValue(
   if (same) {
     return `<span title="${vstring}">${vstring}</span>`;
   } else {
-    return `<span title="${vstring}">${nFormatter(value, digits)}</span>`;
+    return `<span title="${vstring}">${nFormatter(value, digits, noLetter)}</span>`;
   }
 }
 

@@ -461,10 +461,6 @@ html[data-theme="mew"] .btn-period.active {
   border: none;
 }
 
-.table tbody tr:nth-child(odd) {
-  background: rgba(255, 255, 255, 0.02);
-}
-
 .table td,
 .table th {
   border: none;
@@ -578,16 +574,6 @@ html[data-theme="mew"] .btn-period.active {
   border-color: var(--main-color);
   color: white;
   box-shadow: var(--glass-shadow-sm);
-}
-
-.card {
-  background: var(--glass-bg-light);
-  /* backdrop-filter: var(--glass-blur-md);
-  -webkit-backdrop-filter: var(--glass-blur-md); */
-  border: 1px solid var(--glass-border-light);
-  box-shadow: var(--glass-shadow-sm);
-  border-radius: 12px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dropdown-menu {

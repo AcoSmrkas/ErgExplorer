@@ -144,14 +144,4 @@
 	.section-title {
 		font-size: 1.5rem;
 	}
-
-	.card-content {
-		padding: 2rem;
-	}
-
-	@media (max-width: 768px) {
-		.card-content {
-			padding: 1.5rem;
-		}
-	}
 </style>

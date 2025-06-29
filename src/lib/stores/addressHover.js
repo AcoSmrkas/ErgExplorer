@@ -101,13 +101,14 @@ export function initializeGlobalAddressHover() {
     if (event.target && typeof event.target.closest === "function") {
       const link = event.target.closest("[data-address]");
       if (link) {
-        // Only hide if we're really leaving the address element and not going to popup
+        // Only hide if we're really leaving the address element and not going to popup or another address
         const relatedTarget = event.relatedTarget;
         if (
           !relatedTarget ||
           (!link.contains(relatedTarget) &&
             (!relatedTarget.closest ||
-              !relatedTarget.closest(".address-popup")))
+              (!relatedTarget.closest(".address-popup") &&
+               !relatedTarget.closest("[data-address]"))))
         ) {
           hideAddressPopup();
         }

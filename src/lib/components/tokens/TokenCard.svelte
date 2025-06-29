@@ -139,12 +139,6 @@
 		flex-shrink: 0;
 	}
 
-	.glass-card .card-content {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
 	.detail-row {
 		display: flex;
 		justify-content: space-between;
