@@ -8,6 +8,7 @@
 	import { formatErgValue, formatDateString, formatNumber, formatFileSize, formatPriceUSD, formatAddress } from '$lib/utils/formatting.js';
 	import AddressLink from '$lib/components/ui/AddressLink.svelte';
 import BoxLink from '$lib/components/ui/BoxLink.svelte';
+	import StatusBadge from '$lib/components/ui/StatusBadge.svelte';
 	import { getAssetTitleParams } from '$lib/utils/tokenIcons.js';
 	import { usePrices } from '$lib/composables/useAsyncData.js';
 	import { FEE_ERGOTREE } from '$lib/utils/constants.js';
@@ -161,6 +162,25 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 		const outputs = transaction.outputs?.length || 0;
 		return `${status} • ${inputs} inputs → ${outputs} outputs • ${formatFileSize(transaction.size || 0)}`;
 	}
+
+	// Get box status based on spending state
+	function getBoxStatus(box) {
+		if (!box) return 'Unknown';
+		if (box.spentTransactionId) return 'Spent';
+		if (box.mainChain === false) return 'Unconfirmed';
+		return 'Unspent';
+	}
+
+	// Get status type for badge styling
+	function getStatusType(box) {
+		const status = getBoxStatus(box);
+		switch (status) {
+			case 'Spent': return 'danger';
+			case 'Unconfirmed': return 'warning';
+			case 'Unspent': return 'success';
+			default: return 'default';
+		}
+	}
 </script>
 
 <svelte:head>
@@ -176,6 +196,7 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 					title="Transaction" 
 					icon="fa-exchange-alt" 
 					info={getInfoText()}
+					timestamp={transaction?.timestamp}
 				/>
 
 				<div class="container-fluid p-0">
@@ -209,17 +230,15 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 												</span>
 											</div>
 											<div class="detail-row">
-												<span class="detail-label">Status:</span>
-												<span class="detail-value">
-													{#if isConfirmed}
-														<span class="status-badge confirmed">Confirmed</span>
-													{:else}
-														<span class="status-badge pending">Pending</span>
-													{/if}
-												</span>
+												<span class="detail-label">Size:</span>
+												<span class="detail-value">{formatFileSize(transaction.size)}</span>
 											</div>
 											<div class="detail-row">
-												<span class="detail-label">Block Height:</span>
+												<span class="detail-label">Received time:</span>
+												<span class="detail-value">{formatDateString(transaction.timestamp)}</span>
+											</div>
+											<div class="detail-row">
+												<span class="detail-label">Included in blocks:</span>
 												<span class="detail-value">
 													{#if transaction.inclusionHeight}
 														<a href="/blocks/{transaction.inclusionHeight}" class="text-link">{formatNumber(transaction.inclusionHeight)}</a>
@@ -228,23 +247,10 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 													{/if}
 												</span>
 											</div>
-											<div class="detail-row">
-												<span class="detail-label">Timestamp:</span>
-												<span class="detail-value">{formatDateString(transaction.timestamp)}</span>
-											</div>
 										</div>
 									</div>
 									<div class="col-lg-6 p-0 p-md-4">
 										<div class="detail-section">
-											<div class="detail-row">
-												<span class="detail-label">Fee:</span>
-												<span class="detail-value">
-													{@html formatErgValue(feeAmount)}
-													{#if $ergPrice}
-														<br><small class="text-light">{formatPriceUSD(feeAmount, $ergPrice)}</small>
-													{/if}
-												</span>
-											</div>
 											<div class="detail-row">
 												<span class="detail-label">Confirmations:</span>
 												<span class="detail-value">
@@ -256,11 +262,25 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 												</span>
 											</div>
 											<div class="detail-row">
-												<span class="detail-label">Size:</span>
-												<span class="detail-value">{formatFileSize(transaction.size)}</span>
+												<span class="detail-label">Total coins transferred:</span>
+												<span class="detail-value">
+													{@html formatErgValue(totalOutputValue)}
+													{#if $ergPrice}
+														<br><small class="text-light">({formatPriceUSD(totalOutputValue, $ergPrice)})</small>
+													{/if}
+												</span>
 											</div>
 											<div class="detail-row">
-												<span class="detail-label">Fee per Byte:</span>
+												<span class="detail-label">Fees:</span>
+												<span class="detail-value">
+													{@html formatErgValue(feeAmount)}
+													{#if $ergPrice}
+														<br><small class="text-light">({formatPriceUSD(feeAmount, $ergPrice)})</small>
+													{/if}
+												</span>
+											</div>
+											<div class="detail-row">
+												<span class="detail-label">Fees per byte:</span>
 												<span class="detail-value">{@html formatErgValue(feeAmount / (transaction.size || 1), 9)}</span>
 											</div>
 										</div>
@@ -292,10 +312,13 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 						<!-- Mobile Card View -->
 						<div class="d-md-none">
 							{#each transaction.inputs as input, index}
-								<div class="mobile-item-card" style="background: {index % 2 === 1 ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.02)'}">
+								<div class="mobile-item-card" style="background: {index % 2 === 0 ? 'var(--striped-1)' : 'var(--striped-2)'}">
 									<div class="mobile-item-header">
 										<span class="mobile-item-index">#{index}</span>
-										<BoxLink boxId={input.boxId} startChars={8} endChars={4} showCopy={true} linkClass="mobile-box-link" />
+										<div class="mobile-box-info">
+											<BoxLink boxId={input.boxId} startChars={8} endChars={4} showCopy={true} linkClass="mobile-box-link" />
+											<StatusBadge text={getBoxStatus(input)} type={getStatusType(input)} size="small" />
+										</div>
 									</div>
 									<div class="mobile-item-details">
 										<div class="mobile-detail-row">
@@ -342,10 +365,13 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 						<!-- Mobile Card View -->
 						<div class="d-md-none">
 							{#each transaction.outputs as output, index}
-								<div class="mobile-item-card" style="background: {index % 2 === 1 ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.02)'}">
+								<div class="mobile-item-card" style="background: {index % 2 === 0 ? 'var(--striped-1)' : 'var(--striped-2)'}">
 									<div class="mobile-item-header">
 										<span class="mobile-item-index">#{index}</span>
-										<BoxLink boxId={output.boxId} startChars={8} endChars={4} showCopy={true} linkClass="mobile-box-link" />
+										<div class="mobile-box-info">
+											<BoxLink boxId={output.boxId} startChars={8} endChars={4} showCopy={true} linkClass="mobile-box-link" />
+											<StatusBadge text={getBoxStatus(output)} type={getStatusType(output)} size="small" />
+										</div>
 									</div>
 									<div class="mobile-item-details">
 										<div class="mobile-detail-row">
@@ -391,35 +417,20 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 								</span>
 							</div>
 							<div class="detail-row">
-								<span class="detail-label">Status:</span>
-								<span class="detail-value">
-									{#if isConfirmed}
-										<span class="status-badge confirmed">Confirmed</span>
-									{:else}
-										<span class="status-badge pending">Pending</span>
-									{/if}
-								</span>
+								<span class="detail-label">Size:</span>
+								<span class="detail-value">{formatFileSize(transaction.size)}</span>
 							</div>
 							<div class="detail-row">
-								<span class="detail-label">Block Height:</span>
+								<span class="detail-label">Received time:</span>
+								<span class="detail-value">{formatDateString(transaction.timestamp)}</span>
+							</div>
+							<div class="detail-row">
+								<span class="detail-label">Included in blocks:</span>
 								<span class="detail-value">
 									{#if transaction.inclusionHeight}
 										<a href="/blocks/{transaction.inclusionHeight}" class="text-link">{formatNumber(transaction.inclusionHeight)}</a>
 									{:else}
 										<span class="text-muted">Pending</span>
-									{/if}
-								</span>
-							</div>
-							<div class="detail-row">
-								<span class="detail-label">Timestamp:</span>
-								<span class="detail-value">{formatDateString(transaction.timestamp)}</span>
-							</div>
-							<div class="detail-row">
-								<span class="detail-label">Fee:</span>
-								<span class="detail-value">
-									{@html formatErgValue(feeAmount)}
-									{#if $ergPrice}
-										<br><small class="text-light">{formatPriceUSD(feeAmount, $ergPrice)}</small>
 									{/if}
 								</span>
 							</div>
@@ -434,11 +445,25 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 								</span>
 							</div>
 							<div class="detail-row">
-								<span class="detail-label">Size:</span>
-								<span class="detail-value">{formatFileSize(transaction.size)}</span>
+								<span class="detail-label">Total coins transferred:</span>
+								<span class="detail-value">
+									{@html formatErgValue(totalOutputValue)}
+									{#if $ergPrice}
+										<br><small class="text-light">({formatPriceUSD(totalOutputValue, $ergPrice)})</small>
+									{/if}
+								</span>
 							</div>
 							<div class="detail-row">
-								<span class="detail-label">Fee per Byte:</span>
+								<span class="detail-label">Fees:</span>
+								<span class="detail-value">
+									{@html formatErgValue(feeAmount)}
+									{#if $ergPrice}
+										<br><small class="text-light">({formatPriceUSD(feeAmount, $ergPrice)})</small>
+									{/if}
+								</span>
+							</div>
+							<div class="detail-row">
+								<span class="detail-label">Fees per byte:</span>
 								<span class="detail-value">{@html formatErgValue(feeAmount / (transaction.size || 1), 9)}</span>
 							</div>
 						</div>
@@ -844,6 +869,12 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 		font-size: 0.75rem;
 		font-weight: 600;
 		color: var(--text-light);
+	}
+
+	.mobile-box-info {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 	}
 
 	.mobile-item-details {

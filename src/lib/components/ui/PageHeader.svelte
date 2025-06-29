@@ -1,19 +1,27 @@
 <script>
+	import { formatDateString } from '$lib/utils/formatting.js';
+	
 	export let title = '';
 	export let icon = '';
 	export let info = '';
 	export let showInfo = true;
+	export let timestamp = null; // Unix timestamp or Date object
 </script>
 
 <div class="page-header glass-header mb-0">
 	<div class="header-content">
-		<h1 class="page-title">
-			{#if icon}
-				<i class="fas {icon} me-3 title-icon"></i>
+		<div class="title-with-time">
+			<h1 class="page-title">
+				{#if icon}
+					<i class="fas {icon} me-3 title-icon"></i>
+				{/if}
+				{title}
+			</h1>
+			{#if timestamp}
+				<span class="timestamp-inline">{formatDateString(timestamp)}</span>
 			{/if}
-			{title}
-		</h1>
-		{#if showInfo && info}
+		</div>
+		{#if showInfo && info && !timestamp}
 			<div class="header-info">
 				<span class="info-text">{info}</span>
 			</div>
@@ -32,8 +40,17 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		flex-wrap: wrap;
+		flex-wrap: nowrap;
 		gap: 1rem;
+	}
+
+
+	.title-with-time {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+		min-width: 0;
 	}
 
 	.page-title {
@@ -43,6 +60,14 @@
 		margin: 0;
 		display: flex;
 		align-items: center;
+	}
+
+	.timestamp-inline {
+		color: var(--text-light);
+		font-size: 0.9rem;
+		font-weight: 500;
+		opacity: 0.8;
+		white-space: nowrap;
 	}
 
 	.title-icon {
@@ -55,6 +80,7 @@
 		flex-direction: column;
 		align-items: flex-end;
 		gap: 0.5rem;
+		flex-shrink: 0;
 	}
 
 	.info-text {
@@ -79,6 +105,11 @@
 		.header-content {
 			flex-direction: column;
 			align-items: flex-start;
+		}
+
+
+		.timestamp-inline {
+			font-size: 0.8rem;
 		}
 
 		.header-info {
