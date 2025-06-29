@@ -303,10 +303,10 @@
 		
 		<h5 style="font-size:1em" class="text-light">Version: <span class="text-white">{internalProtocolInfo?.version || '--'}</span></h5>
 		<h5 style="font-size:1em" class="text-light">Hashrate: <span class="text-white">{internalProtocolInfo?.hashRate ? formatHashRate(internalProtocolInfo?.hashRate) : '--'}</span></h5>
-		<h5 style="font-size:1em" class="text-light">Circulating Supply: <span class="text-white">
+		<h5 style="font-size:1em" class="text-light">Circulating supply: <span class="text-white">
 			{@html internalProtocolInfo?.supply ? formatErgValue(internalProtocolInfo.supply / 1e9, 0) : '--'}
 		</span></h5>
-		<h5 style="font-size:1em" class="text-light mb-0">Max Supply: <span class="text-white">97,739,924 <span class="erg-span">ERG</span></span></h5>
+		<h5 style="font-size:1em" class="text-light mb-0">Max supply: <span class="text-white">97,739,924 <span class="erg-span">ERG</span></span></h5>
 	</div>
 </div>
 

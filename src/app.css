@@ -418,6 +418,10 @@ html[data-theme="mew"] body {
   min-height: 100vh;
 }
 
+html[data-theme="mew"] .btn-period.active {
+  color: var(--footer);
+}
+
 /* Apply centralized glass system to existing components */
 .div-cell-dark {
   background: var(--glass-bg-light);
@@ -647,7 +651,7 @@ footer {
 .btn-period.active {
   background: var(--main-color) !important;
   border-color: var(--main-color);
-  color: white;
+  color: var(--text-white);
 }
 
 .btn-period::before,

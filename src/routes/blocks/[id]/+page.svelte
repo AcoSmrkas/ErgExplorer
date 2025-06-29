@@ -218,39 +218,6 @@
 {/if}
 
 <style>
-	.card {
-		border: none;
-		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-		border-radius: 12px;
-		overflow: hidden;
-	}
-
-	.card-header {
-		background: linear-gradient(135deg, var(--main-color) 0%, rgba(34, 127, 158, 0.1) 100%);
-		color: white;
-		border: none;
-	}
-
-	.btn-link:hover {
-		color: var(--main-color) !important;
-	}
-
-	.text-primary {
-		color: var(--main-color) !important;
-	}
-
-	.text-info {
-		color: var(--info-color) !important;
-	}
-
-	.text-success {
-		color: #28a745 !important;
-	}
-
-	.text-warning {
-		color: #ffc107 !important;
-	}
-
 	h2 {
 		color: var(--bs-body-color);
 		font-weight: 600;

@@ -306,10 +306,6 @@
 		color: var(--main-color) !important;
 	}
 
-	.text-success {
-		color: #28a745 !important;
-	}
-
 	h2, h4 {
 		color: var(--bs-body-color);
 		font-weight: 600;

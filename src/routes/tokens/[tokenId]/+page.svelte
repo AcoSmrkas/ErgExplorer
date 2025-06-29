@@ -338,18 +338,6 @@
 		color: var(--main-color) !important;
 	}
 
-	.text-primary {
-		color: var(--main-color) !important;
-	}
-
-	.text-info {
-		color: var(--info-color) !important;
-	}
-
-	.text-success {
-		color: #28a745 !important;
-	}
-
 	h2 {
 		color: var(--bs-body-color);
 		font-weight: 600;

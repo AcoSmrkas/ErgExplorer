@@ -113,7 +113,7 @@
 }
 
 .glass-table tbody td {
-  padding: 1rem;
+  padding: 0.8rem 0.9rem;
   color: var(--text-strong);
   border-bottom: 1px solid var(--glass-border-light);
   vertical-align: middle;
@@ -233,31 +233,6 @@
 /* =============================================================================
    BUTTON VARIANTS - Extended button patterns
    ============================================================================= */
-
-/* Period/toggle control buttons */
-.btn-period {
-  padding: 0.25rem 0.75rem;
-  font-size: 0.875rem;
-  border-radius: 6px;
-  font-weight: 500;
-  border: 1px solid var(--glass-border-light);
-  background: var(--glass-bg-subtle);
-  color: var(--text-strong);
-  transition: all 0.3s ease;
-}
-
-.btn-period:hover {
-  background: var(--main-color);
-  border-color: var(--main-color);
-  color: white;
-  transform: translateY(-1px);
-}
-
-.btn-period.active {
-  background: var(--main-color);
-  border-color: var(--main-color);
-  color: white;
-}
 
 /* Small dismiss/close buttons */
 .btn-dismiss {
@@ -812,7 +787,7 @@
   color: #000 !important;
 }
 .bg-info {
-  background-color: var(--info-color) !important;
+  background-color: var(--main-color) !important;
 }
 .bg-danger {
   background-color: #dc3545 !important;
@@ -916,7 +891,7 @@
 }
 
 .badge-info, .status-badge.text-info {
-  background-color: var(--info-color);
+  background-color: var(--main-color);
   color: white;
 }
 
