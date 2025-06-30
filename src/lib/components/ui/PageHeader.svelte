@@ -1,11 +1,13 @@
 <script>
 	import { formatDateString } from '$lib/utils/formatting.js';
+	import StatusBadge from './StatusBadge.svelte';
 	
 	export let title = '';
 	export let icon = '';
 	export let info = '';
 	export let showInfo = true;
 	export let timestamp = null; // Unix timestamp or Date object
+	export let statusBadge = null; // Status badge object: { text, type }
 </script>
 
 <div class="page-header glass-header mb-0">
@@ -13,12 +15,14 @@
 		<div class="title-with-time">
 			<h1 class="page-title">
 				{#if icon}
-					<i class="fas {icon} me-3 title-icon"></i>
+					<i class="fas {icon} me-3 title-icon {statusBadge ? `status-${statusBadge.type}` : ''}"></i>
 				{/if}
 				{title}
 			</h1>
 			{#if timestamp}
 				<span class="timestamp-inline">{formatDateString(timestamp)}</span>
+			{:else if statusBadge}
+				<StatusBadge text={statusBadge.text} type={statusBadge.type} size="small" />
 			{/if}
 		</div>
 		{#if showInfo && info && !timestamp}
@@ -73,6 +77,14 @@
 	.title-icon {
 		color: var(--main-color);
 		font-size: 1.8rem;
+	}
+
+	.title-icon.status-success {
+		color: #28a745;
+	}
+
+	.title-icon.status-warning {
+		color: #ffc107;
 	}
 
 	.header-info {
