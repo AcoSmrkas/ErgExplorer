@@ -116,9 +116,9 @@ export function initializeGlobalTokenHover() {
         if (
           !relatedTarget ||
           (!link.contains(relatedTarget) &&
-            (!relatedTarget.closest || 
-             (!relatedTarget.closest(".token-popup") && 
-              !relatedTarget.closest("[data-token-id]"))))
+            (!relatedTarget.closest ||
+              (!relatedTarget.closest(".token-popup") &&
+                !relatedTarget.closest("[data-token-id]"))))
         ) {
           hideTokenPopup();
         }

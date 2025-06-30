@@ -138,10 +138,14 @@ export function formatNumberShort(num, decimals = 0) {
 }
 
 export function formatPriceUSD(amount, decimals, usdPrice) {
-  if (!amount || !usdPrice) return "($0.00)";
+  if (!amount || !usdPrice) return "";
 
   const erg = parseFloat(amount) / Math.pow(10, decimals);
   const usdValue = erg * parseFloat(usdPrice);
+
+  if (usdValue < 0.01) {
+    return "";
+  }
 
   return (
     " ($" +

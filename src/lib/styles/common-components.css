@@ -167,7 +167,7 @@
     padding: 0.75rem 0.5rem;
     font-size: 0.8rem;
   }
-  
+
   .glass-table td {
     padding: 0.75rem 0.5rem;
     font-size: 0.9rem;
@@ -403,7 +403,8 @@
   }
 
   /* Common responsive patterns for asset/register items */
-  .asset-info, .register-item {
+  .asset-info,
+  .register-item {
     flex-direction: column !important;
     align-items: flex-start !important;
     gap: 0.5rem !important;
@@ -517,21 +518,39 @@
 
 /* Enhanced pulse animation for logos and interactive elements */
 @keyframes pulse-logo {
-  0% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(1.05); }
-  100% { opacity: 1; transform: scale(1); }
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* Spinner animation for loading states */
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Float animation for subtle hover effects */
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-2px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
 }
 
 /* Global animation utility classes */
@@ -636,13 +655,13 @@
    ============================================================================= */
 
 .glass-table-container {
-		border-radius: 16px;
-		overflow: hidden;
-		background: var(--glass-bg-subtle);
-		/* backdrop-filter: var(--glass-blur-md); */
-		/* -webkit-backdrop-filter: var(--glass-blur-md); */
-		box-shadow: var(--glass-shadow-sm);
-		border: none !important;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--glass-bg-subtle);
+  /* backdrop-filter: var(--glass-blur-md); */
+  /* -webkit-backdrop-filter: var(--glass-blur-md); */
+  box-shadow: var(--glass-shadow-sm);
+  border: none !important;
 }
 
 .glass-table-container > .glass-table {
@@ -875,32 +894,38 @@
 }
 
 /* Unified badge color system */
-.badge-primary, .status-badge.text-primary {
+.badge-primary,
+.status-badge.text-primary {
   background-color: var(--main-color);
   color: white;
 }
 
-.badge-success, .status-badge.text-success {
+.badge-success,
+.status-badge.text-success {
   background-color: #28a745;
   color: white;
 }
 
-.badge-warning, .status-badge.text-warning {
+.badge-warning,
+.status-badge.text-warning {
   background-color: #ffc107;
   color: #000;
 }
 
-.badge-danger, .status-badge.text-danger {
+.badge-danger,
+.status-badge.text-danger {
   background-color: #dc3545;
   color: white;
 }
 
-.badge-info, .status-badge.text-info {
+.badge-info,
+.status-badge.text-info {
   background-color: var(--main-color);
   color: white;
 }
 
-.badge-secondary, .status-badge.text-muted {
+.badge-secondary,
+.status-badge.text-muted {
   background-color: #6c757d;
   color: white;
 }
@@ -970,7 +995,8 @@
    ============================================================================= */
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.4;
   }
   50% {
@@ -979,7 +1005,8 @@
 }
 
 @keyframes pulse-logo {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -988,20 +1015,21 @@
 }
 
 @keyframes fa-spin {
-  0% { 
-    transform: rotate(0deg); 
+  0% {
+    transform: rotate(0deg);
   }
-  100% { 
-    transform: rotate(360deg); 
+  100% {
+    transform: rotate(360deg);
   }
 }
 
 @keyframes float {
-  0%, 100% { 
-    transform: translateY(0px); 
+  0%,
+  100% {
+    transform: translateY(0px);
   }
-  50% { 
-    transform: translateY(-4px); 
+  50% {
+    transform: translateY(-4px);
   }
 }
 

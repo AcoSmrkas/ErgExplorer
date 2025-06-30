@@ -70,7 +70,7 @@ export function getAssetTitleParams(
 
   // Create icon HTML if we have an image source
   const iconHtml = imgSrc
-    ? `<img class="token-icon me-2" src="${imgSrc}" alt="${displayName}" />`
+    ? `<img class="token-icon me-2" src="${imgSrc}" alt="${displayName}" onerror="this.remove()" />`
     : "";
 
   // Return the complete link like the original

@@ -14,6 +14,7 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 	import AssetsList from '$lib/components/transaction/AssetsList.svelte';
 	import { getAssetTitleParams } from '$lib/utils/tokenIcons.js';
 	import { usePrices } from '$lib/composables/useAsyncData.js';
+	import { useTransaction } from '$lib/composables/useTransaction.js';
 	import { 
 		calculateFee, 
 		calculateBurnedAssets, 
@@ -28,15 +29,27 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
     import { tokenIconsStore } from '$lib/stores/tokenIconsStore.js';
 
 	export let data;
-	$: ({ transaction, txId } = data);
+	$: ({ transaction: initialTransaction, txId, initialStatus } = data);
+	
+	// Use transaction monitoring service for real-time updates
+	const { transaction: monitoredTransaction, isConfirmed, isUnconfirmed, getStatusText, getStatusType: getMonitoringStatusType, resolveInputBoxes } = useTransaction(data.txId);
+	
+	// Use monitored transaction data when available, fallback to initial data
+	$: transaction = $monitoredTransaction?.data || initialTransaction;
+	$: transactionStatus = $monitoredTransaction?.status || initialStatus;
+	
+	// If we have no initial transaction but monitoring found one, use that
+	$: if (!transaction && $monitoredTransaction?.data) {
+		transaction = $monitoredTransaction.data;
+	}
 	
 	// Use composable for price data
 	const { ergPrice, loadPrices } = usePrices();
 	
 	
 
-	// Shared table headers (identical for inputs and outputs)
-	const tableHeaders = [
+	// Base table headers
+	const baseTableHeaders = [
 		{ 
 			label: 'Index', 
 			field: 'index',
@@ -79,6 +92,27 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 		}
 	];
 
+	// Input headers (box links always enabled)
+	$: inputHeaders = baseTableHeaders;
+
+	// Output headers (box links disabled for unconfirmed transactions)
+	$: outputHeaders = baseTableHeaders.map(header => {
+		if (header.field === 'boxId') {
+			return {
+				...header,
+				componentProps: (row) => ({
+					boxId: row.boxId || "",
+					startChars: 16,
+					endChars: 4,
+					showCopy: true,
+					disabled: !txIsConfirmed,
+					disabledReason: !txIsConfirmed ? 'Output box will be created when transaction is confirmed' : undefined
+				})
+			};
+		}
+		return header;
+	});
+
 	onMount(async () => {
 		await loadPrices();
 	});
@@ -88,9 +122,27 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 	$: totalInputValue = calculateTotalInputValue(transaction);
 	$: totalOutputValue = calculateTotalOutputValue(transaction);
 	$: feeAmount = calculateFee(transaction);
-	$: isConfirmed = transaction?.inclusionHeight > 0;
+	$: txIsConfirmed = transactionStatus === 'confirmed' || transaction?.inclusionHeight > 0;
 	$: burnedAssets = calculateBurnedAssets(transaction);
-	$: infoText = getInfoText(transaction, isConfirmed);
+	$: infoText = getInfoText(transaction, txIsConfirmed);
+	
+	// Real-time status information
+	$: statusBadge = transactionStatus !== 'confirmed' ? { 
+		text: getStatusText($monitoredTransaction), 
+		type: getMonitoringStatusType($monitoredTransaction) 
+	} : null;
+	
+	// Check if transaction might be at risk of being dropped
+	$: isAtDropRisk = $monitoredTransaction?.retryCount > 0 && transactionStatus === 'unconfirmed';
+	
+
+	// Debug logging
+	$: if ($monitoredTransaction) {
+		console.log('Monitored transaction status:', $monitoredTransaction.status);
+		console.log('Transaction status:', transactionStatus);
+		console.log('Is confirmed:', txIsConfirmed);
+		console.log('Monitored data:', $monitoredTransaction);
+	}
 </script>
 
 <svelte:head>
@@ -98,7 +150,7 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 	<meta name="description" content="View transaction details, inputs, outputs, and fees for Ergo transaction {txId}">
 </svelte:head>
 
-{#if transaction}
+{#if transaction || $monitoredTransaction?.data}
 	<div class="container-fluid p-0">
 		<div class="row p-0">
 			<div class="col-12 p-0">
@@ -106,11 +158,47 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 					title="Transaction" 
 					icon="fa-exchange-alt" 
 					info={infoText}
-					timestamp={isConfirmed ? transaction?.timestamp : null}
-					statusBadge={!isConfirmed ? { text: 'Pending', type: 'warning' } : null}
+					timestamp={txIsConfirmed ? transaction?.timestamp : null}
+					statusBadge={statusBadge}
 				/>
 
 				<div class="container-fluid p-0">
+
+				<!-- Real-time monitoring indicator -->
+				{#if $monitoredTransaction && ($monitoredTransaction.status === 'unconfirmed' || !txIsConfirmed)}
+					<div class="monitoring-indicator mb-3">
+						<div class="glass-card p-2">
+							<div class="d-flex align-items-center justify-content-center">
+								<i class="fas fa-satellite-dish text-info me-2"></i>
+								<small class="text-muted">
+									Monitoring transaction status in real-time via {$monitoredTransaction.source}
+									{#if $monitoredTransaction.lastUpdate}
+										• Last update: {new Date($monitoredTransaction.lastUpdate).toLocaleTimeString()}
+									{/if}
+								</small>
+							</div>
+						</div>
+					</div>
+				{/if}
+
+				<!-- Drop risk warning -->
+				{#if isAtDropRisk}
+					<div class="drop-risk-warning mb-3">
+						<div class="glass-card p-3">
+							<div class="d-flex align-items-center">
+								<i class="fas fa-exclamation-triangle text-warning me-2"></i>
+								<div>
+									<div class="text-warning fw-bold">Transaction at risk</div>
+									<small class="text-muted">
+										This transaction has not been found in the mempool for {$monitoredTransaction?.retryCount || 0} check(s). 
+										It may be dropped after 2 failed checks.
+									</small>
+								</div>
+							</div>
+						</div>
+					</div>
+				{/if}
+
 
 				<!-- Transaction Summary - Hidden on mobile, shown after outputs -->
 				<div class="row mb-4 p-0 d-none d-md-block">
@@ -127,10 +215,9 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 										<TransactionDetailsSection 
 											{transaction} 
 											{txId} 
-											{isConfirmed} 
+											isConfirmed={txIsConfirmed} 
 											{feeAmount} 
-											{totalOutputValue} 
-											ergPrice={$ergPrice} 
+											{totalOutputValue}
 										/>
 									</div>
 								</div>
@@ -150,7 +237,7 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 						<!-- Desktop/Tablet Table View -->
 						<div class="d-none d-md-block">
 							<DataTable 
-								headers={tableHeaders} 
+								headers={inputHeaders} 
 								data={transaction.inputs} 
 								loading={false}
 								sortable={false}
@@ -183,7 +270,7 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 						<!-- Desktop/Tablet Table View -->
 						<div class="d-none d-md-block">
 							<DataTable 
-								headers={tableHeaders} 
+								headers={outputHeaders} 
 								data={transaction.outputs} 
 								loading={false}
 								sortable={false}
@@ -199,6 +286,7 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 									{getBoxStatus} 
 									{getStatusType} 
 									type="output"
+									disableBoxLink={!txIsConfirmed}
 								/>
 							{/each}
 						</div>
@@ -211,10 +299,9 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 						<TransactionDetailsSection 
 							{transaction} 
 							{txId} 
-							{isConfirmed} 
+							isConfirmed={txIsConfirmed} 
 							{feeAmount} 
 							{totalOutputValue} 
-							ergPrice={$ergPrice} 
 							mobile={true}
 						/>
 					</Card>
@@ -249,10 +336,49 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 		</div>
 	</div>
 </div>
-{:else}
+{:else if $monitoredTransaction?.status === 'error'}
 	<div class="text-center p-5">
 		<i class="fas fa-exclamation-triangle fa-3x text-muted mb-3"></i>
-		<p class="text-muted">Transaction not found</p>
+		<h4 class="text-muted mb-3">Transaction Not Found</h4>
+		<div class="mt-4">
+			<a href="/mempool" class="btn btn-outline-primary me-2">
+				<i class="fas fa-clock me-1"></i>Check Mempool
+			</a>
+			<a href="/" class="btn btn-outline-secondary">
+				<i class="fas fa-home me-1"></i>Go Home
+			</a>
+		</div>
+	</div>
+{:else if $monitoredTransaction?.status === 'dropped'}
+	<div class="text-center p-5">
+		<i class="fas fa-times-circle fa-3x text-warning mb-3"></i>
+		<h4 class="text-warning mb-3">Transaction Dropped</h4>
+		<p class="text-muted mb-3">
+			This transaction was in the mempool but has been dropped and is no longer pending confirmation.
+			{#if $monitoredTransaction.previousStatus}
+				<br><small class="text-light">Previous status: {$monitoredTransaction.previousStatus}</small>
+			{/if}
+		</p>
+		<div class="alert alert-warning mt-3">
+			<h6><i class="fas fa-info-circle me-2"></i>Common reasons for dropped transactions:</h6>
+			<ul class="text-start mb-0">
+				<li>Double-spend detected (another transaction spent the same inputs)</li>
+				<li>Transaction fee too low for current network conditions</li>
+				<li>Network congestion caused timeout</li>
+				<li>Invalid transaction format or data</li>
+			</ul>
+		</div>
+		<div class="mt-4">
+			<a href="/mempool" class="btn btn-outline-primary me-2">
+				<i class="fas fa-clock me-1"></i>Check Mempool
+			</a>
+			<button class="btn btn-outline-info me-2" onclick={() => window.location.reload()}>
+				<i class="fas fa-refresh me-1"></i>Retry Check
+			</button>
+			<a href="/" class="btn btn-outline-secondary">
+				<i class="fas fa-home me-1"></i>Go Home
+			</a>
+		</div>
 	</div>
 {/if}
 
@@ -343,17 +469,17 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 		border: 1px solid var(--glass-border-light);
 		border-radius: 8px;
 		padding: 1rem;
-		overflow-x: auto;
 		font-size: 0.8rem;
 		max-height: 400px;
 		overflow-y: auto;
 		margin: 0;
+		word-break: break-all;
 	}
 
 	.raw-data code {
 		color: #ffffff;
 		font-family: 'Courier New', Monaco, monospace;
-		white-space: pre;
+		white-space: pre-wrap;
 		background: transparent;
 	}
 
@@ -445,8 +571,32 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 			max-height: 200px;
 			padding: 0.5rem;
 		}
-		
-		
+	}
+
+	/* Monitoring indicator styles */
+	.monitoring-indicator {
+		animation: pulse-subtle 2s infinite;
+	}
+
+	@keyframes pulse-subtle {
+		0%, 100% { opacity: 1; }
+		50% { opacity: 0.7; }
+	}
+
+	/* Drop risk warning styles */
+	.drop-risk-warning {
+		animation: warning-pulse 3s infinite;
+	}
+
+	@keyframes warning-pulse {
+		0%, 100% { 
+			opacity: 1; 
+			transform: scale(1);
+		}
+		50% { 
+			opacity: 0.8; 
+			transform: scale(1.02);
+		}
 	}
 
 

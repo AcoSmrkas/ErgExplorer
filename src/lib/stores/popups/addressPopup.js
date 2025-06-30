@@ -1,18 +1,18 @@
 // Address popup using centralized popup system
-import { createPopupManager } from '../popupManager.js';
-import { getCachedAddressBalance } from '../addressCache.js';
+import { createPopupManager } from "../popupManager.js";
+import { getCachedAddressBalance } from "../addressCache.js";
 
 // Create address popup manager
 export const addressPopupManager = createPopupManager({
-  triggerSelector: '[data-address]',
-  popupClass: 'address-popup',
+  triggerSelector: "[data-address]",
+  popupClass: "address-popup",
   dataExtractor: (trigger) => trigger.dataset.address,
   dataLoader: getCachedAddressBalance,
   hideDelay: 150,
   initialState: {
-    address: '',
-    balance: null
-  }
+    address: "",
+    balance: null,
+  },
 });
 
 // Initialize the popup system

@@ -4,13 +4,13 @@
 	import { getAssetTitleParams } from '$lib/utils/tokenIcons.js';
 	import { addAddress, getOwner, addressBook } from '$lib/stores/addressBook.js';
 	import { currentPrices } from '$lib/stores/priceStore.js';
-	import { onMount } from 'svelte';
 	
 	export let address = '';
 	export let balance = null;
 	export let visible = false;
 	export let x = 0;
 	export let y = 0;
+	export let z = 1070;
 	export let loading = false;
 	
 	
@@ -80,6 +80,7 @@
 	{visible}
 	{x}
 	{y}
+	{z}
 	{loading}
 	popupClass="address-popup"
 	icon="fa-wallet"

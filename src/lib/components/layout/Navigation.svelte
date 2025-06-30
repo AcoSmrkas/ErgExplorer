@@ -113,7 +113,7 @@
 			
 			<!-- Desktop Right Navigation -->
 			<div id="rightNav" class="d-none d-lg-block"><span></span></div>
-			<ul class="navbar-nav ms-auto" style="position: absolute; right: 15px;">
+			<ul class="navbar-nav ms-auto d-none d-md-flex" style="position: absolute; right: 15px;">
 				<!-- Desktop Network Switcher -->
 				<li class="nav-item">
 					<div class="dropdown nav-link">

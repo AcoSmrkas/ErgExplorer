@@ -1,96 +1,210 @@
 <script>
 	import CopyButton from '$lib/components/ui/CopyButton.svelte';
-	import { formatErgValue, formatDateString, formatNumber, formatFileSize, formatPriceUSD, formatAddress } from '$lib/utils/formatting.js';
+	import BlockLink from '$lib/components/ui/BlockLink.svelte';
+	import { formatErgValue, formatDateString, formatNumber, formatFileSize, formatPriceUSD } from '$lib/utils/formatting.js';
+	import { ergPrice } from '$lib/stores/priceStore';
+    import { ERG_DECIMALS } from '$lib/utils/constants';
 
 	export let transaction;
 	export let txId;
 	export let isConfirmed;
 	export let feeAmount;
 	export let totalOutputValue;
-	export let ergPrice;
 	export let mobile = false;
 </script>
 
-<div class="detail-section">
-	<div class="detail-row">
-		<span class="detail-label">Transaction ID:</span>
-		<span class="detail-value">
-			<div class="tx-id-row">
-				<span class="font-monospace tx-id-text">{txId.slice(0, 8)}...{txId.slice(-4)}</span>
-				<CopyButton 
-					text={txId}
-					label="Copy"
-					successMessage="Transaction ID copied to clipboard!"
-					size="small"
-					inline={true}
-				/>
+<div class="detail-section" class:mobile>
+	{#if mobile}
+		<div class="detail-row">
+			<span class="detail-label">Transaction ID:</span>
+			<span class="detail-value">
+				<div class="tx-id-row">
+					<span class="font-monospace tx-id-text">{txId.slice(0, 8)}...{txId.slice(-4)}</span>
+					<CopyButton 
+						text={txId}
+						label="Copy"
+						successMessage="Transaction ID copied to clipboard!"
+						size="small"
+						inline={true}
+					/>
+				</div>
+			</span>
+		</div>
+		<div class="detail-row">
+			<span class="detail-label">Status:</span>
+			<span class="detail-value">
+				{#if isConfirmed}
+					<span class="status-badge confirmed">Confirmed</span>
+				{:else}
+					<span class="status-badge pending">Pending</span>
+				{/if}
+			</span>
+		</div>
+		<div class="detail-row">
+			<span class="detail-label">Size:</span>
+			<span class="detail-value">{formatFileSize(transaction.size)}</span>
+		</div>
+		<div class="detail-row">
+			<span class="detail-label">Received time:</span>
+			<span class="detail-value">{formatDateString(transaction.timestamp)}</span>
+		</div>
+		<div class="detail-row">
+			<span class="detail-label">Included in blocks:</span>
+			<span class="detail-value">
+				{#if transaction.inclusionHeight}
+					<BlockLink 
+						blockId={transaction.blockId}
+						blockHeight={transaction.inclusionHeight}
+						onlyHeight={true}
+						preferHeight={true}
+						showCopy={false}
+						linkClass="text-link"
+					/>
+				{:else}
+					<span class="text-muted">Pending</span>
+				{/if}
+			</span>
+		</div>
+		<div class="detail-row">
+			<span class="detail-label">Confirmations:</span>
+			<span class="detail-value">
+				{#if transaction.numConfirmations}
+					{formatNumber(transaction.numConfirmations)}
+				{:else}
+					<span class="text-warning">Pending</span>
+				{/if}
+			</span>
+		</div>
+		<div class="detail-row">
+			<span class="detail-label">Total coins transferred:</span>
+			<span class="detail-value">
+				{@html formatErgValue(totalOutputValue)}
+				{#if $ergPrice}
+					<small class="text-light">{formatPriceUSD(totalOutputValue, ERG_DECIMALS, $ergPrice.value)}</small>
+				{/if}
+			</span>
+		</div>
+		<div class="detail-row">
+			<span class="detail-label">Fees:</span>
+			<span class="detail-value">
+				{@html formatErgValue(feeAmount)}
+				{#if $ergPrice}
+					<small class="text-light">{formatPriceUSD(feeAmount, ERG_DECIMALS, $ergPrice.value)}</small>
+				{/if}
+			</span>
+		</div>
+		<div class="detail-row">
+			<span class="detail-label">Fees per byte:</span>
+			<span class="detail-value">{@html formatErgValue(feeAmount / (transaction.size || 1), 9)}</span>
+		</div>
+	{:else}
+		<div class="row">
+			<div class="col-md-6">
+				<div class="detail-column">
+					<div class="detail-row">
+						<span class="detail-label">Transaction ID:</span>
+						<span class="detail-value">
+							<div class="tx-id-row">
+								<span class="font-monospace tx-id-text">{txId.slice(0, 8)}...{txId.slice(-4)}</span>
+								<CopyButton 
+									text={txId}
+									label="Copy"
+									successMessage="Transaction ID copied to clipboard!"
+									size="small"
+									inline={true}
+								/>
+							</div>
+						</span>
+					</div>
+					<div class="detail-row">
+						<span class="detail-label">Status:</span>
+						<span class="detail-value">
+							{#if isConfirmed}
+								<span class="status-badge confirmed">Confirmed</span>
+							{:else}
+								<span class="status-badge pending">Pending</span>
+							{/if}
+						</span>
+					</div>
+					<div class="detail-row">
+						<span class="detail-label">Size:</span>
+						<span class="detail-value">{formatFileSize(transaction.size)}</span>
+					</div>
+					<div class="detail-row">
+						<span class="detail-label">Received time:</span>
+						<span class="detail-value">{formatDateString(transaction.timestamp)}</span>
+					</div>
+					<div class="detail-row">
+						<span class="detail-label">Included in blocks:</span>
+						<span class="detail-value">
+							{#if transaction.inclusionHeight}
+								<BlockLink 
+									blockId={transaction.blockId}
+									blockHeight={transaction.inclusionHeight}
+									onlyHeight={true}
+									preferHeight={true}
+									showCopy={false}
+									linkClass="text-link"
+								/>
+							{:else}
+								<span class="text-muted">Pending</span>
+							{/if}
+						</span>
+					</div>
+				</div>
 			</div>
-		</span>
-	</div>
-	<div class="detail-row">
-		<span class="detail-label">Status:</span>
-		<span class="detail-value">
-			{#if isConfirmed}
-				<span class="status-badge confirmed">Confirmed</span>
-			{:else}
-				<span class="status-badge pending">Pending</span>
-			{/if}
-		</span>
-	</div>
-	<div class="detail-row">
-		<span class="detail-label">Size:</span>
-		<span class="detail-value">{formatFileSize(transaction.size)}</span>
-	</div>
-	<div class="detail-row">
-		<span class="detail-label">Received time:</span>
-		<span class="detail-value">{formatDateString(transaction.timestamp)}</span>
-	</div>
-	<div class="detail-row">
-		<span class="detail-label">Included in blocks:</span>
-		<span class="detail-value">
-			{#if transaction.inclusionHeight}
-				<a href="/blocks/{transaction.inclusionHeight}" class="text-link">{formatNumber(transaction.inclusionHeight)}</a>
-			{:else}
-				<span class="text-muted">Pending</span>
-			{/if}
-		</span>
-	</div>
-	<div class="detail-row">
-		<span class="detail-label">Confirmations:</span>
-		<span class="detail-value">
-			{#if transaction.numConfirmations}
-				{formatNumber(transaction.numConfirmations)}
-			{:else}
-				<span class="text-warning">Pending</span>
-			{/if}
-		</span>
-	</div>
-	<div class="detail-row">
-		<span class="detail-label">Total coins transferred:</span>
-		<span class="detail-value">
-			{@html formatErgValue(totalOutputValue)}
-			{#if ergPrice}
-				<br><small class="text-light">({formatPriceUSD(totalOutputValue, ergPrice)})</small>
-			{/if}
-		</span>
-	</div>
-	<div class="detail-row">
-		<span class="detail-label">Fees:</span>
-		<span class="detail-value">
-			{@html formatErgValue(feeAmount)}
-			{#if ergPrice}
-				<br><small class="text-light">({formatPriceUSD(feeAmount, ergPrice)})</small>
-			{/if}
-		</span>
-	</div>
-	<div class="detail-row">
-		<span class="detail-label">Fees per byte:</span>
-		<span class="detail-value">{@html formatErgValue(feeAmount / (transaction.size || 1), 9)}</span>
-	</div>
+			<div class="col-md-6">
+				<div class="detail-column">
+					<div class="detail-row">
+						<span class="detail-label">Confirmations:</span>
+						<span class="detail-value">
+							{#if transaction.numConfirmations}
+								{formatNumber(transaction.numConfirmations)}
+							{:else}
+								<span class="text-warning">Pending</span>
+							{/if}
+						</span>
+					</div>
+					<div class="detail-row">
+						<span class="detail-label">Total coins transferred:</span>
+						<span class="detail-value">
+							{@html formatErgValue(totalOutputValue)}
+							{#if $ergPrice}
+								<small class="text-light">{formatPriceUSD(totalOutputValue, ERG_DECIMALS, $ergPrice.value)}</small>
+							{/if}
+						</span>
+					</div>
+					<div class="detail-row">
+						<span class="detail-label">Fees:</span>
+						<span class="detail-value">
+							{@html formatErgValue(feeAmount)}
+							{#if $ergPrice}
+								<small class="text-light">{formatPriceUSD(feeAmount, ERG_DECIMALS, $ergPrice.value)}</small>
+							{/if}
+						</span>
+					</div>
+					<div class="detail-row">
+						<span class="detail-label">Fees per byte:</span>
+						<span class="detail-value">{@html formatErgValue(feeAmount / (transaction.size || 1), 9)}</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	{/if}
 </div>
 
 <style>
 	.detail-section {
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+	}
+
+	.detail-section:not(.mobile) {
+		display: block;
+	}
+
+	.detail-column {
 		display: flex;
 		flex-direction: column;
 		gap: 0;

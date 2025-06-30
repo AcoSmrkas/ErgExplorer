@@ -1,18 +1,18 @@
 // Box popup using centralized popup system
-import { createPopupManager } from '../popupManager.js';
-import { getCachedBoxData } from '../boxCache.js';
+import { createPopupManager } from "../popupManager.js";
+import { getCachedBoxData } from "../boxCache.js";
 
 // Create box popup manager
 export const boxPopupManager = createPopupManager({
-  triggerSelector: '[data-box-id]',
-  popupClass: 'box-popup',
+  triggerSelector: "[data-box-id]",
+  popupClass: "box-popup",
   dataExtractor: (trigger) => trigger.dataset.boxId,
   dataLoader: getCachedBoxData,
   hideDelay: 150,
   initialState: {
-    boxId: '',
-    boxData: null
-  }
+    boxId: "",
+    boxData: null,
+  },
 });
 
 // Initialize the popup system

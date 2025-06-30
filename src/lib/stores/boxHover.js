@@ -56,7 +56,7 @@ export async function handleBoxHover(event) {
       });
     } catch (error) {
       console.warn("Failed to load box data:", error);
-      
+
       // Update loading state even on error
       boxPopupState.update((state) => {
         if (state.boxId === boxId && state.visible) {
@@ -86,5 +86,5 @@ export function handleBoxHoverOut(event) {
 }
 
 // Note: Auto-initialization removed - now using centralized popup system
-// This file is kept for compatibility but the initialization is handled by 
+// This file is kept for compatibility but the initialization is handled by
 // the centralized popup manager in /lib/stores/popups/boxPopup.js

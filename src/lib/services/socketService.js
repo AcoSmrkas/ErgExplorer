@@ -98,9 +98,11 @@ class SocketService {
   // Find specific transaction in mempool
   findTransaction(txId) {
     let transaction = null;
-    this.mempoolTransactions.subscribe((transactions) => {
+    const unsubscribe = this.mempoolTransactions.subscribe((transactions) => {
       transaction = transactions.find((tx) => tx.id === txId);
-    })();
+    });
+    // Immediately unsubscribe since we only want current value
+    unsubscribe();
     return transaction;
   }
 

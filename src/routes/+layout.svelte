@@ -43,6 +43,24 @@
 		if (data.tokenIcons) {
 			initializeTokenIcons(data.tokenIcons);
 		}
+		
+		// Track initial page view
+		if (typeof gtag !== 'undefined') {
+			gtag('event', 'page_view', {
+				page_title: document.title,
+				page_location: window.location.href
+			});
+		}
+	});
+	
+	// Track page changes for SvelteKit navigation
+	$effect(() => {
+		if (typeof gtag !== 'undefined' && $page.url) {
+			gtag('event', 'page_view', {
+				page_title: document.title,
+				page_location: $page.url.href
+			});
+		}
 	});
 	
 	// Subscribe to centralized popup states
@@ -237,7 +255,11 @@
 		window.dataLayer = window.dataLayer || [];
 		function gtag(){dataLayer.push(arguments);}
 		gtag('js', new Date());
-		gtag('config', 'G-84SMBQLNNF');
+		gtag('config', 'G-84SMBQLNNF', {
+			page_title: document.title,
+			page_location: window.location.href,
+			send_page_view: false
+		});
 	</script>
 </svelte:head>
 
@@ -264,6 +286,7 @@
 	visible={tokenPopup.visible}
 	x={tokenPopup.x}
 	y={tokenPopup.y}
+	z={1080}
 	token={tokenPopup.data}
 	tokenId={tokenPopup.id}
 	name={tokenPopup.tokenName || ''}
@@ -279,7 +302,6 @@
 	balance={addressPopup.data}
 	loading={addressPopup.loading}
 />
-
 
 <BlockPopup 
 	visible={blockPopup.visible}

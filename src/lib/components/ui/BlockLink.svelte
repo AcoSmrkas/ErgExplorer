@@ -10,20 +10,21 @@
 	export let showCopy = true; // Whether to show copy button
 	export let linkClass = 'block-link'; // CSS class for the link
 	export let preferHeight = false; // Show height instead of ID when both available
+	export let onlyHeight = false;
 	
 	// Determine what to display and what URL to use
 	$: {
 		if (preferHeight && blockHeight !== null) {
-			displayText = name || `Block #${formatNumber(blockHeight)}`;
-			blockUrl = `/blocks/${blockHeight}`;
+			displayText = name || `${onlyHeight === true ? '' : 'Block #'}${formatNumber(blockHeight)}`;
+			blockUrl = `/blocks/${blockId}`;
 			copyText = blockHeight.toString();
 		} else if (blockId) {
 			displayText = name || formatAddress(blockId, startChars, endChars);
 			blockUrl = `/blocks/${blockId}`;
 			copyText = blockId;
 		} else if (blockHeight !== null) {
-			displayText = name || `Block #${formatNumber(blockHeight)}`;
-			blockUrl = `/blocks/${blockHeight}`;
+			displayText = name || `${onlyHeight === true ? '' : 'Block #'}${formatNumber(blockHeight)}`;
+			blockUrl = `/blocks/${blockId}`;
 			copyText = blockHeight.toString();
 		} else {
 			displayText = 'Unknown Block';

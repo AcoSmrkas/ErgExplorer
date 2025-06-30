@@ -50,7 +50,7 @@
 
 	function getAssetUsdAmount(asset) {
 		const usdAmount = formatPriceUSD(asset.amount, asset.decimals, $currentPrices[asset.tokenId]);
-		return usdAmount === '($0.00)' ? '' : usdAmount;
+		return usdAmount === '' ? '' : usdAmount;
 	}
 </script>
 
@@ -64,7 +64,7 @@
 					{@html getAssetTitleParams(null, asset.tokenId, asset.name, true)}
 				</div>
 				<div class="asset-amount">
-					{getAssetAmount(asset)}
+					{@html getAssetAmount(asset)}
 					{#if getAssetUsdAmount(asset)}
 						<span class="text-light">{getAssetUsdAmount(asset)}</span>
 					{/if}

@@ -10,6 +10,7 @@
 	export let visible = false;
 	export let x = 0;
 	export let y = 0;
+	export let z = 1070;
 	export let loading = false;
 	
 	$: displayName = token?.name || name || (tokenId ? tokenId.substring(0, 15) + (tokenId.length > 15 ? '...' : '') : 'Unknown Token');
@@ -23,6 +24,7 @@
 	{visible}
 	{x}
 	{y}
+	{z}
 	{loading}
 	popupClass="token-popup"
 	icon={tokenIcon ? '' : 'fa-coins'}

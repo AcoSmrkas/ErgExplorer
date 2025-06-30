@@ -10,13 +10,22 @@
 	export let getBoxStatus;
 	export let getStatusType;
 	export let type = 'input'; // 'input' or 'output'
+	export let disableBoxLink = false; // Whether to disable box link (for unconfirmed outputs)
 </script>
 
 <div class="mobile-item-card" style="background: {index % 2 === 0 ? 'var(--striped-1)' : 'var(--striped-2)'}">
 	<div class="mobile-item-header">
 		<span class="mobile-item-index">#{index}</span>
 		<div class="mobile-box-info">
-			<BoxLink boxId={item.boxId} startChars={8} endChars={4} showCopy={true} linkClass="mobile-box-link" />
+			<BoxLink 
+				boxId={item.boxId} 
+				startChars={8} 
+				endChars={4} 
+				showCopy={true} 
+				linkClass="mobile-box-link"
+				disabled={disableBoxLink}
+				disabledReason={disableBoxLink ? 'Output box will be created when transaction is confirmed' : undefined}
+			/>
 			<StatusBadge text={getBoxStatus(item)} type={getStatusType(item)} size="small" />
 		</div>
 	</div>
@@ -41,11 +50,15 @@
 </div>
 
 <style>
+	:global(.card) {
+		background-color: var(--glass-bg-subtle);
+	}
+
 	.mobile-item-card {
 		background: var(--glass-bg-subtle);
 		border: none;
 		border-radius: 0;
-		padding: 0.75rem 0;
+		padding: 1rem 0;
 		margin: 0;
 	}
 
@@ -61,7 +74,7 @@
 	.mobile-item-index {
 		font-size: 0.75rem;
 		font-weight: 600;
-		color: var(--text-light);
+		color: var(--main-color);
 	}
 
 	.mobile-box-info {

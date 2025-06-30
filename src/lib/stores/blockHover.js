@@ -49,9 +49,9 @@ export function initializeGlobalBlockHover() {
         if (
           !relatedTarget ||
           (!link.contains(relatedTarget) &&
-            (!relatedTarget.closest || 
-             (!relatedTarget.closest(".block-popup") &&
-              !relatedTarget.closest("[data-block-id]"))))
+            (!relatedTarget.closest ||
+              (!relatedTarget.closest(".block-popup") &&
+                !relatedTarget.closest("[data-block-id]"))))
         ) {
           hideBlockPopup();
         }

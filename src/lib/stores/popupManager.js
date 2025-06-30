@@ -1,5 +1,5 @@
 // Centralized popup management system
-import { writable } from 'svelte/store';
+import { writable } from "svelte/store";
 
 /**
  * Creates a popup management system with hover behavior
@@ -17,7 +17,7 @@ export function createPopupManager(config) {
     popupClass,
     dataExtractor,
     dataLoader,
-    hideDelay = 150
+    hideDelay = 150,
   } = config;
 
   // Create popup state store
@@ -27,8 +27,8 @@ export function createPopupManager(config) {
     y: 0,
     loading: false,
     data: null,
-    id: '',
-    ...config.initialState
+    id: "",
+    ...config.initialState,
   };
 
   const popupState = writable(initialState);
@@ -57,34 +57,34 @@ export function createPopupManager(config) {
       y,
       id,
       loading: true,
-      ...extractedData
+      ...extractedData,
     });
 
     // Load additional data if provided
     if (dataLoader && id) {
       try {
         const additionalData = await dataLoader(id);
-        
+
         // Only update if we're still showing the same popup
-        popupState.update(state => {
+        popupState.update((state) => {
           if (state.id === id && state.visible) {
             return {
               ...state,
               data: additionalData,
-              loading: false
+              loading: false,
             };
           }
           return state;
         });
       } catch (error) {
         // Silently handle data loading errors
-        
+
         // Update loading state even on error
-        popupState.update(state => {
+        popupState.update((state) => {
           if (state.id === id && state.visible) {
             return {
               ...state,
-              loading: false
+              loading: false,
             };
           }
           return state;
@@ -92,9 +92,9 @@ export function createPopupManager(config) {
       }
     } else {
       // No data loader, just remove loading state
-      popupState.update(state => ({
+      popupState.update((state) => ({
         ...state,
-        loading: false
+        loading: false,
       }));
     }
   }
@@ -104,7 +104,7 @@ export function createPopupManager(config) {
     if (hoverTimeout) {
       clearTimeout(hoverTimeout);
     }
-    
+
     hoverTimeout = setTimeout(() => {
       popupState.set(initialState);
       currentId = null;
@@ -121,24 +121,28 @@ export function createPopupManager(config) {
 
   // Initialize global event listeners
   function initialize() {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     // Mouse over handler for trigger elements and popup
-    document.addEventListener('mouseover', async (event) => {
-      if (event.target && typeof event.target.closest === 'function') {
+    document.addEventListener("mouseover", async (event) => {
+      if (event.target && typeof event.target.closest === "function") {
         const trigger = event.target.closest(triggerSelector);
         if (trigger) {
           // Clear any existing timeout when hovering over trigger
           cancelHide();
-          
-          const id = dataExtractor ? dataExtractor(trigger) : trigger.dataset.id;
-          const extractedData = config.extractAdditionalData ? config.extractAdditionalData(trigger) : {};
-          
+
+          const id = dataExtractor
+            ? dataExtractor(trigger)
+            : trigger.dataset.id;
+          const extractedData = config.extractAdditionalData
+            ? config.extractAdditionalData(trigger)
+            : {};
+
           if (id) {
             await showPopup(event, id, extractedData);
           }
         }
-        
+
         // Also handle hovering over the popup itself
         const popup = event.target.closest(`.${popupClass}`);
         if (popup) {
@@ -148,26 +152,31 @@ export function createPopupManager(config) {
     });
 
     // Mouse out handler
-    document.addEventListener('mouseout', (event) => {
-      if (event.target && typeof event.target.closest === 'function') {
+    document.addEventListener("mouseout", (event) => {
+      if (event.target && typeof event.target.closest === "function") {
         const trigger = event.target.closest(triggerSelector);
         const popup = event.target.closest(`.${popupClass}`);
-        
+
         if (trigger || popup) {
           const relatedTarget = event.relatedTarget;
-          
+
           // Don't hide if moving to popup, staying within trigger, or moving to another trigger
           if (relatedTarget) {
             const movingToPopup = relatedTarget.closest(`.${popupClass}`);
             const movingToTrigger = relatedTarget.closest(triggerSelector);
             const stayingInTrigger = trigger && trigger.contains(relatedTarget);
             const stayingInPopup = popup && popup.contains(relatedTarget);
-            
-            if (movingToPopup || movingToTrigger || stayingInTrigger || stayingInPopup) {
+
+            if (
+              movingToPopup ||
+              movingToTrigger ||
+              stayingInTrigger ||
+              stayingInPopup
+            ) {
               return; // Don't hide popup
             }
           }
-          
+
           // Hide popup with delay
           hidePopup();
         }
@@ -180,7 +189,7 @@ export function createPopupManager(config) {
     showPopup,
     hidePopup,
     cancelHide,
-    initialize
+    initialize,
   };
 }
 

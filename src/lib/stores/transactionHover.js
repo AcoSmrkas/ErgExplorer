@@ -109,7 +109,7 @@ export function initializeGlobalTransactionHover() {
           showTransactionPopup(transactionId, event);
         }
       }
-      
+
       // Also handle hovering over the popup itself
       const popup = event.target.closest(".transaction-popup");
       if (popup) {
@@ -124,22 +124,29 @@ export function initializeGlobalTransactionHover() {
     if (event.target && typeof event.target.closest === "function") {
       const link = event.target.closest("[data-transaction-hover]");
       const popup = event.target.closest(".transaction-popup");
-      
+
       if (link || popup) {
         const relatedTarget = event.relatedTarget;
-        
+
         // Don't hide if moving to popup, staying within link, or moving to another transaction link
         if (relatedTarget) {
           const movingToPopup = relatedTarget.closest(".transaction-popup");
-          const movingToTransactionLink = relatedTarget.closest("[data-transaction-hover]");
+          const movingToTransactionLink = relatedTarget.closest(
+            "[data-transaction-hover]",
+          );
           const stayingInLink = link && link.contains(relatedTarget);
           const stayingInPopup = popup && popup.contains(relatedTarget);
-          
-          if (movingToPopup || movingToTransactionLink || stayingInLink || stayingInPopup) {
+
+          if (
+            movingToPopup ||
+            movingToTransactionLink ||
+            stayingInLink ||
+            stayingInPopup
+          ) {
             return; // Don't hide popup
           }
         }
-        
+
         // Hide popup with delay
         hideTransactionPopup();
       }

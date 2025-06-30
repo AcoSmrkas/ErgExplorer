@@ -4,7 +4,7 @@
   --main-color: #fb5c16;
   --main-color-hover: #ff8418;
   --main-color-rgb: 251, 92, 22;
-  
+
   /* Enhanced color system */
   --color-primary: var(--main-color);
   --color-primary-hover: var(--main-color-hover);
@@ -13,7 +13,7 @@
   --color-warning: #ffc107;
   --color-danger: #dc3545;
   --color-info: #17a2b8;
-  
+
   /* Info/blue color for transaction chains and info elements */
   --info-color: #17a2b8;
 

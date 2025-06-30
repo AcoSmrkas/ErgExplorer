@@ -108,7 +108,7 @@ export function initializeGlobalAddressHover() {
           (!link.contains(relatedTarget) &&
             (!relatedTarget.closest ||
               (!relatedTarget.closest(".address-popup") &&
-               !relatedTarget.closest("[data-address]"))))
+                !relatedTarget.closest("[data-address]"))))
         ) {
           hideAddressPopup();
         }

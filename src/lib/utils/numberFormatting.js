@@ -40,11 +40,11 @@ export function nFormatter(
     minimumFractionDigits = digits;
   }
 
-  let split = num.toString().split['.'];
+  let split = num.toString().split["."];
   if (split?.length == 2) {
     let allZero = true;
     for (let i = 0; i < split[1].length; i++) {
-      if (split[1][i] !== '0') {
+      if (split[1][i] !== "0") {
         allZero = false;
         break;
       }
@@ -121,7 +121,7 @@ export function formatValue(
   digits = 2,
   autodigits = false,
   same = false,
-  noLetter = false
+  noLetter = false,
 ) {
   if (value == null || isNaN(value)) return "—";
 
