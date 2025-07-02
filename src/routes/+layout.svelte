@@ -150,9 +150,6 @@
 				loading: state.loading,
 				zIndex: state.zIndex || 1070
 			};
-			if (state.visible) {
-				console.log(`[LAYOUT] Block popup state updated - zIndex: ${blockPopup.zIndex}, visible: ${state.visible}`);
-			}
 		});
 		const unsubTransaction = transactionPopupState.subscribe(state => {
 			transactionPopup = { 

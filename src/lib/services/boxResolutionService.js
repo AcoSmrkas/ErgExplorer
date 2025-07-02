@@ -26,8 +26,6 @@ class BoxResolutionService {
   processTransactionData(transaction) {
     if (!transaction) return transaction;
 
-    console.log("Processing transaction data for address conversion");
-
     // Process inputs - convert ergotrees to addresses if needed
     const processedInputs =
       transaction.inputs?.map((input) => {
@@ -35,13 +33,6 @@ class BoxResolutionService {
         const convertedAddress = hasErgoTree
           ? formatAddress(input.ergoTree)
           : input.address;
-
-        if (hasErgoTree) {
-          console.log(
-            "Converted input ergotree to address:",
-            input.ergoTree.substring(0, 20) + "... → " + convertedAddress,
-          );
-        }
 
         return {
           ...input,
@@ -57,13 +48,6 @@ class BoxResolutionService {
           ? formatAddress(output.ergoTree)
           : output.address;
 
-        if (hasErgoTree) {
-          console.log(
-            "Converted output ergotree to address:",
-            output.ergoTree.substring(0, 20) + "... → " + convertedAddress,
-          );
-        }
-
         return {
           ...output,
           address: convertedAddress || "",
@@ -76,7 +60,6 @@ class BoxResolutionService {
       outputs: processedOutputs,
     };
 
-    console.log("Address conversion completed");
     return processedTransaction;
   }
 
@@ -90,12 +73,6 @@ class BoxResolutionService {
     if (!transaction?.inputs) return transaction;
 
     const { prioritizeSocket = false, maxConcurrency = 10 } = options;
-
-    console.log(
-      "Starting input box resolution for",
-      transaction.inputs.length,
-      "inputs",
-    );
     const startTime = Date.now();
 
     // Separate inputs that need resolution vs those that don't
@@ -116,10 +93,6 @@ class BoxResolutionService {
       }
     });
 
-    console.log(
-      `${inputsWithAssets.length} inputs already have assets, ${inputsNeedingResolution.length} need resolution`,
-    );
-
     if (inputsNeedingResolution.length === 0) {
       return transaction; // No resolution needed
     }
@@ -130,24 +103,15 @@ class BoxResolutionService {
     // Try socket first for potential chained transactions
     const socketBoxes = new Map();
     if (this.socketService && prioritizeSocket) {
-      console.log("Checking socket for chained transactions...");
-
       inputsNeedingResolution.forEach(({ input, index }) => {
         const boxId = input.boxId || input.id;
         if (boxId) {
           const socketBox = this._findBoxInSocketTransactions(boxId);
           if (socketBox && socketBox.assets) {
-            console.log(
-              `Found input ${index} in socket with ${socketBox.assets.length} assets`,
-            );
             socketBoxes.set(index, socketBox);
           }
         }
       });
-
-      console.log(
-        `Socket resolved ${socketBoxes.size} inputs from chained transactions`,
-      );
 
       // Apply socket resolutions
       socketBoxes.forEach((socketBox, index) => {
@@ -168,19 +132,11 @@ class BoxResolutionService {
 
     if (needingApiResolution.length === 0) {
       const elapsedTime = Date.now() - startTime;
-      console.log(
-        `Input box resolution completed in ${elapsedTime}ms (socket only)`,
-      );
       return {
         ...transaction,
         inputs: resolvedInputs,
       };
     }
-
-    // Fetch remaining inputs from API in parallel with controlled concurrency
-    console.log(
-      `Fetching ${needingApiResolution.length} inputs from boxes API in parallel...`,
-    );
 
     await this._resolveInputsInBatches(
       needingApiResolution,
@@ -189,7 +145,6 @@ class BoxResolutionService {
     );
 
     const elapsedTime = Date.now() - startTime;
-    console.log(`Input box resolution completed in ${elapsedTime}ms`);
 
     return {
       ...transaction,
@@ -212,16 +167,11 @@ class BoxResolutionService {
         try {
           const boxId = input.boxId || input.id;
           if (!boxId) {
-            console.warn(`Input ${index} has no valid boxId/id`);
             return { index, resolved: false };
           }
 
-          console.log(`Fetching box ${boxId} for input ${index}`);
           const boxData = await getBox(boxId);
           if (boxData) {
-            console.log(
-              `API resolved input ${index} with ${boxData.assets?.length || 0} assets`,
-            );
             resolvedInputs[index] = {
               ...input,
               boxId: boxId,
@@ -233,10 +183,6 @@ class BoxResolutionService {
           }
         } catch (error) {
           const boxId = input.boxId || input.id;
-          console.warn(
-            `Failed to fetch box ${boxId} for input ${index}:`,
-            error.message,
-          );
         }
         return { index, resolved: false };
       });

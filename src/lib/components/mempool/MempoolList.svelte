@@ -75,15 +75,6 @@
 		border: none !important;
 	}
 
-	.custom-table-wrapper :global(.glass-table tbody tr) {
-		border-bottom: 1px solid var(--glass-border-light) !important;
-	}
-
-	.custom-table-wrapper :global(.glass-table tbody tr:last-child) {
-		border-bottom: none !important;
-	}
-
-
 	/* Mobile Card View Styling */
 	.mobile-view {
 		min-height: 200px;

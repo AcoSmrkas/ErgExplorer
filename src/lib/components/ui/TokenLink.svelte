@@ -1,7 +1,7 @@
 <script>
 	import CopyButton from './CopyButton.svelte';
+	import TokenIcon from './TokenIcon.svelte';
 	import { formatAddress } from '$lib/utils/formatting.js';
-	import { getAssetTitleParams } from '$lib/utils/tokenIcons.js';
 	
 	export let tokenId = '';
 	export let tokenName = ''; // Token name if available
@@ -12,6 +12,7 @@
 	export let linkClass = 'token-link'; // CSS class for the link
 	export let showIcon = true; // Whether to show token icon
 	export let disablePopup = false; // Whether to disable token popup activation
+	export let scam = false; // Whether token is marked as scam
 	
 	// Format the display text - priority: name prop, then token name, then formatted tokenId
 	$: displayText = name || tokenName || (tokenId ? 
@@ -19,25 +20,21 @@
 	
 	$: tokenUrl = `/tokens/${tokenId}`;
 	
-	// Get token icon/title params if showing icon
-	$: tokenDisplay = showIcon && tokenId ? 
-		getAssetTitleParams(null, tokenId, tokenName, true) : 
-		displayText;
-	
 </script>
 
 {#if tokenId}
 	<span class="token-link-wrapper">
 		<a 
-			class={linkClass} 
+			class="{linkClass} {scam ? 'text-danger' : ''}" 
 			href={tokenUrl} 
 			data-token-id={disablePopup ? null : tokenId}
+			data-token-name={displayText}
+			title={scam ? "Reported as suspicious by users." : ""}
 		>
 			{#if showIcon}
-				{@html tokenDisplay}
-			{:else}
-				{displayText}
+				<TokenIcon {tokenId} name={tokenName} />
 			{/if}
+			{displayText}
 		</a>
 		{#if showCopy}
 			<CopyButton 

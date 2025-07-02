@@ -483,22 +483,6 @@
 		50% { opacity: 0.7; }
 	}
 
-	/* Drop risk warning styles */
-	.drop-risk-warning {
-		animation: warning-pulse 3s infinite;
-	}
-
-	@keyframes warning-pulse {
-		0%, 100% { 
-			opacity: 1; 
-			transform: scale(1);
-		}
-		50% { 
-			opacity: 0.8; 
-			transform: scale(1.02);
-		}
-	}
-
 	/* Inputs & Outputs Layout */
 	.inputs-outputs-container {
 		margin-bottom: 0rem;

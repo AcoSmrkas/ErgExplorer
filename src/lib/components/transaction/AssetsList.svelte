@@ -1,14 +1,12 @@
 <script>
-	import { getAssetTitleParams } from '$lib/utils/tokenIcons.js';
+	import { hasTokenIcon } from '$lib/stores/tokenIconsStore.js';
 	import { formatValue } from '$lib/utils/numberFormatting.js';
 	import { formatPriceUSD } from '$lib/utils/formatting.js';
 	import { currentPrices } from '$lib/stores/priceStore.js';
 	import { tokenIconsStore } from '$lib/stores/tokenIconsStore.js';
+	import TokenLink from '$lib/components/ui/TokenLink.svelte';
 
 	export let assets = [];
-
-	// Reactive dependency on token icons store to trigger re-render when icons are loaded
-	$: $tokenIconsStore && sortedAssets;
 
 	// Sort assets by priority: 1) USD value (if exists), 2) has token icon, 3) alphabetically
 	$: sortedAssets = assets?.length > 0 ? [...assets].sort((a, b) => {
@@ -29,10 +27,8 @@
 		}
 		
 		// If both have no USD value, check for token icons
-		const titleA = getAssetTitleParams(null, a.tokenId, a.name, true);
-		const titleB = getAssetTitleParams(null, b.tokenId, b.name, true);
-		const hasIconA = titleA.includes('<img') || titleA.includes('token-icon');
-		const hasIconB = titleB.includes('<img') || titleB.includes('token-icon');
+		const hasIconA = hasTokenIcon(a.tokenId);
+		const hasIconB = hasTokenIcon(b.tokenId);
 		
 		if (hasIconA && !hasIconB) {
 			return -1;
@@ -61,7 +57,13 @@
 		{#each sortedAssets as asset (asset.tokenId)}
 			<div class="asset-item">
 				<div class="asset-info">
-					{@html getAssetTitleParams(null, asset.tokenId, asset.name, true)}
+					<TokenLink 
+						tokenId={asset.tokenId} 
+						tokenName={asset.name}
+						showCopy={false}
+						linkClass="token-link"
+						showIcon={true}
+					/>
 				</div>
 				<div class="asset-amount">
 					{@html getAssetAmount(asset)}

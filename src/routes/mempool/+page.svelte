@@ -9,11 +9,15 @@
 	import MempoolList from '$lib/components/mempool/MempoolList.svelte';
 	import { getMempool } from '$lib/utils/api.js';
 	import { createPaginationHandler } from '$lib/utils/usePagination.js';
-	import { FEE_ERGOTREE, ERG_DECIMALS } from '$lib/utils/constants.js';
+	import { FEE_ERGOTREE, ERG_DECIMALS, FEE_ADDRESS } from '$lib/utils/constants.js';
 	import { formatErgValue, formatFileSize, formatNumber, formatPriceUSD, formatAddress } from '$lib/utils/formatting.js';
 	import { ergPrice } from '$lib/stores/priceStore.js';
 	import { socketService } from '$lib/services/socketService.js';
 import { boxResolutionService } from '$lib/services/boxResolutionService.js';
+	import { addressBook } from '$lib/stores/addressBook.js';
+	import MempoolTransactionPopup from '$lib/components/mempool/MempoolTransactionPopup.svelte';
+	import { extractAddresses, generateAddressBadges, getKnownAddresses } from '$lib/utils/mempoolBadges.js';
+    import { getAssetTitleParams } from '$lib/utils/tokenIcons';
 
 	let transactions = [];
 	let groupedTransactions = [];
@@ -28,6 +32,22 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 	let showInfoCard = true;
 	let lastUpdate = null;
 	let resolvedTransactions = [];
+	let currentAddressBook = [];
+
+	// Local popup state for mempool transactions
+	let transactionPopup = {
+		visible: false,
+		x: 0,
+		y: 0,
+		transaction: null,
+		transactionId: ''
+	};
+	let hideTimeout = null;
+
+	// Subscribe to address book updates
+	addressBook.subscribe(value => {
+		currentAddressBook = value;
+	});
 
 	// Load dismissed state from localStorage
 	if (browser) {
@@ -58,32 +78,71 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 	// Function to detect and group conflicting transactions
 	function groupConflictingTransactions(txs) {
 		const boxToTxMap = new Map();
-		const conflicts = new Map();
+		const txToBoxMap = new Map();
 
-		// Build map of boxId to transactions that try to spend it
+		// Build maps of boxId to transactions and transactions to boxes
 		txs.forEach(tx => {
+			const txBoxes = [];
 			tx.inputs?.forEach(input => {
 				if (!boxToTxMap.has(input.boxId)) {
 					boxToTxMap.set(input.boxId, []);
 				}
-				boxToTxMap.get(input.boxId).push(tx);
+				boxToTxMap.get(input.boxId).push(tx.id);
+				txBoxes.push(input.boxId);
 			});
+			if (txBoxes.length > 0) {
+				txToBoxMap.set(tx.id, txBoxes);
+			}
 		});
 
-		// Find conflicts (same box spent by multiple transactions)
+		// Find transactions that conflict (share at least one input box)
+		const conflictGroups = new Map();
+		const processedTxs = new Set();
 		let conflictGroupId = 1;
-		for (const [boxId, spendingTxs] of boxToTxMap) {
-			if (spendingTxs.length > 1) {
-				// Multiple transactions trying to spend same box - assign same group ID
-				spendingTxs.forEach(tx => {
-					if (!conflicts.has(tx.id)) {
-						conflicts.set(tx.id, { 
-							groupId: conflictGroupId, 
-							conflictingBoxes: [],
-							conflictCount: spendingTxs.length
-						});
-					}
-					conflicts.get(tx.id).conflictingBoxes.push(boxId);
+
+		for (const [txId, boxes] of txToBoxMap) {
+			if (processedTxs.has(txId)) continue;
+
+			// Find all transactions that conflict with this one
+			const conflictingTxs = new Set([txId]);
+			const toProcess = [txId];
+
+			while (toProcess.length > 0) {
+				const currentTx = toProcess.pop();
+				const currentBoxes = txToBoxMap.get(currentTx) || [];
+
+				// For each box this transaction spends, find other transactions that spend it
+				currentBoxes.forEach(boxId => {
+					const spendingTxs = boxToTxMap.get(boxId) || [];
+					spendingTxs.forEach(spendingTxId => {
+						if (!conflictingTxs.has(spendingTxId)) {
+							conflictingTxs.add(spendingTxId);
+							toProcess.push(spendingTxId);
+						}
+					});
+				});
+			}
+
+			// If more than one transaction in this group, it's a conflict
+			if (conflictingTxs.size > 1) {
+				const conflictingBoxes = new Set();
+				conflictingTxs.forEach(txId => {
+					const txBoxes = txToBoxMap.get(txId) || [];
+					txBoxes.forEach(boxId => {
+						const spenders = boxToTxMap.get(boxId) || [];
+						if (spenders.length > 1) {
+							conflictingBoxes.add(boxId);
+						}
+					});
+				});
+
+				conflictingTxs.forEach(txId => {
+					conflictGroups.set(txId, {
+						groupId: conflictGroupId,
+						conflictingBoxes: Array.from(conflictingBoxes),
+						conflictCount: conflictingTxs.size
+					});
+					processedTxs.add(txId);
 				});
 				conflictGroupId++;
 			}
@@ -92,9 +151,9 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 		// Add conflict information to transactions
 		return txs.map(tx => ({
 			...tx,
-			conflictGroup: conflicts.has(tx.id) ? conflicts.get(tx.id).groupId : null,
-			conflictingBoxes: conflicts.has(tx.id) ? conflicts.get(tx.id).conflictingBoxes : [],
-			conflictCount: conflicts.has(tx.id) ? conflicts.get(tx.id).conflictCount : 0
+			conflictGroup: conflictGroups.has(tx.id) ? conflictGroups.get(tx.id).groupId : null,
+			conflictingBoxes: conflictGroups.has(tx.id) ? conflictGroups.get(tx.id).conflictingBoxes : [],
+			conflictCount: conflictGroups.has(tx.id) ? conflictGroups.get(tx.id).conflictCount : 0
 		}));
 	}
 
@@ -102,6 +161,86 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 	function calculateFee(tx) {
 		const feeOutput = tx.outputs?.find(output => output.ergoTree === FEE_ERGOTREE);
 		return feeOutput ? parseInt(feeOutput.value) : 0;
+	}
+
+	// Helper function to calculate ERG actually transferred between different addresses
+	function calculateTransferredErg(tx) {
+		if (!tx.inputs || !tx.outputs) return 0;
+
+		// Sum ERG by address for inputs
+		const inputsByAddress = new Map();
+		tx.inputs.forEach(input => {
+			if (input.address && input.value) {
+				const current = inputsByAddress.get(input.address) || 0;
+				inputsByAddress.set(input.address, current + parseInt(input.value));
+			}
+		});
+
+		// Sum ERG by address for outputs (excluding fee)
+		const outputsByAddress = new Map();
+		tx.outputs.forEach(output => {
+			if (output.address && output.value && output.ergoTree !== FEE_ERGOTREE) {
+				const current = outputsByAddress.get(output.address) || 0;
+				outputsByAddress.set(output.address, current + parseInt(output.value));
+			}
+		});
+
+		// Calculate net transfers
+		let totalTransferred = 0;
+		const allAddresses = new Set([...inputsByAddress.keys(), ...outputsByAddress.keys()]);
+
+		allAddresses.forEach(address => {
+			const inputAmount = inputsByAddress.get(address) || 0;
+			const outputAmount = outputsByAddress.get(address) || 0;
+			const netChange = outputAmount - inputAmount;
+
+			// Only count positive net changes (addresses that received more than they sent)
+			if (netChange > 0) {
+				totalTransferred += netChange;
+			}
+		});
+
+		return totalTransferred;
+	}
+
+	// Helper function to calculate transaction priority score
+	function calculateTransactionPriority(tx) {
+		let score = 0;
+		
+		// 1. Fee priority (0-1000 points based on fee amount)
+		const fee = calculateFee(tx);
+		const feeScore = Math.min(fee / 1000000, 1000); // Scale fee to max 1000 points
+		score += feeScore;
+		
+		// 2. Storage rent bonus (500 points)
+		const extractResult = extractAddresses(tx);
+		if (extractResult.hasStorageRent) {
+			score += 500;
+		}
+		
+		// 3. Known entity involvement bonus (300 points)
+		const knownAddresses = getKnownAddresses(extractResult.addressMap, currentAddressBook, 10);
+		if (knownAddresses.length > 0) {
+			score += 300;
+		}
+		
+		// 4. Conflict group penalty (but keep them visible)
+		if (tx.conflictGroup) {
+			score += 100; // Small bonus to keep conflicts visible
+		}
+		
+		// 5. Asset transfer bonus (100 points)
+		const hasAssets = tx.inputs?.some(input => input.assets?.length > 0) || 
+						  tx.outputs?.some(output => output.assets?.length > 0);
+		if (hasAssets) {
+			score += 100;
+		}
+		
+		// 6. Size efficiency bonus (smaller transactions get slight bonus)
+		const sizeBonus = tx.size ? Math.max(0, 50 - (tx.size / 1000)) : 0;
+		score += sizeBonus;
+		
+		return score;
 	}
 
 	// Reactive statement to group transactions - use resolved if available
@@ -116,7 +255,41 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 			// Then by fee (highest first)
 			return calculateFee(b) - calculateFee(a);
 		}) : 
-		groupedTransactions;
+		groupedTransactions.sort((a, b) => {
+			// Prioritize double-spend groups over everything else
+			const hasConflictA = a.conflictGroup ? 1 : 0;
+			const hasConflictB = b.conflictGroup ? 1 : 0;
+			
+			if (hasConflictA !== hasConflictB) {
+				return hasConflictB - hasConflictA; // Conflicts first
+			}
+			
+			// If both have conflicts, sort by conflict group, then fee
+			if (a.conflictGroup && b.conflictGroup) {
+				if (a.conflictGroup !== b.conflictGroup) {
+					return a.conflictGroup - b.conflictGroup;
+				}
+				// Same conflict group, sort by fee (highest first)
+				return calculateFee(b) - calculateFee(a);
+			}
+			
+			// If neither has conflicts, use priority score
+			if (!a.conflictGroup && !b.conflictGroup) {
+				const scoreA = calculateTransactionPriority(a);
+				const scoreB = calculateTransactionPriority(b);
+				
+				if (scoreA !== scoreB) {
+					return scoreB - scoreA;
+				}
+				
+				// If scores are equal, sort by fee as tiebreaker
+				const feeA = calculateFee(a);
+				const feeB = calculateFee(b);
+				return feeB - feeA;
+			}
+			
+			return 0;
+		});
 
 	const headers = [
 		{ 
@@ -125,9 +298,14 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 			render: (value, row) => {
 				const conflictBadge = row.conflictGroup ? 
 					`<span class="conflict-badge" title="Competing with ${row.conflictCount - 1} other transaction(s) for the same UTXO. Only one will succeed.">
-						Double-spend #${row.conflictGroup}
+						#${row.conflictGroup}
 					</span>` : '';
-				return `<a href="/transactions/${value}" class="height-link">${formatAddress(value, 15, 4)}</a> ${conflictBadge}`;
+				
+				// Extract addresses and generate address badges
+				const extractResult = extractAddresses(row);
+				const addressBadges = generateAddressBadges(extractResult, currentAddressBook);
+				
+				return `<a href="/transactions/${value}" class="height-link" data-transaction-hover="${value}">${formatAddress(value, 9, 4)}</a> ${conflictBadge} ${addressBadges}`;
 			}
 		},
 		{ 
@@ -142,21 +320,21 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 			}
 		},
 		{ 
-			label: 'Inputs', 
+			label: 'Ins', 
 			field: 'inputs', 
 			render: (value) => formatNumber(value?.length || 0) 
 		},
 		{ 
-			label: 'Outputs', 
+			label: 'Outs', 
 			field: 'outputs', 
 			render: (value) => formatNumber(value?.length || 0) 
 		},
 		{ 
 			label: 'ERG Transferred', 
-			field: 'outputs', 
-			render: (value) => {
-				const totalValue = value?.reduce((sum, output) => sum + (parseInt(output.value) || 0), 0) || 0;
-				return `${formatErgValue(totalValue)} <small class="text-muted">${formatPriceUSD(totalValue, 9, $ergPrice.value)}</small>`;
+			field: null, 
+			render: (value, row) => {
+				const transferredValue = calculateTransferredErg(row);
+				return `${formatErgValue(transferredValue)} <small class="text-muted">${formatPriceUSD(transferredValue, 9, $ergPrice.value)}</small>`;
 			}
 		},
 		{ 
@@ -169,14 +347,22 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 				row.inputs?.forEach(input => {
 					input.assets?.forEach(asset => {
 						const displayName = asset.name || (asset.tokenId ? asset.tokenId.slice(0, 6) + '...' : 'Unknown');
-						allAssets.add(displayName);
+						allAssets.add({
+							tokenId: asset.tokenId,
+							name: asset.name,
+							displayName: displayName
+						});
 					});
 				});
 				
 				row.outputs?.forEach(output => {
 					output.assets?.forEach(asset => {
 						const displayName = asset.name || (asset.tokenId ? asset.tokenId.slice(0, 6) + '...' : 'Unknown');
-						allAssets.add(displayName);
+						allAssets.add({
+							tokenId: asset.tokenId,
+							name: asset.name,
+							displayName: displayName
+						});
 					});
 				});
 				
@@ -188,11 +374,14 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 				const fullList = assetsList.join(', ');
 				
 				if (assetsList.length === 1) {
-					return `<span class="asset-list" title="${fullList}">${assetsList[0]}</span>`;
-				} else if (assetsList.length <= 3) {
-					return `<span class="asset-list" title="${fullList}">${assetsList.join(', ')}</span>`;
+					return `<div class="asset-container" title="${fullList}">
+						<div class="asset-name">${getAssetTitleParams(assetsList[0], assetsList[0].tokenId, assetsList[0].name)}</div>
+					</div>`;
 				} else {
-					return `<span class="asset-list" title="${fullList}">${assetsList.slice(0, 2).join(', ')}<br><small class="text-muted">+${assetsList.length - 2} more</small></span>`;
+					return `<div class="asset-container" title="${fullList}">
+						<div class="asset-name">${getAssetTitleParams(assetsList[0], assetsList[0].tokenId, assetsList[0].name)}</div>
+						<div class="asset-more">+${assetsList.length - 1} more</div>
+					</div>`;
 				}
 			}
 		},
@@ -245,6 +434,9 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 					}, 1000);
 				}
 			}, SOCKET_WAIT_TIME);
+
+			// Set up custom hover handlers for mempool transactions
+			setupMempoolTransactionHovers();
 		}
 		
 		return () => {
@@ -260,9 +452,124 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 		if (refreshInterval) {
 			clearInterval(refreshInterval);
 		}
+		if (hideTimeout) {
+			clearTimeout(hideTimeout);
+		}
 		if (unsubscribeConnection) unsubscribeConnection();
 		if (unsubscribeMempool) unsubscribeMempool();
 		if (unsubscribeLastUpdate) unsubscribeLastUpdate();
+	}
+
+	// Custom hover handler for mempool transactions to use existing data
+	function setupMempoolTransactionHovers() {
+		if (typeof document === 'undefined') return;
+
+		// Handle mouseover for mempool transaction links
+		document.addEventListener('mouseover', (event) => {
+			const link = event.target.closest('[data-transaction-hover]');
+			if (!link || !link.closest('.mempool-container')) return; // Only handle mempool hovers
+			
+			const txId = link.getAttribute('data-transaction-hover');
+			if (!txId) return;
+
+			// Clear any pending hide timeout
+			if (hideTimeout) {
+				clearTimeout(hideTimeout);
+				hideTimeout = null;
+			}
+
+			// Find the transaction data in our current transactions
+			const transaction = displayTransactions.find(tx => tx.id === txId);
+			if (!transaction) return;
+
+			// Set popup position and show with existing transaction data
+			transactionPopup = {
+				visible: true,
+				x: event.clientX + 20,
+				y: event.clientY - 10,
+				transaction: transaction,
+				transactionId: txId
+			};
+		});
+
+		// Handle mouseout
+		document.addEventListener('mouseout', (event) => {
+			const link = event.target.closest('[data-transaction-hover]');
+			if (!link || !link.closest('.mempool-container')) return;
+
+			const relatedTarget = event.relatedTarget;
+			
+			// Don't hide if moving to the popup itself
+			if (relatedTarget && relatedTarget.closest('.mempool-transaction-popup')) return;
+
+			// Don't hide if moving to another transaction link in mempool
+			if (relatedTarget && relatedTarget.closest('[data-transaction-hover]') && relatedTarget.closest('.mempool-container')) return;
+
+			// Hide popup after delay
+			hideTimeout = setTimeout(() => {
+				transactionPopup = {
+					...transactionPopup,
+					visible: false
+				};
+				hideTimeout = null;
+			}, 150);
+		});
+
+		// Handle mouse enter on popup to cancel hide timeout
+		document.addEventListener('mouseover', (event) => {
+			if (event.target.closest('.mempool-transaction-popup')) {
+				if (hideTimeout) {
+					clearTimeout(hideTimeout);
+					hideTimeout = null;
+				}
+			}
+		});
+
+		// Handle mouse leave from popup
+		document.addEventListener('mouseout', (event) => {
+			const popup = event.target.closest('.mempool-transaction-popup');
+			if (!popup) return;
+
+			const relatedTarget = event.relatedTarget;
+			
+			// Don't hide if moving to a transaction link in mempool
+			if (relatedTarget && relatedTarget.closest('[data-transaction-hover]') && relatedTarget.closest('.mempool-container')) return;
+			
+			// Don't hide if still inside popup
+			if (relatedTarget && relatedTarget.closest('.mempool-transaction-popup')) return;
+
+			// Hide popup after delay
+			hideTimeout = setTimeout(() => {
+				transactionPopup = {
+					...transactionPopup,
+					visible: false
+				};
+				hideTimeout = null;
+			}, 150);
+		});
+
+		// Fallback: hide popup if mouse moves away from mempool area entirely
+		document.addEventListener('mousemove', (event) => {
+			if (!transactionPopup.visible) return;
+
+			const isOverMempoolContainer = event.target.closest('.mempool-container');
+			const isOverPopup = event.target.closest('.mempool-transaction-popup');
+			const isOverTransactionLink = event.target.closest('[data-transaction-hover]');
+
+			// If mouse is not over mempool area, popup, or transaction links, hide popup
+			if (!isOverMempoolContainer && !isOverPopup && !isOverTransactionLink) {
+				if (hideTimeout) {
+					clearTimeout(hideTimeout);
+				}
+				hideTimeout = setTimeout(() => {
+					transactionPopup = {
+						...transactionPopup,
+						visible: false
+					};
+					hideTimeout = null;
+				}, 300); // Longer delay for mouse move fallback
+			}
+		});
 	}
 	
 	// Watch for URL parameter changes and reload data
@@ -302,8 +609,6 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 		if (!txs || txs.length === 0) return;
 		
 		try {
-			console.log('Starting asset resolution for', txs.length, 'transactions');
-			
 			// Process transactions in small batches to avoid overwhelming the API
 			const batchSize = 3;
 			const processedTxs = [];
@@ -340,8 +645,6 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 			// Update resolved transactions
 			resolvedTransactions = processedTxs;
 			
-			console.log('Asset resolution completed for', processedTxs.length, 'transactions');
-			
 		} catch (error) {
 			console.error('Asset resolution failed:', error);
 		}
@@ -364,22 +667,6 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 		if (refreshInterval) {
 			clearInterval(refreshInterval);
 			refreshInterval = null;
-		}
-	}
-
-	function toggleRealTime() {
-		useRealTime = !useRealTime;
-		
-		if (useRealTime && currentPage === 1) {
-			stopFallbackPolling();
-			// Force reload from socket data if available
-			socketService.getMempoolTransactions().subscribe(socketTransactions => {
-				if (socketTransactions.length > 0) {
-					transactions = socketTransactions.slice(0, limit);
-				}
-			})();
-		} else {
-			startFallbackPolling();
 		}
 	}
 
@@ -408,7 +695,7 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 	<meta name="description" content="View pending transactions in the Ergo blockchain mempool awaiting confirmation.">
 </svelte:head>
 
-<div class="container-fluid p-0">
+<div class="container-fluid p-0 mempool-container">
 	<div class="row p-0">
 		<div class="col-12 p-0">
 			<PageHeader 
@@ -451,6 +738,15 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 
 <div class="page-bottom-margin"></div>
 
+<!-- Mempool Transaction Popup -->
+<MempoolTransactionPopup 
+	visible={transactionPopup.visible}
+	x={transactionPopup.x}
+	y={transactionPopup.y}
+	transaction={transactionPopup.transaction}
+	transactionId={transactionPopup.transactionId}
+/>
+
 <style>
 	.page-bottom-margin {
 		height: 2rem;
@@ -465,6 +761,39 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 	/* Prevent line breaks in value column */
 	:global(.glass-table td:nth-child(5)) {
 		white-space: nowrap;
+	}
+
+	/* Column width customization for assets column */
+	:global(.glass-table th:nth-child(6), .glass-table td:nth-child(6)) {
+		max-width: 180px;
+		min-width: 120px;
+		width: 150px;
+		vertical-align: top;
+	}
+
+	/* Asset container styling */
+	:global(.asset-container) {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		width: 100%;
+	}
+
+	/* Asset name styling - single line with ellipsis */
+	:global(.asset-name) {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		font-size: 0.85rem;
+		line-height: 1.2;
+		color: var(--text-strong);
+	}
+
+	/* Asset more indicator styling */
+	:global(.asset-more) {
+		font-size: 0.75rem;
+		color: var(--text-light);
+		line-height: 1;
 	}
 
 	/* Link styling */
@@ -505,5 +834,83 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 		gap: 0.25rem;
 	}
 
+	:global(.address-badge) {
+		padding: 0.15rem 0.4rem;
+		border-radius: 4px;
+		font-size: 0.7rem;
+		font-weight: 600;
+		margin-left: 0.25rem;
+		display: inline-block;
+	}
+
+	:global(.badge-info) {
+		background: #17a2b8;
+		color: white;
+	}
+
+	:global(.badge-primary) {
+		background: #007bff;
+		color: white;
+	}
+
+	:global(.badge-warning) {
+		background: #ffc107;
+		color: #212529;
+	}
+
+	:global(.badge-success) {
+		background: #28a745;
+		color: white;
+	}
+
+	:global(.badge-secondary) {
+		background: #6c757d;
+		color: white;
+	}
+
+	:global(.badge-mew) {
+		background: #4a0e4e;
+		color: white;
+	}
+
+	:global(.badge-spectrum) {
+		background: #a855f7;
+		color: white;
+	}
+
+	:global(.badge-crooks) {
+		background: #84cc16;
+		color: white;
+	}
+
+	:global(.badge-gold) {
+		background: #fbbf24;
+		color: #1f2937;
+	}
+
+	:global(.badge-usd) {
+		background: #6366f1;
+		color: white;
+	}
+
+	:global(.badge-duck) {
+		background: #fde047;
+		color: #1f2937;
+	}
+
+	:global(.badge-rosen) {
+		background: #f43f5e;
+		color: white;
+	}
+
+	:global(.badge-teal) {
+		background: #0891b2;
+		color: white;
+	}
+
+	:global(.badge-storage-rent) {
+		background: #f59e0b;
+		color: #1f2937;
+	}
 
 </style>

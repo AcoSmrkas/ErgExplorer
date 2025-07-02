@@ -53,7 +53,7 @@ export function createPopupManager(config) {
 
     // Generate a unique popup identifier
     const popupId = `${popupClass}-${id}`;
-    
+
     // Register popup and get z-index
     const zIndex = registerPopup(popupId);
 
@@ -118,15 +118,15 @@ export function createPopupManager(config) {
     hoverTimeout = setTimeout(() => {
       // Get current state to access popupId
       let currentState;
-      popupState.subscribe(state => {
+      popupState.subscribe((state) => {
         currentState = state;
       })();
-      
+
       // Unregister popup to free up z-index
       if (currentState.popupId) {
         unregisterPopup(currentState.popupId);
       }
-      
+
       popupState.set(initialState);
       currentId = null;
     }, hideDelay);

@@ -3,22 +3,66 @@
 	import { ergPrice } from '$lib/stores/priceStore.js';
 	import { FEE_ERGOTREE, ERG_DECIMALS } from '$lib/utils/constants.js';
 	import { boxResolutionService } from '$lib/services/boxResolutionService.js';
+	import { addressBook } from '$lib/stores/addressBook.js';
+	import { extractAddresses, getKnownAddresses, getBadgeClass } from '$lib/utils/mempoolBadges.js';
 
 	export let transaction;
 
 	$: currentErgPrice = $ergPrice;
+	
+	let currentAddressBook = [];
+
+	// Subscribe to address book updates
+	addressBook.subscribe(value => {
+		currentAddressBook = value;
+	});
 
 	function calculateFee(tx) {
 		const feeOutput = tx.outputs?.find(output => output.ergoTree === FEE_ERGOTREE);
 		return feeOutput ? parseInt(feeOutput.value) : 0;
 	}
 
-	function calculateTotalValue(tx) {
-		return tx.outputs?.reduce((sum, output) => sum + (parseInt(output.value) || 0), 0) || 0;
+	function calculateTransferredErg(tx) {
+		if (!tx.inputs || !tx.outputs) return 0;
+
+		// Sum ERG by address for inputs
+		const inputsByAddress = new Map();
+		tx.inputs.forEach(input => {
+			if (input.address && input.value) {
+				const current = inputsByAddress.get(input.address) || 0;
+				inputsByAddress.set(input.address, current + parseInt(input.value));
+			}
+		});
+
+		// Sum ERG by address for outputs (excluding fee)
+		const outputsByAddress = new Map();
+		tx.outputs.forEach(output => {
+			if (output.address && output.value && output.ergoTree !== FEE_ERGOTREE) {
+				const current = outputsByAddress.get(output.address) || 0;
+				outputsByAddress.set(output.address, current + parseInt(output.value));
+			}
+		});
+
+		// Calculate net transfers
+		let totalTransferred = 0;
+		const allAddresses = new Set([...inputsByAddress.keys(), ...outputsByAddress.keys()]);
+
+		allAddresses.forEach(address => {
+			const inputAmount = inputsByAddress.get(address) || 0;
+			const outputAmount = outputsByAddress.get(address) || 0;
+			const netChange = outputAmount - inputAmount;
+
+			// Only count positive net changes (addresses that received more than they sent)
+			if (netChange > 0) {
+				totalTransferred += netChange;
+			}
+		});
+
+		return totalTransferred;
 	}
 
 	$: fee = calculateFee(transaction);
-	$: totalValue = calculateTotalValue(transaction);
+	$: totalValue = calculateTransferredErg(transaction);
 	$: allAssets = (() => {
 		const movedAssets = boxResolutionService.extractMovedAssets(transaction);
 		return movedAssets.map(asset => 
@@ -36,13 +80,41 @@
 			</div>
 			<div class="tx-info">
 				<div class="tx-id">
-					<a href="/transactions/{transaction.id}" class="tx-link">
+					<a href="/transactions/{transaction.id}" class="tx-link" data-transaction-hover="{transaction.id}">
 						{formatAddress(transaction.id, 12, 4)}
 					</a>
 					{#if transaction.conflictGroup}
 						<span class="conflict-badge" title="Competing with {transaction.conflictCount - 1} other transaction(s) for the same UTXO. Only one will succeed.">
-							Double-spend #{transaction.conflictGroup}
+							#{transaction.conflictGroup}
 						</span>
+					{/if}
+					{#if true}
+						{@const extractResult = extractAddresses(transaction)}
+						{@const allKnownAddresses = getKnownAddresses(extractResult.addressMap, currentAddressBook)}
+						{@const nameDirections = new Map()}
+						{@const _ = allKnownAddresses.forEach(entry => {
+							const existing = nameDirections.get(entry.name) || { isInput: false, isOutput: false };
+							if (entry.direction.isInput) existing.isInput = true;
+							if (entry.direction.isOutput) existing.isOutput = true;
+							nameDirections.set(entry.name, existing);
+						})}
+						{@const seenNames = new Set()}
+						{@const uniqueKnownAddresses = allKnownAddresses.filter(entry => {
+							if (seenNames.has(entry.name)) return false;
+							seenNames.add(entry.name);
+							return true;
+						}).slice(0, 2)}
+						{#if extractResult.hasStorageRent}
+							<span class="address-badge badge-storage-rent" title="Storage Rent Collection">📦 Storage</span>
+						{/if}
+						{#each uniqueKnownAddresses as entry}
+							{@const baseContent = entry.type || entry.name}
+							{@const nameDirection = nameDirections.get(entry.name) || { isInput: false, isOutput: false }}
+							{@const badgeContent = nameDirection.isInput && nameDirection.isOutput ? `↔${baseContent}` : entry.direction.isInput ? `${baseContent}→` : `→${baseContent}`}
+							<span class="address-badge {getBadgeClass(entry.type, entry.name)}" title="{entry.name}{entry.urltype ? ` (${entry.urltype})` : ''}">
+								{badgeContent}
+							</span>
+						{/each}
 					{/if}
 				</div>
 			</div>

@@ -71,7 +71,7 @@
 				{#if transaction.numConfirmations}
 					{formatNumber(transaction.numConfirmations)}
 				{:else}
-					<span class="text-warning">Pending</span>
+					<span class="text-white">0</span>
 				{/if}
 			</span>
 		</div>
@@ -146,7 +146,7 @@
 							{#if transaction.numConfirmations}
 								{formatNumber(transaction.numConfirmations)}
 							{:else}
-								<span class="text-warning">Pending</span>
+								<span class="text-white">0</span>
 							{/if}
 						</span>
 					</div>

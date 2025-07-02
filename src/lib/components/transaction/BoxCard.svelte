@@ -5,7 +5,7 @@
 	import TransactionLink from '$lib/components/ui/TransactionLink.svelte';
 	import EnhancedAssetsList from './EnhancedAssetsList.svelte';
 	import RegisterList from './RegisterList.svelte';
-	import { formatErgValue, formatAddress } from '$lib/utils/formatting.js';
+	import { formatErgValue } from '$lib/utils/formatting.js';
 	import { processRegisters } from '$lib/utils/registerProcessor.js';
 	
 	export let box;

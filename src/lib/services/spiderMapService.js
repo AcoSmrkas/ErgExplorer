@@ -15,22 +15,26 @@ class SpiderMapService {
 
     // Try confirmed API first (most complete data)
     try {
-      const response = await fetch(`${API_ENDPOINTS.ERGOPLATFORM}transactions/${txId}`);
+      const response = await fetch(
+        `${API_ENDPOINTS.ERGOPLATFORM}transactions/${txId}`,
+      );
       if (response.ok) {
         return await response.json();
       }
     } catch (error) {
-      console.warn('Failed to fetch confirmed transaction:', error);
+      console.warn("Failed to fetch confirmed transaction:", error);
     }
 
     // Try unconfirmed API as fallback
     try {
-      const response = await fetch(`${API_ENDPOINTS.ERGOPLATFORM_BASE}transactions/unconfirmed/${txId}`);
+      const response = await fetch(
+        `${API_ENDPOINTS.ERGOPLATFORM_BASE}transactions/unconfirmed/${txId}`,
+      );
       if (response.ok) {
         return await response.json();
       }
     } catch (error) {
-      console.warn('Failed to fetch unconfirmed transaction:', error);
+      console.warn("Failed to fetch unconfirmed transaction:", error);
     }
 
     return null;
@@ -42,12 +46,14 @@ class SpiderMapService {
    * @returns {Promise<Object[]>} Array of transaction data
    */
   async getMultipleTransactions(txIds) {
-    const promises = txIds.map(txId => this.getTransactionDetails(txId));
+    const promises = txIds.map((txId) => this.getTransactionDetails(txId));
     const results = await Promise.allSettled(promises);
-    
+
     return results
-      .filter(result => result.status === 'fulfilled' && result.value !== null)
-      .map(result => result.value);
+      .filter(
+        (result) => result.status === "fulfilled" && result.value !== null,
+      )
+      .map((result) => result.value);
   }
 
   /**
@@ -63,8 +69,11 @@ class SpiderMapService {
 
     // Extract input transaction IDs
     if (transaction.inputs) {
-      transaction.inputs.forEach(input => {
-        if (input.outputTransactionId && input.outputTransactionId !== transaction.id) {
+      transaction.inputs.forEach((input) => {
+        if (
+          input.outputTransactionId &&
+          input.outputTransactionId !== transaction.id
+        ) {
           inputTxIds.add(input.outputTransactionId);
         }
       });
@@ -72,7 +81,7 @@ class SpiderMapService {
 
     return {
       inputs: Array.from(inputTxIds),
-      outputs: Array.from(outputTxIds)
+      outputs: Array.from(outputTxIds),
     };
   }
 
@@ -87,13 +96,13 @@ class SpiderMapService {
     // Try to find a transaction that spends this box
     // This would require searching through transactions or using a specific API endpoint
     // For now, we'll return null (unspent) as we don't have a direct API for this
-    
+
     // TODO: Implement proper box spending lookup when API supports it
     // This could involve:
     // 1. Searching recent transactions for inputs matching this boxId
     // 2. Using a dedicated "box spending" API endpoint if available
     // 3. Caching spent status to avoid repeated checks
-    
+
     return null;
   }
 
@@ -111,24 +120,26 @@ class SpiderMapService {
       inclusionHeight: transaction.inclusionHeight,
       timestamp: transaction.timestamp,
       size: transaction.size,
-      inputs: transaction.inputs?.map(input => ({
-        boxId: input.boxId,
-        outputTransactionId: input.outputTransactionId,
-        value: input.value,
-        assets: input.assets || [],
-        address: input.address,
-        spendingProof: input.spendingProof
-      })) || [],
-      outputs: transaction.outputs?.map((output, index) => ({
-        boxId: output.boxId,
-        value: output.value,
-        assets: output.assets || [],
-        address: output.address,
-        ergoTree: output.ergoTree,
-        additionalRegisters: output.additionalRegisters || {},
-        index,
-        isSpent: false // Will be updated when we can check spending status
-      })) || []
+      inputs:
+        transaction.inputs?.map((input) => ({
+          boxId: input.boxId,
+          outputTransactionId: input.outputTransactionId,
+          value: input.value,
+          assets: input.assets || [],
+          address: input.address,
+          spendingProof: input.spendingProof,
+        })) || [],
+      outputs:
+        transaction.outputs?.map((output, index) => ({
+          boxId: output.boxId,
+          value: output.value,
+          assets: output.assets || [],
+          address: output.address,
+          ergoTree: output.ergoTree,
+          additionalRegisters: output.additionalRegisters || {},
+          index,
+          isSpent: false, // Will be updated when we can check spending status
+        })) || [],
     };
   }
 }

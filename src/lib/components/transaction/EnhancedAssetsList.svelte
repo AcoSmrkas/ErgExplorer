@@ -1,5 +1,4 @@
 <script>
-	import { onMount } from 'svelte';
 	import { getAssetTitleParams } from '$lib/utils/tokenIcons.js';
 	import { formatValue } from '$lib/utils/numberFormatting.js';
 	import { formatPriceUSD } from '$lib/utils/formatting.js';

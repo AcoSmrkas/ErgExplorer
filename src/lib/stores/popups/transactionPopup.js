@@ -6,7 +6,13 @@ import * as api from "../../utils/api.js";
 export const transactionPopupManager = createPopupManager({
   triggerSelector: "[data-transaction-hover]",
   popupClass: "transaction-popup",
-  dataExtractor: (trigger) => trigger.getAttribute("data-transaction-hover"),
+  dataExtractor: (trigger) => {
+    // Ignore mempool transaction hovers (they have their own popup)
+    if (trigger.closest(".mempool-container")) {
+      return null;
+    }
+    return trigger.getAttribute("data-transaction-hover");
+  },
   dataLoader: api.getTransaction,
   hideDelay: 150,
   initialState: {

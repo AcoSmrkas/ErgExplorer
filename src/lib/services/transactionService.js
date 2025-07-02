@@ -205,7 +205,7 @@ class TransactionService {
       await this._updateTransaction(txId, {
         data: unconfirmedTx.value,
         status: "unconfirmed",
-        source: "unconfirmed_api",
+        source: "API",
         lastUpdate: new Date().toISOString(),
       });
       this._startPolling(txId);
@@ -313,7 +313,7 @@ class TransactionService {
       if (socketTx || unconfirmedTx) {
         // Still unconfirmed, update data if needed
         const newData = socketTx || unconfirmedTx;
-        const newSource = socketTx ? "socket" : "unconfirmed_api";
+        const newSource = socketTx ? "socket" : "API";
 
         console.log(`Polling found transaction in ${newSource}`);
         console.log("Polling data input count:", newData.inputs?.length || 0);

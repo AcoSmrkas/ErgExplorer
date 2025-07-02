@@ -8,7 +8,6 @@ const boxCache = new Map();
 // Cache duration (5 minutes)
 const CACHE_DURATION = 5 * 60 * 1000;
 
-
 // Get cached box data or fetch from API
 export async function getCachedBoxData(boxId) {
   if (!boxId) return null;
