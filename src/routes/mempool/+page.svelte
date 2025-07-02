@@ -13,6 +13,7 @@
 	import { formatErgValue, formatFileSize, formatNumber, formatPriceUSD, formatAddress } from '$lib/utils/formatting.js';
 	import { ergPrice } from '$lib/stores/priceStore.js';
 	import { socketService } from '$lib/services/socketService.js';
+import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 
 	let transactions = [];
 	let groupedTransactions = [];
@@ -26,6 +27,7 @@
 	let showConflicts = false;
 	let showInfoCard = true;
 	let lastUpdate = null;
+	let resolvedTransactions = [];
 
 	// Load dismissed state from localStorage
 	if (browser) {
@@ -102,8 +104,9 @@
 		return feeOutput ? parseInt(feeOutput.value) : 0;
 	}
 
-	// Reactive statement to group transactions
-	$: groupedTransactions = groupConflictingTransactions(transactions);
+	// Reactive statement to group transactions - use resolved if available
+	$: sourceTransactions = resolvedTransactions.length > 0 ? resolvedTransactions : transactions;
+	$: groupedTransactions = groupConflictingTransactions(sourceTransactions);
 	$: displayTransactions = showConflicts ? 
 		groupedTransactions.filter(tx => tx.conflictGroup).sort((a, b) => {
 			// First sort by conflict group
@@ -157,6 +160,43 @@
 			}
 		},
 		{ 
+			label: 'Assets', 
+			field: null, 
+			render: (value, row) => {
+				const allAssets = new Set();
+				
+				// Extract assets from inputs and outputs
+				row.inputs?.forEach(input => {
+					input.assets?.forEach(asset => {
+						const displayName = asset.name || (asset.tokenId ? asset.tokenId.slice(0, 6) + '...' : 'Unknown');
+						allAssets.add(displayName);
+					});
+				});
+				
+				row.outputs?.forEach(output => {
+					output.assets?.forEach(asset => {
+						const displayName = asset.name || (asset.tokenId ? asset.tokenId.slice(0, 6) + '...' : 'Unknown');
+						allAssets.add(displayName);
+					});
+				});
+				
+				if (allAssets.size === 0) {
+					return '<span class="text-muted text-center">-</span>';
+				}
+				
+				const assetsList = Array.from(allAssets);
+				const fullList = assetsList.join(', ');
+				
+				if (assetsList.length === 1) {
+					return `<span class="asset-list" title="${fullList}">${assetsList[0]}</span>`;
+				} else if (assetsList.length <= 3) {
+					return `<span class="asset-list" title="${fullList}">${assetsList.join(', ')}</span>`;
+				} else {
+					return `<span class="asset-list" title="${fullList}">${assetsList.slice(0, 2).join(', ')}<br><small class="text-muted">+${assetsList.length - 2} more</small></span>`;
+				}
+			}
+		},
+		{ 
 			label: 'Size', 
 			field: 'size', 
 			render: (value) => formatFileSize(value) 
@@ -165,16 +205,21 @@
 
 	onMount(async () => {
 		if (browser) {
+			// Set up box resolution service
+			boxResolutionService.setSocketService(socketService);
+			
 			// Subscribe to socket stores
 			unsubscribeConnection = socketService.getConnectionStatus().subscribe(status => {
 				isSocketConnected = status;
 			});
 
-			unsubscribeMempool = socketService.getMempoolTransactions().subscribe(socketTransactions => {
+			unsubscribeMempool = socketService.getMempoolTransactions().subscribe(async (socketTransactions) => {
 				if (useRealTime && currentPage === 1 && socketTransactions.length > 0) {
 					transactions = socketTransactions.slice(0, limit);
 					loading = false;
 					error = null;
+					// Start asset resolution in background
+					resolveAssetsInBackground(socketTransactions.slice(0, limit));
 				}
 			});
 
@@ -240,6 +285,11 @@
 			totalItems = data.total || 0;
 			totalPages = Math.ceil(totalItems / limit);
 			
+			// Start asset resolution in background
+			if (transactions.length > 0) {
+				resolveAssetsInBackground(transactions);
+			}
+			
 		} catch (err) {
 			error = err.message;
 			console.error('Failed to load mempool:', err);
@@ -247,6 +297,56 @@
 			loading = false;
 		}
 	}
+
+	async function resolveAssetsInBackground(txs) {
+		if (!txs || txs.length === 0) return;
+		
+		try {
+			console.log('Starting asset resolution for', txs.length, 'transactions');
+			
+			// Process transactions in small batches to avoid overwhelming the API
+			const batchSize = 3;
+			const processedTxs = [];
+			
+			for (let i = 0; i < txs.length; i += batchSize) {
+				const batch = txs.slice(i, i + batchSize);
+				const batchPromises = batch.map(async (tx) => {
+					try {
+						// Process transaction data (convert ergotrees to addresses)
+						const processedTx = boxResolutionService.processTransactionData(tx);
+						
+						// Resolve input box data for asset information
+						const resolvedTx = await boxResolutionService.resolveInputBoxData(processedTx, {
+							prioritizeSocket: true,
+							maxConcurrency: 2 // Keep it low to avoid API spam
+						});
+						
+						return resolvedTx;
+					} catch (error) {
+						console.warn('Failed to resolve assets for transaction:', tx.id, error);
+						return tx; // Return original transaction on error
+					}
+				});
+				
+				const batchResults = await Promise.all(batchPromises);
+				processedTxs.push(...batchResults);
+				
+				// Small delay between batches to be gentle on the API
+				if (i + batchSize < txs.length) {
+					await new Promise(resolve => setTimeout(resolve, 100));
+				}
+			}
+			
+			// Update resolved transactions
+			resolvedTransactions = processedTxs;
+			
+			console.log('Asset resolution completed for', processedTxs.length, 'transactions');
+			
+		} catch (error) {
+			console.error('Asset resolution failed:', error);
+		}
+	}
+
 
 	function startFallbackPolling() {
 		if (refreshInterval) {
@@ -300,6 +400,7 @@
 	async function handleRefresh() {
 		await loadTransactions();
 	}
+
 </script>
 
 <svelte:head>
@@ -319,6 +420,7 @@
 			{#if error}
 				<ErrorMessage message={error} type="danger" dismissible />
 			{/if}
+
 
 			<MempoolControls 
 				{isSocketConnected}
@@ -393,4 +495,15 @@
 	}
 
 	/* Global keyframes defined in common-components.css */
+
+
+	:global(.asset-list) {
+		font-size: 0.8rem;
+		color: var(--text-strong);
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+	}
+
+
 </style>

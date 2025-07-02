@@ -53,6 +53,10 @@
 {/if}
 
 <style>
+	.box-link-small {
+		font-size: 0.8rem;
+	}
+
 	.box-link-wrapper {
 		display: inline-flex;
 		align-items: center;

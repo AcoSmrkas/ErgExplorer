@@ -11,61 +11,64 @@
 /* Primary link style - most common pattern */
 :global(.link-primary) {
   color: var(--text-strong);
-  text-decoration: none;
+  text-decoration: none !important;
   transition: color 0.2s ease;
 }
 
 :global(.link-primary:hover) {
   color: var(--main-color);
-  text-decoration: none;
+  text-decoration: none !important;
 }
 
 /* Height/Block links in tables */
 :global(.height-link) {
   color: var(--text-strong);
-  text-decoration: none;
+  text-decoration: none !important;
   font-weight: 600;
   transition: color 0.3s ease;
 }
 
 :global(.height-link:hover) {
   color: var(--main-color);
+  text-decoration: none !important;
 }
 
 /* Address links */
 :global(.address-link) {
   color: var(--text-strong);
-  text-decoration: none;
+  text-decoration: none !important;
   font-weight: 500;
   transition: color 0.3s ease;
 }
 
 :global(.address-link:hover) {
   color: var(--main-color);
+  text-decoration: none !important;
 }
 
 /* Transaction links */
 :global(.tx-link) {
   color: var(--text-strong);
-  text-decoration: none;
+  text-decoration: none !important;
   font-weight: 600;
   transition: color 0.2s ease;
 }
 
 :global(.tx-link:hover) {
   color: var(--main-color);
+  text-decoration: none !important;
 }
 
 /* Asset/Token links */
 :global(.asset-link) {
   color: var(--text-strong);
-  text-decoration: none;
+  text-decoration: none !important;
   transition: color 0.2s ease;
 }
 
 :global(.asset-link:hover) {
   color: var(--main-color);
-  text-decoration: none;
+  text-decoration: none !important;
 }
 
 /* =============================================================================
@@ -360,6 +363,14 @@
 
 .mobile-spacing {
   margin-bottom: 1rem;
+}
+
+.glass-card .card-header {
+  padding: 1.25rem 1.5rem !important;
+}
+
+.glass-card .card-content {
+  padding: 1.5rem !important;
 }
 
 /* =============================================================================
@@ -657,7 +668,7 @@
 .glass-table-container {
   border-radius: 16px;
   overflow: hidden;
-  background: var(--glass-bg-subtle);
+  background: var(--glass-bg-light);
   /* backdrop-filter: var(--glass-blur-md); */
   /* -webkit-backdrop-filter: var(--glass-blur-md); */
   box-shadow: var(--glass-shadow-sm);
@@ -743,34 +754,14 @@
 
 .contact-link {
   color: var(--text-strong);
-  text-decoration: none;
+  text-decoration: none !important;
   transition: color 0.3s ease;
   word-break: break-all;
 }
 
 .contact-link:hover {
   color: var(--main-color);
-  text-decoration: none;
-}
-
-@media (max-width: 768px) {
-  .glass-card .card-header {
-    padding: 1rem 1.25rem;
-  }
-
-  .glass-card .card-content {
-    padding: 1.25rem;
-  }
-
-  .contact-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-
-  .contact-label {
-    min-width: auto;
-  }
+  text-decoration: none !important;
 }
 
 /* =============================================================================
@@ -826,7 +817,7 @@
 
 .btn-link:hover {
   color: var(--main-color) !important;
-  text-decoration: none;
+  text-decoration: none !important;
 }
 
 .btn-outline-light {

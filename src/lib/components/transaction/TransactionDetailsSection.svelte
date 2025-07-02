@@ -46,7 +46,7 @@
 		</div>
 		<div class="detail-row">
 			<span class="detail-label">Received time:</span>
-			<span class="detail-value">{formatDateString(transaction.timestamp)}</span>
+			<span class="detail-value">{formatDateString(transaction.timestamp, true)}</span>
 		</div>
 		<div class="detail-row">
 			<span class="detail-label">Included in blocks:</span>
@@ -99,23 +99,8 @@
 		</div>
 	{:else}
 		<div class="row">
-			<div class="col-md-6">
+			<div class="col-md-6 p-0 pe-md-3">
 				<div class="detail-column">
-					<div class="detail-row">
-						<span class="detail-label">Transaction ID:</span>
-						<span class="detail-value">
-							<div class="tx-id-row">
-								<span class="font-monospace tx-id-text">{txId.slice(0, 8)}...{txId.slice(-4)}</span>
-								<CopyButton 
-									text={txId}
-									label="Copy"
-									successMessage="Transaction ID copied to clipboard!"
-									size="small"
-									inline={true}
-								/>
-							</div>
-						</span>
-					</div>
 					<div class="detail-row">
 						<span class="detail-label">Status:</span>
 						<span class="detail-value">
@@ -132,7 +117,7 @@
 					</div>
 					<div class="detail-row">
 						<span class="detail-label">Received time:</span>
-						<span class="detail-value">{formatDateString(transaction.timestamp)}</span>
+						<span class="detail-value">{formatDateString(transaction.timestamp, true)}</span>
 					</div>
 					<div class="detail-row">
 						<span class="detail-label">Included in blocks:</span>
@@ -153,7 +138,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="col-md-6">
+			<div class="col-md-6 p-0 ps-md-3">
 				<div class="detail-column">
 					<div class="detail-row">
 						<span class="detail-label">Confirmations:</span>

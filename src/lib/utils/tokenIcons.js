@@ -60,6 +60,8 @@ export function getAssetTitleParams(
 
   if (token && token.iconurl) {
     imgSrc = token.iconurl;
+  } else if (token && token.cachedurl) {
+    imgSrc = token.cachedurl;
   }
 
   // Format name or use truncated tokenId

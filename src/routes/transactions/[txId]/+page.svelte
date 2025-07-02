@@ -2,37 +2,26 @@
 	import { onMount } from 'svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import PageHeader from '$lib/components/ui/PageHeader.svelte';
-	import DataTable from '$lib/components/data/DataTable.svelte';
 	import TokenDisplay from '$lib/components/data/TokenDisplay.svelte';
 	import CopyButton from '$lib/components/ui/CopyButton.svelte';
-	import { formatErgValue, formatDateString, formatNumber, formatFileSize, formatPriceUSD, formatAddress } from '$lib/utils/formatting.js';
-	import AddressLink from '$lib/components/ui/AddressLink.svelte';
-import BoxLink from '$lib/components/ui/BoxLink.svelte';
-	import StatusBadge from '$lib/components/ui/StatusBadge.svelte';
+	import { formatAddress } from '$lib/utils/formatting.js';
 	import TransactionDetailsSection from '$lib/components/transaction/TransactionDetailsSection.svelte';
-	import MobileTransactionCard from '$lib/components/transaction/MobileTransactionCard.svelte';
-	import AssetsList from '$lib/components/transaction/AssetsList.svelte';
-	import { getAssetTitleParams } from '$lib/utils/tokenIcons.js';
+	import BoxCard from '$lib/components/transaction/BoxCard.svelte';
 	import { usePrices } from '$lib/composables/useAsyncData.js';
 	import { useTransaction } from '$lib/composables/useTransaction.js';
 	import { 
 		calculateFee, 
 		calculateBurnedAssets, 
-		getBoxStatus, 
-		getStatusType, 
 		getInfoText,
 		calculateTotalInputValue,
 		calculateTotalOutputValue
 	} from '$lib/utils/transactionHelpers.js';
-    import { formatValue } from '$lib/utils/numberFormatting.js';
-    import { currentPrices } from '$lib/stores/priceStore.js';
-    import { tokenIconsStore } from '$lib/stores/tokenIconsStore.js';
 
 	export let data;
 	$: ({ transaction: initialTransaction, txId, initialStatus } = data);
 	
 	// Use transaction monitoring service for real-time updates
-	const { transaction: monitoredTransaction, isConfirmed, isUnconfirmed, getStatusText, getStatusType: getMonitoringStatusType, resolveInputBoxes } = useTransaction(data.txId);
+	const { transaction: monitoredTransaction, getStatusText, getStatusType: getMonitoringStatusType } = useTransaction(data.txId);
 	
 	// Use monitored transaction data when available, fallback to initial data
 	$: transaction = $monitoredTransaction?.data || initialTransaction;
@@ -46,77 +35,9 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 	// Use composable for price data
 	const { ergPrice, loadPrices } = usePrices();
 	
-	
-
-	// Base table headers
-	const baseTableHeaders = [
-		{ 
-			label: 'Index', 
-			field: 'index',
-			render: (value, row, index) => `<span class="index-number">${index}</span>`
-		},
-		{ 
-			label: 'Box ID', 
-			field: 'boxId',
-			component: BoxLink,
-			componentProps: (row) => ({
-				boxId: row.boxId || "",
-				startChars: 16,
-				endChars: 4,
-				showCopy: true
-			})
-		},
-		{ 
-			label: 'Address', 
-			field: 'address',
-			component: AddressLink,
-			componentProps: (row) => ({
-				address: row.address || "",
-				startChars: 9,
-				endChars: 4,
-				showCopy: true
-			})
-		},
-		{ 
-			label: 'Value', 
-			field: 'value',
-			render: (value) => `${formatErgValue(value)}`
-		},
-		{ 
-			label: 'Assets', 
-			field: 'assets',
-			component: AssetsList,
-			componentProps: (row) => ({
-				assets: row.assets
-			})
-		}
-	];
-
-	// Input headers (box links always enabled)
-	$: inputHeaders = baseTableHeaders;
-
-	// Output headers (box links disabled for unconfirmed transactions)
-	$: outputHeaders = baseTableHeaders.map(header => {
-		if (header.field === 'boxId') {
-			return {
-				...header,
-				componentProps: (row) => ({
-					boxId: row.boxId || "",
-					startChars: 16,
-					endChars: 4,
-					showCopy: true,
-					disabled: !txIsConfirmed,
-					disabledReason: !txIsConfirmed ? 'Output box will be created when transaction is confirmed' : undefined
-				})
-			};
-		}
-		return header;
-	});
-
 	onMount(async () => {
 		await loadPrices();
 	});
-
 
 	// Calculate transaction metrics
 	$: totalInputValue = calculateTotalInputValue(transaction);
@@ -135,7 +56,6 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 	// Check if transaction might be at risk of being dropped
 	$: isAtDropRisk = $monitoredTransaction?.retryCount > 0 && transactionStatus === 'unconfirmed';
 	
-
 	// Debug logging
 	$: if ($monitoredTransaction) {
 		console.log('Monitored transaction status:', $monitoredTransaction.status);
@@ -160,7 +80,20 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 					info={infoText}
 					timestamp={txIsConfirmed ? transaction?.timestamp : null}
 					statusBadge={statusBadge}
-				/>
+				>
+					<div slot="subtitle" class="tx-id-section">
+						<div class="d-flex align-items-center gap-2">
+							<span class="tx-id-display font-monospace">ID: {formatAddress(txId, 10, 4)}</span>
+							<CopyButton 
+								text={txId}
+								label=""
+								successMessage="Transaction ID copied!"
+								size="small"
+								inline={true}
+							/>
+						</div>
+					</div>
+				</PageHeader>
 
 				<div class="container-fluid p-0">
 
@@ -199,110 +132,68 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 					</div>
 				{/if}
 
-
-				<!-- Transaction Summary - Hidden on mobile, shown after outputs -->
-				<div class="row mb-4 p-0 d-none d-md-block">
-					<div class="col-12 p-0">
-						<div class="glass-card">
-							<div class="card-header">
-								<div class="header-content">
-									<h2 class="section-title">Transaction Details</h2>
+				<!-- Inputs & Outputs - 2 Column Layout -->
+				{#if transaction.inputs?.length > 0 || transaction.outputs?.length > 0}
+					<div class="inputs-outputs-container">
+						<div class="row">
+							<!-- Inputs Column -->
+							{#if transaction.inputs?.length > 0}
+								<div class="col-md-6 p-0 pe-md-3">
+									<Card 
+										title="Inputs" 
+										icon="fa-sign-in-alt" 
+										count={transaction.inputs.length}
+										noPadding={true}
+									>
+										<div class="boxes-list">
+											{#each transaction.inputs as input, index}
+												<BoxCard 
+													box={input} 
+													{index} 
+													type="input"
+													isConfirmed={txIsConfirmed}
+												/>
+											{/each}
+										</div>
+									</Card>
 								</div>
-							</div>
-							<div class="card-content">
-								<div class="row">
-									<div class="col-12 p-0 p-md-4">
-										<TransactionDetailsSection 
-											{transaction} 
-											{txId} 
-											isConfirmed={txIsConfirmed} 
-											{feeAmount} 
-											{totalOutputValue}
-										/>
-									</div>
+							{/if}
+							
+							<!-- Outputs Column -->
+							{#if transaction.outputs?.length > 0}
+								<div class="col-md-6 p-0 ps-md-3">
+									<Card 
+										title="Outputs" 
+										icon="fa-sign-out-alt" 
+										count={transaction.outputs.length}
+										noPadding={true}
+									>
+										<div class="boxes-list">
+											{#each transaction.outputs as output, index}
+												<BoxCard 
+													box={output} 
+													{index} 
+													type="output"
+													isConfirmed={txIsConfirmed}
+												/>
+											{/each}
+										</div>
+									</Card>
 								</div>
-							</div>
+							{/if}
 						</div>
 					</div>
-				</div>
-
-				<!-- Inputs -->
-				{#if transaction.inputs?.length > 0}
-					<Card 
-						title="Inputs" 
-						icon="fa-sign-in-alt" 
-						count={transaction.inputs.length}
-						noPadding={true}
-					>
-						<!-- Desktop/Tablet Table View -->
-						<div class="d-none d-md-block">
-							<DataTable 
-								headers={inputHeaders} 
-								data={transaction.inputs} 
-								loading={false}
-								sortable={false}
-							/>
-						</div>
-						
-						<!-- Mobile Card View -->
-						<div class="d-md-none">
-							{#each transaction.inputs as input, index}
-								<MobileTransactionCard 
-									item={input} 
-									{index} 
-									{getBoxStatus} 
-									{getStatusType} 
-									type="input"
-								/>
-							{/each}
-						</div>
-					</Card>
-				{/if}
-
-				<!-- Outputs -->
-				{#if transaction.outputs?.length > 0}
-					<Card 
-						title="Outputs" 
-						icon="fa-sign-out-alt" 
-						count={transaction.outputs.length}
-						noPadding={true}
-					>
-						<!-- Desktop/Tablet Table View -->
-						<div class="d-none d-md-block">
-							<DataTable 
-								headers={outputHeaders} 
-								data={transaction.outputs} 
-								loading={false}
-								sortable={false}
-							/>
-						</div>
-						
-						<!-- Mobile Card View -->
-						<div class="d-md-none">
-							{#each transaction.outputs as output, index}
-								<MobileTransactionCard 
-									item={output} 
-									{index} 
-									{getBoxStatus} 
-									{getStatusType} 
-									type="output"
-									disableBoxLink={!txIsConfirmed}
-								/>
-							{/each}
-						</div>
-					</Card>
 				{/if}
 
 				<!-- Transaction Details - Mobile Only -->
-				<div class="d-md-none">
+				<div class="d-block">
 					<Card title="Transaction Details" icon="fa-info-circle">
 						<TransactionDetailsSection 
 							{transaction} 
 							{txId} 
 							isConfirmed={txIsConfirmed} 
 							{feeAmount} 
-							{totalOutputValue} 
-							mobile={true}
+							{totalOutputValue}
 						/>
 					</Card>
 				</div>
@@ -321,14 +212,20 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 				{/if}
 
 				<!-- Raw Data -->
-				<Card title="Raw Transaction Data" icon="fa-code">
-					<div class="raw-data-header">
-						<CopyButton 
-							text={JSON.stringify(transaction, null, 2)}
-							label="Copy JSON"
-							successMessage="Raw transaction data copied to clipboard!"
-							size="small"
-						/>
+				<Card>
+					<div slot="header" class="d-flex justify-content-between align-items-center w-100">
+						<h5 class="card-title mb-0">
+							<i class="fas fa-code me-2"></i>
+							Raw Transaction Data
+						</h5>
+						<div class="ms-auto">
+							<CopyButton 
+								text={JSON.stringify(transaction, null, 2)}
+								label="Copy JSON"
+								successMessage="Raw transaction data copied to clipboard!"
+								size="small"
+							/>
+						</div>
 					</div>
 					<pre class="raw-data"><code>{JSON.stringify(transaction, null, 2)}</code></pre>
 				</Card>
@@ -411,9 +308,10 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 	/* Consolidated link styles */
 	:global(.address-link),
 	:global(.text-link),
-	:global(.box-link) {
+	:global(.box-link),
+	:global(.block-link) {
 		color: var(--text-strong);
-		text-decoration: none;
+		text-decoration: none !important;
 		font-weight: 500;
 		transition: color 0.3s ease;
 	}
@@ -425,10 +323,13 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 	:global(.address-link:hover),
 	:global(.text-link:hover) {
 		color: var(--main-color);
+		text-decoration: none !important;
 	}
 
-	:global(.box-link:hover) {
+	:global(.box-link:hover),
+	:global(.block-link:hover) {
 		color: var(--info-color);
+		text-decoration: none !important;
 	}
 
 	/* Scrollbar styles */
@@ -456,13 +357,16 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 		font-size: 0.9rem;
 	}
 
-	.raw-data-header {
-		display: flex;
-		justify-content: flex-end;
-		margin-bottom: 0.75rem;
-		padding-bottom: 0.5rem;
-		border-bottom: 1px solid var(--glass-border-light);
+	.tx-id-section {
+		padding: 0.5rem 0 0 0;
 	}
+
+	.tx-id-display {
+		color: var(--text-light);
+		font-size: 0.9rem;
+		opacity: 0.9;
+	}
+
 
 	.raw-data {
 		background: #000000;
@@ -544,10 +448,6 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 			padding: 0.25rem;
 		}
 		
-		.raw-data-header {
-			margin-bottom: 0.5rem;
-			padding-bottom: 0.25rem;
-		}
 	}
 
 	@media (max-width: 576px) {
@@ -596,6 +496,50 @@ import BoxLink from '$lib/components/ui/BoxLink.svelte';
 		50% { 
 			opacity: 0.8; 
 			transform: scale(1.02);
+		}
+	}
+
+	/* Inputs & Outputs Layout */
+	.inputs-outputs-container {
+		margin-bottom: 0rem;
+	}
+
+	.boxes-list {
+		max-height: 600px;
+		overflow-y: auto;
+		/* padding-right: 0.5rem; */
+	}
+
+	.boxes-list::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	.boxes-list::-webkit-scrollbar-track {
+		background: var(--glass-bg-subtle);
+		border-radius: 3px;
+	}
+
+	.boxes-list::-webkit-scrollbar-thumb {
+		background: var(--glass-border-medium);
+		border-radius: 3px;
+	}
+
+	.boxes-list::-webkit-scrollbar-thumb:hover {
+		background: var(--main-color);
+	}
+
+	/* Responsive adjustments */
+	@media (max-width: 767px) {
+		.inputs-outputs-container .row {
+			flex-direction: column;
+		}
+
+		.inputs-outputs-container .col-md-6 {
+			width: 100%;
+		}
+
+		.boxes-list {
+			max-height: 400px;
 		}
 	}
 

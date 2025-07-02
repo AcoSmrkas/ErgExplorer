@@ -316,12 +316,13 @@ tbody {
 
 /* Token link styling to match original */
 a {
-  text-decoration: none;
+  text-decoration: none !important;
   color: var(--text-color);
 }
 
 a:hover {
   color: var(--main-color) !important;
+  text-decoration: none !important;
 }
 
 /* Button styling superseded by glass system below */

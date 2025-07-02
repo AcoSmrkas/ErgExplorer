@@ -216,98 +216,103 @@
 
 
 <div class="row w-100 div-cell-dark"><!-- Column 1 -->
-<div class="col-md-6 col-lg-4 p-1 pe-0 ps-0 pe-lg-3">
-	<!-- ERG Price -->
-	<div class="d-flex align-items-stretch">
-		<div class="me-3 d-flex align-items-center justify-content-center index-card-symbol-holder">
-			<img id="erg-logo" src={getLogoSrc()} alt="Ergo coin" style="width:auto; height:48px;">
-		</div>
-		<div class="d-flex flex-column justify-content-between flex-grow-1 box-holder py-2">
-			<p class="mb-1">
-				<span class="erg-span"><b>ERG</b></span> price
-			</p>
-			<div class="d-flex align-items-center gap-2">
-				<h2 class="text-strong index-card-values mb-0 {priceAnimating ? 'value-animating' : ''}">
-					{#if animatedPrice > 0}
-						{formatCurrency(animatedPrice, 2)}
-					{:else}
-						--
+	<div class="col-md-6 col-lg-4 p-1 pe-0 ps-0 pe-lg-3 order-3">
+		<!-- ERG Price -->
+		<div class="d-flex align-items-stretch">
+			<div class="me-3 d-flex align-items-center justify-content-center index-card-symbol-holder">
+				<img id="erg-logo" src={getLogoSrc()} alt="Ergo coin" style="width:auto; height:48px;">
+			</div>
+			<div class="d-flex flex-column justify-content-between flex-grow-1 box-holder py-2">
+				<p class="mb-1">
+					<span class="erg-span"><b>ERG</b></span> price
+				</p>
+				<div class="d-flex align-items-center gap-2">
+					<h2 class="text-strong index-card-values mb-0 {priceAnimating ? 'value-animating' : ''}">
+						{#if animatedPrice > 0}
+							{formatCurrency(animatedPrice, 2)}
+						{:else}
+							--
+						{/if}
+					</h2>
+					{#if internalErgPrice && internalErgPrice.difference}
+						<span class="price-change {parseFloat(internalErgPrice.difference) >= 0 ? 'positive' : 'negative'}">
+							{parseFloat(internalErgPrice.difference) >= 0 ? '+' : ''}{formatNumber(parseFloat(internalErgPrice.difference), 2)}%
+						</span>
 					{/if}
+				</div>
+			</div>
+		</div>
+
+		<hr class="my-3">
+
+		<!-- Market Cap -->
+		<div class="d-flex align-items-stretch">
+			<div class="me-3 d-flex align-items-center justify-content-center index-card-symbol-holder">
+				<i class="fas fa-globe erg-span index-card-symbol"></i>
+			</div>
+			<div class="d-flex flex-column justify-content-between flex-grow-1 box-holder py-2">
+				<p class="mb-1 d-flex align-items-center">
+					<strong class="erg-span me-1"></strong>Market cap
+				</p>
+				<h2 class="text-strong index-card-values mb-0 d-flex align-items-center {marketCapAnimating ? 'value-animating' : ''}">
+					{animatedMarketCap > 0 ? formatCurrency(animatedMarketCap, 0) : '--'}
 				</h2>
-				{#if internalErgPrice && internalErgPrice.difference}
-					<span class="price-change {parseFloat(internalErgPrice.difference) >= 0 ? 'positive' : 'negative'}">
-						{parseFloat(internalErgPrice.difference) >= 0 ? '+' : ''}{formatNumber(parseFloat(internalErgPrice.difference), 2)}%
-					</span>
-				{/if}
 			</div>
 		</div>
 	</div>
 
-	<hr class="my-3">
+	<hr class="my-3 d-block d-md-none order-4">
 
-	<!-- Market Cap -->
-	<div class="d-flex align-items-stretch">
-		<div class="me-3 d-flex align-items-center justify-content-center index-card-symbol-holder">
-			<i class="fas fa-globe erg-span index-card-symbol"></i>
+	<!-- Column 2 -->
+	<div class="col-md-6 col-lg-4 p-1 pe-0 ps-0 pe-lg-3 order-5">
+		<!-- Block Height -->
+		<div class="d-flex align-items-stretch">
+			<div class="me-3 d-flex align-items-center justify-content-center index-card-symbol-holder">
+				<i class="fas fa-bars erg-span index-card-symbol"></i>
+			</div>
+			<div class="d-flex flex-column justify-content-between flex-grow-1 box-holder py-2">
+				<p class="mb-1">Block height</p>
+				<h2 class="text-strong index-card-values mb-0 {heightAnimating ? 'value-animating' : ''}">
+					{animatedHeight > 0 ? formatNumber(animatedHeight, 0) : '--'}
+				</h2>
+			</div>
 		</div>
-		<div class="d-flex flex-column justify-content-between flex-grow-1 box-holder py-2">
-			<p class="mb-1 d-flex align-items-center">
-				<strong class="erg-span me-1"></strong>Market cap
-			</p>
-			<h2 class="text-strong index-card-values mb-0 d-flex align-items-center {marketCapAnimating ? 'value-animating' : ''}">
-				{animatedMarketCap > 0 ? formatCurrency(animatedMarketCap, 0) : '--'}
-			</h2>
-		</div>
-	</div>
-</div>
 
-<!-- Spacer for mobile -->
-<hr class="my-3 d-block d-md-none">
+		<hr class="my-3">
 
-<!-- Column 2 -->
-<div class="col-md-6 col-lg-4 p-1 pe-0 ps-0 pe-lg-3">
-	<!-- Block Height -->
-	<div class="d-flex align-items-stretch">
-		<div class="me-3 d-flex align-items-center justify-content-center index-card-symbol-holder">
-			<i class="fas fa-bars erg-span index-card-symbol"></i>
-		</div>
-		<div class="d-flex flex-column justify-content-between flex-grow-1 box-holder py-2">
-			<p class="mb-1">Block height</p>
-			<h2 class="text-strong index-card-values mb-0 {heightAnimating ? 'value-animating' : ''}">
-				{animatedHeight > 0 ? formatNumber(animatedHeight, 0) : '--'}
-			</h2>
-		</div>
-	</div>
-
-	<hr class="my-3">
-
-	<!-- Total Transactions -->
-	<div class="d-flex align-items-stretch">
-		<div class="me-3 d-flex align-items-center justify-content-center index-card-symbol-holder">
-			<i class="fas fa-list erg-span index-card-symbol"></i>
-		</div>
-		<div class="d-flex flex-column justify-content-between flex-grow-1 box-holder py-2">
-			<p class="mb-1">
-				<strong class="erg-span"></strong>Total transactions
-			</p>
-			<h2 class="text-strong index-card-values mb-0 {txAnimating ? 'value-animating' : ''}">
-				{animatedTxCount > 0 ? formatNumber(animatedTxCount, 0) : '--'}
-			</h2>
+		<!-- Total Transactions -->
+		<div class="d-flex align-items-stretch">
+			<div class="me-3 d-flex align-items-center justify-content-center index-card-symbol-holder">
+				<i class="fas fa-list erg-span index-card-symbol"></i>
+			</div>
+			<div class="d-flex flex-column justify-content-between flex-grow-1 box-holder py-2">
+				<p class="mb-1">
+					<strong class="erg-span"></strong>Total transactions
+				</p>
+				<h2 class="text-strong index-card-values mb-0 {txAnimating ? 'value-animating' : ''}">
+					{animatedTxCount > 0 ? formatNumber(animatedTxCount, 0) : '--'}
+				</h2>
+			</div>
 		</div>
 	</div>
-</div>
 
-	<hr class="my-3 d-block d-lg-none">
-	<div class="col p-1 ps-lg-3 border-lg-start">
+	<div class="col-12 col-lg-auto p-1 ps-lg-3 pb-4 pb-lg-1 border-lg-start order-1 order-lg-5 d-flex flex-column">
 		<h2 class="erg-span" style="font-size:1.7em; margin-bottom: 16px;">Protocol information</h2>
 		
-		<h5 style="font-size:1em" class="text-light">Version: <span class="text-white">{internalProtocolInfo?.version || '--'}</span></h5>
-		<h5 style="font-size:1em" class="text-light">Hashrate: <span class="text-white">{internalProtocolInfo?.hashRate ? formatHashRate(internalProtocolInfo?.hashRate) : '--'}</span></h5>
-		<h5 style="font-size:1em" class="text-light">Circulating supply: <span class="text-white">
-			{@html internalProtocolInfo?.supply ? formatErgValue(internalProtocolInfo.supply / 1e9, 0) : '--'}
-		</span></h5>
-		<h5 style="font-size:1em" class="text-light mb-0">Max supply: <span class="text-white">97,739,924 <span class="erg-span">ERG</span></span></h5>
+		<div class="d-flex flex-column flex-md-row flex-lg-column">
+			<div class="d-flex flex-column flex-fill">
+				<h5 style="font-size:1em" class="text-light">Version: <span class="text-white">{internalProtocolInfo?.version || '--'}</span></h5>
+				<h5 style="font-size:1em" class="text-light">Hashrate: <span class="text-white">{internalProtocolInfo?.hashRate ? formatHashRate(internalProtocolInfo?.hashRate) : '--'}</span></h5>
+			</div>
+			<div class="d-flex flex-column flex-fill">
+				<h5 style="font-size:1em" class="text-light">Circulating supply: <span class="text-white">
+					{@html internalProtocolInfo?.supply ? formatErgValue(internalProtocolInfo.supply / 1e9, 0) : '--'}
+				</span></h5>
+				<h5 style="font-size:1em" class="text-light mb-0">Max supply: <span class="text-white">97,739,924 <span class="erg-span">ERG</span></span></h5>
+			</div>
+		</div>
 	</div>
+
 </div>
 
 <style>

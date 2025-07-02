@@ -299,7 +299,8 @@ html[data-theme="mew"] .enhanced-button--primary:hover {
    ============================================================================= */
 
 html[data-bs-theme="dark"] {
-  --striped-1: #25252588;
+  --striped-1: #20202088;
+  /* --striped-2: #20202022; */
   --text-color: #aaa;
   --forms-bg: #333;
   --borders: #4f4f4f;

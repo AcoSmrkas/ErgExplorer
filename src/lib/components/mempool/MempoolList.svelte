@@ -64,10 +64,25 @@
 		background: var(--main-color-hover);
 	}
 
-	/* Ensure table has minimum width to trigger scroll */
+	/* Remove table borders and ensure full width */
 	.custom-table-wrapper :global(.glass-table) {
-		min-width: 800px;
+		width: 100%;
+		border: none !important;
 	}
+
+	.custom-table-wrapper :global(.glass-table th),
+	.custom-table-wrapper :global(.glass-table td) {
+		border: none !important;
+	}
+
+	.custom-table-wrapper :global(.glass-table tbody tr) {
+		border-bottom: 1px solid var(--glass-border-light) !important;
+	}
+
+	.custom-table-wrapper :global(.glass-table tbody tr:last-child) {
+		border-bottom: none !important;
+	}
+
 
 	/* Mobile Card View Styling */
 	.mobile-view {

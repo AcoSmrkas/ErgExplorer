@@ -2,6 +2,7 @@
 	import { formatErgValue, formatFileSize, formatNumber, formatPriceUSD, formatAddress } from '$lib/utils/formatting.js';
 	import { ergPrice } from '$lib/stores/priceStore.js';
 	import { FEE_ERGOTREE, ERG_DECIMALS } from '$lib/utils/constants.js';
+	import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 
 	export let transaction;
 
@@ -18,6 +19,13 @@
 
 	$: fee = calculateFee(transaction);
 	$: totalValue = calculateTotalValue(transaction);
+	$: allAssets = (() => {
+		const movedAssets = boxResolutionService.extractMovedAssets(transaction);
+		return movedAssets.map(asset => 
+			asset.name || (asset.tokenId ? asset.tokenId.slice(0, 6) + '...' : 'Unknown')
+		);
+	})();
+	$: hasAssets = allAssets.length > 0;
 </script>
 
 <div class="glass-card">
@@ -73,6 +81,22 @@
 				{/if}
 			</span>
 		</div>
+		{#if hasAssets}
+			<div class="detail-row">
+				<span class="detail-label">Assets:</span>
+				<span class="detail-value">
+					<span class="asset-summary-mobile">
+						{#if allAssets.length === 1}
+							{allAssets[0]}
+						{:else if allAssets.length <= 3}
+							{allAssets.join(', ')}
+						{:else}
+							{allAssets.slice(0, 2).join(', ')} +{allAssets.length - 2} more
+						{/if}
+					</span>
+				</span>
+			</div>
+		{/if}
 		<div class="detail-row">
 			<span class="detail-label">Size:</span>
 			<span class="detail-value">{formatFileSize(transaction.size)}</span>
@@ -176,4 +200,13 @@
 		text-align: right;
 		word-break: break-word;
 	}
+
+	.asset-summary-mobile {
+		font-size: 0.8rem;
+		color: var(--text-strong);
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+	}
+
 </style>

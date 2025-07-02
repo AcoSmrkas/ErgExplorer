@@ -57,6 +57,7 @@
 		font-size: 0.7em;
 		opacity: 0.7;
 		margin-left: 6px;
+		max-height: fit-content;
 	}
 	
 	.copy-btn-inline:hover:not(:disabled) {

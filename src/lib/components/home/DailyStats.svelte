@@ -136,11 +136,6 @@
 	}
 
 	/* Using global card system - styles defined in common-components.css */
-	
-	.card-header {
-		padding: 1.5rem 2rem 1rem 2rem;
-	}
-
 	.section-title {
 		font-size: 1.5rem;
 	}

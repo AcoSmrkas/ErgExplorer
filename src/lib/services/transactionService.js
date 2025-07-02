@@ -1,8 +1,7 @@
 import { writable, derived, get } from "svelte/store";
 import { API_ENDPOINTS } from "$lib/utils/constants.js";
 import { socketService } from "./socketService.js";
-import { getBox } from "$lib/utils/api.js";
-import { formatAddress } from "$lib/utils/ergotreeUtils.js";
+import { boxResolutionService } from "./boxResolutionService.js";
 
 /**
  * Transaction monitoring service that handles both confirmed and unconfirmed transactions
@@ -19,6 +18,9 @@ class TransactionService {
     // Configuration
     this.POLLING_INTERVAL = 10000; // 10 seconds
     this.MAX_RETRIES = 180; // 30 minutes of monitoring (180 * 10s)
+
+    // Set up box resolution service with socket reference
+    boxResolutionService.setSocketService(socketService);
   }
 
   /**
@@ -411,62 +413,7 @@ class TransactionService {
    * @private
    */
   _processTransactionData(transaction) {
-    if (!transaction) return transaction;
-
-    console.log("Processing transaction data for address conversion");
-
-    // Process inputs - convert ergotrees to addresses if needed
-    const processedInputs =
-      transaction.inputs?.map((input) => {
-        const originalAddress = input.address;
-        const hasErgoTree = input.ergoTree && !input.address;
-        const convertedAddress = hasErgoTree
-          ? formatAddress(input.ergoTree)
-          : input.address;
-
-        if (hasErgoTree) {
-          console.log(
-            "Converted input ergotree to address:",
-            input.ergoTree.substring(0, 20) + "... → " + convertedAddress,
-          );
-        }
-
-        return {
-          ...input,
-          address: convertedAddress || "",
-        };
-      }) || [];
-
-    // Process outputs - convert ergotrees to addresses if needed
-    const processedOutputs =
-      transaction.outputs?.map((output) => {
-        const originalAddress = output.address;
-        const hasErgoTree = output.ergoTree && !output.address;
-        const convertedAddress = hasErgoTree
-          ? formatAddress(output.ergoTree)
-          : output.address;
-
-        if (hasErgoTree) {
-          console.log(
-            "Converted output ergotree to address:",
-            output.ergoTree.substring(0, 20) + "... → " + convertedAddress,
-          );
-        }
-
-        return {
-          ...output,
-          address: convertedAddress || "",
-        };
-      }) || [];
-
-    const processedTransaction = {
-      ...transaction,
-      inputs: processedInputs,
-      outputs: processedOutputs,
-    };
-
-    console.log("Address conversion completed");
-    return processedTransaction;
+    return boxResolutionService.processTransactionData(transaction);
   }
 
   /**
@@ -474,145 +421,10 @@ class TransactionService {
    * @private
    */
   async _resolveInputBoxData(transaction) {
-    if (!transaction?.inputs) return transaction;
-
-    console.log(
-      "Starting input box resolution for",
-      transaction.inputs.length,
-      "inputs",
-    );
-    const startTime = Date.now();
-
-    // Debug: Log input structure
-    console.log("Input structure sample:", transaction.inputs[0]);
-    console.log("Input keys:", Object.keys(transaction.inputs[0] || {}));
-
-    // Separate inputs that need resolution vs those that don't
-    const inputsNeedingResolution = [];
-    const inputsWithAssets = [];
-
-    transaction.inputs.forEach((input, index) => {
-      // Check if input has valid boxId
-      if (!input.boxId && !input.id) {
-        console.warn(`Input ${index} missing boxId/id:`, input);
-        return;
-      }
-
-      if (input.assets && input.assets.length > 0) {
-        inputsWithAssets.push({ input, index });
-      } else {
-        inputsNeedingResolution.push({ input, index });
-      }
+    return await boxResolutionService.resolveInputBoxData(transaction, {
+      prioritizeSocket: true,
+      maxConcurrency: 10,
     });
-
-    console.log(
-      `${inputsWithAssets.length} inputs already have assets, ${inputsNeedingResolution.length} need resolution`,
-    );
-
-    if (inputsNeedingResolution.length === 0) {
-      return transaction; // No resolution needed
-    }
-
-    // Create a copy of inputs array to fill in resolved data
-    const resolvedInputs = [...transaction.inputs];
-
-    // For unconfirmed transactions, most inputs will be confirmed boxes from the API
-    // Try socket first for potential chained transactions, but prioritize API calls
-    console.log("Checking socket for chained transactions...");
-    const socketBoxes = new Map();
-
-    // Quick check for any chained transactions in socket
-    inputsNeedingResolution.forEach(({ input, index }) => {
-      const boxId = input.boxId || input.id;
-      if (boxId) {
-        const socketBox = this._findBoxInSocketTransactions(boxId);
-        if (socketBox && socketBox.assets) {
-          console.log(
-            `Found input ${index} in socket with ${socketBox.assets.length} assets`,
-          );
-          socketBoxes.set(index, socketBox);
-        }
-      }
-    });
-
-    console.log(
-      `Socket resolved ${socketBoxes.size} inputs from chained transactions`,
-    );
-
-    // Apply socket resolutions
-    socketBoxes.forEach((socketBox, index) => {
-      const input = transaction.inputs[index];
-      resolvedInputs[index] = {
-        ...input,
-        assets: socketBox.assets || [],
-        address: socketBox.address || input.address,
-        value: socketBox.value || input.value,
-      };
-    });
-
-    // Get remaining inputs that need API resolution
-    const needingApiResolution = inputsNeedingResolution.filter(
-      ({ index }) => !socketBoxes.has(index),
-    );
-
-    if (needingApiResolution.length === 0) {
-      const elapsedTime = Date.now() - startTime;
-      console.log(
-        `Input box resolution completed in ${elapsedTime}ms (socket only)`,
-      );
-      return {
-        ...transaction,
-        inputs: resolvedInputs,
-      };
-    }
-
-    // Fetch all remaining inputs from API in parallel with aggressive optimization
-    console.log(
-      `Fetching ${needingApiResolution.length} inputs from boxes API in parallel...`,
-    );
-    const apiPromises = needingApiResolution.map(async ({ input, index }) => {
-      try {
-        // Use boxId or id as fallback
-        const boxId = input.boxId || input.id;
-        if (!boxId) {
-          console.warn(`Input ${index} has no valid boxId/id`);
-          return { index, resolved: false };
-        }
-
-        console.log(`Fetching box ${boxId} for input ${index}`);
-        const boxData = await getBox(boxId);
-        if (boxData) {
-          console.log(
-            `API resolved input ${index} with ${boxData.assets?.length || 0} assets`,
-          );
-          resolvedInputs[index] = {
-            ...input,
-            boxId: boxId, // Ensure boxId is set
-            assets: boxData.assets || [],
-            address: boxData.address || input.address,
-            value: boxData.value || input.value,
-          };
-          return { index, resolved: true };
-        }
-      } catch (error) {
-        const boxId = input.boxId || input.id;
-        console.warn(
-          `Failed to fetch box ${boxId} for input ${index}:`,
-          error.message,
-        );
-      }
-      return { index, resolved: false };
-    });
-
-    await Promise.all(apiPromises);
-
-    const elapsedTime = Date.now() - startTime;
-    console.log(`Input box resolution completed in ${elapsedTime}ms`);
-
-    return {
-      ...transaction,
-      inputs: resolvedInputs,
-    };
   }
 
   /**
@@ -620,21 +432,7 @@ class TransactionService {
    * @private
    */
   _findBoxInSocketTransactions(boxId) {
-    let foundBox = null;
-
-    // Get current mempool transactions from socket
-    socketService.getMempoolTransactions().subscribe((transactions) => {
-      for (const tx of transactions) {
-        // Check if this box is an output of another mempool transaction
-        const outputBox = tx.outputs?.find((output) => output.boxId === boxId);
-        if (outputBox) {
-          foundBox = outputBox;
-          break;
-        }
-      }
-    })();
-
-    return foundBox;
+    return boxResolutionService._findBoxInSocketTransactions(boxId);
   }
 
   /**
@@ -676,39 +474,42 @@ class TransactionService {
               `Transaction has ${inputsNeedingResolution} inputs needing asset resolution`,
             );
 
-            // For all sources with missing input data, show immediate update then resolve in background
+            // For all sources with missing input data, resolve in background without double-update
             if (inputsNeedingResolution > 0) {
               console.log(
                 `${updates.source} source with missing input assets - using background resolution`,
               );
 
-              // Show immediate update without waiting for input resolution
-              const immediateUpdates = {
-                ...updates,
-                data: processedTransaction,
-              };
-
-              monitoringData.store.set({
-                ...currentData,
-                ...immediateUpdates,
-              });
-
-              // Then resolve inputs in background and update again
+              // Resolve inputs in background and update once when complete
               this._resolveInputBoxData(processedTransaction)
                 .then((resolvedTransaction) => {
                   const currentStoreData = get(monitoringData.store);
-                  monitoringData.store.set({
-                    ...currentStoreData,
-                    data: resolvedTransaction,
-                    lastUpdate: new Date().toISOString(),
-                  });
-                  console.log("Background input box resolution completed");
+                  // Only update if the transaction is still being monitored
+                  if (transactions.has(txId)) {
+                    monitoringData.store.set({
+                      ...currentStoreData,
+                      ...updates,
+                      data: resolvedTransaction,
+                      lastUpdate: new Date().toISOString(),
+                    });
+                    console.log("Background input box resolution completed");
+                  }
                 })
                 .catch((error) => {
                   console.warn(
                     "Background input box resolution failed:",
                     error,
                   );
+                  // Update with unresolved data if resolution fails
+                  const currentStoreData = get(monitoringData.store);
+                  if (transactions.has(txId)) {
+                    monitoringData.store.set({
+                      ...currentStoreData,
+                      ...updates,
+                      data: processedTransaction,
+                      lastUpdate: new Date().toISOString(),
+                    });
+                  }
                 });
 
               return; // Exit early, background resolution will update later

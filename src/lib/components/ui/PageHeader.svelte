@@ -20,7 +20,7 @@
 				{title}
 			</h1>
 			{#if timestamp}
-				<span class="timestamp-inline">{formatDateString(timestamp)}</span>
+				<span class="timestamp-inline">{formatDateString(timestamp, true)}</span>
 			{:else if statusBadge}
 				<StatusBadge text={statusBadge.text} type={statusBadge.type} size="small" />
 			{/if}
@@ -32,6 +32,7 @@
 		{/if}
 		<slot name="info" />
 	</div>
+	<slot name="subtitle" />
 </div>
 
 <style>

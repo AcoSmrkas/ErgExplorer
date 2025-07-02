@@ -50,34 +50,36 @@ export function formatTokenAmount(amount, decimals = 0) {
   });
 }
 
-export function formatDateString(timestamp) {
+export function formatDateString(timestamp, full = false) {
   if (!timestamp) return "Unknown";
 
   const date = new Date(timestamp);
   const now = new Date();
   const diff = now - date;
 
-  // Less than 1 minute
-  if (diff < 60000) {
-    return "Just now";
-  }
+  if (!full) {
+    // Less than 1 minute
+    if (diff < 60000) {
+      return "Just now";
+    }
 
-  // Less than 1 hour
-  if (diff < 3600000) {
-    const minutes = Math.floor(diff / 60000);
-    return `${minutes}m ago`;
-  }
+    // Less than 1 hour
+    if (diff < 3600000) {
+      const minutes = Math.floor(diff / 60000);
+      return `${minutes}m ago`;
+    }
 
-  // Less than 24 hours
-  if (diff < 86400000) {
-    const hours = Math.floor(diff / 3600000);
-    return `${hours}h ago`;
-  }
+    // Less than 24 hours
+    if (diff < 86400000) {
+      const hours = Math.floor(diff / 3600000);
+      return `${hours}h ago`;
+    }
 
-  // Less than 7 days
-  if (diff < 604800000) {
-    const days = Math.floor(diff / 86400000);
-    return `${days}d ago`;
+    // Less than 7 days
+    if (diff < 604800000) {
+      const days = Math.floor(diff / 86400000);
+      return `${days}d ago`;
+    }
   }
 
   // Default to full date
@@ -87,6 +89,7 @@ export function formatDateString(timestamp) {
     date.toLocaleTimeString(undefined, {
       hour: "2-digit",
       minute: "2-digit",
+      second: "2-digit",
     })
   );
 }
