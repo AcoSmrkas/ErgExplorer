@@ -77,6 +77,9 @@
 					<a class="nav-link" class:active={isActive('/mempool')} href="/mempool">Mempool</a>
 				</li>
 				<li class="nav-item">
+					<a class="nav-link" class:active={isActive('/transaction-spider')} href="/transaction-spider">Spider Map</a>
+				</li>
+				<li class="nav-item">
 					<a class="nav-link" class:active={isActive('/addressbook')} href="/addressbook"rel="noopener">Address book</a>
 				</li>
 				<li class="nav-item">

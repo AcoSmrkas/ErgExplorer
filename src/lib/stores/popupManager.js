@@ -1,5 +1,6 @@
 // Centralized popup management system
 import { writable } from "svelte/store";
+import { registerPopup, unregisterPopup } from "./zIndexManager.js";
 
 /**
  * Creates a popup management system with hover behavior
@@ -28,6 +29,7 @@ export function createPopupManager(config) {
     loading: false,
     data: null,
     id: "",
+    zIndex: 1070, // Default z-index
     ...config.initialState,
   };
 
@@ -49,6 +51,12 @@ export function createPopupManager(config) {
     const x = event.clientX + 20;
     const y = event.clientY - 10;
 
+    // Generate a unique popup identifier
+    const popupId = `${popupClass}-${id}`;
+    
+    // Register popup and get z-index
+    const zIndex = registerPopup(popupId);
+
     // Show basic popup immediately with loading state
     popupState.set({
       ...initialState,
@@ -57,6 +65,8 @@ export function createPopupManager(config) {
       y,
       id,
       loading: true,
+      zIndex,
+      popupId, // Store the popup ID for cleanup
       ...extractedData,
     });
 
@@ -106,6 +116,17 @@ export function createPopupManager(config) {
     }
 
     hoverTimeout = setTimeout(() => {
+      // Get current state to access popupId
+      let currentState;
+      popupState.subscribe(state => {
+        currentState = state;
+      })();
+      
+      // Unregister popup to free up z-index
+      if (currentState.popupId) {
+        unregisterPopup(currentState.popupId);
+      }
+      
       popupState.set(initialState);
       currentId = null;
     }, hideDelay);

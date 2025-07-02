@@ -11,6 +11,7 @@
 	export let showCopy = true; // Whether to show copy button
 	export let linkClass = 'token-link'; // CSS class for the link
 	export let showIcon = true; // Whether to show token icon
+	export let disablePopup = false; // Whether to disable token popup activation
 	
 	// Format the display text - priority: name prop, then token name, then formatted tokenId
 	$: displayText = name || tokenName || (tokenId ? 
@@ -30,7 +31,7 @@
 		<a 
 			class={linkClass} 
 			href={tokenUrl} 
-			data-token-id={tokenId}
+			data-token-id={disablePopup ? null : tokenId}
 		>
 			{#if showIcon}
 				{@html tokenDisplay}

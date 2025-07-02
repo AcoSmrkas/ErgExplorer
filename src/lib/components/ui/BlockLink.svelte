@@ -11,6 +11,7 @@
 	export let linkClass = 'block-link'; // CSS class for the link
 	export let preferHeight = false; // Show height instead of ID when both available
 	export let onlyHeight = false;
+	export let disablePopup = false; // Whether to disable block popup activation
 	
 	// Determine what to display and what URL to use
 	$: {
@@ -42,8 +43,8 @@
 		<a 
 			class={linkClass} 
 			href={blockUrl} 
-			data-block-id={blockId}
-			data-block-height={blockHeight}
+			data-block-id={disablePopup ? null : blockId}
+			data-block-height={disablePopup ? null : blockHeight}
 		>
 			{displayText}
 		</a>

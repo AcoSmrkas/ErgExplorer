@@ -8,6 +8,7 @@
 	export let visible = false;
 	export let x = 0;
 	export let y = 0;
+	export let z = 0;
 	export let loading = false;
 	
 	$: hasDetailedData = block !== null && block !== undefined;
@@ -20,6 +21,7 @@
 	{visible}
 	{x}
 	{y}
+	{z}
 	{loading}
 	popupClass="block-popup"
 	icon="fa-cube"

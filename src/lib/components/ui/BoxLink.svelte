@@ -10,6 +10,7 @@
 	export let linkClass = 'box-link'; // CSS class for the link
 	export let disabled = false; // Whether to disable the link (for unconfirmed outputs)
 	export let disabledReason = 'Box not yet created'; // Tooltip for disabled state
+	export let disablePopup = false; // Whether to disable box popup activation
 	
 	// Format the display text - priority: name prop, then formatted boxId
 	$: displayText = name || (boxId ? 
@@ -32,7 +33,7 @@
 			<a 
 				class={linkClass} 
 				href={boxUrl} 
-				data-box-id={boxId}
+				data-box-id={disablePopup ? null : boxId}
 			>
 				{displayText}
 			</a>

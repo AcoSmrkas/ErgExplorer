@@ -1,11 +1,13 @@
 <script>
 	import { formatErgValue, formatAddress, formatDateString } from '$lib/utils/formatting.js';
 	import BasePopup from './BasePopup.svelte';
+    import BlockLink from './BlockLink.svelte';
 	
 	export let transaction = null;
 	export let visible = false;
 	export let x = 0;
 	export let y = 0;
+	export let z = 0;
 	export let loading = false;
 	export let transactionId = '';
 	
@@ -22,6 +24,7 @@ function getBlockUrl(blockId) {
 	{visible}
 	{x}
 	{y}
+	{z}
 	{loading}
 	popupClass="transaction-popup"
 	icon="fa-exchange-alt"
@@ -43,7 +46,14 @@ function getBlockUrl(blockId) {
 			
 			{#if transaction.blockId}
 				<div class="transaction-detail-row">
-					<strong>Block:</strong> <a href="{getBlockUrl(transaction.blockId)}" class="text-link">{formatAddress(transaction.blockId, 15, 4)}</a>
+					<strong>Block:</strong> 
+					<BlockLink
+						blockId={transaction.blockId}
+						blockHeight={transaction.inclusionHeight}
+						label={formatAddress(transaction.blockId, 15, 4)}
+						preferHeight={true}
+						onlyHeight={true}
+					/>
 				</div>
 			{/if}
 			

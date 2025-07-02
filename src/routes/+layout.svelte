@@ -70,7 +70,8 @@
 		y: 0,
 		data: null,
 		id: '',
-		loading: false
+		loading: false,
+		zIndex: 1070
 	});
 	
 	let addressPopup = $state({
@@ -79,7 +80,8 @@
 		y: 0,
 		data: null,
 		id: '',
-		loading: false
+		loading: false,
+		zIndex: 1070
 	});
 	
 	let blockPopup = $state({
@@ -88,7 +90,8 @@
 		y: 0,
 		data: null,
 		id: '',
-		loading: false
+		loading: false,
+		zIndex: 1070
 	});
 	
 	let transactionPopup = $state({
@@ -97,7 +100,8 @@
 		y: 0,
 		data: null,
 		id: '',
-		loading: false
+		loading: false,
+		zIndex: 1070
 	});
 	
 	let boxPopup = $state({
@@ -106,7 +110,8 @@
 		y: 0,
 		data: null,
 		id: '',
-		loading: false
+		loading: false,
+		zIndex: 1070
 	});
 	
 	// Subscribe to popup states
@@ -120,7 +125,8 @@
 				id: state.id,
 				loading: state.loading,
 				tokenName: state.tokenName || '',
-				tokenPrice: state.tokenPrice || null
+				tokenPrice: state.tokenPrice || null,
+				zIndex: state.zIndex || 1070
 			};
 		});
 		const unsubAddress = addressPopupState.subscribe(state => {
@@ -130,7 +136,8 @@
 				y: state.y,
 				data: state.data,
 				id: state.id,
-				loading: state.loading
+				loading: state.loading,
+				zIndex: state.zIndex || 1070
 			};
 		});
 		const unsubBlock = blockPopupState.subscribe(state => {
@@ -140,8 +147,12 @@
 				y: state.y,
 				data: state.data,
 				id: state.id,
-				loading: state.loading
+				loading: state.loading,
+				zIndex: state.zIndex || 1070
 			};
+			if (state.visible) {
+				console.log(`[LAYOUT] Block popup state updated - zIndex: ${blockPopup.zIndex}, visible: ${state.visible}`);
+			}
 		});
 		const unsubTransaction = transactionPopupState.subscribe(state => {
 			transactionPopup = { 
@@ -150,7 +161,8 @@
 				y: state.y,
 				data: state.data,
 				id: state.id,
-				loading: state.loading
+				loading: state.loading,
+				zIndex: state.zIndex || 1070
 			};
 		});
 		const unsubBox = boxPopupState.subscribe(state => {
@@ -160,7 +172,8 @@
 				y: state.y,
 				data: state.data,
 				id: state.id,
-				loading: state.loading
+				loading: state.loading,
+				zIndex: state.zIndex || 1070
 			};
 		});
 		
@@ -286,7 +299,7 @@
 	visible={tokenPopup.visible}
 	x={tokenPopup.x}
 	y={tokenPopup.y}
-	z={1080}
+	z={tokenPopup.zIndex}
 	token={tokenPopup.data}
 	tokenId={tokenPopup.id}
 	name={tokenPopup.tokenName || ''}
@@ -298,6 +311,7 @@
 	visible={addressPopup.visible}
 	x={addressPopup.x}
 	y={addressPopup.y}
+	z={addressPopup.zIndex}
 	address={addressPopup.id}
 	balance={addressPopup.data}
 	loading={addressPopup.loading}
@@ -307,6 +321,7 @@
 	visible={blockPopup.visible}
 	x={blockPopup.x}
 	y={blockPopup.y}
+	z={blockPopup.zIndex}
 	block={blockPopup.data}
 	blockId={blockPopup.id}
 	loading={blockPopup.loading}
@@ -319,12 +334,14 @@
 	transaction={transactionPopup.data}
 	transactionId={transactionPopup.id}
 	loading={transactionPopup.loading}
+	z={transactionPopup.zIndex}
 />
 
 <BoxPopup 
 	visible={boxPopup.visible}
 	x={boxPopup.x}
 	y={boxPopup.y}
+	z={boxPopup.zIndex}
 	boxData={boxPopup.data}
 	boxId={boxPopup.id}
 	loading={boxPopup.loading}

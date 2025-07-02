@@ -1,11 +1,13 @@
 // Box data caching service
 import { getBox } from "$lib/utils/api.js";
+import { API_ENDPOINTS } from "$lib/utils/constants.js";
 
 // In-memory cache for box data
 const boxCache = new Map();
 
 // Cache duration (5 minutes)
 const CACHE_DURATION = 5 * 60 * 1000;
+
 
 // Get cached box data or fetch from API
 export async function getCachedBoxData(boxId) {
@@ -22,6 +24,9 @@ export async function getCachedBoxData(boxId) {
   try {
     // Fetch fresh data from API
     const boxData = await getBox(boxId);
+
+    // The API should already include spentTransactionId if the box is spent
+    // No need to add artificial spending status
 
     // Cache the result
     boxCache.set(boxId, {

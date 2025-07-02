@@ -3,10 +3,14 @@
 	import { getAssetTitleParams } from '$lib/utils/tokenIcons.js';
 	import { currentPrices } from '$lib/stores/priceStore.js';
 	import BasePopup from './BasePopup.svelte';
+    import AddressLink from './AddressLink.svelte';
+    import BlockLink from './BlockLink.svelte';
+    import TransactionLink from './TransactionLink.svelte';
 	
 	export let visible = false;
 	export let x = 0;
 	export let y = 0;
+	export let z = 1070;
 	export let loading = false;
 	export let boxId = '';
 	export let boxData = null;
@@ -66,6 +70,7 @@
 	{visible}
 	{x}
 	{y}
+	{z}
 	{loading}
 	popupClass="box-popup"
 	icon="fa-cube"
@@ -81,27 +86,58 @@
 		<div class="box-details">
 			{#if boxData?.value !== undefined}
 				<div class="box-detail-row">
-					<strong>Value:</strong> {@html formatErgValue(boxData.value)} ERG
+					<strong>Value:</strong> {@html formatErgValue(boxData.value)}
 				</div>
 			{/if}
 			
 			{#if boxData?.address}
 				<div class="box-detail-row">
 					<strong>Address:</strong> 
-					<a href="/addresses/{boxData.address}" class="address-link">
-						{formatAddress(boxData.address, 8, 4)}
-					</a>
+					<AddressLink
+						address={boxData.address}
+						label={formatAddress(boxData.address, 8, 4)}
+					/>
 				</div>
 			{/if}
 			
 			{#if boxData?.creationHeight}
 				<div class="box-detail-row">
 					<strong>Creation Height:</strong> 
-					<a href="/blocks/{boxData.creationHeight}" class="text-link">
-						{formatNumber(boxData.creationHeight)}
-					</a>
+					<BlockLink
+						blockId={boxData.blockId}
+						blockHeight={boxData.creationHeight}
+						label={formatNumber(boxData.creationHeight)}
+						preferHeight={true}
+						onlyHeight={true}
+					/>
 				</div>
 			{/if}
+			
+			<!-- Box Status -->
+			<div class="box-detail-row">
+				<strong>Status:</strong> 
+				<span class="box-status {boxData?.spentTransactionId ? 'spent' : 'unspent'}">
+					{#if boxData?.spentTransactionId}
+						<i class="fas fa-arrow-right me-1"></i>
+						Spent
+					{:else}
+						<i class="fas fa-circle me-1"></i>
+						Unspent
+					{/if}
+				</span>
+				{#if boxData?.spentTransactionId}
+					<div class="spending-info">
+						<small>
+							Spent in: 
+							<TransactionLink
+								transactionId={boxData.spentTransactionId}
+								startChars={8}
+								endChars={4}
+							/>
+						</small>
+					</div>
+				{/if}
+			</div>
 			
 			<!-- Asset Holdings -->
 			{#if topAssets.length > 0}
@@ -222,5 +258,38 @@
 	.text-link:hover {
 		color: var(--main-color);
 		text-decoration: none;
+	}
+
+	.box-status {
+		display: inline-flex;
+		align-items: center;
+		font-weight: 600;
+		font-size: 0.85rem;
+	}
+
+	.box-status.spent {
+		color: #009688;
+	}
+
+	.box-status.spent i {
+		color: #009688;
+	}
+
+	.box-status.unspent {
+		color: #666;
+	}
+
+	.box-status.unspent i {
+		color: #666;
+	}
+
+	.spending-info {
+		margin-top: 4px;
+		margin-left: 16px;
+	}
+
+	.spending-info small {
+		color: var(--text-muted);
+		font-size: 0.75rem;
 	}
 </style>

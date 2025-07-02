@@ -8,6 +8,7 @@
 	export let endChars = 3; // Characters to show at end
 	export let showCopy = true; // Whether to show copy button
 	export let linkClass = 'transaction-link'; // CSS class for the link
+	export let disablePopup = false; // Whether to disable transaction popup activation
 	
 	// Format the display text - priority: name prop, then formatted transaction ID
 	$: displayText = name || (transactionId ? 
@@ -22,8 +23,8 @@
 		<a 
 			class={linkClass} 
 			href={transactionUrl} 
-			data-transaction-id={transactionId}
-			data-transaction-hover={transactionId}
+			data-transaction-id={disablePopup ? null : transactionId}
+			data-transaction-hover={disablePopup ? null : transactionId}
 		>
 			{displayText}
 		</a>

@@ -7,6 +7,7 @@
 	export let x = 0;
 	export let y = 0;
 	export let z = 1070;
+	
 	export let loading = false;
 	
 	// Header props
@@ -29,7 +30,7 @@
 {#if visible}
 	<div 
 		class="popup-base {popupClass} show" 
-		style="left: {x}px; top: {y}px; z-index: {z};"
+		style="left: {x}px; top: {y}px; z-index: {z} !important;"
 		in:fade={{ duration: 200 }}
 		out:fade={{ duration: 150 }}
 	>

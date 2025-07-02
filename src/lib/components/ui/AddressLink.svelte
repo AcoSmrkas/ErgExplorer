@@ -9,6 +9,7 @@
 	export let endChars = 3; // Characters to show at end
 	export let showCopy = true; // Whether to show copy button
 	export let linkClass = 'address-link'; // CSS class for the link
+	export let disablePopup = false; // Whether to disable address popup activation
 	
 	let currentAddressBook = [];
 	
@@ -41,7 +42,7 @@
 			<a 
 				class={linkClass} 
 				href={addressUrl} 
-				data-address={address}
+				data-address={disablePopup ? null : address}
 			>
 				{displayText}
 			</a>
