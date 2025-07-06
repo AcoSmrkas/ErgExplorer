@@ -9,7 +9,7 @@
 	import MempoolList from '$lib/components/mempool/MempoolList.svelte';
 	import { getMempool } from '$lib/utils/api.js';
 	import { createPaginationHandler } from '$lib/utils/usePagination.js';
-	import { FEE_ERGOTREE, ERG_DECIMALS, FEE_ADDRESS } from '$lib/utils/constants.js';
+	import { FEE_ERGOTREE, ERG_DECIMALS } from '$lib/utils/constants.js';
 	import { formatErgValue, formatFileSize, formatNumber, formatPriceUSD, formatAddress } from '$lib/utils/formatting.js';
 	import { ergPrice } from '$lib/stores/priceStore.js';
 	import { socketService } from '$lib/services/socketService.js';
@@ -17,6 +17,9 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 	import { addressBook } from '$lib/stores/addressBook.js';
 	import MempoolTransactionPopup from '$lib/components/mempool/MempoolTransactionPopup.svelte';
 	import { extractAddresses, generateAddressBadges, getKnownAddresses } from '$lib/utils/mempoolBadges.js';
+	import { hasTokenIcon, getTokenIcon } from '$lib/stores/tokenIconsStore.js';
+	import { sortAssetsByPriority } from '$lib/utils/assetSorting.js';
+	import { currentPrices } from '$lib/stores/priceStore.js';
     import { getAssetTitleParams } from '$lib/utils/tokenIcons';
 
 	let transactions = [];
@@ -33,6 +36,11 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 	let lastUpdate = null;
 	let resolvedTransactions = [];
 	let currentAddressBook = [];
+	let initialLoadComplete = false;
+	let assetResolutionInProgress = false;
+	let blockHeight = null;
+	let loadingStatus = 'connecting'; // 'connecting', 'waiting_data', 'api_fallback', 'loaded'
+	let isActualFallback = false; // Track if this is a real fallback after socket attempt
 
 	// Local popup state for mempool transactions
 	let transactionPopup = {
@@ -64,12 +72,14 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 	
 	const DEFAULT_LIMIT = 50;
 	const FALLBACK_REFRESH_INTERVAL = 10000; // 10 seconds
-	const SOCKET_WAIT_TIME = 3000; // Wait 3 seconds for socket connection before fallback
+	const SOCKET_WAIT_TIME = 5000; // Wait 5 seconds for socket connection before API fallback
+	const SOCKET_DATA_WAIT_TIME = 3000; // Wait 3 seconds for socket data after connection
 
 	// Socket store unsubscribe functions
 	let unsubscribeConnection;
 	let unsubscribeMempool;
 	let unsubscribeLastUpdate;
+	let unsubscribeHeight;
 
 	// Use pagination utility
 	$: pagination = createPaginationHandler($page, loadTransactions, DEFAULT_LIMIT);
@@ -203,38 +213,56 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 		return totalTransferred;
 	}
 
+	// Helper function to generate TokenLink-style HTML for assets
+	function generateAssetLinkHtml(asset) {
+		const tokenId = asset.tokenId;
+		const tokenName = asset.name;
+		const displayName = tokenName || (tokenId ? formatAddress(tokenId, 8, 4) : 'Unknown Token');
+		
+		// Generate icon HTML if available
+		let iconHtml = '';
+		if (hasTokenIcon(tokenId)) {
+			const iconUrl = getTokenIcon(tokenId);
+			iconHtml = `<img class="token-icon me-2" src="${iconUrl}" alt="${displayName}" onerror="this.remove()" style="width: 16px; height: 16px; border-radius: 50%; object-fit: cover;" />`;
+		}
+		
+		return `<a class="token-link" href="/tokens/${tokenId}" data-token-id="${tokenId}" data-token-name="${displayName}">
+			${iconHtml}${displayName}
+		</a>`;
+	}
+
 	// Helper function to calculate transaction priority score
 	function calculateTransactionPriority(tx) {
 		let score = 0;
 		
-		// 1. Fee priority (0-1000 points based on fee amount)
-		const fee = calculateFee(tx);
-		const feeScore = Math.min(fee / 1000000, 1000); // Scale fee to max 1000 points
-		score += feeScore;
-		
-		// 2. Storage rent bonus (500 points)
+		// 1. Storage rent bonus (highest priority - 2000 points)
 		const extractResult = extractAddresses(tx);
 		if (extractResult.hasStorageRent) {
-			score += 500;
+			score += 2000;
 		}
 		
-		// 3. Known entity involvement bonus (300 points)
+		// 2. Known entity involvement bonus (1500 points)
 		const knownAddresses = getKnownAddresses(extractResult.addressMap, currentAddressBook, 10);
 		if (knownAddresses.length > 0) {
-			score += 300;
+			score += 1500;
 		}
 		
-		// 4. Conflict group penalty (but keep them visible)
+		// 3. Conflict group bonus (1000 points to keep conflicts visible)
 		if (tx.conflictGroup) {
-			score += 100; // Small bonus to keep conflicts visible
+			score += 1000;
 		}
 		
-		// 5. Asset transfer bonus (100 points)
+		// 4. Asset transfer bonus (800 points)
 		const hasAssets = tx.inputs?.some(input => input.assets?.length > 0) || 
 						  tx.outputs?.some(output => output.assets?.length > 0);
 		if (hasAssets) {
-			score += 100;
+			score += 800;
 		}
+		
+		// 5. Fee priority (0-500 points based on fee amount, lower priority than badges)
+		const fee = calculateFee(tx);
+		const feeScore = Math.min(fee / 1000000, 500); // Scale fee to max 500 points
+		score += feeScore;
 		
 		// 6. Size efficiency bonus (smaller transactions get slight bonus)
 		const sizeBonus = tx.size ? Math.max(0, 50 - (tx.size / 1000)) : 0;
@@ -301,11 +329,14 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 						#${row.conflictGroup}
 					</span>` : '';
 				
-				// Extract addresses and generate address badges
-				const extractResult = extractAddresses(row);
-				const addressBadges = generateAddressBadges(extractResult, currentAddressBook);
+				// Extract addresses and generate address badges (cache by transaction ID)
+				if (!row._cachedBadges || row._badgesCacheKey !== currentAddressBook.length) {
+					const extractResult = extractAddresses(row);
+					row._cachedBadges = generateAddressBadges(extractResult, currentAddressBook);
+					row._badgesCacheKey = currentAddressBook.length;
+				}
 				
-				return `<a href="/transactions/${value}" class="height-link" data-transaction-hover="${value}">${formatAddress(value, 9, 4)}</a> ${conflictBadge} ${addressBadges}`;
+				return `<a href="/transactions/${value}" class="height-link" data-transaction-hover="${value}">${formatAddress(value, 9, 4)}</a> ${conflictBadge} ${row._cachedBadges}`;
 			}
 		},
 		{ 
@@ -341,16 +372,18 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 			label: 'Assets', 
 			field: null, 
 			render: (value, row) => {
-				const allAssets = new Set();
+				const allAssets = new Map(); // Use Map to deduplicate by tokenId
 				
 				// Extract assets from inputs and outputs
 				row.inputs?.forEach(input => {
 					input.assets?.forEach(asset => {
 						const displayName = asset.name || (asset.tokenId ? asset.tokenId.slice(0, 6) + '...' : 'Unknown');
-						allAssets.add({
+						allAssets.set(asset.tokenId, {
 							tokenId: asset.tokenId,
 							name: asset.name,
-							displayName: displayName
+							displayName: displayName,
+							amount: asset.amount || 0,
+							decimals: asset.decimals || 0
 						});
 					});
 				});
@@ -358,11 +391,19 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 				row.outputs?.forEach(output => {
 					output.assets?.forEach(asset => {
 						const displayName = asset.name || (asset.tokenId ? asset.tokenId.slice(0, 6) + '...' : 'Unknown');
-						allAssets.add({
-							tokenId: asset.tokenId,
-							name: asset.name,
-							displayName: displayName
-						});
+						// If asset already exists, combine amounts
+						const existing = allAssets.get(asset.tokenId);
+						if (existing) {
+							existing.amount = (existing.amount || 0) + (asset.amount || 0);
+						} else {
+							allAssets.set(asset.tokenId, {
+								tokenId: asset.tokenId,
+								name: asset.name,
+								displayName: displayName,
+								amount: asset.amount || 0,
+								decimals: asset.decimals || 0
+							});
+						}
 					});
 				});
 				
@@ -370,16 +411,17 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 					return '<span class="text-muted text-center">-</span>';
 				}
 				
-				const assetsList = Array.from(allAssets);
-				const fullList = assetsList.join(', ');
+				// Sort assets using shared utility
+				const assetsList = sortAssetsByPriority(Array.from(allAssets.values()), $currentPrices);
+				const fullList = assetsList.slice(1).map(asset => asset.displayName).join(', ');
 				
 				if (assetsList.length === 1) {
-					return `<div class="asset-container" title="${fullList}">
-						<div class="asset-name">${getAssetTitleParams(assetsList[0], assetsList[0].tokenId, assetsList[0].name)}</div>
+					return `<div class="asset-container" title="${assetsList[0].displayName}">
+						<div class="asset-name">${getAssetTitleParams(assetsList[0], assetsList[0].tokenId, assetsList[0].name, true, 20)}</div>
 					</div>`;
 				} else {
 					return `<div class="asset-container" title="${fullList}">
-						<div class="asset-name">${getAssetTitleParams(assetsList[0], assetsList[0].tokenId, assetsList[0].name)}</div>
+						<div class="asset-name">${getAssetTitleParams(assetsList[0], assetsList[0].tokenId, assetsList[0].name, true, 20)}</div>
 						<div class="asset-more">+${assetsList.length - 1} more</div>
 					</div>`;
 				}
@@ -402,13 +444,28 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 				isSocketConnected = status;
 			});
 
+			unsubscribeHeight = socketService.getNodeInfo().subscribe(nodeInfo => {
+				if (nodeInfo) {
+					blockHeight = nodeInfo.fullHeight;
+				}
+			})
+
 			unsubscribeMempool = socketService.getMempoolTransactions().subscribe(async (socketTransactions) => {
-				if (useRealTime && currentPage === 1 && socketTransactions.length > 0) {
+				if (useRealTime && currentPage === 1) {
+					// Always update transactions from socket for real-time updates
 					transactions = socketTransactions.slice(0, limit);
 					loading = false;
 					error = null;
-					// Start asset resolution in background
-					resolveAssetsInBackground(socketTransactions.slice(0, limit));
+					
+					// if (!initialLoadComplete) {
+						initialLoadComplete = true;
+						loadingStatus = 'loaded';
+						// Start asset resolution in background after initial load - ONLY ONCE
+						setTimeout(() => resolveAssetsInBackground(socketTransactions.slice(0, limit)), 500);
+					// } else {
+						// For subsequent updates, just update transactions without starting new resolution
+						// The resolved data will be mixed in by the UI components
+					// }
 				}
 			});
 
@@ -416,24 +473,8 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 				lastUpdate = timestamp;
 			});
 
-			// Wait for socket connection before falling back to API
-			setTimeout(async () => {
-				if (!isSocketConnected || !useRealTime || currentPage !== 1) {
-					await loadTransactions();
-					
-					// Start fallback polling if not using real-time or not on first page
-					if (!useRealTime || currentPage !== 1) {
-						startFallbackPolling();
-					}
-				} else {
-					// Socket is connected, but if no data comes in after another second, load via API
-					setTimeout(async () => {
-						if (loading) {
-							await loadTransactions();
-						}
-					}, 1000);
-				}
-			}, SOCKET_WAIT_TIME);
+			// Try socket-first approach: wait for socket connection and data
+			await trySocketFirst();
 
 			// Set up custom hover handlers for mempool transactions
 			setupMempoolTransactionHovers();
@@ -458,6 +499,109 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 		if (unsubscribeConnection) unsubscribeConnection();
 		if (unsubscribeMempool) unsubscribeMempool();
 		if (unsubscribeLastUpdate) unsubscribeLastUpdate();
+		if (unsubscribeHeight) unsubscribeHeight();
+	}
+
+	// Socket-first loading strategy
+	async function trySocketFirst() {
+		console.log('Trying socket-first approach for mempool data...');
+		loadingStatus = 'connecting';
+		
+		// If not on page 1 or not using real-time, skip socket and go straight to API
+		if (currentPage !== 1 || !useRealTime) {
+			console.log('Not page 1 or real-time disabled, using API directly');
+			loadingStatus = 'loaded'; // Don't show fallback message for direct API usage
+			await loadTransactions();
+			startFallbackPolling();
+			return;
+		}
+
+		try {
+			// Wait for socket connection
+			const socketConnected = await waitForSocketConnection();
+			
+			if (!socketConnected) {
+				console.log('Socket connection failed, falling back to API');
+				isActualFallback = true;
+				loadingStatus = 'api_fallback';
+				await loadTransactions();
+				startFallbackPolling();
+				return;
+			}
+
+			// Socket is connected, wait for mempool data
+			loadingStatus = 'waiting_data';
+			const socketHasData = await waitForSocketData();
+			
+			if (!socketHasData) {
+				console.log('Socket connected but no data received, falling back to API');
+				isActualFallback = true;
+				loadingStatus = 'api_fallback';
+				await loadTransactions();
+				startFallbackPolling();
+				return;
+			}
+
+			console.log('Successfully loaded data from socket');
+			loadingStatus = 'loaded';
+			// Data should already be loaded via the socket subscription
+			
+		} catch (error) {
+			console.error('Socket-first approach failed:', error);
+			isActualFallback = true;
+			loadingStatus = 'api_fallback';
+			await loadTransactions();
+			startFallbackPolling();
+		}
+	}
+
+	// Wait for socket to connect
+	function waitForSocketConnection() {
+		return new Promise((resolve) => {
+			const startTime = Date.now();
+			
+			const checkConnection = () => {
+				if (Date.now() - startTime > SOCKET_WAIT_TIME) {
+					console.log('Socket connection timeout');
+					resolve(false);
+					return;
+				}
+
+				if (isSocketConnected) {
+					console.log('Socket connected successfully');
+					resolve(true);
+				} else {
+					setTimeout(checkConnection, 200);
+				}
+			};
+
+			checkConnection();
+		});
+	}
+
+	// Wait for socket to provide mempool data
+	function waitForSocketData() {
+		return new Promise((resolve) => {
+			const startTime = Date.now();
+			
+			const checkData = () => {
+				if (Date.now() - startTime > SOCKET_DATA_WAIT_TIME) {
+					console.log('Socket data timeout');
+					resolve(false);
+					return;
+				}
+
+				// Check if we have transactions loaded (either from socket subscription or initial data)
+				if (transactions.length > 0 && !loading) {
+					console.log('Socket provided mempool data');
+					resolve(true);
+				} else {
+					setTimeout(checkData, 200);
+				}
+			};
+
+			checkData();
+		});
 	}
 
 	// Custom hover handler for mempool transactions to use existing data
@@ -592,9 +736,14 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 			totalItems = data.total || 0;
 			totalPages = Math.ceil(totalItems / limit);
 			
-			// Start asset resolution in background
+			if (!initialLoadComplete) {
+				initialLoadComplete = true;
+				loadingStatus = 'loaded';
+			}
+			
+			// Start asset resolution in background after a short delay to let initial UI render
 			if (transactions.length > 0) {
-				resolveAssetsInBackground(transactions);
+				setTimeout(() => resolveAssetsInBackground(transactions), 300);
 			}
 			
 		} catch (err) {
@@ -609,6 +758,11 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 		if (!txs || txs.length === 0) return;
 		
 		try {
+			assetResolutionInProgress = true;
+			
+			// Initialize resolved transactions with original data
+			resolvedTransactions = [...txs];
+			
 			// Process transactions in small batches to avoid overwhelming the API
 			const batchSize = 3;
 			const processedTxs = [];
@@ -636,17 +790,22 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 				const batchResults = await Promise.all(batchPromises);
 				processedTxs.push(...batchResults);
 				
+				// Update resolved transactions after each batch
+				resolvedTransactions = [...processedTxs, ...txs.slice(processedTxs.length)];
+				
 				// Small delay between batches to be gentle on the API
 				if (i + batchSize < txs.length) {
-					await new Promise(resolve => setTimeout(resolve, 100));
+					await new Promise(resolve => setTimeout(resolve, 150));
 				}
 			}
 			
-			// Update resolved transactions
+			// Final update with all resolved transactions
 			resolvedTransactions = processedTxs;
 			
 		} catch (error) {
 			console.error('Asset resolution failed:', error);
+		} finally {
+			assetResolutionInProgress = false;
 		}
 	}
 
@@ -708,11 +867,50 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 				<ErrorMessage message={error} type="danger" dismissible />
 			{/if}
 
+			<!-- Socket-first loading indicator -->
+			{#if loading && !initialLoadComplete}
+				<div class="socket-loading-indicator mb-3">
+					<div class="glass-card p-3">
+						<div class="d-flex align-items-center justify-content-center">
+							{#if loadingStatus === 'connecting'}
+								<i class="fas fa-wifi fa-pulse text-info me-2"></i>
+								<span class="text-muted">Connecting to real-time data stream...</span>
+							{:else if loadingStatus === 'waiting_data'}
+								<i class="fas fa-satellite-dish fa-spin text-info me-2"></i>
+								<span class="text-muted">Waiting for mempool data...</span>
+							{:else if loadingStatus === 'api_fallback' && isActualFallback}
+								<i class="fas fa-download fa-spin text-warning me-2"></i>
+								<span class="text-muted">Real-time unavailable, loading from API...</span>
+							{:else}
+								<i class="fas fa-clock fa-spin text-info me-2"></i>
+								<span class="text-muted">Loading mempool transactions...</span>
+							{/if}
+						</div>
+					</div>
+				</div>
+			{/if}
+
+			<!-- Asset resolution indicator -->
+			{#if assetResolutionInProgress && initialLoadComplete}
+				<div class="asset-resolution-indicator mb-3">
+					<div class="glass-card p-2">
+						<div class="d-flex align-items-center justify-content-center">
+							<i class="fas fa-cog fa-spin text-info me-2"></i>
+							<small class="text-muted">
+								Resolving asset details in background...
+							</small>
+						</div>
+					</div>
+				</div>
+			{/if}
 
 			<MempoolControls 
 				{isSocketConnected}
+				{loadingStatus}
+				{isActualFallback}
 				bind:showConflicts
 				{showInfoCard}
+				{blockHeight}
 				onDismissInfo={dismissInfoCard}
 			/>
 
@@ -765,7 +963,7 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 
 	/* Column width customization for assets column */
 	:global(.glass-table th:nth-child(6), .glass-table td:nth-child(6)) {
-		max-width: 180px;
+		max-width: 200px;
 		min-width: 120px;
 		width: 150px;
 		vertical-align: top;
@@ -911,6 +1109,31 @@ import { boxResolutionService } from '$lib/services/boxResolutionService.js';
 	:global(.badge-storage-rent) {
 		background: #f59e0b;
 		color: #1f2937;
+	}
+
+	/* Loading indicators */
+	.socket-loading-indicator {
+		animation: pulse-subtle 2s infinite;
+	}
+
+	.asset-resolution-indicator {
+		animation: pulse-subtle 2s infinite;
+	}
+
+	@keyframes pulse-subtle {
+		0%, 100% { opacity: 1; }
+		50% { opacity: 0.8; }
+	}
+
+	/* FontAwesome pulse animation */
+	:global(.fa-pulse) {
+		animation: fa-pulse 1s infinite steps(8);
+	}
+
+	@keyframes fa-pulse {
+		0% { opacity: 1; }
+		50% { opacity: 0.4; }
+		100% { opacity: 1; }
 	}
 
 </style>

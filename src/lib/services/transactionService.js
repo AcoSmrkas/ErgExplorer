@@ -21,6 +21,9 @@ class TransactionService {
 
     // Set up box resolution service with socket reference
     boxResolutionService.setSocketService(socketService);
+
+    // Set up real-time socket monitoring for mempool updates
+    this._setupMempoolMonitoring();
   }
 
   /**
@@ -133,38 +136,65 @@ class TransactionService {
   async _startMonitoring(txId) {
     console.log("Starting monitoring for txId:", txId);
 
-    // Wait for socket to be ready with data before checking it
-    const socketReady = await this._waitForSocketReady();
+    // For transaction pages, we want to prioritize socket data but not wait too long
+    // Check socket immediately if connected, otherwise fall back to API quickly
+    const isSocketConnected = await this._isSocketConnected();
+    
+    if (isSocketConnected) {
+      const socketTransaction = this._getFromSocket(txId);
+      if (socketTransaction) {
+        console.log("Found transaction in socket immediately - using with priority resolution");
+        
+        // Update UI immediately with socket data
+        const processedTransaction = this._processTransactionData(socketTransaction);
+        const monitoringData = this._getMonitoringData(txId);
+        
+        if (monitoringData) {
+          monitoringData.store.set({
+            txId,
+            data: processedTransaction,
+            status: "unconfirmed",
+            source: "socket",
+            lastUpdate: new Date().toISOString(),
+            retryCount: 0,
+            error: null,
+          });
+        }
+
+        // Start immediate priority box resolution in parallel (don't wait)
+        this._priorityResolveInputBoxes(txId, processedTransaction);
+        this._startPolling(txId);
+        return;
+      }
+    }
+
+    // Wait briefly for socket to get data, but with shorter timeout for transaction pages
+    const socketReady = await this._waitForSocketReady(1000); // Reduced from 2000ms
     console.log("Socket ready status:", socketReady);
 
     if (socketReady) {
-      // Socket is ready with data, check it first
       const socketTransaction = this._getFromSocket(txId);
-      console.log(
-        "Socket check result:",
-        socketTransaction ? "Found" : "Not found",
-      );
-
       if (socketTransaction) {
-        console.log("Using socket data immediately");
-        console.log(
-          "Socket transaction input count:",
-          socketTransaction.inputs?.length || 0,
-        );
-        console.log(
-          "Socket transaction inputs with assets:",
-          socketTransaction.inputs?.filter((i) => i.assets?.length > 0)
-            .length || 0,
-        );
+        console.log("Found transaction in socket after brief wait - using with priority resolution");
+        
+        // Update UI immediately with socket data
+        const processedTransaction = this._processTransactionData(socketTransaction);
+        const monitoringData = this._getMonitoringData(txId);
+        
+        if (monitoringData) {
+          monitoringData.store.set({
+            txId,
+            data: processedTransaction,
+            status: "unconfirmed",
+            source: "socket",
+            lastUpdate: new Date().toISOString(),
+            retryCount: 0,
+            error: null,
+          });
+        }
 
-        // For socket transactions, we know we'll likely need to fetch input boxes
-        // so start that process immediately in parallel with the UI update
-        await this._updateTransaction(txId, {
-          data: socketTransaction,
-          status: "unconfirmed",
-          source: "socket",
-          lastUpdate: new Date().toISOString(),
-        });
+        // Start immediate priority box resolution
+        this._priorityResolveInputBoxes(txId, processedTransaction);
         this._startPolling(txId);
         return;
       }
@@ -192,16 +222,6 @@ class TransactionService {
     // Check unconfirmed
     if (unconfirmedTx.status === "fulfilled" && unconfirmedTx.value) {
       console.log("Found in unconfirmed API");
-      console.log(
-        "API transaction input count:",
-        unconfirmedTx.value.inputs?.length || 0,
-      );
-      console.log(
-        "API transaction inputs with assets:",
-        unconfirmedTx.value.inputs?.filter((i) => i.assets?.length > 0)
-          .length || 0,
-      );
-
       await this._updateTransaction(txId, {
         data: unconfirmedTx.value,
         status: "unconfirmed",
@@ -220,6 +240,116 @@ class TransactionService {
       error: "Transaction not found",
       lastUpdate: new Date().toISOString(),
     });
+  }
+
+  /**
+   * Check if socket is currently connected (synchronous)
+   * @private
+   */
+  async _isSocketConnected() {
+    if (!socketService) return false;
+    
+    let isConnected = false;
+    socketService.getConnectionStatus().subscribe((status) => {
+      isConnected = status;
+    })();
+    
+    return isConnected;
+  }
+
+  /**
+   * Get monitoring data for a transaction
+   * @private
+   */
+  _getMonitoringData(txId) {
+    const transactions = get(this.monitoredTransactions);
+    return transactions.get(txId);
+  }
+
+  /**
+   * Set up real-time mempool monitoring for watched transactions
+   * @private
+   */
+  _setupMempoolMonitoring() {
+    if (!socketService) return;
+
+    // Subscribe to mempool updates and check for monitored transactions
+    socketService.getMempoolTransactions().subscribe((mempoolTransactions) => {
+      const transactions = get(this.monitoredTransactions);
+      
+      // Check each monitored transaction
+      for (const [txId, monitoringData] of transactions) {
+        const currentData = get(monitoringData.store);
+        
+        // Only check transactions that are still loading or need updates
+        if (currentData.status === 'loading' || currentData.source === null) {
+          const socketTransaction = mempoolTransactions.find(tx => tx.id === txId);
+          
+          if (socketTransaction) {
+            console.log(`Real-time: Found monitored transaction ${txId} in mempool`);
+            
+            // Update immediately with socket data
+            const processedTransaction = this._processTransactionData(socketTransaction);
+            monitoringData.store.set({
+              ...currentData,
+              data: processedTransaction,
+              status: "unconfirmed",
+              source: "socket_realtime",
+              lastUpdate: new Date().toISOString(),
+              retryCount: 0,
+              error: null,
+            });
+
+            // Start priority box resolution
+            this._priorityResolveInputBoxes(txId, processedTransaction);
+            
+            // Start polling if not already started
+            if (!this.pollingIntervals.has(txId)) {
+              this._startPolling(txId);
+            }
+          }
+        }
+        
+        // Also check for transactions that might have disappeared from mempool
+        else if (currentData.status === 'unconfirmed' && currentData.source === 'socket') {
+          const socketTransaction = mempoolTransactions.find(tx => tx.id === txId);
+          
+          if (!socketTransaction) {
+            console.log(`Real-time: Transaction ${txId} disappeared from mempool`);
+            // Don't immediately mark as dropped - let polling handle confirmation check
+          }
+        }
+      }
+    });
+  }
+
+  /**
+   * Priority box resolution for socket transactions - immediate and aggressive
+   * @private
+   */
+  async _priorityResolveInputBoxes(txId, transaction) {
+    console.log("Starting priority box resolution for transaction:", txId);
+    
+    try {
+      // Use aggressive resolution settings for transaction pages
+      const resolvedTransaction = await this._resolveInputBoxData(transaction, {
+        prioritizeSocket: true,
+        maxConcurrency: 20, // Higher concurrency for faster resolution
+      });
+      
+      const monitoringData = this._getMonitoringData(txId);
+      if (monitoringData) {
+        const currentData = get(monitoringData.store);
+        monitoringData.store.set({
+          ...currentData,
+          data: resolvedTransaction,
+          lastUpdate: new Date().toISOString(),
+        });
+        console.log("Priority box resolution completed for transaction:", txId);
+      }
+    } catch (error) {
+      console.warn("Priority box resolution failed for transaction:", txId, error);
+    }
   }
 
   /**
@@ -273,37 +403,46 @@ class TransactionService {
    * @private
    */
   _startPolling(txId) {
+    console.log(`Starting polling for transaction: ${txId}`);
     const intervalId = setInterval(async () => {
       const transactions = get(this.monitoredTransactions);
       const monitoringData = transactions.get(txId);
 
       if (!monitoringData) {
+        console.log(`Polling stopped for ${txId}: monitoring data not found`);
         clearInterval(intervalId);
         return;
       }
 
       const currentTx = get(monitoringData.store);
+      console.log(`Polling ${txId}: current status=${currentTx.status}, retryCount=${monitoringData.retryCount}`);
 
       // Stop polling if already confirmed or max retries reached
       if (
         currentTx.status === "confirmed" ||
         monitoringData.retryCount >= this.MAX_RETRIES
       ) {
+        console.log(`Stopping polling for ${txId}: status=${currentTx.status}, retryCount=${monitoringData.retryCount}`);
         this.stopMonitoring(txId);
         return;
       }
 
       // Check for confirmation first
+      console.log(`Polling ${txId}: checking for confirmation...`);
       const confirmedTx = await this._fetchConfirmed(txId);
       if (confirmedTx) {
-        this._updateTransaction(txId, {
+        console.log(`Polling ${txId}: CONFIRMED! Updating status...`);
+        await this._updateTransaction(txId, {
           data: confirmedTx,
           status: "confirmed",
           source: "confirmed_api",
           lastUpdate: new Date().toISOString(),
         });
+        console.log(`Polling ${txId}: stopping monitoring after confirmation`);
         this.stopMonitoring(txId);
         return;
+      } else {
+        console.log(`Polling ${txId}: still not confirmed`);
       }
 
       // Check if still in unconfirmed
@@ -332,10 +471,28 @@ class TransactionService {
           lastUpdate: new Date().toISOString(),
         });
       } else {
-        // Not in socket or unconfirmed API, might be dropped
+        // Not in socket or unconfirmed API - could be confirmed or dropped
+        console.log(`Transaction ${txId} disappeared from mempool - checking if confirmed before marking as dropped`);
+        
+        // When transaction disappears from mempool, check confirmation again with retry
+        // Sometimes there's a delay between confirmation and API availability
+        const confirmedTxRetry = await this._fetchConfirmed(txId, 2); // 2 attempts with backoff
+        if (confirmedTxRetry) {
+          console.log(`Transaction ${txId} was actually CONFIRMED (found on retry check)`);
+          await this._updateTransaction(txId, {
+            data: confirmedTxRetry,
+            status: "confirmed",
+            source: "confirmed_api",
+            lastUpdate: new Date().toISOString(),
+          });
+          this.stopMonitoring(txId);
+          return;
+        }
+        
+        // Still not confirmed, increment retry count
         monitoringData.retryCount++;
         console.log(
-          `Transaction ${txId} not found in mempool, retry ${monitoringData.retryCount}/2`,
+          `Transaction ${txId} not found in mempool or confirmed, retry ${monitoringData.retryCount}/2`,
         );
 
         // Update retry count in store immediately for UI feedback
@@ -345,13 +502,28 @@ class TransactionService {
         });
 
         if (monitoringData.retryCount >= 2) {
-          // Wait 2 intervals (20 seconds) before marking as dropped
-          console.log(`Transaction ${txId} appears to be dropped from mempool`);
+          // Final check for confirmation before marking as dropped
+          console.log(`Transaction ${txId} final confirmation check before marking as dropped`);
+          const finalConfirmedCheck = await this._fetchConfirmed(txId, 3); // 3 attempts with backoff
+          if (finalConfirmedCheck) {
+            console.log(`Transaction ${txId} was CONFIRMED on final check!`);
+            await this._updateTransaction(txId, {
+              data: finalConfirmedCheck,
+              status: "confirmed",
+              source: "confirmed_api",
+              lastUpdate: new Date().toISOString(),
+            });
+            this.stopMonitoring(txId);
+            return;
+          }
+          
+          // Definitely dropped now
+          console.log(`Transaction ${txId} appears to be dropped from mempool after final checks`);
           await this._updateTransaction(txId, {
             status: "dropped",
             error: "Transaction was dropped from mempool",
             dropReason:
-              "Transaction not found in mempool after 3 consecutive checks",
+              "Transaction not found in mempool or confirmed API after multiple checks",
             lastUpdate: new Date().toISOString(),
             previousStatus: currentTx.status,
           });
@@ -391,19 +563,34 @@ class TransactionService {
   }
 
   /**
-   * Fetch transaction from confirmed API
+   * Fetch transaction from confirmed API with retry logic
    * @private
    */
-  async _fetchConfirmed(txId) {
-    try {
-      const response = await fetch(
-        `${API_ENDPOINTS.ERGOPLATFORM}transactions/${txId}`,
-      );
-      if (response.ok) {
-        return await response.json();
+  async _fetchConfirmed(txId, retries = 1) {
+    for (let attempt = 0; attempt < retries; attempt++) {
+      try {
+        const response = await fetch(
+          `${API_ENDPOINTS.ERGOPLATFORM}transactions/${txId}`,
+        );
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`Found confirmed transaction ${txId} on attempt ${attempt + 1}`);
+          return data;
+        } else if (response.status === 404) {
+          console.log(`Confirmed API returned 404 for ${txId} on attempt ${attempt + 1}`);
+        } else {
+          console.warn(`Confirmed API returned ${response.status} for ${txId} on attempt ${attempt + 1}`);
+        }
+      } catch (error) {
+        console.warn(`Failed to fetch confirmed transaction ${txId} on attempt ${attempt + 1}:`, error);
       }
-    } catch (error) {
-      console.warn("Failed to fetch confirmed transaction:", error);
+      
+      // Wait before retry (exponential backoff)
+      if (attempt < retries - 1) {
+        const delay = Math.min(1000 * Math.pow(2, attempt), 5000); // 1s, 2s, 4s, max 5s
+        console.log(`Waiting ${delay}ms before retry ${attempt + 2} for ${txId}`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
     }
     return null;
   }
@@ -453,14 +640,11 @@ class TransactionService {
           // First, convert any ergotrees to addresses
           let processedTransaction = this._processTransactionData(updates.data);
 
-          // Then resolve input box data if it's unconfirmed
-          if (
-            updates.status === "unconfirmed" ||
-            !updates.data.inclusionHeight ||
-            updates.data.inclusionHeight === 0
-          ) {
+          // Only resolve input box data for unconfirmed transactions
+          // Confirmed transactions should already have complete data
+          if (updates.status === "unconfirmed") {
             console.log(
-              "Resolving input box data for transaction from source:",
+              "Resolving input box data for unconfirmed transaction from source:",
               updates.source,
             );
 
@@ -474,7 +658,7 @@ class TransactionService {
               `Transaction has ${inputsNeedingResolution} inputs needing asset resolution`,
             );
 
-            // For all sources with missing input data, resolve in background without double-update
+            // For unconfirmed transactions with missing input data, resolve in background
             if (inputsNeedingResolution > 0) {
               console.log(
                 `${updates.source} source with missing input assets - using background resolution`,
@@ -484,8 +668,8 @@ class TransactionService {
               this._resolveInputBoxData(processedTransaction)
                 .then((resolvedTransaction) => {
                   const currentStoreData = get(monitoringData.store);
-                  // Only update if the transaction is still being monitored
-                  if (transactions.has(txId)) {
+                  // Only update if the transaction is still being monitored and still unconfirmed
+                  if (transactions.has(txId) && currentStoreData.status === "unconfirmed") {
                     monitoringData.store.set({
                       ...currentStoreData,
                       ...updates,
@@ -502,7 +686,7 @@ class TransactionService {
                   );
                   // Update with unresolved data if resolution fails
                   const currentStoreData = get(monitoringData.store);
-                  if (transactions.has(txId)) {
+                  if (transactions.has(txId) && currentStoreData.status === "unconfirmed") {
                     monitoringData.store.set({
                       ...currentStoreData,
                       ...updates,
@@ -514,8 +698,10 @@ class TransactionService {
 
               return; // Exit early, background resolution will update later
             } else {
-              console.log("No input resolution needed");
+              console.log("No input resolution needed for unconfirmed transaction");
             }
+          } else if (updates.status === "confirmed") {
+            console.log("Transaction confirmed - using data as-is without box resolution");
           }
 
           processedUpdates = {
@@ -551,7 +737,9 @@ class TransactionService {
         newData.retryCount = updates.retryCount;
       }
 
+      // Always update the store immediately (especially important for confirmed status)
       monitoringData.store.set(newData);
+      console.log(`Transaction ${txId} updated to status: ${newData.status}`);
     }
   }
 

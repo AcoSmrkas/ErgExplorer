@@ -5,6 +5,7 @@
 	import { currentPrices } from '$lib/stores/priceStore.js';
 	import { tokenIconsStore } from '$lib/stores/tokenIconsStore.js';
 	import { getCachedTokens } from '$lib/stores/tokenCache.js';
+	import { sortAssetsByPriority } from '$lib/utils/assetSorting.js';
 
 	export let assets = [];
 
@@ -14,39 +15,8 @@
 	// Reactive dependency on token icons store to trigger re-render when icons are loaded
 	$: $tokenIconsStore && sortedAssets;
 
-	// Sort assets by priority: 1) USD value (if exists), 2) has token icon, 3) alphabetically
-	$: sortedAssets = enhancedAssets?.length > 0 ? [...enhancedAssets].sort((a, b) => {
-		const priceA = $currentPrices[a.tokenId];
-		const priceB = $currentPrices[b.tokenId];
-		const adjustedAmountA = a.amount / Math.pow(10, a.decimals || 0);
-		const adjustedAmountB = b.amount / Math.pow(10, b.decimals || 0);
-		const usdValueA = priceA ? adjustedAmountA * priceA : 0;
-		const usdValueB = priceB ? adjustedAmountB * priceB : 0;
-		
-		// First sort by USD value (descending)
-		if (usdValueA > 0 && usdValueB > 0) {
-			return usdValueB - usdValueA;
-		} else if (usdValueA > 0 && usdValueB === 0) {
-			return -1;
-		} else if (usdValueA === 0 && usdValueB > 0) {
-			return 1;
-		}
-		
-		// If both have no USD value, check for token icons
-		const titleA = getAssetTitleParams(null, a.tokenId, a.name, true);
-		const titleB = getAssetTitleParams(null, b.tokenId, b.name, true);
-		const hasIconA = titleA.includes('<img') || titleA.includes('token-icon');
-		const hasIconB = titleB.includes('<img') || titleB.includes('token-icon');
-		
-		if (hasIconA && !hasIconB) {
-			return -1;
-		} else if (!hasIconA && hasIconB) {
-			return 1;
-		}
-		
-		// Finally, sort alphabetically by name
-		return (a.name || '').localeCompare(b.name || '');
-	}) : [];
+	// Sort assets using shared utility
+	$: sortedAssets = enhancedAssets?.length > 0 ? sortAssetsByPriority(enhancedAssets, $currentPrices) : [];
 
 	// Enhance assets with token metadata when assets change
 	$: if (assets && assets.length > 0) {
@@ -87,7 +57,7 @@
 						const metadata = metadataMap.get(asset.tokenId);
 						return {
 							...asset,
-							name: asset.name || metadata?.name || `Token ${asset.tokenId?.slice(0, 8)}...`,
+							name: asset.name || metadata?.name || `${asset.tokenId?.slice(0, 8)}...`,
 							decimals: asset.decimals !== undefined ? asset.decimals : (metadata?.decimals || 0),
 							description: asset.description || metadata?.description,
 						};
@@ -96,7 +66,7 @@
 					// No valid token IDs, use raw assets with defaults
 					enhancedAssets = rawAssets.map(asset => ({
 						...asset,
-						name: asset.name || `Token ${asset.tokenId?.slice(0, 8)}...`,
+						name: asset.name || `${asset.tokenId?.slice(0, 8)}...`,
 						decimals: asset.decimals !== undefined ? asset.decimals : 0,
 					}));
 				}
@@ -109,7 +79,7 @@
 			// Fall back to raw assets with defaults
 			enhancedAssets = rawAssets.map(asset => ({
 				...asset,
-				name: asset.name || `Token ${asset.tokenId?.slice(0, 8)}...`,
+				name: asset.name || `${asset.tokenId?.slice(0, 8)}...`,
 				decimals: asset.decimals !== undefined ? asset.decimals : 0,
 			}));
 		} finally {

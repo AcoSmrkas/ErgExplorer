@@ -297,14 +297,12 @@ tbody {
 
 /* Token icon styling to match original */
 .token-icon {
-  max-width: 25px;
-  max-height: 25px;
-  line-height: 25px;
   display: inline-block;
 }
 
 .token-link {
   display: flex;
+  align-items: center;
   line-height: 25px;
 }
 
@@ -619,6 +617,16 @@ footer {
   position: relative;
   overflow: hidden;
   color: var(--text-strong) !important;
+}
+
+/* Fix ugly blue flash on focus/active states */
+.btn-outline-primary:focus,
+.btn-outline-primary:active,
+.btn-outline-primary.active {
+  background: var(--main-color) !important;
+  border-color: var(--main-color) !important;
+  color: white !important;
+  box-shadow: 0 0 0 0.2rem rgba(var(--main-color-rgb), 0.25) !important;
 }
 
 .btn-period {

@@ -6,7 +6,6 @@
 	import Loading from '$lib/components/ui/Loading.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import CopyButton from '$lib/components/ui/CopyButton.svelte';
-	import AddressLink from '$lib/components/ui/AddressLink.svelte';
 	import RawDataToggle from '$lib/components/ui/RawDataToggle.svelte';
 	import DetailRow from '$lib/components/ui/DetailRow.svelte';
 	import StatusBadge from '$lib/components/ui/StatusBadge.svelte';

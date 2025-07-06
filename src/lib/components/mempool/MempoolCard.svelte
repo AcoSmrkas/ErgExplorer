@@ -92,11 +92,21 @@
 						{@const extractResult = extractAddresses(transaction)}
 						{@const allKnownAddresses = getKnownAddresses(extractResult.addressMap, currentAddressBook)}
 						{@const nameDirections = new Map()}
+						{@const nameUrltypeDirections = new Map()}
 						{@const _ = allKnownAddresses.forEach(entry => {
-							const existing = nameDirections.get(entry.name) || { isInput: false, isOutput: false };
+							// Track by name only (including isLastOutput info)
+							const existing = nameDirections.get(entry.name) || { isInput: false, isOutput: false, hasLastOutput: false };
 							if (entry.direction.isInput) existing.isInput = true;
 							if (entry.direction.isOutput) existing.isOutput = true;
+							if (entry.direction.isLastOutput) existing.hasLastOutput = true;
 							nameDirections.set(entry.name, existing);
+							
+							// Track by name + urltype combination
+							const nameUrltype = `${entry.name}|${entry.urltype || ''}`;
+							const existingUrltype = nameUrltypeDirections.get(nameUrltype) || { isInput: false, isOutput: false };
+							if (entry.direction.isInput) existingUrltype.isInput = true;
+							if (entry.direction.isOutput) existingUrltype.isOutput = true;
+							nameUrltypeDirections.set(nameUrltype, existingUrltype);
 						})}
 						{@const seenNames = new Set()}
 						{@const uniqueKnownAddresses = allKnownAddresses.filter(entry => {
@@ -108,10 +118,18 @@
 							<span class="address-badge badge-storage-rent" title="Storage Rent Collection">📦 Storage</span>
 						{/if}
 						{#each uniqueKnownAddresses as entry}
-							{@const baseContent = entry.type || entry.name}
-							{@const nameDirection = nameDirections.get(entry.name) || { isInput: false, isOutput: false }}
-							{@const badgeContent = nameDirection.isInput && nameDirection.isOutput ? `↔${baseContent}` : entry.direction.isInput ? `${baseContent}→` : `→${baseContent}`}
-							<span class="address-badge {getBadgeClass(entry.type, entry.name)}" title="{entry.name}{entry.urltype ? ` (${entry.urltype})` : ''}">
+							{@const baseContent = entry.name}
+							{@const nameDirection = nameDirections.get(entry.name) || { isInput: false, isOutput: false, hasLastOutput: false }}
+							{@const nameUrltype = `${entry.name}|${entry.urltype || ''}`}
+							{@const nameUrltypeDirection = nameUrltypeDirections.get(nameUrltype) || { isInput: false, isOutput: false }}
+							{@const badgeContent = nameDirection.isInput && nameDirection.isOutput && !entry.direction.isLastOutput ? 
+								(nameUrltypeDirection.isInput && nameUrltypeDirection.isOutput ? 
+									`↔${baseContent}${entry.urltype ? ` (${entry.urltype})` : ""}` : 
+									`↔${baseContent}`) : 
+								entry.direction.isInput ? 
+									`${baseContent}${entry.urltype ? ` (${entry.urltype})` : ""}→` : 
+									`→${baseContent}${entry.urltype ? ` (${entry.urltype})` : ""}`}
+							<span class="address-badge {getBadgeClass(entry.urltype, entry.name)}" title="{entry.name}{entry.urltype ? ` (${entry.urltype})` : ''}">
 								{badgeContent}
 							</span>
 						{/each}

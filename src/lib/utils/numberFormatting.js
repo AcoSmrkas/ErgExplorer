@@ -40,7 +40,7 @@ export function nFormatter(
     minimumFractionDigits = digits;
   }
 
-  let split = num.toString().split["."];
+  let split = num.toString().split(".");
   if (split?.length == 2) {
     let allZero = true;
     for (let i = 0; i < split[1].length; i++) {
@@ -49,7 +49,6 @@ export function nFormatter(
         break;
       }
     }
-    console.log(allZero);
     if (allZero) {
       digits = 0;
     }
@@ -101,7 +100,7 @@ export function nFormatter(
  */
 export function formatNumber(value, maxDecimals = 0, minDecimals = 0) {
   if (value == null || isNaN(value)) return "—";
-
+  
   return value.toLocaleString("en-US", {
     maximumFractionDigits: maxDecimals,
     minimumFractionDigits: minDecimals,

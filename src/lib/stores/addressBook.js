@@ -1,10 +1,19 @@
 // Global address book service
 import { writable } from "svelte/store";
 import { getApiHost } from "../utils/constants.js";
-import axios from "axios";
 
 // Store for address book data
 export const addressBook = writable([]);
+//Tried address list
+let alreadyTried = new Map();
+
+// Local cache of address book for quick lookups
+let localAddressBook = [];
+
+// Subscribe to address book changes to keep local cache in sync
+addressBook.subscribe((book) => {
+  localAddressBook = book;
+});
 
 // Store for pending addresses to fetch
 const pendingAddresses = new Set();
@@ -23,17 +32,29 @@ export function addAddress(address) {
     return;
   }
 
+  // Check if we already have info for this address
+  const existingEntry = localAddressBook.find((entry) => entry.address === address);
+  if (existingEntry) {
+    return; // Already have info for this address
+  }
+
   pendingAddresses.add(address);
   addressesToFetch.push(address);
 
   // Debounce the fetch to collect multiple addresses
   if (!pendingPromise) {
-    pendingPromise = setTimeout(fetchAddressesInfo, 100);
+    pendingPromise = setTimeout(fetchAddressesInfo, 200);
   }
 }
 
 // Fetch address book info for collected addresses
 async function fetchAddressesInfo() {
+  for (let i = addressesToFetch.length - 1; i >= 0; i--) {
+    if (alreadyTried.has(addressesToFetch[i])) {
+      addressesToFetch.splice(addressesToFetch.indexOf(addressesToFetch[i]), 1);
+    }
+  }
+
   if (addressesToFetch.length === 0) {
     pendingPromise = null;
     return;
@@ -48,6 +69,7 @@ async function fetchAddressesInfo() {
     const formData = new URLSearchParams();
     addressesToQuery.forEach((address) => {
       formData.append("addresses[]", address);
+      alreadyTried.set(address, true);
     });
 
     const response = await fetch(
@@ -102,7 +124,7 @@ export function getOwner(address, currentAddressBook) {
   if (!address || !currentAddressBook) {
     return undefined;
   }
-
+  
   const entry = currentAddressBook.find((item) => item.address === address);
   if (!entry) {
     return undefined;

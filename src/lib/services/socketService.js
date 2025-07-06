@@ -14,6 +14,7 @@ class SocketService {
     // Reactive stores
     this.connectionStatus = writable(false);
     this.mempoolTransactions = writable([]);
+    this.nodeInfo = writable(null);
     this.lastUpdate = writable(null);
   }
 
@@ -55,6 +56,11 @@ class SocketService {
       console.error("Socket connection error:", error);
       this.isConnected = false;
       this.connectionStatus.set(false);
+    });
+
+    this.socket.on("info", (info) => {
+      console.log("Socket info:", info);
+      this.nodeInfo.set(info);
     });
 
     // Listen for mempool updates
@@ -128,6 +134,10 @@ class SocketService {
   // Get last update time store
   getLastUpdate() {
     return this.lastUpdate;
+  }
+
+  getNodeInfo() {
+    return this.nodeInfo;
   }
 }
 

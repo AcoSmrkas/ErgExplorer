@@ -2,8 +2,6 @@ import { ERG_DECIMALS } from "$lib/utils/constants.js";
 import {
   nFormatter,
   formatNumber as formatNum,
-  formatPercentage,
-  formatHashRate as formatHashRateUtil,
 } from "./numberFormatting.js";
 
 export const ERG_SPAN = ' <span class="erg-span">ERG</span>';
@@ -103,40 +101,27 @@ export function formatFileSize(bytes) {
   return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + " " + sizes[i];
 }
 
-export function formatNumber(num, decimals = 0, addCommas = true) {
-  if (num == null || isNaN(num)) return "0";
+// Re-export formatNumber from numberFormatting for consistency  
+export { formatNumber } from "./numberFormatting.js";
 
-  if (addCommas) {
-    return formatNum(num, decimals, 0);
-  }
-
-  return parseFloat(num).toFixed(decimals);
-}
-
-// Large number formatting with abbreviated suffixes (M, B, T)
+// Large number formatting with abbreviated suffixes (M, B, T) - alias for nFormatter
 export function formatNumberLarge(num, decimals = 2, symbol = true) {
   if (num == null || isNaN(num)) return "0";
-
   return nFormatter(num, decimals, !symbol);
 }
 
 // Currency formatting with consistent decimal places
 export function formatCurrency(amount, decimals = 2) {
   if (amount == null || isNaN(amount)) return "$0.00";
-
   return "$" + formatNum(amount, decimals, decimals);
 }
 
-// Percentage formatting with styling
-export function formatPercentageStyled(value, decimals = 2) {
-  if (value == null || isNaN(value)) return "—";
+// Alias for formatPercentage for backward compatibility
+export { formatPercentage as formatPercentageStyled } from "./numberFormatting.js";
 
-  return formatPercentage(value, decimals);
-}
-
+// Alias for nFormatter
 export function formatNumberShort(num, decimals = 0) {
   if (num == null || isNaN(num)) return "0";
-
   return nFormatter(num, decimals);
 }
 
@@ -204,8 +189,5 @@ export function formatMiningTime(milliseconds) {
   return `${seconds}s`;
 }
 
-export function formatHashRate(hashRate) {
-  if (!hashRate) return "0 H/s";
-
-  return formatHashRateUtil(hashRate);
-}
+// Re-export formatHashRate from numberFormatting
+export { formatHashRate } from "./numberFormatting.js";

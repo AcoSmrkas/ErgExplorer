@@ -95,7 +95,8 @@
 					<strong>Address:</strong> 
 					<AddressLink
 						address={boxData.address}
-						label={formatAddress(boxData.address, 8, 4)}
+						startChars={8}
+						endChars={4}
 					/>
 				</div>
 			{/if}

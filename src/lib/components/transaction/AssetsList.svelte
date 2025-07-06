@@ -5,40 +5,12 @@
 	import { currentPrices } from '$lib/stores/priceStore.js';
 	import { tokenIconsStore } from '$lib/stores/tokenIconsStore.js';
 	import TokenLink from '$lib/components/ui/TokenLink.svelte';
+	import { sortAssetsByPriority } from '$lib/utils/assetSorting.js';
 
 	export let assets = [];
 
-	// Sort assets by priority: 1) USD value (if exists), 2) has token icon, 3) alphabetically
-	$: sortedAssets = assets?.length > 0 ? [...assets].sort((a, b) => {
-		const priceA = $currentPrices[a.tokenId];
-		const priceB = $currentPrices[b.tokenId];
-		const adjustedAmountA = a.amount / Math.pow(10, a.decimals || 0);
-		const adjustedAmountB = b.amount / Math.pow(10, b.decimals || 0);
-		const usdValueA = priceA ? adjustedAmountA * priceA : 0;
-		const usdValueB = priceB ? adjustedAmountB * priceB : 0;
-		
-		// First sort by USD value (descending)
-		if (usdValueA > 0 && usdValueB > 0) {
-			return usdValueB - usdValueA;
-		} else if (usdValueA > 0 && usdValueB === 0) {
-			return -1;
-		} else if (usdValueA === 0 && usdValueB > 0) {
-			return 1;
-		}
-		
-		// If both have no USD value, check for token icons
-		const hasIconA = hasTokenIcon(a.tokenId);
-		const hasIconB = hasTokenIcon(b.tokenId);
-		
-		if (hasIconA && !hasIconB) {
-			return -1;
-		} else if (!hasIconA && hasIconB) {
-			return 1;
-		}
-		
-		// Finally, sort alphabetically by name
-		return (a.name || '').localeCompare(b.name || '');
-	}) : [];
+	// Sort assets using shared utility
+	$: sortedAssets = assets?.length > 0 ? sortAssetsByPriority(assets, $currentPrices) : [];
 
 	function getAssetAmount(asset) {
 		return formatValue(asset.amount / Math.pow(10, asset.decimals || 0), 0, false, false, true);

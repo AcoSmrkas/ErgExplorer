@@ -70,7 +70,7 @@
 	<meta name="description" content="View transaction details, inputs, outputs, and fees for Ergo transaction {txId}">
 </svelte:head>
 
-{#if transaction || $monitoredTransaction?.data}
+{#if (transaction || $monitoredTransaction?.data) && $monitoredTransaction?.status !== 'dropped' && $monitoredTransaction?.status !== 'error'}
 	<div class="container-fluid p-0">
 		<div class="row p-0">
 			<div class="col-12 p-0">
@@ -526,7 +526,6 @@
 			max-height: 400px;
 		}
 	}
-
 
 
 </style>

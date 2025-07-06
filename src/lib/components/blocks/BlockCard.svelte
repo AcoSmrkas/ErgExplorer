@@ -17,7 +17,7 @@
 			<div class="block-info">
 				<div class="block-height">
 					<a href="/blocks/{block.id}" class="height-link">
-						Block #{formatNumber(block.height, 0, true)}
+						Block #{formatNumber(block.height)}
 					</a>
 				</div>
 				<div class="block-time">{formatDateString(block.timestamp)}</div>

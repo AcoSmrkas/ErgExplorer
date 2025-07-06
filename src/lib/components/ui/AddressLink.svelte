@@ -2,14 +2,26 @@
 	import { addressBook, addAddress, getOwner } from '$lib/stores/addressBook.js';
 	import CopyButton from './CopyButton.svelte';
 	import { formatAddress } from '$lib/utils/formatting.js';
+	import { createEventDispatcher } from 'svelte';
 	
+	const dispatch = createEventDispatcher();
+	
+	// Address and display props
 	export let address = '';
-	export let name = ''; // Optional display name instead of address
-	export let startChars = 9; // Characters to show at start
-	export let endChars = 3; // Characters to show at end
-	export let showCopy = true; // Whether to show copy button
-	export let linkClass = 'address-link'; // CSS class for the link
-	export let disablePopup = false; // Whether to disable address popup activation
+	export let name = ''; // Optional display name override
+	export let displayLength = 12; // For both start and end when using simple truncation
+	export let startChars = null; // Explicit start chars (overrides displayLength)
+	export let endChars = null; // Explicit end chars (overrides displayLength)
+	
+	// Feature toggles
+	export let linkToAddress = true;
+	export let showCopy = true;
+	export let showOwner = true; // Show owner badge from known addresses
+	export let disablePopup = false;
+	
+	// Styling
+	export let linkClass = 'address-link';
+	export let displayClass = '';
 	
 	let currentAddressBook = [];
 	
@@ -18,12 +30,29 @@
 		currentAddressBook = value;
 	});
 	
-	// Get owner name from address book
-	$: ownerName = getOwner(address, currentAddressBook);
+	// Get owner name from address book or hardcoded known addresses
+	function getOwnerName(addr, currentAddressBook) {
+		if (!showOwner) return null;
+
+		// First check the address book
+		const bookOwner = getOwner(addr, currentAddressBook);
+		if (bookOwner) return bookOwner;
+		
+		// Fallback to hardcoded known addresses for backwards compatibility
+		const knownAddresses = {
+			'9hiaAS3pCydq12CS7xrTBBn2YTfdfSRCsXyQn9KZHVpVyEPk9zk': 'ErgExplorer',
+			// Add more known addresses here
+		};
+		return knownAddresses[addr] || null;
+	}
 	
-	// Format the display text - priority: name prop, then address book name, then formatted address
-	$: displayText = name || ownerName || (address ? 
-		formatAddress(address, startChars, endChars) : 'Unknown Address');
+	// Calculate display parameters
+	$: actualStartChars = startChars !== null ? startChars : displayLength;
+	$: actualEndChars = endChars !== null ? endChars : displayLength;
+	
+	// Format the display text - priority: name prop, then owner name, then formatted address
+	$: displayText = getOwnerName(address, currentAddressBook) || name || (address ? 
+		formatAddress(address, actualStartChars, actualEndChars) : 'Unknown Address');
 	
 	$: addressUrl = `/addresses/${address}`;
 	
@@ -32,20 +61,60 @@
 		addAddress(address);
 	}
 	
+	async function copyToClipboard() {
+		if (!showCopy || !address) return;
+		
+		try {
+			await navigator.clipboard.writeText(address);
+			
+			// Show toast notification
+			const toast = document.getElementById('liveToast');
+			if (toast) {
+				const bsToast = new bootstrap.Toast(toast);
+				bsToast.show();
+			}
+			
+			dispatch('copied', { address });
+		} catch (err) {
+			console.error('Failed to copy address:', err);
+		}
+	}
+	
+	function handleClick(event) {
+		if (showCopy && !linkToAddress) {
+			event.preventDefault();
+			copyToClipboard();
+		}
+	}
 </script>
 
 {#if address}
-	<span class="address-link-wrapper">
+	<div class="address-display {displayClass}">
 		{#if displayText == 'N/A' || displayText == 'Multiple'}
-			N/A
+			<span class="text-muted">N/A</span>
 		{:else}
-			<a 
-				class={linkClass} 
-				href={addressUrl} 
-				data-address={disablePopup ? null : address}
-			>
-				{displayText}
-			</a>
+			{#if linkToAddress}
+				<a 
+					class={linkClass} 
+					href={addressUrl}
+					data-address={disablePopup ? null : address}
+					on:click={handleClick}
+				>
+					{displayText}
+				</a>
+			{:else}
+				<!-- svelte-ignore a11y_click_events_have_key_events -->
+				<!-- svelte-ignore a11y_no_static_element_interactions -->
+				<span 
+					class="address-text" 
+					title={address} 
+					on:click={handleClick}
+					class:clickable={showCopy}
+				>
+					{displayText}
+				</span>
+			{/if}
+			
 			{#if showCopy}
 				<CopyButton 
 					text={address} 
@@ -57,7 +126,7 @@
 				/>
 			{/if}
 		{/if}
-	</span>
+	</div>
 {:else}
 	<span class="text-muted">N/A</span>
 {/if}

@@ -1,4 +1,4 @@
-import { getBox } from "$lib/utils/api.js";
+import { getCachedBoxData } from "$lib/stores/boxCache.js";
 import { formatAddress } from "$lib/utils/ergotreeUtils.js";
 
 /**
@@ -117,10 +117,11 @@ class BoxResolutionService {
       socketBoxes.forEach((socketBox, index) => {
         const input = transaction.inputs[index];
         resolvedInputs[index] = {
-          ...input,
-          assets: socketBox.assets || [],
-          address: socketBox.address || input.address,
-          value: socketBox.value || input.value,
+          ...input, // Preserve ALL original input fields (including transactionId, spendingProof, etc.)
+          ...socketBox, // Add ALL socket box data fields
+          // Override specific fields where input should take precedence
+          id: input.id || socketBox.id, // Preserve original input ID if it exists
+          boxId: input.boxId || socketBox.boxId || socketBox.id, // Ensure boxId is set
         };
       });
     }
@@ -143,8 +144,6 @@ class BoxResolutionService {
       resolvedInputs,
       maxConcurrency,
     );
-
-    const elapsedTime = Date.now() - startTime;
 
     return {
       ...transaction,
@@ -170,14 +169,14 @@ class BoxResolutionService {
             return { index, resolved: false };
           }
 
-          const boxData = await getBox(boxId);
+          const boxData = await getCachedBoxData(boxId);
           if (boxData) {
             resolvedInputs[index] = {
-              ...input,
-              boxId: boxId,
-              assets: boxData.assets || [],
-              address: boxData.address || input.address,
-              value: boxData.value || input.value,
+              ...input, // Preserve ALL original input fields (including transactionId, spendingProof, etc.)
+              ...boxData, // Add ALL box data fields
+              boxId: boxId, // Ensure boxId is set
+              // Override specific fields where input should take precedence
+              id: input.id || boxData.id, // Preserve original input ID if it exists
             };
             return { index, resolved: true };
           }

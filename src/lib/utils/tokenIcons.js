@@ -39,6 +39,7 @@ export function getAssetTitleParams(
   tokenId,
   name,
   iconIsToTheLeft,
+  iconSize = 25,
   scam = false,
 ) {
   if (tokenId === undefined && name === "ERG") {
@@ -72,7 +73,10 @@ export function getAssetTitleParams(
 
   // Create icon HTML if we have an image source
   const iconHtml = imgSrc
-    ? `<img class="token-icon me-2" src="${imgSrc}" alt="${displayName}" onerror="this.remove()" />`
+    ? `<img class="token-icon me-2" style="
+  max-width: ${iconSize}px;
+  max-height: ${iconSize}px;
+  line-height: ${iconSize}px;" src="${imgSrc}" alt="${displayName}" onerror="this.remove()" />`
     : "";
 
   // Return the complete link like the original

@@ -16,7 +16,7 @@ export function getLatestBlocksHeaders() {
       label: "Height",
       field: "height",
       render: (value, row) =>
-        `<a href="/blocks/${row.id}" data-block-id="${row.id}" class="height-link">${formatNumber(value, 0, true)}</a>`,
+        `<a href="/blocks/${row.id}" data-block-id="${row.id}" class="height-link">${formatNumber(value)}</a>`,
     },
     {
       label: "Time",

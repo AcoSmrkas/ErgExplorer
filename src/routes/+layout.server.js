@@ -7,11 +7,17 @@ async function loadCurrentPrices() {
   try {
     const prices = { ERG: 0 };
 
-    // Load ERG price first
-    const ergResponse = await fetch(
-      `${API_ENDPOINTS.ERGEXPLORER}tokens/getErgPrice`,
-    );
+    // Get token prices from Spectrum
+    const [ergResponse, marketsResponse, poolsResponse] = await Promise.all([
+      fetch(`${API_ENDPOINTS.ERGEXPLORER}tokens/getErgPrice`),
+      fetch(`${API_ENDPOINTS.SPECTRUM}price-tracking/markets`),
+      fetch(`${API_ENDPOINTS.SPECTRUM}amm/pools/stats`),
+    ]);
+
     const ergData = await ergResponse.json();
+    const marketsData = await marketsResponse.json();
+    const poolsData = await poolsResponse.json();
+
     if (ergData.items?.[0]) {
       prices["ERG"] = parseFloat(ergData.items[0].value);
       // Also store the full ERG price data for components that need percentage change
@@ -21,15 +27,6 @@ async function loadCurrentPrices() {
         timestamp: ergData.items[0].timestamp,
       };
     }
-
-    // Get token prices from Spectrum
-    const [marketsResponse, poolsResponse] = await Promise.all([
-      fetch(`${API_ENDPOINTS.SPECTRUM}price-tracking/markets`),
-      fetch(`${API_ENDPOINTS.SPECTRUM}amm/pools/stats`),
-    ]);
-
-    const marketsData = await marketsResponse.json();
-    const poolsData = await poolsResponse.json();
 
     // Process prices like the original
     for (const pairData of marketsData) {
