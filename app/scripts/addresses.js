@@ -142,8 +142,8 @@ function printAddressSummary() {
 
 		$('#summaryOk').show();
 
-		getErgopadVesting();
-		getErgopadStaking();
+		// getErgopadVesting();
+		// getErgopadStaking();
     })
     .fail(function() {
     	$('#txLoading').hide();

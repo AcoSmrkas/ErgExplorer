@@ -19,7 +19,6 @@ tokenIcons['27fd0367536ef3f05c460115087c38b6ff25a944047cc6ab06a74aaec52ccb48'] =
 tokenIcons['8da6eec252f720a09bc0655abfc4ac943a9769728e1b167454ed9c3298d151ff'] = 'https://storage.googleapis.com/dexhunter-images/tokens/533bb94a8850ee3ccbe483106489399112b74c905342cb1792a797a0494e4459.webp';
 tokenIcons['b2bb4d99ffd6f73c06a4ca1fe9fadd1ad4a20b5b9052373e3cee5ddeb4534e27'] = 'https://storage.googleapis.com/dexhunter-images/tokens/016be5325fd988fea98ad422fcfd53e5352cacfced5c106a932a35a442544e.webp';
 tokenIcons['a01cb7b8ab08dec2e191b3ba58165a88a510d0f310dff5d81eb8e62e4ea6ab20'] = 'https://storage.googleapis.com/dexhunter-images/tokens/da8c30857834c6ae7203935b89278c532b3995245295456f993e1d244c51.webp';
-tokenIcons['203ef3066a912f35c488487cc2cb94bdb0d30680dab22551c7e6fdbc70dfcc8e'] = 'https://cryptologos.cc/logos/ethereum-eth-logo.png';
 tokenIcons['4ba9550720bc6520c8d58b1e8d7615627b775440f8d642415df1581eacf6d68a'] = 'https://spectrum.fi/logos/cardano/279c909f348e533da5808898f87f9a14bb2c3dfbbacccd631d927a3f534e454b.webp';
 tokenIcons['f0d5bdf474fcbd4249608e6dc6e9cf34a327b218f66445ea545b4c711b4676e3'] = 'https://cupofsugar.io/icon.png';
 tokenIcons['6c35aa395c7c75b0f67f7804d6930f0e11ef93c3387dc1faa86498d54af7962c'] = 'https://ergexplorer.com/images/tokens/mew.png';
@@ -28,7 +27,6 @@ tokenIcons['886b7721bef42f60c6317d37d8752da8aca01898cae7dae61808c4a14225edc8'] =
 tokenIcons['2e59555f055c1341e64d51267a381f6dbbe572cb725cfc471b35e84bbc258b75'] = 'https://ergexplorer.com/images/tokens/hodlcomet10.svg';
 tokenIcons['24c380b40c934db2273affc782e091df28c965f1e513f8f5f09fc1d12646ecf2'] = 'https://ergexplorer.com/images/tokens/OINK.png';
 tokenIcons['fe40fc4215230c23e2bb2684ed2816b40daf2d6a8b14c34a405064e661afed05'] = 'https://i.imgur.com/PZp8hUf.jpeg';
-tokenIcons['7a51950e5f548549ec1aa63ffdc38279505b11e7e803d01bcf8347e0123c88b0'] = 'https://cryptologos.cc/logos/bitcoin-btc-logo.png';
 tokenIcons['ca0ed0092eaaa22b6bfcc407d221b3aaa5c8f643e843cb6aafff6af955947675'] = 'https://ergopad-public.s3.us-west-2.amazonaws.com/assets.PandaVlogoColor1024x1024.1715103773336896.jpg';
 tokenIcons['8e0cd39c6fba31c419df790a99f2a70d1d81dc549c9f9d09ea2d17b1dfb8c097'] = 'https://i.ibb.co/8D7QMg8/zangao.png';
 tokenIcons['ccaac3de4098aa63de90c56973bb1bff7563e8c58594b2075dd04005dac13ae6'] = 'https://ergexplorer.com/images/tokens/ketchup.png'; //ketchup
@@ -107,7 +105,7 @@ var tokenIconsDb = [];
 var gotTokenIcons = false;
 
 function getTokenIcons(callback) {
-	$.get(ERGEXPLORER_API_HOST + 'tokens/getTokenIcons',
+	$.get('https://api2.ergexplorer.com/tokens/getTokenIcons',
 		function (data) {
 			tokenIconsDb = data.items.reduce((acc, item) => {
 				acc[item.id] = item.iconurl;

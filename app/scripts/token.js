@@ -236,7 +236,7 @@ function setLinks() {
 }
 
 function getPriceHistory() {
-	$.post(ERGEXPLORER_API_HOST + 'tokens/getPriceHistoryNew',
+	$.post('https://api2.ergexplorer.com/tokens/getPriceHistoryNew',
 		{from: from30d, ids : [tokenData.name]},
 		function(data) {
 

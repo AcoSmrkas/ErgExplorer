@@ -2,8 +2,8 @@ var FEE_ADDRESS = '2iHkR7CWvD1R4j1yZg5bkeDRQavjAaVPeTDFGGLZduHyfWMuYpmhHocX8GJoa
 const DONATION_ADDRESS = '9hiaAS3pCydq12CS7xrTBBn2YTfdfSRCsXyQn9KZHVpVyEPk9zk';
 //https://api.ergoplatform.com/
 //https://api.ergo.aap.cornell.edu/
-var API_HOST = 'https://api.ergoplatform.com/api/v1/';
-var API_HOST_2 = 'https://api.ergoplatform.com/api/v1/';
+var API_HOST = 'https://api-p2p.ergoplatform.com/api/v1/';
+var API_HOST_2 = 'https://api-p2p.ergoplatform.com/api/v1/';
 //https://api.ergexplorer.com/
 //https://localhost/ergexplorer-api/
 var ERGEXPLORER_API_HOST = 'https://api.ergexplorer.com/';

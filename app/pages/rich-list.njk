@@ -1,0 +1,44 @@
+{% extends "layout.njk" %}
+
+{% block styles %}
+	<!-- build:css styles/rich-list.css -->
+	<link rel="stylesheet" href="styles/rich-list.css">
+	<!-- endbuild -->
+{% endblock %}
+
+{% block navigation %}
+		{% import 'macros/nav-macro.njk' as nav %}
+		{{nav.active('rich-list')}}
+{% endblock %}
+
+{% block content %}
+	<div class="row w-100">
+		<div class="col-md-12 mb-3 mb-md-4">
+			<h2 class="m-0">Rich List</h2>
+		</div>
+	</div>
+	<div id="richListDataHolder" style="display: none;" class="col-md-12">
+        <table class="table table-dark table-striped table-mobile">
+            <thead>
+                <tr>
+                    <th scope="col">Rank</th>
+                    <th scope="col">Address</th>
+                    <th scope="col" class="text-end">Balance</th>
+                </tr>
+            </thead>
+            <tbody id="richListTableBody">
+            </tbody>
+        </table>
+		<br>
+	</div>
+
+	{% include "partials/error-message.njk" %}
+
+	{% include "partials/loading.njk" %}
+
+	<br>
+{% endblock %}
+
+{% block scripts %}
+		<script src="./scripts/rich-list.js?v=40"></script>
+{% endblock %}

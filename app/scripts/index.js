@@ -52,7 +52,7 @@ function getNetworkState() {
 }
 
 function getPoolStats() {
-	$.get('https://api.mewfinance.com/dex/getTop10Volume',
+	$.get('https://api2.mewfinance.com/dex/getTop10Volume',
 	function (data) {
 		let poolStatsData = data.items;
 
@@ -78,7 +78,7 @@ function getPoolStats() {
 }
 
 function getPriceHistory() {
-	$.post(ERGEXPLORER_API_HOST + 'tokens/getPriceHistory?cache',
+	$.post('https://api2.ergexplorer.com/tokens/getPriceHistory?cache',
 		{
 			'from': nowTime,
 			'milestones': 'true',
@@ -147,12 +147,14 @@ function printGainersLosers(timeframe) {
 	let data = JSON.parse(JSON.stringify(priceData));
 
 	let lastTimestamp = timeframe;	
+	console.log(lastTimestamp);
 
 	for (var i = data.items.length - 1; i >= 0; i--) {
 		let item = data.items[i];
 		if (item.originaltimestamp != lastTimestamp
 			|| item.ticker == 'ERG') {
 			data.items.splice(i, 1);
+			console.log('Removing ' + i);
 			continue;
 		}
 
