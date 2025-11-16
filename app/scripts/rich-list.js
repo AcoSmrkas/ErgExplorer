@@ -25,7 +25,7 @@ function printRichList(data) {
             <tr>
                 <td><span class="d-lg-none"><strong>Rank: </strong></span>${rank}</td>
                 <td><span class="d-lg-none"><strong>Address: </strong></span><a class="address-string" addr="${item.address}" href="${getWalletAddressUrl(item.address)}" >${formatAddressString(item.address, 8)}</a></td>
-                <td class="text-end"><span class="d-lg-none"><strong>Balance: </strong></span>${(item.balance / 1000000000).toLocaleString()} <strong class="erg-span">ERG</strong></td>
+                <td class="text-end"><span class="d-lg-none"><strong>Balance: </strong></span>${nFormatter(item.balance / 1000000000, 2, true)} <strong class="erg-span">ERG</strong></td>
             </tr>
         `;
         rank++;
