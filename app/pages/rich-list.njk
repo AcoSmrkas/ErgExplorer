@@ -17,6 +17,37 @@
 			<h2 class="m-0">Rich List</h2>
 		</div>
 	</div>
+
+	<div id="richListStatsHolder" style="display: none;" class="row w-100 mb-4 p-0">
+		<div class="col-md-6 col-lg-4 mb-3 ps-lg-0">
+			<div class="div-cell-dark">
+				<div class="card-body">
+					<h6 class="card-subtitle mb-2 text-muted">Top 100 Holdings</h6>
+					<h4 class="card-title mb-1" id="stat-top100-erg">-</h4>
+					<p class="card-text text-muted mb-0"><span id="stat-top100-percent">-</span> of circulating supply</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6 col-lg-4 mb-3">
+			<div class="div-cell-dark">
+				<div class="card-body">
+					<h6 class="card-subtitle mb-2 text-muted">CEX Holdings</h6>
+					<h4 class="card-title mb-1" id="stat-cex-erg">-</h4>
+					<p class="card-text text-muted mb-0"><span id="stat-cex-percent">-</span> of circulating supply</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6 col-lg-4 mb-3 pe-lg-0">
+			<div class="div-cell-dark">
+				<div class="card-body">
+					<h6 class="card-subtitle mb-2 text-muted">Circulating Supply</h6>
+					<h4 class="card-title mb-1" id="stat-supply">-</h4>
+					<p class="card-text text-muted mb-0"><span id="stat-supply-percent">-</span> of max supply</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<div id="richListDataHolder" style="display: none;" class="col-md-12">
         <table class="table table-dark table-striped table-mobile">
             <thead>
@@ -24,6 +55,7 @@
                     <th scope="col">Rank</th>
                     <th scope="col">Address</th>
                     <th scope="col" class="text-end">Balance</th>
+                    <th scope="col" class="text-end">% of Circ. Supply</th>
                 </tr>
             </thead>
             <tbody id="richListTableBody">

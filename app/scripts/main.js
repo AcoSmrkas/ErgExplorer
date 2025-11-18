@@ -269,12 +269,12 @@ function checkErgoIdentifier(input) {
 }
 
 //Format strings
-function formatErgValueString(value, maxDecimals = 4, force = false) {
+function formatErgValueString(value, maxDecimals = 4, force = false, ergSpan = false) {
     let ergValue = parseFloat(new BigNumber(value).dividedBy(1000000000).toString());
 	
     let tempMaxDecimals = getDecimals(ergValue, 1);
 
-	if (tempMaxDecimals > maxDecimals) {
+	if (tempMaxDecimals > maxDecimals && maxDecimals > 0) {
 		maxDecimals = tempMaxDecimals;
 	}
 
@@ -287,7 +287,7 @@ function formatErgValueString(value, maxDecimals = 4, force = false) {
             minimumFractionDigits= maxDecimals;
     }
 	
-	return '<strong title="' + ergValue + '"><span class="text-white">' + ergValue.toLocaleString('en-US', { maximumFractionDigits: maxDecimals, minimumFractionDigits: minimumFractionDigits }) + '</span></strong> ERG';
+	return '<strong title="' + ergValue + '"><span class="text-white">' + ergValue.toLocaleString('en-US', { maximumFractionDigits: maxDecimals, minimumFractionDigits: minimumFractionDigits }) + '</span></strong> <strong' + (ergSpan ? ' class="erg-span"' : '') + '>ERG</strong>';
 }
 
 function utcToLocal(utcDateString) {

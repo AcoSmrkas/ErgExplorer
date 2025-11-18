@@ -313,8 +313,8 @@ function getProtocolInfo() {
 	  	let data = JSON.parse(this.response);
 
 	    $('#ergVersion').html(data.version);
-	    $('#ergSupply').html(formatErgValueString(data.supply, 0));
-	    $('#ergTotal').html(formatErgValueString(97739924000000000, 0));
+	    $('#ergSupply').html(formatErgValueString(data.supply, 0, true, true));
+	    $('#ergTotal').html(formatErgValueString(97739924000000000, 0, true, true));
 	    $('#ergHashRate').html(formatHashRateString(data.hashRate));
 	    $('#ergTxAvg').html(data.transactionAverage);
 
