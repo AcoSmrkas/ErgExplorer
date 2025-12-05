@@ -2044,7 +2044,6 @@ function getAddressInfo() {
 	function (data) {
 		if (data.total == 0) {
 			let newName = "";
-			console.log(transactionsData)
 			for (let i = 0; i < transactionsData.items[0].inputs.length; i++) {
 				let box = transactionsData.items[0].inputs[i];
 				if (box.address == walletAddress) {

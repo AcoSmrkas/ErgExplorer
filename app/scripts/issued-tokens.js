@@ -36,7 +36,7 @@ function updateUi() {
 }
 
 function printIssuedTokens() {
-    let tokensSearchUrl = ERGEXPLORER_API_HOST + 'tokens/search?limit=' + ITEMS_PER_PAGE + '&offset=' + offset + '&query=' + query + '&type=' + tokenType + '&hideUtility=' + hideUtility + '&order=' + orderBy + '&hideBurned=' + hideBurned;
+    let tokensSearchUrl = 'https://api2.ergexplorer.com/tokens/search?limit=' + ITEMS_PER_PAGE + '&offset=' + offset + '&query=' + query + '&type=' + tokenType + '&hideUtility=' + hideUtility + '&order=' + orderBy + '&hideBurned=' + hideBurned;
 
     if (networkType == 'testnet') {
         tokensSearchUrl = API_HOST + 'api/v1/tokens?limit=' + ITEMS_PER_PAGE + '&offset=' + offset;

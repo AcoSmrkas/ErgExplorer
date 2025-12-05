@@ -390,7 +390,7 @@ function onGetNftInfoDone(nftInfo, message) {
 	//Emission amount
 	decimals = tokenData.decimals;
 	let emissionAmount = getAssetValue(tokenData.emissionAmount, tokenData.decimals);
-	$('#tokenEmissionAmount').html('<p>' + nFormatter(emissionAmount, 0, true) + '</p>');
+	$('#tokenEmissionAmount').html('<p>' + nFormatter(emissionAmount, 0, true, true) + '</p>');
 
 	if (tokenData.emissionAmount == 1) {
 		getCurrentAddress();
@@ -543,7 +543,7 @@ function onGetNftInfoDone(nftInfo, message) {
 					break;
 				} else {	
 					if (i == IPFS_PROVIDER_HOSTS.length - 1) {
-						fullUrl = IPFS_PROVIDER_HOSTS[0] + '/ipfs/' + nftInfo.link.url;
+						fullUrl = IPFS_PROVIDER_HOSTS[2] + '/ipfs/' + nftInfo.link.url;
 					}
 				}
 			}
@@ -586,8 +586,11 @@ function onGetNftInfoDone(nftInfo, message) {
 			$('#nftPreviewImgHolder').hide();
 			$('#nftPreviewImgHolder').removeClass('col-lg-3');
 			$('#nftInfoHolder').removeClass('col-lg-9');
-
-			if (nftInfo.additionalLinks.length > 0) {
+			
+			if (nftInfo.cachedurl) {
+				$('#nftPreviewImg').attr('src', nftInfo.cachedurl);
+				$('#nftImageFull').attr('src', nftInfo.cachedurl);
+			} else if (nftInfo.additionalLinks.length > 0) {
 				$('#nftPreviewImg').attr('src', additionalFullUrl[0]);
 				$('#nftImageFull').attr('src', additionalFullUrl[0]);
 			}
@@ -1139,10 +1142,17 @@ function mapLabel(row, index) {
 }
 
 function isAudioPlayable(audioUrl) {
-  const audio = new Audio();
+	const audio = new Audio();
+	const mimeType = getMimeType(audioUrl);
 
-  const mimeType = getMimeType(audioUrl);
+	let a = audioUrl;
+	audio.addEventListener("canplaythrough", (event) => {
+		$('#nftAudio').prop('src', a);
+	});
 
+	audio.src = audioUrl;
+
+	return false;
   if (audio.canPlayType(mimeType) !== '') {
     return true;
   } else {
