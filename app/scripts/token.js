@@ -37,7 +37,7 @@ function getCruxData() {
 }
 
 function getTxsData() {
-	$.get('http://localhost/ergexplorer-api/tokens/getTransactions?offset=0&limit=10&tokenId=' + tokenId,
+	$.get('https://api.ergexplorer.com/tokens/getTransactions?offset=0&limit=10&tokenId=' + tokenId,
 		function (data) {
 			printTxs(data.items);
 		});
