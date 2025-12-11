@@ -154,7 +154,6 @@ function printGainersLosers(timeframe) {
 		if (item.originaltimestamp != lastTimestamp
 			|| item.ticker == 'ERG') {
 			data.items.splice(i, 1);
-			console.log('Removing ' + i);
 			continue;
 		}
 

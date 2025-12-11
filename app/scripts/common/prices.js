@@ -42,9 +42,9 @@ function getPrices(callback, force = false) {
     return;
   }
 
-  // Get ERG price from CoinGecko
-  $.get('https://api.coingecko.com/api/v3/simple/price?ids=ergo&vs_currencies=usd&precision=15', data => {
-    const ergPrice = data.ergo.usd;
+  // Get ERG price
+  $.get('https://api.ergexplorer.com/tokens/getErgPrice', data => {
+    const ergPrice = data.items[0].value;
     prices['ERG'] = ergPrice;
     pricesNames['ERG'] = ergPrice;
 
@@ -84,7 +84,7 @@ function handlePrices(force = false, ergPrice) {
 
     // Skip if ticker already exists
     if (prices[tokenData.ticker] !== undefined) continue;
-
+    
     // Filter by liquidity (>= 2000) unless forced or in exceptions
     if (tokenData.liquidity < 2000 && !force && !EXCEPTIONS.includes(tokenData.id)) {
       continue;
