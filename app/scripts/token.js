@@ -1147,7 +1147,10 @@ function isAudioPlayable(audioUrl) {
 
 	let a = audioUrl;
 	audio.addEventListener("canplaythrough", (event) => {
-		$('#nftAudio').prop('src', a);
+		if (!$('#nftAudio').prop('src')
+		&& !a.includes('nftstorage')) {
+			$('#nftAudio').prop('src', a);
+		}
 	});
 
 	audio.src = audioUrl;

@@ -42,12 +42,14 @@ function printIssuedTokens() {
         tokensSearchUrl = API_HOST + 'api/v1/tokens?limit=' + ITEMS_PER_PAGE + '&offset=' + offset;
     }
 
-	var jqxhr = $.get(tokensSearchUrl, function(data) {
+	$.get(tokensSearchUrl, function(data) {
 		let formattedResult = '';
 		let items = data.items;
-        console.log(items);
+
         if (items.length == 0) {
             formattedResult = '<tr><td colspan="5">No results matching your query.</td></tr>';
+        } else if (items.length === 1) {
+            location.href = getTokenUrl(items[0].id);
         } else {
     		for (let i = 0; i < items.length; i++) {
                 let tokenData = processNftData(items[i]);

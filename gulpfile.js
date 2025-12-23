@@ -138,7 +138,7 @@ function scriptsmove() {
 
 function images() {
 	return gulp.src('app/images/**/*', {encoding: false})
-    	.pipe(($.cache($.imagemin())))
+    	// .pipe(($.cache($.imagemin())))
     	.pipe(gulp.dest('dist/images'));
 }
 
