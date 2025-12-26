@@ -82,17 +82,17 @@ function printTxs(data) {
 			addAddress(toAddress);
 			formattedAddressString = formatTxAddressString(toAddress);
 			html += '<td><span class="d-lg-none"><strong>From: </strong></span>' + formattedAddressString + '</td>';
-
+			
 			let value = calculateTransferredAmount(item);
 			html += `<td><span class="text-white">`
-				+ formatAssetValueString(value * Math.pow(10, tokenData.decimals), tokenData.decimals, 4)
+				+ formatAssetValueString(value, tokenData.decimals, 4)
 				+ ' '
 				+ getAssetTitleParams(tokenData, tokenData.id, tokenData.name, false);
 
 				if (prices[tokenData.id]) {
 					html += ' '
 					+ '<span class="text-light">'
-						+ formatAssetDollarPriceString(value * Math.pow(10, tokenData.decimals), tokenData.decimals, tokenId)
+						+ formatAssetDollarPriceString(value, tokenData.decimals, tokenId)
 					+ '</span>';
 				}
 			html += '</span></td>';

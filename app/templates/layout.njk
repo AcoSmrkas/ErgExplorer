@@ -223,6 +223,29 @@
 			</div>
 		</div>
 
+
+	<!-- Welcome Popup Modal -->
+	<div class="modal fade" id="welcomePopupModal" tabindex="-1" aria-labelledby="welcomePopupModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header py-2">
+					<h5 class="modal-title" style="font-weight:600;" id="welcomePopupModalLabel">Erg Explorer needs your help!</h5>
+					<button type="button" class="btn btn-primary" style="padding: 0px 8px;" data-bs-dismiss="modal" aria-label="Close">x</button>
+				</div>
+				<div class="modal-body text-start">
+					<p>⚠️ Erg Explorer is running low on funds!
+The service can only continue for 2 more months without support.</p>
+<br>
+<p>Contribute to keep it alive. 💚</p>
+					{# <a target="_blank" href="https://bvb.ergexplorer.com"><img id="welcomePopupImage" src="./images/bvb.png" alt="Welcome" class="img-fluid" style="max-width: 100%; height: auto;"></a> #}
+				</div>
+				<div class="modal-footer d-flex justify-content-between">
+					<button type="button" class="btn btn-secondary" onclick="dismissWelcomePopupPermanently()">Don't show again</button>
+					<a id="welcomePopupButton" href="https://fund.mewfinance.com/contribute" target="_blank"><button class="btn btn-info">Contribute</button></a>
+				</div>
+			</div>
+		</div>
+	</div>
 		<!-- JQuery JavaScript -->
 		<script	src="https://code.jquery.com/jquery-3.6.4.min.js"
 			integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8="
