@@ -4,6 +4,8 @@ var addresses = new Array();
 var addressbook = new Array();
 var shownNotificationPermissionToast = false;
 
+var popupKeyPrefix = 'bvb';
+
 setupMainnetTestnet();
 
 $.ajaxSetup({
@@ -1230,13 +1232,13 @@ function formatTxAddressString(address, formattedAddress = null, walletAddress =
 // Welcome Popup functions
 function shouldShowWelcomePopup() {
 	// Check if permanently dismissed
-	const dismissed = localStorage.getItem('welcomePopupDismissed');
+	const dismissed = localStorage.getItem(popupKeyPrefix + 'PopupDismissed');
 	if (dismissed === 'true') {
 		return false;
 	}
 
 	// Check when last shown
-	const lastShown = localStorage.getItem('welcomePopupLastShown');
+	const lastShown = localStorage.getItem(popupKeyPrefix + 'PopupLastShown');
 	if (!lastShown) {
 		return true; // Never shown before
 	}
@@ -1256,12 +1258,12 @@ function showWelcomePopup() {
 		modal.show();
 
 		// Update last shown timestamp
-		localStorage.setItem('welcomePopupLastShown', Date.now().toString());
+		localStorage.setItem(popupKeyPrefix + 'PopupLastShown', Date.now().toString());
 	}
 }
 
 function dismissWelcomePopupPermanently() {
-	localStorage.setItem('welcomePopupDismissed', 'true');
+	localStorage.setItem(popupKeyPrefix + 'PopupDismissed', 'true');
 
 	const modalElement = document.getElementById('welcomePopupModal');
 	if (modalElement) {
