@@ -27,7 +27,7 @@ export const API_ENDPOINTS = {
 export function getApiHost(index = 1) {
   if (typeof window !== "undefined") {
     if (window.location.host === "dev.ergexplorer.com") {
-      return "https://devapi.ergexplorer.com/";
+      // return "https://devapi.ergexplorer.com/";
     }
   }
 
