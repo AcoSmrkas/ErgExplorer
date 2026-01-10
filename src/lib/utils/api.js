@@ -1,3 +1,4 @@
+import axios from "axios";
 import { API_ENDPOINTS, getApiHost } from "./constants.js";
 
 // Re-export for backwards compatibility
@@ -14,27 +15,25 @@ class ApiError extends Error {
 
 async function apiRequest(url, options = {}) {
   try {
-    const response = await fetch(url, {
+    const response = await axios({
+      url,
+      method: options.method || "GET",
       headers: {
         "Content-Type": "application/json",
         ...options.headers,
       },
+      data: options.body,
       ...options,
     });
 
-    if (!response.ok) {
-      throw new ApiError(
-        `API request failed: ${response.statusText}`,
-        response.status,
-        response,
-      );
-    }
-
-    const data = await response.json();
-    return data;
+    return response.data;
   } catch (error) {
-    if (error instanceof ApiError) {
-      throw error;
+    if (error.response) {
+      throw new ApiError(
+        `API request failed: ${error.response.statusText || error.message}`,
+        error.response.status,
+        error.response,
+      );
     }
     throw new ApiError(`Network error: ${error.message}`, 0, null);
   }
@@ -144,7 +143,7 @@ export async function getStats() {
 
 export async function getTopVolumeTokens() {
   try {
-    const url = `https://api2.mewfinance.com/dex/getTop10Volume`;
+    const url = `${API_ENDPOINTS.MEWFINANCE2}dex/getTop10Volume`;
     return apiRequest(url);
   } catch (error) {
     console.warn("Failed to fetch top volume tokens:", error);
@@ -156,23 +155,13 @@ export async function getPriceHistory() {
   try {
     const url = `${getApiHost(2)}tokens/getPriceHistory?cache`;
     const nowTime = Date.now();
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: nowTime,
-        milestones: "true",
-        period: "30d",
-      }),
+    const response = await axios.post(url, {
+      from: nowTime,
+      milestones: "true",
+      period: "30d",
     });
 
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.statusText}`);
-    }
-
-    return await response.json();
+    return response.data;
   } catch (error) {
     console.warn("Failed to fetch price history:", error);
     return null;
@@ -192,21 +181,11 @@ export async function getWhaleTxs() {
 export async function getTokensByIds(tokenIds) {
   try {
     const url = `${getApiHost()}tokens/byId`;
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ids: tokenIds,
-      }),
+    const response = await axios.post(url, {
+      ids: tokenIds,
     });
 
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.statusText}`);
-    }
-
-    return await response.json();
+    return response.data;
   } catch (error) {
     console.warn("Failed to fetch tokens by IDs:", error);
     return null;
@@ -216,13 +195,9 @@ export async function getTokensByIds(tokenIds) {
 export async function getAddressBalance(address) {
   try {
     const url = `${API_ENDPOINTS.ERGOPLATFORM}addresses/${address}/balance/total`;
-    const response = await fetch(url);
+    const response = await axios.get(url);
 
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.statusText}`);
-    }
-
-    return await response.json();
+    return response.data;
   } catch (error) {
     console.warn("Failed to fetch address balance:", error);
     return null;

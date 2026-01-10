@@ -20,6 +20,7 @@ export const API_ENDPOINTS = {
   ERGOPLATFORM_BASE: "https://api-p2p.ergoplatform.com/",
   SPECTRUM: "https://api.spectrum.fi/v1/",
   MEWFINANCE: "https://api.mewfinance.com/",
+  MEWFINANCE2: "https://api2.mewfinance.com/",
   SOCKET: "https://socket.ergexplorer.com",
 };
 
