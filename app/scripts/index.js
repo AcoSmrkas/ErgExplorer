@@ -70,7 +70,7 @@ function getNetworkState() {
 }
 
 function getPoolStats() {
-  $.get("https://api.mewfinance.com/dex/getTop10Volume", function (data) {
+  $.get("https://api2.mewfinance.com/dex/getTop10Volume", function (data) {
     let poolStatsData = data.items;
 
     //Volume
@@ -101,7 +101,7 @@ function getPoolStats() {
 
 function getPriceHistory() {
   $.post(
-    ERGEXPLORER_API_HOST + "tokens/getPriceHistory?cache",
+     "https://api2.ergexplorer.com/tokens/getPriceHistory?cache",
     {
       from: nowTime,
       milestones: "true",

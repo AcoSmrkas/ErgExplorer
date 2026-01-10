@@ -144,7 +144,7 @@ export async function getStats() {
 
 export async function getTopVolumeTokens() {
   try {
-    const url = `https://api.mewfinance.com/dex/getTop10Volume`;
+    const url = `https://api2.mewfinance.com/dex/getTop10Volume`;
     return apiRequest(url);
   } catch (error) {
     console.warn("Failed to fetch top volume tokens:", error);
@@ -154,7 +154,7 @@ export async function getTopVolumeTokens() {
 
 export async function getPriceHistory() {
   try {
-    const url = `${getApiHost()}tokens/getPriceHistory?cache`;
+    const url = `${getApiHost(2)}tokens/getPriceHistory?cache`;
     const nowTime = Date.now();
     const response = await fetch(url, {
       method: "POST",

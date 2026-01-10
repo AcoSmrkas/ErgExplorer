@@ -52,8 +52,6 @@
 		loadTokens();
 	}
 
-
-
 	onMount(() => {
 		loadTokens();
 	});
@@ -65,10 +63,10 @@
 
 			let apiUrl;
 			if (isTestnet()) {
-				apiUrl = `${getApiHost()}tokens?limit=${limit}&offset=${offset}`;
+				apiUrl = `${getApiHost(2)}tokens?limit=${limit}&offset=${offset}`;
 			} else {
 				const queryParam = query ? `&query=${encodeURIComponent(query)}` : '';
-				apiUrl = `${getApiHost()}tokens/search?limit=${limit}&offset=${offset}&type=${tokenType}&order=${orderBy}&hideUtility=${hideUtility}&hideBurned=${hideBurned}${queryParam}`;
+				apiUrl = `${getApiHost(2)}tokens/search?limit=${limit}&offset=${offset}&type=${tokenType}&order=${orderBy}&hideUtility=${hideUtility}&hideBurned=${hideBurned}${queryParam}`;
 			}
 			
 			const response = await fetch(apiUrl);

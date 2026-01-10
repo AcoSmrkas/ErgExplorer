@@ -15,6 +15,7 @@ export const NANOERG_TO_ERG = 1000000000;
 // API endpoints
 export const API_ENDPOINTS = {
   ERGEXPLORER: "https://api.ergexplorer.com/",
+  ERGEXPLORER2: "https://api2.ergexplorer.com/",
   ERGOPLATFORM: "https://api-p2p.ergoplatform.com/api/v1/",
   ERGOPLATFORM_BASE: "https://api-p2p.ergoplatform.com/",
   SPECTRUM: "https://api.spectrum.fi/v1/",
@@ -23,11 +24,16 @@ export const API_ENDPOINTS = {
 };
 
 // Get API host with dev environment support
-export function getApiHost() {
+export function getApiHost(index = 1) {
   if (typeof window !== "undefined") {
     if (window.location.host === "dev.ergexplorer.com") {
       return "https://devapi.ergexplorer.com/";
     }
   }
-  return API_ENDPOINTS.ERGEXPLORER;
+
+  if (index == 2) {
+    return API_ENDPOINTS.ERGEXPLORER2;
+  } else {
+    return API_ENDPOINTS.ERGEXPLORER;
+  }
 }
