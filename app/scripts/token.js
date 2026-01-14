@@ -45,28 +45,40 @@ function printSupplyInfo() {
 	// Market Cap (liquid_supply * price)
 	if (amountsData.liquid_supply !== undefined && prices[tokenId]) {
 		let marketCap = amountsData.liquid_supply * prices[tokenId];
-		$('#tokenMarketCap').html('$' + nFormatter(marketCap, 2));
+		$('#tokenMarketCap').html('$' + nFormatter(marketCap, 2, true));
 		$('#tokenMarketCapRow').show();
 		hasData = true;
 	}
 
 	// Liquid Supply
 	if (amountsData.liquid_supply !== undefined) {
-		$('#tokenLiquidSupply').html(nFormatter(amountsData.liquid_supply, 0, true) + ' ' + tokenNameHtml);
+		let liquidHtml = nFormatter(amountsData.liquid_supply, 0, true) + ' ' + tokenNameHtml;
+		if (prices[tokenId]) {
+			liquidHtml += ' <span class="text-light">($' + nFormatter(amountsData.liquid_supply * prices[tokenId], 2) + ')</span>';
+		}
+		$('#tokenLiquidSupply').html(liquidHtml);
 		$('#tokenLiquidSupplyRow').show();
 		hasData = true;
 	}
 
 	// Locked Supply
 	if (amountsData.locked_supply !== undefined && amountsData.locked_supply > 0) {
-		$('#tokenLockedSupply').html(nFormatter(amountsData.locked_supply, 0, true) + ' ' + tokenNameHtml);
+		let lockedHtml = nFormatter(amountsData.locked_supply, 0, true) + ' ' + tokenNameHtml;
+		if (prices[tokenId]) {
+			lockedHtml += ' <span class="text-light">($' + nFormatter(amountsData.locked_supply * prices[tokenId], 2) + ')</span>';
+		}
+		$('#tokenLockedSupply').html(lockedHtml);
 		$('#tokenLockedSupplyRow').show();
 		hasData = true;
 	}
 
 	// Burned Supply
 	if (amountsData.burned_supply !== undefined && amountsData.burned_supply > 0) {
-		$('#tokenBurnedSupply').html(nFormatter(amountsData.burned_supply, 0, true) + ' ' + tokenNameHtml);
+		let burnedHtml = nFormatter(amountsData.burned_supply, 0, true) + ' ' + tokenNameHtml;
+		if (prices[tokenId]) {
+			burnedHtml += ' <span class="text-light">($' + nFormatter(amountsData.burned_supply * prices[tokenId], 2) + ')</span>';
+		}
+		$('#tokenBurnedSupply').html(burnedHtml);
 		$('#tokenBurnedSupplyRow').show();
 		hasData = true;
 	}
