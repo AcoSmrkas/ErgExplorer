@@ -48,6 +48,8 @@ function printSupplyInfo() {
 		$('#tokenMarketCap').html('$' + nFormatter(marketCap, 2, true));
 		$('#tokenMarketCapRow').show();
 		hasData = true;
+	} else {
+		$('#tokenMarketCapRow').remove();
 	}
 
 	// Liquid Supply
@@ -59,6 +61,8 @@ function printSupplyInfo() {
 		$('#tokenLiquidSupply').html(liquidHtml);
 		$('#tokenLiquidSupplyRow').show();
 		hasData = true;
+	} else {
+		$('#tokenLiquidSupplyRow').remove();
 	}
 
 	// Locked Supply
@@ -70,6 +74,8 @@ function printSupplyInfo() {
 		$('#tokenLockedSupply').html(lockedHtml);
 		$('#tokenLockedSupplyRow').show();
 		hasData = true;
+	} else {
+		$('#tokenLockedSupplyRow').remove();
 	}
 
 	// Burned Supply
@@ -81,6 +87,8 @@ function printSupplyInfo() {
 		$('#tokenBurnedSupply').html(burnedHtml);
 		$('#tokenBurnedSupplyRow').show();
 		hasData = true;
+	} else {
+		$('#tokenBurnedSupplyRow').remove();
 	}
 
 	if (hasData) {
