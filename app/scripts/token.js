@@ -36,6 +36,50 @@ function getCruxData() {
 	});
 }
 
+function printSupplyInfo() {
+	if (!amountsData) return;
+
+	let hasData = false;
+	let tokenNameHtml = getAssetTitleParams(tokenData, tokenData.id, tokenData.name, false);
+
+	// Market Cap (liquid_supply * price)
+	if (amountsData.liquid_supply !== undefined && prices[tokenId]) {
+		let marketCap = amountsData.liquid_supply * prices[tokenId];
+		$('#tokenMarketCap').html('$' + nFormatter(marketCap, 2));
+		$('#tokenMarketCapRow').show();
+		hasData = true;
+	}
+
+	// Liquid Supply
+	if (amountsData.liquid_supply !== undefined) {
+		$('#tokenLiquidSupply').html(nFormatter(amountsData.liquid_supply, 0, true) + ' ' + tokenNameHtml);
+		$('#tokenLiquidSupplyRow').show();
+		hasData = true;
+	}
+
+	// Locked Supply
+	if (amountsData.locked_supply !== undefined && amountsData.locked_supply > 0) {
+		$('#tokenLockedSupply').html(nFormatter(amountsData.locked_supply, 0, true) + ' ' + tokenNameHtml);
+		$('#tokenLockedSupplyRow').show();
+		hasData = true;
+	}
+
+	// Burned Supply
+	if (amountsData.burned_supply !== undefined && amountsData.burned_supply > 0) {
+		$('#tokenBurnedSupply').html(nFormatter(amountsData.burned_supply, 0, true) + ' ' + tokenNameHtml);
+		$('#tokenBurnedSupplyRow').show();
+		hasData = true;
+	}
+
+	if (hasData) {
+		$('#supplyHolder').show();
+		// Apply striping to visible rows
+		$('#supplyInfoHolder > div:visible').each(function(index) {
+			$(this).css('background-color', index % 2 === 0 ? 'var(--striped-1)' : '');
+		});
+	}
+}
+
 function getTxsData() {
 	$.get('https://api.ergexplorer.com/tokens/getTransactions?offset=0&limit=10&tokenId=' + tokenId,
 		function (data) {
@@ -240,6 +284,7 @@ function getPriceHistory() {
 		{from: from30d, ids : [tokenData.name]},
 		function(data) {
 
+		printSupplyInfo();
 		getHolders();
 		getHolderCount();
 		getSwapsData();
