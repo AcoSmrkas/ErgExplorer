@@ -242,7 +242,7 @@ function printSwaps(data) {
 			+ '</td>';
 			html += '<td>' + item.dexname + '</td>';
 			html += '<td><a class="" href="' + getTransactionsUrl(item.txid) + '">' + formatAddressString(item.txid, 4) + '</a></td>';
-			html += '<td>' + item.timestamp.substr(0, item.timestamp.indexOf('.')) + '</td>';
+			html += '<td>' + (item.timestamp.indexOf('.') == -1 ? item.timestamp : item.timestamp.substr(0, item.timestamp.indexOf('.'))) + '</td>';
 			html += '</tr>';
 		}
 
