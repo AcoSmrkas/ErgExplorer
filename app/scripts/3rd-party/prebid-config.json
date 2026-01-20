@@ -1,7 +1,0 @@
-{
-  "version": "10.21.0",
-  "modules": [
-    "bitmediaBidAdapter",
-    "storageControl"
-  ]
-}
