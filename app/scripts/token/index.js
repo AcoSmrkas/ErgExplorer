@@ -190,6 +190,8 @@ window.onGetNftInfoDone = function(nftInfo, message) {
 
 				if (nftInfo.type == (typeof NFT_TYPE !== 'undefined' ? NFT_TYPE.Audio : 'Audio') && typeof isAudioPlayable === 'function' && isAudioPlayable(fullUrl)) {
 					break;
+				} else if (nftInfo.type == (typeof NFT_TYPE !== 'undefined' ? NFT_TYPE.Video : 'Video') && typeof isVideoPlayable === 'function' && isVideoPlayable(fullUrl)) {
+					break;
 				} else {
 					if (i == ipfsHosts.length - 1) {
 						fullUrl = ipfsHosts[0] + '/ipfs/' + nftInfo.link.url;
@@ -501,6 +503,27 @@ function isAudioPlayable(audioUrl) {
 	return false;
 }
 
+// Helper function to check if video is playable
+function isVideoPlayable(videoUrl) {
+	const video = document.createElement('video');
+	const mimeType = getMimeType(videoUrl);
+
+	let v = videoUrl;
+	video.addEventListener("canplaythrough", (event) => {
+		const currentSrc = $('#nftPreviewVideo').attr('src') || $('#nftPreviewVideoSource').attr('src') || '';
+		if ((!currentSrc || currentSrc.includes('nftstorage')) && !v.includes('nftstorage')) {
+			console.log('[Video] Switching to better gateway:', v);
+			$('#nftPreviewVideo').attr('src', v);
+			$('#nftPreviewVideoSource').attr('src', v);
+			let videoElem = document.getElementById('nftPreviewVideo');
+			if (videoElem) videoElem.load();
+		}
+	});
+
+	video.src = videoUrl;
+	return false;
+}
+
 // Helper function to get the MIME type based on the file extension
 function getMimeType(url) {
 	if (!url) return '';
@@ -515,6 +538,12 @@ function getMimeType(url) {
 			return 'audio/ogg';
 		case 'aac':
 			return 'audio/aac';
+		case 'mp4':
+			return 'video/mp4';
+		case 'webm':
+			return 'video/webm';
+		case 'ogv':
+			return 'video/ogg';
 		default:
 			return '';
 	}
