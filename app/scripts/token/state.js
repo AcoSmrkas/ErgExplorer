@@ -10,6 +10,9 @@ export const TokenState = {
 	priceData: undefined,
 	hasPrice: false,
 	amountsData: undefined,
+	holders: [],
+	txs: [],
+	swaps: [],
 
 	// Chart state
 	chart: undefined,

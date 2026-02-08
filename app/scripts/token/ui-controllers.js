@@ -221,5 +221,16 @@ export const TokenUIControllers = {
 
 		$('#priceInfo').show();
 		$('#priceLoading').hide();
+	},
+
+	// Set external links for the token
+	setLinks() {
+		if (TokenState.tokenData.isMeme == 't') {
+			$('#spectrumLink').attr('href', 'https://dex.crooks-fi.com/ergo/swap?base=0000000000000000000000000000000000000000000000000000000000000000&quote=' + TokenState.tokenId);
+			$('#spectrumLink').html('Crooks Finance <i class="erg-span fa-solid fa-up-right-from-square"></i>');
+		} else {
+			$('#spectrumLink').attr('href', 'https://dex.mewfinance.com/ergo/swap?base=0000000000000000000000000000000000000000000000000000000000000000&quote=' + TokenState.tokenId);
+		}
+		$('#cruxLink').attr('href', 'https://cruxfinance.io/tokens/' + TokenState.tokenId);
 	}
 };

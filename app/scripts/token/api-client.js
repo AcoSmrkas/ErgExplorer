@@ -17,6 +17,14 @@ export const TokenApiClient = {
 						// Price data loaded, trigger chart display if we have price history
 						console.log('Prices loaded, checking for price history data');
 
+						// Refresh UI components that depend on prices
+						import('./ui-display.js').then(module => {
+							if (TokenState.amountsData) module.TokenUIDisplay.printSupplyInfo();
+							if (TokenState.holders && TokenState.holders.length > 0) module.TokenUIDisplay.printHolders(TokenState.holders);
+							if (TokenState.txs && TokenState.txs.length > 0) module.TokenUIDisplay.printTxs(TokenState.txs);
+							if (TokenState.swaps && TokenState.swaps.length > 0) module.TokenUIDisplay.printSwaps(TokenState.swaps);
+						});
+
 						// Import and call chart display if price history is loaded
 						import('./ui-controllers.js').then(module => {
 							if (TokenState.priceData && TokenState.priceData.length > 0) {
@@ -43,7 +51,9 @@ export const TokenApiClient = {
 			console.log('Fetching TXs from:', url);
 
 			$.get(url, function (data) {
-				resolve((data && data.items) ? data.items : []);
+				const items = (data && data.items) ? data.items : [];
+				TokenState.txs = items;
+				resolve(items);
 			}).fail(function (error) {
 				console.error('Error fetching transactions:', error);
 				resolve([]); // Resolve with empty instead of rejecting
@@ -64,7 +74,9 @@ export const TokenApiClient = {
 			console.log('Fetching swaps from:', url);
 
 			$.get(url, function (data) {
-				resolve((data && data.items) ? data.items : []);
+				const items = (data && data.items) ? data.items : [];
+				TokenState.swaps = items;
+				resolve(items);
 			}).fail(function (error) {
 				console.error('Error fetching swaps:', error);
 				resolve([]); // Resolve with empty instead of rejecting
@@ -87,12 +99,15 @@ export const TokenApiClient = {
 					if (data && data.length > 0 && data[0].length > 0) {
 						TokenState.priceData = data;
 						TokenState.hasPrice = true;
+					} else {
+						TokenState.hasPrice = false;
 					}
 					$('#priceLoading').hide();
 					resolve(data);
 				}
 			).fail(function(error) {
 				console.error('Error fetching price history:', error);
+				TokenState.hasPrice = false;
 				$('#priceLoading').hide();
 				resolve(null);
 			});
@@ -102,26 +117,34 @@ export const TokenApiClient = {
 	// Get holders from ergo.watch
 	async getHolders() {
 		return new Promise((resolve, reject) => {
+			const tokenId = TokenState.tokenId;
+			if (!tokenId) {
+				resolve([]);
+				return;
+			}
+
 			let timeout = setTimeout(() => {
 				console.log('Holders timeout, trying fallback');
 				this.getHoldersFallback().then(resolve).catch(reject);
 			}, 2000);
 
 			$.ajax({
-				url: 'https://api.ergo.watch/lists/addresses/by/balance?token_id=' + TokenState.tokenId + '&limit=10',
+				url: 'https://api.ergo.watch/lists/addresses/by/balance?token_id=' + tokenId + '&limit=10',
 				success: function (data) {
 					if (timeout) {
 						clearTimeout(timeout);
 					}
-					resolve(data || []);
+					const items = data || [];
+					TokenState.holders = items;
+					resolve(items);
 				},
 				error: function (xhr, status, error) {
 					if (timeout) {
 						clearTimeout(timeout);
 					}
 					console.error('Error fetching holders:', status, error);
-					reject(error);
-				}
+					this.getHoldersFallback().then(resolve).catch(reject);
+				}.bind(this)
 			});
 		});
 	},
@@ -129,13 +152,19 @@ export const TokenApiClient = {
 	// Get holder count from ergo.watch
 	async getHolderCount() {
 		return new Promise((resolve, reject) => {
+			const tokenId = TokenState.tokenId;
+			if (!tokenId) {
+				resolve(0);
+				return;
+			}
+
 			let timeout = setTimeout(() => {
 				console.log('Holder count timeout, trying fallback');
 				this.getHolderCountFallback().then(resolve).catch(reject);
 			}, 2000);
 
 			$.ajax({
-				url: 'https://api.ergo.watch/p2pk/count?token_id=' + TokenState.tokenId,
+				url: 'https://api.ergo.watch/p2pk/count?token_id=' + tokenId,
 				success: function (data) {
 					if (timeout) {
 						clearTimeout(timeout);
@@ -147,8 +176,8 @@ export const TokenApiClient = {
 						clearTimeout(timeout);
 					}
 					console.error('Error fetching holder count:', status, error);
-					reject(error);
-				}
+					this.getHolderCountFallback().then(resolve).catch(reject);
+				}.bind(this)
 			});
 		});
 	},
@@ -158,7 +187,9 @@ export const TokenApiClient = {
 		return new Promise((resolve) => {
 			const apiHost = typeof ERGEXPLORER_API_HOST !== 'undefined' ? ERGEXPLORER_API_HOST : 'https://api.ergexplorer.com/';
 			$.get(apiHost + 'tokens/getHolders?id=' + TokenState.tokenId, function (data) {
-				resolve(data && data.items ? data.items : []);
+				const items = data && data.items ? data.items : [];
+				TokenState.holders = items;
+				resolve(items);
 			}).fail(function (error) {
 				console.error('Error fetching holders (fallback):', error);
 				resolve([]);

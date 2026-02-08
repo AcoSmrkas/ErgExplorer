@@ -1,9 +1,10 @@
 import { TokenState } from './state.js';
+import { TokenAnalyzer } from './token-analyzer.js';
 
 export const TokenUIDisplay = {
 	// Display token supply information
 	printSupplyInfo() {
-		if (!TokenState.amountsData) return;
+		if (!TokenState.amountsData || !TokenState.tokenData) return;
 
 		let hasData = false;
 		let tokenNameHtml = typeof getAssetTitleParams === 'function' ?
@@ -69,7 +70,7 @@ export const TokenUIDisplay = {
 
 	// Display transactions
 	printTxs(data) {
-		if (!data || data.length === 0) {
+		if (!data || data.length === 0 || !TokenState.tokenData) {
 			$('#txsLoading').hide();
 			return;
 		}
@@ -96,16 +97,37 @@ export const TokenUIDisplay = {
 			if (typeof addAddress === 'function') addAddress(toAddress);
 			formattedAddressString = typeof formatTxAddressString === 'function' ? formatTxAddressString(toAddress) : toAddress;
 			html += '<td><span class="d-lg-none"><strong>To: </strong></span>' + formattedAddressString + '</td>';
+
+			let value = TokenAnalyzer.calculateTransferredAmount(item);
+			let assetTitle = typeof getAssetTitleParams === 'function' ? getAssetTitleParams(TokenState.tokenData, TokenState.tokenData.id, TokenState.tokenData.name, false) : TokenState.tokenData.name;
+			
+			html += `<td><span class="text-white">`
+				+ (typeof formatAssetValueString === 'function' ? formatAssetValueString(value, TokenState.tokenData.decimals, 4) : value)
+				+ ' '
+				+ assetTitle;
+
+			if (typeof prices !== 'undefined' && prices[TokenState.tokenData.id]) {
+				html += ' '
+				+ '<span class="text-light">'
+					+ (typeof formatAssetDollarPriceString === 'function' ? formatAssetDollarPriceString(value, TokenState.tokenData.decimals, TokenState.tokenId) : '')
+				+ '</span>';
+			}
+			html += '</span></td>';
+
 			html += '</tr>';
 		}
 
 		$('#txsTableBody').html(html);
 		$('#txsTable').show();
+
+		if (typeof getAddressesInfo === 'function') {
+			getAddressesInfo();
+		}
 	},
 
 	// Display swaps
 	printSwaps(data) {
-		if (!data || data.length === 0) {
+		if (!data || data.length === 0 || !TokenState.tokenData) {
 			$('#swapsLoading').hide();
 			return;
 		}
@@ -125,10 +147,23 @@ export const TokenUIDisplay = {
 				item.amount = item.sellamount;
 			}
 
+			let assetTitle = typeof getAssetTitleParams === 'function' ? getAssetTitleParams(TokenState.tokenData, TokenState.tokenData.id, TokenState.tokenData.name, false) : TokenState.tokenData.name;
+			let amountWithDecimals = item.amount * Math.pow(10, TokenState.decimals);
+
 			html += '<tr>';
 			html += '<td><a class="address-string" addr="' + item.address + '" href="' + (typeof getWalletAddressUrl === 'function' ? getWalletAddressUrl(item.address) : '#') + '">' + (typeof formatAddressString === 'function' ? formatAddressString(item.address, 4) : item.address) + '</a></td>';
 			html += '<td><span class="' + (item.type == 'Sell' ? 'text-danger' : 'text-success') + '">' + item.type + '</span></td>';
-			html += '<td>' + (typeof formatAssetValueString === 'function' ? formatAssetValueString(item.amount * Math.pow(10, TokenState.decimals), TokenState.decimals, 4) : item.amount) + '</td>';
+			html += '<td>'
+				+ '<span class="text-white">'
+					+ (typeof formatAssetValueString === 'function' ? formatAssetValueString(amountWithDecimals, TokenState.decimals, 4) : item.amount)
+					+ ' '
+					+ assetTitle
+					+ ' '
+					+ '<span class="text-light">'
+						+ (typeof formatAssetDollarPriceString === 'function' ? formatAssetDollarPriceString(amountWithDecimals, TokenState.decimals, TokenState.tokenId) : '')
+					+ '</span>'
+				+ '</span>'
+			+ '</td>';
 			html += '<td>' + item.dexname + '</td>';
 			html += '<td><a class="" href="' + (typeof getTransactionsUrl === 'function' ? getTransactionsUrl(item.txid) : '#') + '">' + (typeof formatAddressString === 'function' ? formatAddressString(item.txid, 4) : item.txid) + '</a></td>';
 			html += '<td>' + (item.timestamp.indexOf('.') == -1 ? item.timestamp : item.timestamp.substr(0, item.timestamp.indexOf('.'))) + '</td>';
@@ -156,7 +191,7 @@ export const TokenUIDisplay = {
 
 	// Display holders list
 	printHolders(data) {
-		if (!data || data.length === 0) return;
+		if (!data || data.length === 0 || !TokenState.tokenData) return;
 
 		let formattedResult = '';
 
@@ -169,7 +204,7 @@ export const TokenUIDisplay = {
 
 			// Balance
 			let dollarPrice = '';
-			if (TokenState.hasPrice && typeof prices !== 'undefined' && prices[TokenState.tokenId]) {
+			if (typeof prices !== 'undefined' && prices[TokenState.tokenId]) {
 				if (typeof formatDollarPriceString === 'function') {
 					dollarPrice = formatDollarPriceString(data[i].balance / Math.pow(10, TokenState.decimals) * prices[TokenState.tokenId]);
 				}
@@ -202,10 +237,14 @@ export const TokenUIDisplay = {
 			getAddressesInfo();
 		}
 
-		if (!TokenState.hasPrice) {
+		if (!TokenState.hasPrice && (typeof prices === 'undefined' || !prices[TokenState.tokenId])) {
 			$('#financeHeader').hide();
 			$('#chartColumn').hide();
 			$('#holdersColumn').removeClass('col-xl-6');
+		} else {
+			$('#financeHeader').show();
+			$('#chartColumn').show();
+			$('#holdersColumn').addClass('col-xl-6');
 		}
 	},
 
@@ -223,3 +262,4 @@ export const TokenUIDisplay = {
 		$('#priceLoading').hide();
 	}
 };
+
