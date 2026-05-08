@@ -41,12 +41,12 @@ export const ApiClient = {
 	/**
 	 * Get unspent boxes URL
 	 */
-	getUnspentBoxesDataUrl() {
+	getUnspentBoxesDataUrl(boxOffset = 0, limit = AddressState.unspentBoxesPageSize) {
 		let url = API_HOST_2 + 'boxes/unspent/byAddress/' + AddressState.walletAddress;
 		if (networkType === 'testnet') {
 			url = API_HOST + 'api/v1/boxes/unspent/byAddress/' + AddressState.walletAddress;
 		}
-		return url;
+		return url + '?offset=' + boxOffset + '&limit=' + limit;
 	},
 
 	/**
@@ -169,9 +169,9 @@ export const ApiClient = {
 	/**
 	 * Fetch unspent boxes
 	 */
-	async getUnspentBoxes() {
+	async getUnspentBoxes(boxOffset = AddressState.unspentBoxesOffset, limit = AddressState.unspentBoxesPageSize) {
 		try {
-			const response = await fetch(this.getUnspentBoxesDataUrl());
+			const response = await fetch(this.getUnspentBoxesDataUrl(boxOffset, limit));
 			if (!response.ok) throw new Error('Unspent boxes fetch failed');
 			return await response.json();
 		} catch (error) {

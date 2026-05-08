@@ -2,7 +2,9 @@
 	background-color: var(--striped-1);
 }
 
-#txInputs > div, #txOutputs > div {
+#txInputs > .div-cell, #txOutputs > .div-cell {
+	border: 0;
+	border-top: 1px solid var(--borders);
 	border-radius: 0;
 }
 

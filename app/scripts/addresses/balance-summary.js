@@ -1,10 +1,13 @@
-import { AddressState } from './state.js';
 import { ApiClient } from './api-client.js';
+import { AddressState } from './state.js';
 
 /**
  * Balance summary display and token formatting
  */
 export const BalanceSummary = {
+	_tokenHolderHeightObserver: null,
+	_tokenHolderHeightResizeHandler: null,
+
 	/**
 	 * Print address summary with balance and tokens
 	 */
@@ -45,6 +48,9 @@ export const BalanceSummary = {
 
 			const financialTokens = AddressState.tokensArray.filter((_, i, arr) => this._separateFinancialTokens(_, i, arr));
 			const otherTokens = AddressState.tokensArray.filter((_, i, arr) => this._separateNonFinancialTokens(_, i, arr));
+			const visibleTokenGroupCount = [financialTokens, otherTokens].filter(tokens => tokens.length > 0).length;
+
+			$('#tokensHolder').toggleClass('has-single-token-group', visibleTokenGroupCount === 1);
 
 			if (financialTokens.length > 0) {
 				const html = this._formatFinancialTokensHtmlString(financialTokens, ergDollarValue);
@@ -56,6 +62,7 @@ export const BalanceSummary = {
 				const html = this._formatOtherTokensHtmlString(otherTokens);
 				$('#otherTokens').html(html);
 				$('#otherTokensHolder').show();
+				this._loadOtherTokensNftInfo(otherTokens);
 			}
 		}
 
@@ -72,16 +79,15 @@ export const BalanceSummary = {
 			$('#officialLink').show();
 		}
 		$('#summaryOk').show();
+		this._syncTokenHolderHeight();
 	},
 
 	/**
 	 * Format financial tokens (tokens with prices)
 	 */
 	_formatFinancialTokensHtmlString(tokensArray, ergDollarValue) {
-		let tokensToShow = AddressState.publicUser ? 15 : 6;
-		AddressState.financialTokensContent = '';
-		AddressState.financialTokensContentFull = '';
 		let totalAssetsValue = 0;
+		let html = '';
 
 		// Calculate prices and sort by USD value
 		tokensArray.forEach(token => {
@@ -97,8 +103,7 @@ export const BalanceSummary = {
 			tokensArray.sort((a, b) => (b.usdPrice || 0) - (a.usdPrice || 0));
 		}
 
-		let html = '';
-		tokensArray.forEach((token, i) => {
+		tokensArray.forEach(token => {
 			const isScan = AddressState.scamList.includes(token.tokenId);
 			const priceStr = token.usdPrice > 0 ? '<span class="text-light"> ' + formatDollarPriceString(token.usdPrice) + '</span>' : '';
 			const tokenStr = formatAssetNameAndValueString(
@@ -107,17 +112,8 @@ export const BalanceSummary = {
 				token.tokenId
 			);
 
-			AddressState.financialTokensContentFull += tokenStr;
-
-			if (i <= tokensToShow) {
-				html += tokenStr;
-				if (i === tokensToShow && tokensArray.length > tokensToShow + 1) {
-					html += '<p>...</p><p><strong><a href="#" onclick="showAllFinancialTokens(event)">Show all</a></strong></p>';
-				}
-			}
+			html += tokenStr;
 		});
-
-		AddressState.financialTokensContent = html;
 
 		if (totalAssetsValue > 0) {
 			$('#finalAssetsBalance').html('<span class="gray-color">Tokens balance:</span> $' + formatValue(totalAssetsValue, 2));
@@ -126,43 +122,159 @@ export const BalanceSummary = {
 			$('#finalBalance').show();
 		}
 
-		return AddressState.financialTokensContentFull;
+		return html;
 	},
 
 	/**
 	 * Format non-financial tokens
 	 */
-	_formatOtherTokensHtmlString(tokensArray) {
-		let tokensToShow = AddressState.publicUser ? 15 : 2;
-		AddressState.tokensContent = '';
-		AddressState.tokensContentFull = '';
-		const nftSearchTokens = [];
+	_formatOtherTokensHtmlString(tokensArray, nftInfos = []) {
+		const nftInfoByTokenId = this._getNftInfoByTokenId(nftInfos);
+		const sortedTokens = this._sortOtherTokensByNftType(tokensArray, nftInfoByTokenId);
+		let html = '';
 
-		tokensArray.forEach((token, i) => {
+		sortedTokens.forEach(token => {
 			const isScan = AddressState.scamList.includes(token.tokenId);
 			const tokenStr = formatAssetNameAndValueString(
-				getAssetTitle(token, true, isScan),
+				this._formatNftTypeIcon(nftInfoByTokenId[token.tokenId]) + getAssetTitle(token, true, isScan),
 				formatAssetValueString(token.amount, token.decimals, 4),
 				token.tokenId
 			);
 
-			AddressState.tokensContentFull += tokenStr;
-			nftSearchTokens.push(token.tokenId);
+			html += tokenStr;
+		});
 
-			if (i <= tokensToShow) {
-				AddressState.tokensContent += tokenStr;
-				if (i === tokensToShow && tokensArray.length > tokensToShow + 1) {
-					AddressState.tokensContent += '<p>...</p><p><strong><a href="#" onclick="showAllTokens(event)">Show all</a></strong></p>';
+		return html;
+	},
+
+	_loadOtherTokensNftInfo(tokensArray) {
+		const nftSearchTokens = tokensArray.map(token => token.tokenId);
+
+		if (nftSearchTokens.length > 0) {
+			getNftsInfo(nftSearchTokens, (nftInfos, message) => {
+				if (nftInfos && nftInfos.length > 0) {
+					$('#otherTokens').html(this._formatOtherTokensHtmlString(tokensArray, nftInfos));
 				}
+
+				if (typeof window.onGotOwnedNftInfo === 'function') {
+					window.onGotOwnedNftInfo(nftInfos, message);
+				}
+			});
+		}
+	},
+
+	_getNftInfoByTokenId(nftInfos) {
+		const nftInfoByTokenId = {};
+		if (!nftInfos) return nftInfoByTokenId;
+
+		nftInfos.forEach(nftInfo => {
+			if (nftInfo && nftInfo.isNft && nftInfo.data && nftInfo.data.id) {
+				nftInfoByTokenId[nftInfo.data.id] = nftInfo;
 			}
 		});
 
-		// Fetch NFT info for these tokens
-		if (nftSearchTokens.length > 0) {
-			getNftsInfo(nftSearchTokens, window.onGotOwnedNftInfo);
+		return nftInfoByTokenId;
+	},
+
+	_sortOtherTokensByNftType(tokensArray, nftInfoByTokenId) {
+		const nftTypeOrder = this._getNftTypeOrder();
+
+		return tokensArray
+			.map((token, index) => ({ token, index }))
+			.sort((a, b) => {
+				const aType = nftInfoByTokenId[a.token.tokenId] ? nftInfoByTokenId[a.token.tokenId].type : null;
+				const bType = nftInfoByTokenId[b.token.tokenId] ? nftInfoByTokenId[b.token.tokenId].type : null;
+				const aOrder = this._getNftTypeSortOrder(aType, nftTypeOrder);
+				const bOrder = this._getNftTypeSortOrder(bType, nftTypeOrder);
+
+				if (aOrder !== bOrder) return aOrder - bOrder;
+				return a.index - b.index;
+			})
+			.map(item => item.token);
+	},
+
+	_getNftTypeOrder() {
+		return {
+			[NFT_TYPE.Image]: 0,
+			[NFT_TYPE.Audio]: 1,
+			[NFT_TYPE.Video]: 2,
+			[NFT_TYPE.ArtCollection]: 3,
+			[NFT_TYPE.FileAttachment]: 4,
+			[NFT_TYPE.MembershipToken]: 5
+		};
+	},
+
+	_getNftTypeSortOrder(type, nftTypeOrder) {
+		if (!type) return 100;
+		if (Object.prototype.hasOwnProperty.call(nftTypeOrder, type)) {
+			return nftTypeOrder[type];
 		}
 
-		return AddressState.tokensContentFull;
+		return 99;
+	},
+
+	_formatNftTypeIcon(nftInfo) {
+		if (!nftInfo || !nftInfo.isNft) return '';
+
+		const iconPath = this._getNftTypeIconPath(nftInfo.type);
+		if (!iconPath) return '';
+
+		return '<img class="token-icon nft-icon address-token-type-icon" title="' + nftInfo.type + ' NFT" alt="' + nftInfo.type + ' NFT" src="' + iconPath + '"/> ';
+	},
+
+	_getNftTypeIconPath(type) {
+		switch (type) {
+			case NFT_TYPE.Image:
+				return './images/nft-image.png';
+			case NFT_TYPE.Audio:
+				return './images/nft-audio.png';
+			case NFT_TYPE.Video:
+				return './images/nft-video.png';
+			case NFT_TYPE.ArtCollection:
+				return './images/nft-artcollection.png';
+			case NFT_TYPE.FileAttachment:
+				return './images/nft-file.png';
+			case NFT_TYPE.MembershipToken:
+				return './images/nft-membership.png';
+			default:
+				return '';
+		}
+	},
+
+	/**
+	 * Keep desktop token lists capped to the summary holder height
+	 */
+	_syncTokenHolderHeight() {
+		const summaryMain = document.getElementById('addressSummaryContent');
+		const tokensHolder = document.getElementById('tokensHolder');
+		if (!summaryMain || !tokensHolder) return;
+
+		const syncHeight = () => {
+			if (!window.matchMedia('(min-width: 992px)').matches) {
+				tokensHolder.style.maxHeight = '';
+				return;
+			}
+
+			const height = summaryMain.getBoundingClientRect().height;
+			tokensHolder.style.maxHeight = height > 0 ? height + 'px' : '';
+		};
+
+		if (this._tokenHolderHeightObserver) {
+			this._tokenHolderHeightObserver.disconnect();
+		}
+
+		if (this._tokenHolderHeightResizeHandler) {
+			window.removeEventListener('resize', this._tokenHolderHeightResizeHandler);
+		}
+
+		if (typeof ResizeObserver !== 'undefined') {
+			this._tokenHolderHeightObserver = new ResizeObserver(syncHeight);
+			this._tokenHolderHeightObserver.observe(summaryMain);
+		}
+
+		this._tokenHolderHeightResizeHandler = syncHeight;
+		window.addEventListener('resize', syncHeight);
+		syncHeight();
 	},
 
 	/**

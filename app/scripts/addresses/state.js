@@ -28,10 +28,6 @@ export const AddressState = {
 
 	// Tokens
 	tokensArray: [],
-	tokensContent: '',
-	tokensContentFull: '',
-	financialTokensContent: '',
-	financialTokensContentFull: '',
 
 	// Transaction display
 	totalTransactions: 0,
@@ -44,6 +40,8 @@ export const AddressState = {
 
 	// Unspent boxes
 	unspentBoxesCount: 0,
+	unspentBoxesOffset: 0,
+	unspentBoxesPageSize: 8,
 
 	// Date filtering
 	datePickerFrom: undefined,
@@ -88,10 +86,6 @@ export const AddressState = {
 		this.ownedNftsShown = false;
 		this.issuedNftsShown = false;
 		this.tokensArray = [];
-		this.tokensContent = '';
-		this.tokensContentFull = '';
-		this.financialTokensContent = '';
-		this.financialTokensContentFull = '';
 		this.totalTransactions = 0;
 		this.valueFields = [];
 		this.valueFieldsFull = [];
@@ -99,6 +93,8 @@ export const AddressState = {
 		this.printedAddressSummary = false;
 		this.printedUnspentBoxes = false;
 		this.unspentBoxesCount = 0;
+		this.unspentBoxesOffset = 0;
+		this.unspentBoxesPageSize = 8;
 		this.getTxData = false;
 		this.firstTime = true;
 	}

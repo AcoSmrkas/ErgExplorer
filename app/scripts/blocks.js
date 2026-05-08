@@ -111,12 +111,12 @@ function printBlockTransactions() {
 		//Header
 		formattedData += '<div class="row w-100 div-cell-dark border-bottom-flat"><div class="col-9" style="word-break: break-all;"><a href="' + getTransactionsUrl(transactionData.id) + '">' + transactionData.id + '</a></div><div id="txTime" class="col-3 d-flex justify-content-end">' + formatDateString(transactionData.timestamp) + '</div></div>';
 
-		formattedData += '<div class="row w-100 two-column-holder two-column-holder-md"><div class="col-md-6 div-cell-dark p-0" style="border-radius: 0 0 5px 5px;"><h2 class="p-3">Inputs</h2><div class="block-tx-holder">';
+		formattedData += '<div class="row w-100 two-column-holder two-column-holder-md"><div class="col-md-6 div-cell-dark p-0 block-tx-column"><h2 class="p-3">Inputs</h2><div class="block-tx-holder">';
 
 		//Inputs
 		formattedData += formatInputsOutputs(transactionData.inputs);
 
-		formattedData += '</div></div><div class="col-md-6 div-cell-dark p-0 mt-4 mt-md-0" style="border-radius: 0 0 5px 5px;"><h2 class="p-3">Outputs</h2><div class="block-tx-holder">';
+		formattedData += '</div></div><div class="col-md-6 div-cell-dark p-0 mt-4 mt-md-0 block-tx-column"><h2 class="p-3">Outputs</h2><div class="block-tx-holder">';
 
 		//Outputs
 		formattedData += formatInputsOutputs(transactionData.outputs);

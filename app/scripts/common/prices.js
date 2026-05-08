@@ -6,7 +6,8 @@ var callbackCalled = false;
 var theCallback;
 var pricesData;
 
-const CACHE_KEY = 'priceCache';
+const CACHE_KEY = 'priceCacheFiltered';
+const FORCE_CACHE_KEY = 'priceCacheFull';
 const CACHE_TIME = 5 * 60 * 1000; // 5 minutes
 const EXCEPTIONS = [
   '6122f7289e7bb2df2de273e09d4b2756cda6aeb0f40438dc9d257688f45183ad',
@@ -17,7 +18,7 @@ function getPrices(callback, force = false) {
   theCallback = callback;
 
   // load cache
-  const cacheRaw = localStorage.getItem(CACHE_KEY);
+  const cacheRaw = localStorage.getItem(force ? FORCE_CACHE_KEY : CACHE_KEY);
   let cache = null;
   if (cacheRaw) {
     try { cache = JSON.parse(cacheRaw); } 
@@ -30,6 +31,9 @@ function getPrices(callback, force = false) {
   if (!force && cache && now - cache.timestamp < CACHE_TIME) {
 	const keys = cache.keys;
 	const names = cache.names;
+
+	prices = {};
+	pricesNames = {};
 	
 	for (let i = 0; i < keys.length; i++) {
 		prices[keys[i]] = cache.values[i];
@@ -79,11 +83,16 @@ function getPrices(callback, force = false) {
 function handlePrices(force = false, ergPrice) {
   if (!pricesData) return;
 
+  prices = {};
+  pricesNames = {};
+  prices['ERG'] = ergPrice;
+  pricesNames['ERG'] = ergPrice;
+
   for (let i = 0; i < pricesData.length; i++) {
     let tokenData = pricesData[i];
 
     // Skip if ticker already exists
-    if (prices[tokenData.ticker] !== undefined) continue;
+    if (pricesNames[tokenData.ticker] !== undefined) continue;
     
     // Filter by liquidity (>= 2000) unless forced or in exceptions
     if (tokenData.liquidity < 2000 && !force && !EXCEPTIONS.includes(tokenData.id)) {
@@ -99,7 +108,7 @@ function handlePrices(force = false, ergPrice) {
   gotPrices = true;
 
   // save only objects
-  localStorage.setItem(CACHE_KEY, JSON.stringify({
+  localStorage.setItem(force ? FORCE_CACHE_KEY : CACHE_KEY, JSON.stringify({
     keys: Object.keys(prices),
 	names: Object.keys(pricesNames),
 	values: Object.values(prices),
@@ -113,6 +122,9 @@ function handleError(cache) {
   if (cache) {
 	const keys = cache.keys;
 	const names = cache.names;
+
+	prices = {};
+	pricesNames = {};
 	
 	for (let i = 0; i < keys.length; i++) {
 		prices[keys[i]] = cache.values[i];

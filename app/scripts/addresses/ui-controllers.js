@@ -6,42 +6,6 @@ import { AddressState } from './state.js';
  */
 export const UIControllers = {
 	/**
-	 * Show all other tokens (non-financial)
-	 */
-	showAllTokens(e) {
-		$('#otherTokens').html(AddressState.tokensContentFull);
-		scrollToElement($('#tokensHolder'));
-		e.preventDefault();
-	},
-
-	/**
-	 * Hide other tokens, show truncated version
-	 */
-	hideAllTokens(e) {
-		$('#otherTokens').html(AddressState.tokensContent);
-		scrollToElement($('#tokensHolder'));
-		e.preventDefault();
-	},
-
-	/**
-	 * Show all financial tokens (with prices)
-	 */
-	showAllFinancialTokens(e) {
-		$('#financialTokens').html(AddressState.financialTokensContentFull);
-		scrollToElement($('#tokensHolder'));
-		e.preventDefault();
-	},
-
-	/**
-	 * Hide financial tokens, show truncated version
-	 */
-	hideAllFinancialTokens(e) {
-		$('#financialTokens').html(AddressState.financialTokensContent);
-		scrollToElement($('#tokensHolder'));
-		e.preventDefault();
-	},
-
-	/**
 	 * Show full transaction value with all assets
 	 */
 	showFullValue(e, index) {

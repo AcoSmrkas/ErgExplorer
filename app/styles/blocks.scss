@@ -2,8 +2,27 @@
 	background-color: var(--striped-1);
 }
 
-.block-tx-holder > div {
-	border-radius: 0;
+.block-tx-column {
+	border-radius: 0 0 5px 5px;
+	overflow: hidden;
+}
+
+.block-tx-holder > .div-cell {
+	border-radius: 0 !important;
+}
+
+.two-column-holder > .block-tx-column > .block-tx-holder > .div-cell:last-of-type {
+	border-radius: 0 !important;
+}
+
+@media only screen and (min-width : 768px) {
+	.two-column-holder-md > .block-tx-column:first-of-type {
+		border-radius: 0 0 0 5px;
+	}
+
+	.two-column-holder-md > .block-tx-column:last-of-type {
+		border-radius: 0 0 5px 0;
+	}
 }
 
 #adProofs {

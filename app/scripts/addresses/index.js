@@ -106,31 +106,99 @@ async function printTransactions() {
 /**
  * Fetch unspent boxes
  */
-async function printUnspentBoxes() {
-	if (AddressState.printedUnspentBoxes) return;
-	AddressState.printedUnspentBoxes = true;
+async function printUnspentBoxes(force = false) {
+	if (AddressState.printedUnspentBoxes && !force) return;
 
 	// Hide unspent boxes on first load
-	if (AddressState.firstTime) {
+	if (AddressState.firstTime && !force) {
 		hideUnspentBoxes(null);
 	}
 
 	try {
 		const data = await ApiClient.getUnspentBoxes();
-		if (data && data.items && data.items.length > 0) {
-			let html = '';
-			data.items.forEach(box => {
-				html += formatBox(box, false, true).replace('row', 'col-12 col-md-6 ps-0 pe-0');
-			});
+		AddressState.printedUnspentBoxes = true;
 
-			AddressState.unspentBoxesCount = data.total;
-			$('#unspentBoxesHolder').html(html);
-			$('#unspentBoxesHeading').html('<strong>Unspent Boxes</strong> (' + AddressState.unspentBoxesCount + ') ');
-			$('#hideUnspentBoxesAction').hide();
+		if (!data || !data.items || data.items.length === 0) {
+			if (data && data.total > 0 && AddressState.unspentBoxesOffset > 0) {
+				AddressState.unspentBoxesOffset = getLastUnspentBoxesOffset(data.total);
+				AddressState.printedUnspentBoxes = false;
+				await printUnspentBoxes(true);
+				return;
+			}
+
+			AddressState.unspentBoxesCount = 0;
+			$('#unspentBoxesHolder').empty();
+			$('#unspentBoxesPagination').hide();
+			$('#unspentBoxesHeading').html('<strong>Unspent Boxes</strong> (0) ');
+			return;
 		}
+
+		renderUnspentBoxes(data);
 	} catch (error) {
 		console.error('Failed to fetch unspent boxes:', error);
 	}
+}
+
+function renderUnspentBoxes(data) {
+	let html = '';
+	data.items.forEach(box => {
+		html += formatBox(box, false, true).replace('row', 'col-12 col-md-6 ps-0 pe-0');
+	});
+
+	AddressState.unspentBoxesCount = data.total;
+	$('#unspentBoxesHolder').html(html);
+	$('#unspentBoxesHeading').html('<strong>Unspent Boxes</strong> (' + AddressState.unspentBoxesCount + ') ');
+	renderUnspentBoxesPagination();
+
+	if (!AddressState.firstTime && $('#unspentBoxesHolder').is(':visible')) {
+		$('#hideUnspentBoxesAction').show();
+		$('#showUnspentBoxesAction').hide();
+	}
+}
+
+function renderUnspentBoxesPagination() {
+	const totalPages = Math.ceil(AddressState.unspentBoxesCount / AddressState.unspentBoxesPageSize);
+	const currentPage = Math.floor(AddressState.unspentBoxesOffset / AddressState.unspentBoxesPageSize) + 1;
+
+	if (totalPages <= 1) {
+		$('#unspentBoxesPagination').hide();
+		return;
+	}
+
+	const previousOffset = Math.max(0, AddressState.unspentBoxesOffset - AddressState.unspentBoxesPageSize);
+	const nextOffset = Math.min(getLastUnspentBoxesOffset(AddressState.unspentBoxesCount), AddressState.unspentBoxesOffset + AddressState.unspentBoxesPageSize);
+
+	$('#unspentBoxesPageNum').html(nFormatter(currentPage, 0, true, true) + ' of ' + nFormatter(totalPages, 0, true, true));
+	$('#unspentBoxesPagination').toggle($('#unspentBoxesHolder').is(':visible'));
+	bindUnspentBoxesPageLink('.unspentFirstPageHolder', '.unspentFirstPage', 0, currentPage <= 1);
+	bindUnspentBoxesPageLink('.unspentPreviousPageHolder', '.unspentPreviousPage', previousOffset, currentPage <= 1);
+	bindUnspentBoxesPageLink('.unspentNextPageHolder', '.unspentNextPage', nextOffset, currentPage >= totalPages);
+	bindUnspentBoxesPageLink('.unspentLastPageHolder', '.unspentLastPage', getLastUnspentBoxesOffset(AddressState.unspentBoxesCount), currentPage >= totalPages);
+}
+
+function bindUnspentBoxesPageLink(holderSelector, linkSelector, boxOffset, disabled) {
+	$(holderSelector).toggleClass('disabled', disabled);
+	$(linkSelector)
+		.off('click')
+		.on('click', function(e) {
+			showUnspentBoxesPage(e, boxOffset);
+		});
+}
+
+function getLastUnspentBoxesOffset(totalItems) {
+	if (totalItems <= 0) return 0;
+	return Math.floor((totalItems - 1) / AddressState.unspentBoxesPageSize) * AddressState.unspentBoxesPageSize;
+}
+
+async function showUnspentBoxesPage(e, boxOffset) {
+	if (e) e.preventDefault();
+
+	AddressState.unspentBoxesOffset = Math.max(0, Math.min(boxOffset, getLastUnspentBoxesOffset(AddressState.unspentBoxesCount)));
+	AddressState.printedUnspentBoxes = false;
+	$('#unspentBoxesHolder').show();
+	$('#unspentBoxesPagination').show();
+	await printUnspentBoxes(true);
+	scrollToElement($('#unspentBoxesHeading'));
 }
 
 /**
@@ -138,9 +206,12 @@ async function printUnspentBoxes() {
  */
 function showUnspentBoxes(e) {
 	$('#unspentBoxesHolder').show();
+	if (AddressState.unspentBoxesCount > AddressState.unspentBoxesPageSize) {
+		$('#unspentBoxesPagination').show();
+	}
 	$('#showUnspentBoxesAction').hide();
 	$('#hideUnspentBoxesAction').show();
-	$('#unspentBoxesHeading').html('<strong>Unspent Boxes </strong>');
+	$('#unspentBoxesHeading').html('<strong>Unspent Boxes</strong> (' + AddressState.unspentBoxesCount + ') ');
 	scrollToElement($('#unspentBoxesHeading'));
 	if (e) e.preventDefault();
 }
@@ -150,6 +221,7 @@ function showUnspentBoxes(e) {
  */
 function hideUnspentBoxes(e) {
 	$('#unspentBoxesHolder').hide();
+	$('#unspentBoxesPagination').hide();
 	$('#showUnspentBoxesAction').show();
 	$('#hideUnspentBoxesAction').hide();
 	$('#unspentBoxesHeading').html('<strong>Unspent Boxes</strong> (' + AddressState.unspentBoxesCount + ') ');
@@ -324,12 +396,6 @@ window.printAddressSummary = printAddressSummary;
 window.printTransactions = printTransactions;
 window.printUnspentBoxes = printUnspentBoxes;
 window.refreshData = refreshData;
-
-// UI Controllers - Token display
-window.showAllTokens = (e) => UIControllers.showAllTokens(e);
-window.hideAllTokens = (e) => UIControllers.hideAllTokens(e);
-window.showAllFinancialTokens = (e) => UIControllers.showAllFinancialTokens(e);
-window.hideAllFinancialTokens = (e) => UIControllers.hideAllFinancialTokens(e);
 
 // UI Controllers - Transaction value
 window.showFullValue = (e, index) => UIControllers.showFullValue(e, index);

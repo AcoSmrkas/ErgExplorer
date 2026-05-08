@@ -132,17 +132,77 @@ select:hover {
 }
 
 .tokensContainer {
-	max-height: 130px;
+	max-height: 180px;
+	margin-bottom: 0;
 	overflow-y: auto;
+	padding-right: 0.25rem;
 }
 
 #tokensHolder {
 	min-height: unset;
 }
 
+.address-token-groups {
+	display: block;
+}
+
+.address-token-group {
+	min-width: 0;
+}
+
+.address-token-group + .address-token-group {
+	margin-top: 1rem;
+}
+
+.tokensContainer p {
+	line-height: 1.22;
+	margin-bottom: 0.3rem;
+}
+
+.tokensContainer p:last-child {
+	margin-bottom: 0;
+}
+
+.tokensContainer .address-token-type-icon {
+	display: inline-block;
+	margin-right: 0.15rem;
+	margin-top: -1px;
+	vertical-align: middle;
+}
+
 @media only screen and (min-width: 992px) {
+	#tokensHolder {
+		overflow: hidden;
+	}
+
+	.address-token-groups {
+		display: flex;
+		flex-wrap: nowrap;
+		gap: 0.75rem;
+		height: 100%;
+		min-height: 0;
+	}
+
+	.address-token-group {
+		display: flex;
+		flex: 1 1 0;
+		flex-direction: column;
+		min-height: 0;
+	}
+
+	#tokensHolder.has-single-token-group .address-token-group {
+		flex: 0 1 50%;
+		max-width: 50%;
+	}
+
+	.address-token-group + .address-token-group {
+		margin-top: 0;
+	}
+
 	.tokensContainer {
-		//min-height: 400px;
+		flex: 1 1 auto;
+		max-height: none;
+		min-height: 0;
 	}
 }
 
@@ -152,7 +212,53 @@ select:hover {
 	overflow-y: auto;	
 }
 
-#unspentBoxesHolder > div {
+#unspentBoxesHolder > .div-cell {
+	border-radius: 0;
 	max-height: 200px;
 	overflow-y: auto;
+}
+
+#unspentBoxesHolder > .div-cell:not(:first-child) {
+	border-top: 0;
+}
+
+#unspentBoxesHolder > .div-cell:first-child {
+	border-top-left-radius: 5px;
+	border-top-right-radius: 5px;
+}
+
+#unspentBoxesHolder > .div-cell:last-child {
+	border-bottom-left-radius: 5px;
+	border-bottom-right-radius: 5px;
+}
+
+@media only screen and (min-width: 768px) {
+	#unspentBoxesHolder > .div-cell:not(:first-child) {
+		border-top: 1px solid var(--borders);
+	}
+
+	#unspentBoxesHolder > .div-cell:nth-child(n + 3) {
+		border-top: 0;
+	}
+
+	#unspentBoxesHolder > .div-cell:nth-child(even) {
+		border-left: 0;
+	}
+
+	#unspentBoxesHolder > .div-cell:first-child {
+		border-top-right-radius: 0;
+	}
+
+	#unspentBoxesHolder > .div-cell:nth-child(2) {
+		border-top-right-radius: 5px;
+	}
+
+	#unspentBoxesHolder > .div-cell:last-child {
+		border-bottom-left-radius: 0;
+	}
+
+	#unspentBoxesHolder > .div-cell:nth-last-child(2):nth-child(odd),
+	#unspentBoxesHolder > .div-cell:last-child:nth-child(odd) {
+		border-bottom-left-radius: 5px;
+	}
 }
