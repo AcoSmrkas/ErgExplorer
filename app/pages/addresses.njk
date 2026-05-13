@@ -22,33 +22,44 @@
 			</div>
 		</div>
 		<div id="summaryOk" class="mb-3" style="display: none;">
-			<div class="row w-100 div-cell-dark border-bottom-flat p-2 p-lg-3" style="align-items:center;">
+			<div class="row w-100 div-cell-dark border-bottom-flat p-2 p-lg-3 address-identity-row">
 				<div class="col pe-0 ps-0">
-					<p><a title="Copy" onclick="copyWalletAddress(event)" href="Copy to clipboard!" id="address"></a></p>
+					<div class="address-identity-line">
+						<a title="Copy" onclick="copyWalletAddress(event)" href="Copy to clipboard!" id="address"></a>
+						<div id="addressDetailsHolder" class="address-details" style="display: none;">
+							<span id="verifiedOwnerHolder" class="address-detail-chip address-detail-owner" style="display: none;">
+								<i class="fa-solid fa-circle-check"></i>
+								<span id="verifiedOwner"></span>
+							</span>
+								<span id="addressNameHolder" class="address-detail-chip" style="display: none;">
+									<span id="addressName"></span>
+								</span>
+						</div>
+					</div>
 				</div>
-			</div>		
+			</div>
 			<div class="row w-100 div-cell-dark border-top-flat p-2 p-lg-3">
 				<div class="col-md p-0" id="addressSummaryMain">
 					<div id="addressSummaryContent">
-						<div class="row w-100">
-							<div class="ps-0 pe-0 col-12">
-								<h4><strong>Balance</strong></h4>
-								<h5 id="finalErgBalance"></h5>
-								<h5 style="display: none" id="finalAssetsBalance"></h5>
-								<h4 style="display: none;margin-bottom:0;" id="finalBalance"></h4>
+							<div class="row w-100">
+								<div class="ps-0 pe-0 col-12">
+									<h4><strong>Balance</strong></h4>
+									<h5 id="finalErgBalance"></h5>
+									<h5 style="display: none" id="finalAssetsBalance"></h5>
+									<h4 style="display: none;margin-bottom:0;" id="finalBalance"></h4>
+								</div>
 							</div>
-						</div>
-					<div style="display: none;" id="1chartHolder">
-						<div class="row w-100" id="1chart">
-							<div class="col-12">
-								<hr class="my-3">
-								<h2>Total ERG</h2>
-								<br>
-								<canvas style="width:100%;" id="chart"></canvas>
+							<div style="display: none;" id="1chartHolder">
+								<div class="row w-100" id="1chart">
+									<div class="col-12">
+										<hr class="my-3">
+										<h2>Total ERG</h2>
+										<br>
+										<canvas style="width:100%;" id="chart"></canvas>
+									</div>
+								</div>
 							</div>
-						</div>
-					</div>
-					<hr class="my-3 me-0 me-lg-3">
+							<hr class="my-3 me-0 me-lg-3">
 					<div class="row w-100">
 						<div id="nftsHolder" class="ps-0 pe-0 row w-100" style="display: none;">
 							<div class="col-12 p-0">
@@ -202,8 +213,8 @@
 		  <div id="txView" class="row w-100">
 
 			{% include "partials/pagination.njk" %}
-		  
-			<table class="table table-dark table-striped table-mobile">
+
+			<table class="table table-dark table-striped table-mobile address-tx-table">
 				<thead>
 					<tr>
 						<th scope="col">Tx</th>
@@ -218,7 +229,7 @@
 					</tr>
 				</thead>
 
-				<tbody id="transactionsTableBody">                                          
+				<tbody id="transactionsTableBody">
 				</tbody>
 			</table>
 
@@ -241,6 +252,6 @@
 	<script src="./scripts/common/prices.js?v=41"></script>
 	<script src="./scripts/common/pagination.js?v=41"></script>
 	<script src="./scripts/common/nft.js?v=41"></script>
-	<script type="module" src="./scripts/addresses/index.js?v=41"></script>
+	<script type="module" src="./scripts/addresses/index.js?v=43"></script>
 	<script src="./scripts/3rd-party/qrcode.min.js?v=41"></script>
 {% endblock %}

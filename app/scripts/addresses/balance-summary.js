@@ -67,12 +67,14 @@ export const BalanceSummary = {
 		}
 
 		// Address display
-		let addressString = AddressState.walletAddress;
-		if (addressString.length > 70) {
-			addressString = formatAddressString(addressString, 58);
-		}
-
-		$('#address').html(addressString + ' &#128203;');
+		const addressString = this._formatAddressDisplay(AddressState.walletAddress);
+		const compactAddressString = this._formatCompactAddressDisplay(AddressState.walletAddress);
+		$('#address')
+			.attr('title', AddressState.walletAddress)
+			.empty()
+			.append($('<span>').addClass('address-text-full').text(addressString))
+			.append($('<span>').addClass('address-text-compact').text(compactAddressString))
+			.append($('<span>').addClass('address-copy-icon').attr('aria-hidden', 'true').text('📋'));
 		if (typeof getOfficialExplorereAddressUrl === 'function') {
 			$('#officialLink').html(getOfficialExplorereAddressUrl(addressString));
 			$('#officialLink').attr('href', getOfficialExplorereAddressUrl(AddressState.walletAddress));
@@ -80,6 +82,16 @@ export const BalanceSummary = {
 		}
 		$('#summaryOk').show();
 		this._syncTokenHolderHeight();
+	},
+
+	_formatAddressDisplay(address) {
+		if (!address) return '';
+		return address.length > 70 ? formatAddressString(address, 58) : address;
+	},
+
+	_formatCompactAddressDisplay(address) {
+		if (!address || address.length <= 24) return address || '';
+		return address.substring(0, 12) + '...' + address.substring(address.length - 8);
 	},
 
 	/**

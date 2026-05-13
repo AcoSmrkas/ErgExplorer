@@ -28,6 +28,17 @@ export const ApiClient = {
 	},
 
 	/**
+	 * Fetch verified address book details for the current address
+	 */
+	getAddressInfo() {
+		return new Promise((resolve, reject) => {
+			$.get(ERGEXPLORER_API_HOST + 'addressbook/getAddressInfo?address=' + AddressState.walletAddress,
+				(data) => resolve(data)
+			).fail(() => reject(new Error('Failed to fetch address details')));
+		});
+	},
+
+	/**
 	 * Get balance/summary URL
 	 */
 	getTxsUrl() {

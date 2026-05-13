@@ -5,7 +5,8 @@
 
 import { AddressState, FilterState } from './state.js';
 import { ApiClient } from './api-client.js';
-import { BalanceSummary } from './balance-summary.js';
+import { BalanceSummary } from './balance-summary.js?v=43';
+import { AddressDetails } from './address-details.js?v=43';
 import { TransactionFormatter } from './transaction-formatter.js';
 import { UIControllers } from './ui-controllers.js';
 import { TransactionFilters } from './filters.js';
@@ -241,9 +242,7 @@ function onMempoolAndTransactionsDataFetched() {
 
 	if (AddressState.printed) return;
 
-	if (typeof getAddressInfo === 'function') {
-		getAddressInfo();
-	}
+	AddressDetails.printAddressDetails();
 
 	let html = '';
 	const mempoolCount = AddressState.mempoolData && AddressState.mempoolData.items ? AddressState.mempoolData.items.length : 0;
