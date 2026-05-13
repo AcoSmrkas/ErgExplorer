@@ -6,13 +6,9 @@ Erg Explorer project repo
 
 ### How do I get set up? ###
 
-Install Node.JS 11.15.0
+Install Node.js
 
-npm install -g bower
-npm install --global gulp-cli
 npm install
-bower install
-npm install natives@1.1.6
 
 ### Commands ###
 

@@ -263,6 +263,15 @@ select:hover {
 	vertical-align: middle;
 }
 
+#showAllNftsAction,
+#hideAllNftsAction,
+#showIssuedNftsAction,
+#hideIssuedNftsAction,
+#showUnspentBoxesAction,
+#hideUnspentBoxesAction {
+	margin-left: 0.35rem;
+}
+
 .address-tx-table {
 	border-collapse: separate;
 	border-spacing: 0;
