@@ -79,6 +79,39 @@ table > tbody > tr > td {
 	padding: 4px 12px !important;
 }
 
+.token-chart-controls {
+	display: flex;
+	gap: 6px;
+	justify-content: flex-end;
+}
+
+#chartColumn .token-chart-range-btn {
+	background: var(--borders) !important;
+	border: 1px solid var(--borders) !important;
+	box-shadow: none !important;
+	color: var(--text-color) !important;
+	font-weight: 700;
+	line-height: 1;
+	min-height: 42px;
+	min-width: 50px;
+	padding: 8px 10px !important;
+}
+
+#chartColumn .token-chart-range-btn:hover,
+#chartColumn .token-chart-range-btn:focus {
+	background: var(--forms-bg) !important;
+	border-color: var(--main-color) !important;
+	color: var(--text-color) !important;
+}
+
+#chartColumn .token-chart-range-btn.btn-info,
+#chartColumn .token-chart-range-btn.btn-info:hover,
+#chartColumn .token-chart-range-btn.btn-info:focus {
+	background: var(--main-color) !important;
+	border-color: var(--main-color) !important;
+	color: #fff !important;
+}
+
 .token-chart-frame {
 	height: 315px;
 	position: relative;

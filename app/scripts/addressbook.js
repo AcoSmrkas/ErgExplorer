@@ -105,10 +105,18 @@ function getAddressBookNameItems(items, startIndex) {
 }
 
 function printAddressGroups(items) {
-    let p2pkAddresses = items.filter(item => isP2pkAddress(item.address));
-    let contractAddresses = items.filter(item => !isP2pkAddress(item.address));
+    let addressItems = [];
+    let contractAddresses = [];
 
-    return printAddressGroup('Addresses', p2pkAddresses) + printAddressGroup('Contracts', contractAddresses);
+    for (let i = 0; i < items.length; i++) {
+        if (isP2pkAddress(items[i].address)) {
+            addressItems.push(items[i]);
+        } else {
+            contractAddresses.push(items[i]);
+        }
+    }
+
+    return printAddressGroup('Addresses', addressItems) + printAddressGroup('Contracts', contractAddresses);
 }
 
 function printAddressGroup(title, items) {
@@ -126,7 +134,11 @@ function printAddressGroup(title, items) {
 }
 
 function isP2pkAddress(address) {
-    return address.startsWith('9');
+    try {
+        return qfleetSDKcore.ErgoAddress.getAddressType(address) == qfleetSDKcore.AddressType.P2PK;
+    } catch {
+        return false;
+    }
 }
 
 function printAddress(item) {

@@ -286,10 +286,10 @@
 						<div class="col-6 p-0 pb-1">
 							<h4>Price chart <input id="chartToggleBtn" onclick="toggleChart()" type="button" class="btn btn-info ms-1" value="USD" /></h4>
 						</div>
-						<div class="col-6 p-0">
-							<input id="showGainersLosers30d" onclick="printGainersLosers30d()" style="display:inline-block;" class="p-2 p-sm-2 btn btn-primary float-end" type="button" value="30d">
-							<input id="showGainersLosers7d" onclick="printGainersLosers7d()" style="margin-right:5px;display:inline-block;" class="p-2 p-sm-2 btn btn-primary float-end" type="button" value="7d">
-							<input id="showGainersLosers24h" onclick="printGainersLosers24h()" style="margin-right:5px;display:inline-block;" class="p-2 p-sm-2 btn btn-info float-end" type="button" value="24h">
+						<div class="col-6 p-0 token-chart-controls">
+							<input id="showGainersLosers24h" onclick="printGainersLosers24h()" class="btn btn-info token-chart-range-btn" type="button" value="24h">
+							<input id="showGainersLosers7d" onclick="printGainersLosers7d()" class="btn btn-primary token-chart-range-btn" type="button" value="7d">
+							<input id="showGainersLosers30d" onclick="printGainersLosers30d()" class="btn btn-primary token-chart-range-btn" type="button" value="30d">
 						</div>
 					</div>
 					<div class="token-chart-frame">
