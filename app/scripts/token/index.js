@@ -4,6 +4,11 @@ import { TokenUIDisplay } from './ui-display.js';
 import { TokenUIControllers } from './ui-controllers.js';
 import { TokenAnalyzer } from './token-analyzer.js';
 
+function isLpTokenData(tokenData) {
+	const name = (tokenData && tokenData.name ? tokenData.name : '').trim();
+	return /(?:\sLP|_LP)(?:\sToken)?$/i.test(name);
+}
+
 // Main initialization
 $(function() {
 	TokenState.tokenId = typeof getWalletAddressFromUrl === 'function' ? getWalletAddressFromUrl() : undefined;
@@ -45,6 +50,7 @@ window.onGetNftInfoDone = function(nftInfo, message) {
 	}
 
 	TokenState.tokenData = nftInfo.data;
+	TokenState.isLpToken = isLpTokenData(TokenState.tokenData);
 
 	// Display collection info if exists
 	if (TokenState.tokenData.collectionid && TokenState.tokenData.collectionid != '') {
@@ -330,9 +336,13 @@ window.onGetNftInfoDone = function(nftInfo, message) {
 			if (txs && txs.length > 0) TokenUIDisplay.printTxs(txs);
 		}).catch(error => console.error('TXs error:', error));
 
-		TokenApiClient.getSwapsData().then(swaps => {
-			if (swaps && swaps.length > 0) TokenUIDisplay.printSwaps(swaps);
-		}).catch(error => console.error('Swaps error:', error));
+		if (TokenState.isLpToken) {
+			TokenUIDisplay.hideSwaps();
+		} else {
+			TokenApiClient.getSwapsData().then(swaps => {
+				if (swaps && swaps.length > 0) TokenUIDisplay.printSwaps(swaps);
+			}).catch(error => console.error('Swaps error:', error));
+		}
 
 		TokenApiClient.getHolders().then(holders => {
 			if (holders && holders.length > 0) TokenUIDisplay.printHolders(holders);

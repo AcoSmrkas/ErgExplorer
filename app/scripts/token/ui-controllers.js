@@ -1,5 +1,12 @@
 import { TokenState } from './state.js';
 
+function hasTokenUsdPrice() {
+	if (typeof prices === 'undefined') return false;
+
+	const price = Number(prices[TokenState.tokenId]);
+	return Number.isFinite(price) && price > 0;
+}
+
 export const TokenUIControllers = {
 	// Copy token address to clipboard
 	copyTokenAddress(e) {
@@ -226,12 +233,17 @@ export const TokenUIControllers = {
 
 	// Set external links for the token
 	setLinks() {
+		if (!TokenState.tokenData || TokenState.isLpToken || !hasTokenUsdPrice()) {
+			$('#tokenBuyLink').hide().attr('href', '');
+			return;
+		}
+
 		let tradeUrl = 'https://dex.mewfinance.com/ergo/swap?base=0000000000000000000000000000000000000000000000000000000000000000&quote=' + TokenState.tokenId;
 
 		if (TokenState.tokenData.isMeme == 't') {
 			tradeUrl = 'https://dex.crooks-fi.com/ergo/swap?base=0000000000000000000000000000000000000000000000000000000000000000&quote=' + TokenState.tokenId;
 		}
 
-		$('#tokenBuyLink').attr('href', tradeUrl);
+		$('#tokenBuyLink').show().attr('href', tradeUrl);
 	}
 };

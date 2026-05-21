@@ -5,6 +5,7 @@ export const TokenState = {
 	tokenId: '',
 	nftType: undefined,
 	decimals: 0,
+	isLpToken: false,
 
 	// Price/market data
 	priceData: undefined,

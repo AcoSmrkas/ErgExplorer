@@ -62,6 +62,10 @@ table > tbody > tr > td {
 	overflow: hidden;
 }
 
+#priceInfo.holders-only #holdersTable {
+	border-radius: 0 !important;
+}
+
 #priceInfo.holders-only #holdersColumn {
 	width: 100%;
 }

@@ -27,6 +27,8 @@ export const TokenApiClient = {
 
 						// Import and call chart display if price history is loaded
 						import('./ui-controllers.js').then(module => {
+							module.TokenUIControllers.setLinks();
+
 							if (TokenState.priceData && TokenState.priceData.length > 0) {
 								console.log('Price history available, displaying chart');
 								module.TokenUIControllers.printGainersLosers(0);
@@ -66,6 +68,11 @@ export const TokenApiClient = {
 		return new Promise((resolve) => {
 			if (!TokenState.tokenId) {
 				console.warn('Token ID not set for swaps');
+				resolve([]);
+				return;
+			}
+
+			if (TokenState.isLpToken) {
 				resolve([]);
 				return;
 			}

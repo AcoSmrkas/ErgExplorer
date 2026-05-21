@@ -48,6 +48,15 @@ function setHoldersLayout(hasChart) {
 }
 
 export const TokenUIDisplay = {
+	hideSwaps() {
+		TokenState.swaps = [];
+		$('#swapsHeader').hide();
+		$('#swapsHolder').hide();
+		$('#swapsLoading').hide();
+		$('#swapsTable').hide();
+		$('#swapsTableBody').empty();
+	},
+
 	// Display token supply information
 	printSupplyInfo() {
 		if (!TokenState.amountsData || !TokenState.tokenData) return;
@@ -169,6 +178,11 @@ export const TokenUIDisplay = {
 
 	// Display swaps
 	printSwaps(data) {
+		if (TokenState.isLpToken) {
+			this.hideSwaps();
+			return;
+		}
+
 		if (!data || data.length === 0 || !TokenState.tokenData) {
 			$('#swapsLoading').hide();
 			return;
