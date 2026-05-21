@@ -80,8 +80,9 @@ table > tbody > tr > td {
 }
 
 .token-chart-controls {
+	align-items: center;
 	display: flex;
-	gap: 6px;
+	gap: 5px;
 	justify-content: flex-end;
 }
 
@@ -90,25 +91,31 @@ table > tbody > tr > td {
 	border: 1px solid var(--borders) !important;
 	box-shadow: none !important;
 	color: var(--text-color) !important;
+	font-size: 0.95rem;
 	font-weight: 700;
-	line-height: 1;
-	min-height: 42px;
-	min-width: 50px;
-	padding: 8px 10px !important;
+	line-height: 1.1;
+	min-height: 34px;
+	min-width: 42px;
+	padding: 5px 9px !important;
 }
 
-#chartColumn .token-chart-range-btn:hover,
-#chartColumn .token-chart-range-btn:focus {
-	background: var(--forms-bg) !important;
-	border-color: var(--main-color) !important;
-	color: var(--text-color) !important;
-}
-
-#chartColumn .token-chart-range-btn.btn-info,
-#chartColumn .token-chart-range-btn.btn-info:hover,
-#chartColumn .token-chart-range-btn.btn-info:focus {
+#chartColumn .token-chart-range-btn.btn-primary:hover,
+#chartColumn .token-chart-range-btn.btn-primary:focus {
 	background: var(--main-color) !important;
 	border-color: var(--main-color) !important;
+	color: #fff !important;
+}
+
+#chartColumn .token-chart-range-btn.btn-info {
+	background: var(--main-color) !important;
+	border-color: var(--main-color) !important;
+	color: #fff !important;
+}
+
+#chartColumn .token-chart-range-btn.btn-info:hover,
+#chartColumn .token-chart-range-btn.btn-info:focus {
+	background: var(--main-color-hover) !important;
+	border-color: var(--main-color-hover) !important;
 	color: #fff !important;
 }
 
