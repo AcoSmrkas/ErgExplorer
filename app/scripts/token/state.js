@@ -11,6 +11,7 @@ export const TokenState = {
 	hasPrice: false,
 	amountsData: undefined,
 	holders: [],
+	holderCount: 0,
 	txs: [],
 	swaps: [],
 

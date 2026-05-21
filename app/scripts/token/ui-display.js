@@ -1,19 +1,66 @@
 import { TokenState } from './state.js';
 import { TokenAnalyzer } from './token-analyzer.js';
 
+function getTokenUsdPrice() {
+	if (typeof prices === 'undefined') return 0;
+
+	const price = Number(prices[TokenState.tokenId]);
+	return Number.isFinite(price) && price > 0 ? price : 0;
+}
+
+function formatTokenDollarPrice(tokenAmount, tokenDecimals) {
+	const price = getTokenUsdPrice();
+	if (!price) return '';
+
+	const tokenValue = typeof getAssetValue === 'function'
+		? getAssetValue(tokenAmount, tokenDecimals)
+		: tokenAmount / Math.pow(10, tokenDecimals);
+	const dollarValue = tokenValue * price;
+
+	if (!Number.isFinite(dollarValue) || dollarValue <= 0) return '';
+
+	return typeof formatDollarPriceString === 'function'
+		? formatDollarPriceString(dollarValue)
+		: '($' + dollarValue.toFixed(2) + ')';
+}
+
+function formatTokenDollarPriceHtml(tokenAmount, tokenDecimals) {
+	const dollarPrice = formatTokenDollarPrice(tokenAmount, tokenDecimals);
+	return dollarPrice ? ' <span class="text-light">' + dollarPrice + '</span>' : '';
+}
+
+function renderHolderCount() {
+	const count = Math.max(TokenState.holderCount || 0, TokenState.holders ? TokenState.holders.length : 0);
+	const formattedCount = typeof nFormatter === 'function' ? nFormatter(count) : count;
+	const html = count > 0 ? `(of total ${formattedCount})` : '';
+
+	$('#totalHolderCount').html(html);
+	$('#totalHolderCountStandalone').html(html);
+}
+
+function setHoldersLayout(hasChart) {
+	$('#priceInfo').toggleClass('holders-only', !hasChart);
+	$('#financeHeader').toggle(hasChart);
+	$('#chartColumn').toggle(hasChart);
+	$('#holdersSectionHeader').toggle(!hasChart);
+	$('#holdersInlineHeader, #totalHolderCount').toggle(hasChart);
+	$('#holdersColumn').toggleClass('col-xl-6', hasChart);
+}
+
 export const TokenUIDisplay = {
 	// Display token supply information
 	printSupplyInfo() {
 		if (!TokenState.amountsData || !TokenState.tokenData) return;
 
+		const tokenUsdPrice = getTokenUsdPrice();
 		let hasData = false;
 		let tokenNameHtml = typeof getAssetTitleParams === 'function' ?
 			getAssetTitleParams(TokenState.tokenData, TokenState.tokenData.id, TokenState.tokenData.name, false) :
 			TokenState.tokenData.name;
 
 		// Market Cap
-		if (TokenState.amountsData.liquid_supply !== undefined && typeof prices !== 'undefined' && prices[TokenState.tokenId]) {
-			let marketCap = TokenState.amountsData.liquid_supply * prices[TokenState.tokenId];
+		if (TokenState.amountsData.liquid_supply !== undefined && tokenUsdPrice) {
+			let marketCap = TokenState.amountsData.liquid_supply * tokenUsdPrice;
 			$('#tokenMarketCap').html('$' + (typeof nFormatter === 'function' ? nFormatter(marketCap, 2, true) : marketCap));
 			$('#tokenMarketCapRow').show();
 			hasData = true;
@@ -24,8 +71,8 @@ export const TokenUIDisplay = {
 		// Liquid Supply
 		if (TokenState.amountsData.liquid_supply !== undefined) {
 			let liquidHtml = (typeof nFormatter === 'function' ? nFormatter(TokenState.amountsData.liquid_supply, 0, true) : TokenState.amountsData.liquid_supply) + ' ' + tokenNameHtml;
-			if (typeof prices !== 'undefined' && prices[TokenState.tokenId]) {
-				liquidHtml += ' <span class="text-light">($' + (typeof nFormatter === 'function' ? nFormatter(TokenState.amountsData.liquid_supply * prices[TokenState.tokenId], 2) : TokenState.amountsData.liquid_supply * prices[TokenState.tokenId]) + ')</span>';
+			if (tokenUsdPrice) {
+				liquidHtml += ' <span class="text-light">($' + (typeof nFormatter === 'function' ? nFormatter(TokenState.amountsData.liquid_supply * tokenUsdPrice, 2) : TokenState.amountsData.liquid_supply * tokenUsdPrice) + ')</span>';
 			}
 			$('#tokenLiquidSupply').html(liquidHtml);
 			$('#tokenLiquidSupplyRow').show();
@@ -37,8 +84,8 @@ export const TokenUIDisplay = {
 		// Locked Supply
 		if (TokenState.amountsData.locked_supply !== undefined && TokenState.amountsData.locked_supply > 0) {
 			let lockedHtml = (typeof nFormatter === 'function' ? nFormatter(TokenState.amountsData.locked_supply, 0, true) : TokenState.amountsData.locked_supply) + ' ' + tokenNameHtml;
-			if (typeof prices !== 'undefined' && prices[TokenState.tokenId]) {
-				lockedHtml += ' <span class="text-light">($' + (typeof nFormatter === 'function' ? nFormatter(TokenState.amountsData.locked_supply * prices[TokenState.tokenId], 2) : TokenState.amountsData.locked_supply * prices[TokenState.tokenId]) + ')</span>';
+			if (tokenUsdPrice) {
+				lockedHtml += ' <span class="text-light">($' + (typeof nFormatter === 'function' ? nFormatter(TokenState.amountsData.locked_supply * tokenUsdPrice, 2) : TokenState.amountsData.locked_supply * tokenUsdPrice) + ')</span>';
 			}
 			$('#tokenLockedSupply').html(lockedHtml);
 			$('#tokenLockedSupplyRow').show();
@@ -50,8 +97,8 @@ export const TokenUIDisplay = {
 		// Burned Supply
 		if (TokenState.amountsData.burned_supply !== undefined && TokenState.amountsData.burned_supply > 0) {
 			let burnedHtml = (typeof nFormatter === 'function' ? nFormatter(TokenState.amountsData.burned_supply, 0, true) : TokenState.amountsData.burned_supply) + ' ' + tokenNameHtml;
-			if (typeof prices !== 'undefined' && prices[TokenState.tokenId]) {
-				burnedHtml += ' <span class="text-light">($' + (typeof nFormatter === 'function' ? nFormatter(TokenState.amountsData.burned_supply * prices[TokenState.tokenId], 2) : TokenState.amountsData.burned_supply * prices[TokenState.tokenId]) + ')</span>';
+			if (tokenUsdPrice) {
+				burnedHtml += ' <span class="text-light">($' + (typeof nFormatter === 'function' ? nFormatter(TokenState.amountsData.burned_supply * tokenUsdPrice, 2) : TokenState.amountsData.burned_supply * tokenUsdPrice) + ')</span>';
 			}
 			$('#tokenBurnedSupply').html(burnedHtml);
 			$('#tokenBurnedSupplyRow').show();
@@ -106,12 +153,7 @@ export const TokenUIDisplay = {
 				+ ' '
 				+ assetTitle;
 
-			if (typeof prices !== 'undefined' && prices[TokenState.tokenData.id]) {
-				html += ' '
-				+ '<span class="text-light">'
-					+ (typeof formatAssetDollarPriceString === 'function' ? formatAssetDollarPriceString(value, TokenState.tokenData.decimals, TokenState.tokenId) : '')
-				+ '</span>';
-			}
+			html += formatTokenDollarPriceHtml(value, TokenState.tokenData.decimals);
 			html += '</span></td>';
 
 			html += '</tr>';
@@ -158,10 +200,7 @@ export const TokenUIDisplay = {
 					+ (typeof formatAssetValueString === 'function' ? formatAssetValueString(amountWithDecimals, TokenState.decimals, 4) : item.amount)
 					+ ' '
 					+ assetTitle
-					+ ' '
-					+ '<span class="text-light">'
-						+ (typeof formatAssetDollarPriceString === 'function' ? formatAssetDollarPriceString(amountWithDecimals, TokenState.decimals, TokenState.tokenId) : '')
-					+ '</span>'
+					+ formatTokenDollarPriceHtml(amountWithDecimals, TokenState.decimals)
 				+ '</span>'
 			+ '</td>';
 			html += '<td>' + item.dexname + '</td>';
@@ -194,6 +233,7 @@ export const TokenUIDisplay = {
 	printHolders(data) {
 		if (!data || data.length === 0 || !TokenState.tokenData) return;
 
+		TokenState.holders = data;
 		let formattedResult = '';
 
 		for (let i = 0; i < data.length; i++) {
@@ -204,12 +244,7 @@ export const TokenUIDisplay = {
 			formattedResult += '<td>#' + (i+1) + ' <a class="address-string" addr="' + data[i].address + '" href="' + (typeof getWalletAddressUrl === 'function' ? getWalletAddressUrl(data[i].address) : '#') + '">' + (typeof formatAddressString === 'function' ? formatAddressString(data[i].address, 4) : data[i].address) + '</a></td>';
 
 			// Balance
-			let dollarPrice = '';
-			if (typeof prices !== 'undefined' && prices[TokenState.tokenId]) {
-				if (typeof formatDollarPriceString === 'function') {
-					dollarPrice = formatDollarPriceString(data[i].balance / Math.pow(10, TokenState.decimals) * prices[TokenState.tokenId]);
-				}
-			}
+			let dollarPriceHtml = formatTokenDollarPriceHtml(data[i].balance, TokenState.decimals);
 
 			let percent = '0.00';
 			if (TokenState.amountsData) {
@@ -222,7 +257,7 @@ export const TokenUIDisplay = {
 			let assetTitle = typeof getAssetTitleParams === 'function' ? getAssetTitleParams(TokenState.tokenData, TokenState.tokenId, TokenState.tokenData.name, false) : TokenState.tokenData.name;
 			let assetValue = typeof formatAssetValueString === 'function' ? formatAssetValueString(data[i].balance, TokenState.decimals) : data[i].balance;
 
-			formattedResult += '<td class="">' + assetValue + ' ' + assetTitle + ' <span class="text-light">' + dollarPrice + '</span><span style="text-align:right;float:right;" class="d-inline d-lg-none text-white"> ' + percent + '%</span></td>';
+			formattedResult += '<td class="">' + assetValue + ' ' + assetTitle + dollarPriceHtml + '<span style="text-align:right;float:right;" class="d-inline d-lg-none text-white"> ' + percent + '%</span></td>';
 
 			// Percent
 			formattedResult += '<td class="d-none d-lg-table-cell" style="text-align:right;">' + percent + '%</td>';
@@ -233,28 +268,24 @@ export const TokenUIDisplay = {
 		$('#holdersTableBody').html(formattedResult);
 		$('#holdersLoading').hide();
 		$('#holdersTable').show();
+		$('#priceInfo').show();
+		$('#priceLoading').hide();
 
 		if (typeof getAddressesInfo === 'function') {
 			getAddressesInfo();
 		}
 
-		if (!TokenState.hasPrice && (typeof prices === 'undefined' || !prices[TokenState.tokenId])) {
-			$('#financeHeader').hide();
-			$('#chartColumn').hide();
-			$('#holdersColumn').removeClass('col-xl-6');
-		} else {
-			$('#financeHeader').show();
-			$('#chartColumn').show();
-			$('#holdersColumn').addClass('col-xl-6');
-		}
+		renderHolderCount();
+		setHoldersLayout(TokenState.hasPrice && !!getTokenUsdPrice());
 	},
 
 	// Display holder count
 	printHolderCount(data) {
 		const count = typeof data === 'number' ? data : (data && data.total ? data.total : 0);
-		$('#totalHolderCount').html(`(of total ${typeof nFormatter === 'function' ? nFormatter(count) : count})`);
+		TokenState.holderCount = count;
+		renderHolderCount();
 
-		if (count == 0) {
+		if (Math.max(count, TokenState.holders ? TokenState.holders.length : 0) == 0) {
 			$('#priceInfo').hide();
 		} else {
 			$('#priceInfo').show();

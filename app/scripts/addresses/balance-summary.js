@@ -7,6 +7,7 @@ import { AddressState } from './state.js';
 export const BalanceSummary = {
 	_tokenHolderHeightObserver: null,
 	_tokenHolderHeightResizeHandler: null,
+	_underlyingTokenPriceCache: {},
 
 	/**
 	 * Print address summary with balance and tokens
@@ -18,7 +19,7 @@ export const BalanceSummary = {
 
 		try {
 			const data = await ApiClient.getAddressSummary();
-			this._displayBalance(data);
+			await this._displayBalance(data);
 		} catch (error) {
 			console.error('Failed to print address summary:', error);
 			showLoadError('No results matching your query.');
@@ -28,7 +29,7 @@ export const BalanceSummary = {
 	/**
 	 * Display balance information on UI
 	 */
-	_displayBalance(data) {
+	async _displayBalance(data) {
 		// ERG balance
 		const ergBalance = formatErgValueString(data.confirmed.nanoErgs, 4, true);
 		let balanceHtml = ergBalance;
@@ -46,8 +47,20 @@ export const BalanceSummary = {
 
 			AddressState.tokensArray = sortTokens(data.confirmed.tokens);
 
-			const financialTokens = AddressState.tokensArray.filter((_, i, arr) => this._separateFinancialTokens(_, i, arr));
-			const otherTokens = AddressState.tokensArray.filter((_, i, arr) => this._separateNonFinancialTokens(_, i, arr));
+			const financialTokens = AddressState.tokensArray.filter(token => this._isDirectFinancialToken(token));
+			const lpTokens = AddressState.tokensArray.filter(token => !this._isDirectFinancialToken(token) && this._isLpToken(token));
+			const lpTokenValues = await this._loadLpTokenValues(lpTokens);
+			const pricedLpTokens = lpTokens.filter(token => lpTokenValues[token.tokenId] && lpTokenValues[token.tokenId].usdValue > 0);
+			const unpricedLpTokens = lpTokens.filter(token => !lpTokenValues[token.tokenId] || lpTokenValues[token.tokenId].usdValue <= 0);
+			let otherTokens = AddressState.tokensArray.filter(token => !this._isDirectFinancialToken(token) && !this._isLpToken(token));
+
+			pricedLpTokens.forEach(token => {
+				token.lpUsdPrice = lpTokenValues[token.tokenId].usdValue;
+				token.lpEstimated = true;
+			});
+			otherTokens = otherTokens.concat(unpricedLpTokens);
+			financialTokens.push(...pricedLpTokens);
+
 			const visibleTokenGroupCount = [financialTokens, otherTokens].filter(tokens => tokens.length > 0).length;
 
 			$('#tokensHolder').toggleClass('has-single-token-group', visibleTokenGroupCount === 1);
@@ -105,11 +118,11 @@ export const BalanceSummary = {
 
 		// Calculate prices and sort by USD value
 		tokensArray.forEach(token => {
-			let price = 0;
-			if (gotPrices && prices[token.tokenId]) {
+			let price = token.lpUsdPrice || 0;
+			if (!price && gotPrices && prices[token.tokenId]) {
 				price = formatAssetDollarPrice(token.amount, token.decimals, token.tokenId);
-				totalAssetsValue += price;
 			}
+			totalAssetsValue += price;
 			token.usdPrice = price;
 		});
 
@@ -119,7 +132,8 @@ export const BalanceSummary = {
 
 		tokensArray.forEach(token => {
 			const isScan = AddressState.scamList.includes(token.tokenId);
-			const priceStr = token.usdPrice > 0 ? '<span class="text-light"> ' + formatDollarPriceString(token.usdPrice) + '</span>' : '';
+			const priceTitle = token.lpEstimated ? ' title="Estimated LP locked value"' : '';
+			const priceStr = token.usdPrice > 0 ? '<span class="text-light"' + priceTitle + '> ' + formatDollarPriceString(token.usdPrice) + '</span>' : '';
 			const tokenStr = formatAssetNameAndValueString(
 				getAssetTitle(token, true, isScan),
 				formatAssetValueString(token.amount, token.decimals, 4) + priceStr,
@@ -139,6 +153,147 @@ export const BalanceSummary = {
 		}
 
 		return html;
+	},
+
+	async _loadLpTokenValues(lpTokens) {
+		const values = {};
+		if (!lpTokens || lpTokens.length === 0) return values;
+
+		await Promise.all(lpTokens.map(async token => {
+			try {
+				const value = await this._getLpTokenValue(token);
+				if (value && value.usdValue > 0) {
+					values[token.tokenId] = value;
+					AddressState.lpTokenValues[token.tokenId] = value;
+				}
+			} catch (error) {
+				console.warn('Failed to estimate LP value:', token.tokenId, error);
+			}
+		}));
+
+		return values;
+	},
+
+	async _getLpTokenValue(token) {
+		const [tokenInfo, boxesData] = await Promise.all([
+			ApiClient.getTokenInfo(token.tokenId),
+			ApiClient.getUnspentBoxesByTokenId(token.tokenId)
+		]);
+		const poolBox = this._findLpPoolBox(boxesData.items || [], token.tokenId, tokenInfo.emissionAmount);
+		if (!poolBox) return null;
+
+		const lpReserve = this._getAssetAmount(poolBox, token.tokenId);
+		const circulatingSupply = this._getLpCirculatingSupply(tokenInfo.emissionAmount, lpReserve);
+		if (circulatingSupply <= 0) return null;
+
+		const poolUsdValue = await this._getLpPoolUsdValue(poolBox, token);
+		if (poolUsdValue <= 0) return null;
+
+		const walletLpAmount = Number(token.amount);
+		return {
+			usdValue: poolUsdValue * walletLpAmount / circulatingSupply,
+			poolUsdValue
+		};
+	},
+
+	_findLpPoolBox(boxes, lpTokenId, emissionAmount) {
+		const emission = this._safeBigInt(emissionAmount);
+		const candidateBoxes = boxes
+			.map(box => {
+				const lpAsset = (box.assets || []).find(asset => asset.tokenId === lpTokenId);
+				const reserveAssets = this._getLpReserveAssets(box, lpTokenId);
+				return {
+					box,
+					lpAmount: lpAsset ? this._safeBigInt(lpAsset.amount) : 0n,
+					reserveAssets
+				};
+			})
+			.filter(candidate => candidate.lpAmount > 0n && candidate.reserveAssets.length > 0);
+
+		if (candidateBoxes.length === 0) return null;
+
+		const likelyPoolBoxes = emission > 0n
+			? candidateBoxes.filter(candidate => candidate.lpAmount > emission / 2n)
+			: candidateBoxes;
+		const poolCandidates = likelyPoolBoxes.length > 0 ? likelyPoolBoxes : candidateBoxes;
+		poolCandidates.sort((a, b) => a.lpAmount > b.lpAmount ? -1 : 1);
+		return poolCandidates[0].box;
+	},
+
+	_getLpReserveAssets(poolBox, lpTokenId) {
+		return (poolBox.assets || []).filter(asset => {
+			if (asset.tokenId === lpTokenId) return false;
+			if (asset.decimals === undefined || asset.decimals === null) return false;
+			return Number(asset.amount) > 0;
+		});
+	},
+
+	_getAssetAmount(box, tokenId) {
+		const asset = (box.assets || []).find(boxAsset => boxAsset.tokenId === tokenId);
+		return asset ? asset.amount : 0;
+	},
+
+	_getLpCirculatingSupply(emissionAmount, poolLpReserveAmount) {
+		const emission = this._safeBigInt(emissionAmount);
+		const poolReserve = this._safeBigInt(poolLpReserveAmount);
+		if (emission <= poolReserve) return 0;
+		return Number(emission - poolReserve);
+	},
+
+	async _getLpPoolUsdValue(poolBox, lpToken) {
+		const reserveAssets = this._getLpReserveAssets(poolBox, lpToken.tokenId);
+		let totalUsdValue = this._shouldIncludeLpErgReserve(lpToken, reserveAssets)
+			? formatAssetDollarPrice(poolBox.value, ERG_DECIMALS, 'ERG')
+			: 0;
+
+		const reserveValues = await Promise.all(reserveAssets.map(asset => this._getTokenReserveUsdValue(asset)));
+		reserveValues.forEach(value => {
+			totalUsdValue += value;
+		});
+
+		return totalUsdValue;
+	},
+
+	_shouldIncludeLpErgReserve(lpToken, reserveAssets) {
+		const name = (lpToken.name || '').toLowerCase();
+		return reserveAssets.length === 1 || name.includes('erg/') || name.includes('/erg') || name.includes('ergo_');
+	},
+
+	async _getTokenReserveUsdValue(asset) {
+		const usdPrice = await this._getTokenUsdUnitPrice(asset.tokenId);
+		if (!usdPrice || !asset.decimals && asset.decimals !== 0) return 0;
+		return Number(asset.amount) / Math.pow(10, asset.decimals) * usdPrice;
+	},
+
+	async _getTokenUsdUnitPrice(tokenId) {
+		if (prices && prices[tokenId]) return prices[tokenId];
+		if (this._underlyingTokenPriceCache[tokenId] !== undefined) {
+			return this._underlyingTokenPriceCache[tokenId];
+		}
+
+		const tokenPriceData = Array.isArray(pricesData)
+			? pricesData.find(token => token.id === tokenId)
+			: null;
+		if (tokenPriceData && tokenPriceData.price_erg && prices && prices.ERG) {
+			this._underlyingTokenPriceCache[tokenId] = tokenPriceData.price_erg * prices.ERG;
+			return this._underlyingTokenPriceCache[tokenId];
+		}
+
+		const tokenInfo = await ApiClient.getCruxTokenInfo(tokenId);
+		const price = tokenInfo && tokenInfo.value_in_erg && prices && prices.ERG
+			? tokenInfo.value_in_erg * prices.ERG
+			: 0;
+		this._underlyingTokenPriceCache[tokenId] = price;
+		return price;
+	},
+
+	_safeBigInt(value) {
+		try {
+			if (value === undefined || value === null) return 0n;
+			return BigInt(value);
+		} catch (error) {
+			return 0n;
+		}
 	},
 
 	_formatBalanceRow(labelHtml, valueHtml) {
@@ -301,15 +456,23 @@ export const BalanceSummary = {
 	 * Check if token has price (is financial)
 	 */
 	_separateFinancialTokens(_, index, array) {
-		const pricesKeys = Object.keys(prices || {});
-		return pricesKeys.some(priceId => priceId === array[index].tokenId);
+		return this._isDirectFinancialToken(array[index]);
 	},
 
 	/**
 	 * Check if token lacks price (is non-financial)
 	 */
 	_separateNonFinancialTokens(_, index, array) {
+		return !this._isDirectFinancialToken(array[index]);
+	},
+
+	_isDirectFinancialToken(token) {
 		const pricesKeys = Object.keys(prices || {});
-		return !pricesKeys.some(priceId => priceId === array[index].tokenId);
+		return pricesKeys.some(priceId => priceId === token.tokenId);
+	},
+
+	_isLpToken(token) {
+		const name = (token.name || '').trim();
+		return /(?:\sLP|_LP)(?:\sToken)?$/i.test(name);
 	}
 };

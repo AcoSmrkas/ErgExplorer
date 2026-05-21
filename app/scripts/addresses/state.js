@@ -28,6 +28,7 @@ export const AddressState = {
 
 	// Tokens
 	tokensArray: [],
+	lpTokenValues: {},
 
 	// Transaction display
 	totalTransactions: 0,
@@ -86,6 +87,7 @@ export const AddressState = {
 		this.ownedNftsShown = false;
 		this.issuedNftsShown = false;
 		this.tokensArray = [];
+		this.lpTokenValues = {};
 		this.totalTransactions = 0;
 		this.valueFields = [];
 		this.valueFieldsFull = [];

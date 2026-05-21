@@ -10,6 +10,33 @@ table > tbody > tr > td {
 	padding:6px !important;
 }
 
+#holdersTable,
+#txsTable,
+#swapsTable {
+	--bs-border-color: var(--borders);
+	--bs-table-border-color: var(--borders);
+	border: 0 !important;
+}
+
+#holdersTable > :not(caption) > * > *,
+#txsTable > :not(caption) > * > *,
+#swapsTable > :not(caption) > * > * {
+	border-color: var(--borders) !important;
+}
+
+#holdersTable > thead > tr > th,
+#txsTable > thead > tr > th,
+#swapsTable > thead > tr > th {
+	border-top: 0 !important;
+	border-bottom: 2px solid var(--main-color) !important;
+}
+
+#holdersTable > tbody > tr:last-child > td,
+#txsTable > tbody > tr:last-child > td,
+#swapsTable > tbody > tr:last-child > td {
+	border-bottom: 0 !important;
+}
+
 #tokenDataLeft > div:nth-child(odd), #nftInfoHolder > div:nth-child(odd) {
 	background-color: var(--striped-1);
 }
@@ -24,6 +51,19 @@ table > tbody > tr > td {
 
 #supplyHolder > .div-cell-dark {
 	overflow: hidden;
+}
+
+#holdersSectionHeader .text-light {
+	font-size: 0.7em;
+	font-weight: 600;
+}
+
+#priceInfo.holders-only > .div-cell-dark {
+	overflow: hidden;
+}
+
+#priceInfo.holders-only #holdersColumn {
+	width: 100%;
 }
 
 #swapsHolder {

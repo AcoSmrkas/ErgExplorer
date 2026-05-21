@@ -178,6 +178,33 @@ export const ApiClient = {
 	},
 
 	/**
+	 * Fetch token metadata
+	 */
+	async getTokenInfo(tokenId) {
+		const response = await fetch(API_HOST_2 + 'tokens/' + tokenId);
+		if (!response.ok) throw new Error('Token info fetch failed');
+		return response.json();
+	},
+
+	/**
+	 * Fetch unspent boxes containing token
+	 */
+	async getUnspentBoxesByTokenId(tokenId, limit = 100) {
+		const response = await fetch(API_HOST_2 + 'boxes/unspent/byTokenId/' + tokenId + '?limit=' + limit);
+		if (!response.ok) throw new Error('Token boxes fetch failed');
+		return response.json();
+	},
+
+	/**
+	 * Fetch Crux token info, including value in ERG
+	 */
+	async getCruxTokenInfo(tokenId) {
+		const response = await fetch('https://api.cruxfinance.io/crux/token_info/' + tokenId);
+		if (!response.ok) throw new Error('Crux token info fetch failed');
+		return response.json();
+	},
+
+	/**
 	 * Fetch unspent boxes
 	 */
 	async getUnspentBoxes(boxOffset = AddressState.unspentBoxesOffset, limit = AddressState.unspentBoxesPageSize) {
