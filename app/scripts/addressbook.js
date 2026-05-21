@@ -116,13 +116,13 @@ function printAddressGroup(title, items) {
         return '';
     }
 
-    let formattedResult = '<p><strong>' + title + ':</strong></p>';
+    let formattedResult = '<div class="addressbook-address-group"><p><strong>' + title + ':</strong></p>';
 
     for (let i = 0; i < items.length; i++) {
         formattedResult += printAddress(items[i]);
     }
 
-    return formattedResult;
+    return formattedResult + '</div>';
 }
 
 function isP2pkAddress(address) {

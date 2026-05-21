@@ -11,3 +11,7 @@ label {
 		color: #fff;
 	}
 }
+
+.addressbook-address-group + .addressbook-address-group {
+	margin-top: 0.75rem;
+}
