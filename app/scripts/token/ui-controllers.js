@@ -183,6 +183,7 @@ export const TokenUIControllers = {
 					type: 'line',
 					options: {
 						responsive: true,
+						maintainAspectRatio: false,
 						animation: {
 							duration: 1000
 						},
@@ -225,12 +226,12 @@ export const TokenUIControllers = {
 
 	// Set external links for the token
 	setLinks() {
+		let tradeUrl = 'https://dex.mewfinance.com/ergo/swap?base=0000000000000000000000000000000000000000000000000000000000000000&quote=' + TokenState.tokenId;
+
 		if (TokenState.tokenData.isMeme == 't') {
-			$('#spectrumLink').attr('href', 'https://dex.crooks-fi.com/ergo/swap?base=0000000000000000000000000000000000000000000000000000000000000000&quote=' + TokenState.tokenId);
-			$('#spectrumLink').html('Crooks Finance <i class="erg-span fa-solid fa-up-right-from-square"></i>');
-		} else {
-			$('#spectrumLink').attr('href', 'https://dex.mewfinance.com/ergo/swap?base=0000000000000000000000000000000000000000000000000000000000000000&quote=' + TokenState.tokenId);
+			tradeUrl = 'https://dex.crooks-fi.com/ergo/swap?base=0000000000000000000000000000000000000000000000000000000000000000&quote=' + TokenState.tokenId;
 		}
-		$('#cruxLink').attr('href', 'https://cruxfinance.io/tokens/' + TokenState.tokenId);
+
+		$('#tokenBuyLink').attr('href', tradeUrl);
 	}
 };

@@ -142,6 +142,74 @@ select:hover {
 	min-height: unset;
 }
 
+.address-balance-summary {
+	width: 100%;
+}
+
+.address-balance-title {
+	font-size: 1.35rem;
+	font-weight: 700;
+	line-height: 1.1;
+	margin-bottom: 0.55rem;
+}
+
+.address-balance-rows {
+	display: flex;
+	flex-direction: column;
+	gap: 0.28rem;
+}
+
+.address-balance-row {
+	align-items: baseline;
+	column-gap: 0.75rem;
+	display: grid;
+	grid-template-columns: 5rem minmax(0, 1fr);
+	line-height: 1.25;
+	max-width: 32rem;
+}
+
+.address-balance-label {
+	color: var(--bs-body-color);
+	font-weight: 700;
+}
+
+.address-balance-value {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+.address-balance-fiat {
+	color: var(--text-light);
+	font-size: 0.95em;
+	font-weight: 600;
+	margin-left: 0.3rem;
+	white-space: nowrap;
+}
+
+.address-balance-total {
+	font-size: 1.16rem;
+	margin-top: 0.25rem;
+	max-width: none;
+	position: relative;
+	padding-top: 0.55rem;
+}
+
+.address-balance-total::before {
+	background-color: var(--borders);
+	content: "";
+	height: 1px;
+	left: 0;
+	position: absolute;
+	right: 0;
+	top: 0.12rem;
+}
+
+.address-balance-total .address-balance-label,
+.address-balance-total .address-balance-value {
+	color: var(--bs-body-color);
+	font-weight: 800;
+}
+
 .address-identity-row {
 	align-items: center;
 }
@@ -258,28 +326,97 @@ select:hover {
 	vertical-align: middle;
 }
 
-#showAllNftsAction,
-#hideAllNftsAction,
-#showIssuedNftsAction,
-#hideIssuedNftsAction,
-#showUnspentBoxesAction,
-#hideUnspentBoxesAction {
-	margin-left: 0.35rem;
+.address-section-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+	margin-bottom: 0.75rem;
 }
 
-.address-tx-table {
-	border-collapse: separate;
-	border-spacing: 0;
-	overflow: hidden;
-	padding: 0;
+.address-section-tab {
+	background-color: rgba(var(--bs-body-color-rgb), 0.06);
+	border: 1px solid var(--borders);
+	border-radius: 5px;
+	color: var(--text-color);
+	font-size: 0.9rem;
+	font-weight: 700;
+	line-height: 1.15;
+	padding: 0.34rem 0.55rem;
+	transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
-.address-tx-table tbody tr:first-child > * {
-	border-top: 2px solid var(--main-color) !important;
+.address-section-tab:hover,
+.address-section-tab:focus {
+	border-color: var(--main-color);
+	color: var(--main-color);
 }
 
-.address-tx-table tbody tr:last-child > * {
-	border-bottom-width: 0;
+.address-section-tab.active {
+	background-color: var(--main-color);
+	border-color: var(--main-color);
+	color: #eee;
+}
+
+.address-section-tab.active span {
+	color: #eee !important;
+}
+
+.address-section-tab-count {
+	color: var(--text-light);
+	font-weight: 600;
+}
+
+.address-section-tab.active .address-section-tab-count {
+	color: #eee;
+}
+
+.address-asset-type-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.32rem;
+	margin-bottom: 0.6rem;
+	padding-right: 0.75rem;
+}
+
+.address-asset-type-tab {
+	background-color: rgba(var(--bs-body-color-rgb), 0.04);
+	border: 1px solid var(--borders);
+	border-radius: 5px;
+	color: var(--text-light);
+	font-size: 0.78rem;
+	font-weight: 700;
+	line-height: 1.15;
+	padding: 0.22rem 0.42rem;
+	transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.address-asset-type-tab:hover,
+.address-asset-type-tab:focus {
+	border-color: var(--main-color);
+	color: var(--main-color);
+}
+
+.address-asset-type-tab.active {
+	background-color: rgba(255, 93, 20, 0.12);
+	border-color: var(--main-color);
+	color: var(--main-color);
+}
+
+.address-asset-type-tab-count {
+	color: inherit;
+	font-weight: 600;
+}
+
+.address-section-title-anchor {
+	display: none;
+}
+
+.address-nft-type-heading {
+	display: none;
+}
+
+.address-section-panel {
+	margin-top: 0.1rem;
 }
 
 @media only screen and (min-width: 992px) {

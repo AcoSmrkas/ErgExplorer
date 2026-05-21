@@ -70,6 +70,24 @@ table {
 	padding: 15px;
 }
 
+.rounded-data-table,
+.address-tx-table {
+	border-collapse: separate;
+	border-spacing: 0;
+	overflow: hidden;
+	padding: 0;
+}
+
+.rounded-data-table tbody tr:first-child > *,
+.address-tx-table tbody tr:first-child > * {
+	border-top: 2px solid var(--main-color) !important;
+}
+
+.rounded-data-table tbody tr:last-child > *,
+.address-tx-table tbody tr:last-child > * {
+	border-bottom-width: 0;
+}
+
 tbody {
 	border-top: 2px solid var(--main-color) !important;
 }

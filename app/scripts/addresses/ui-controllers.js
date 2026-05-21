@@ -56,18 +56,18 @@ export const UIControllers = {
 	 * Show owned NFTs section
 	 */
 	showNfts(e) {
+		if (typeof window.showAddressSectionTab === 'function') {
+			window.showAddressSectionTab(e, 'ownedNfts');
+			return;
+		}
+
+		$('#nftsHolder').show();
 		$('#nftsShowAll').show();
-		$('#showAllNftsAction').hide();
-		$('#hideAllNftsAction').show();
-		$('#nftsTitle').html('<strong>Owned NFTs</strong>');
 
 		loadOwnedNfts();
 		AddressState.ownedNftsShown = true;
 
-		if (e) {
-			scrollToElement($('#nftsTitle'));
-			e.preventDefault();
-		}
+		if (e) e.preventDefault();
 	},
 
 	/**
@@ -75,10 +75,6 @@ export const UIControllers = {
 	 */
 	hideNfts(e) {
 		$('#nftsShowAll').hide();
-		$('#showAllNftsAction').show();
-		$('#hideAllNftsAction').hide();
-		$('#nftsTitle').html('<strong>Owned NFTs</strong> (' + AddressState.nftsCount + ') ');
-		scrollToElement($('#nftsTitle'));
 
 		AddressState.ownedNftsShown = false;
 
@@ -89,18 +85,18 @@ export const UIControllers = {
 	 * Show issued NFTs/tokens section
 	 */
 	showIssuedNfts(e) {
+		if (typeof window.showAddressSectionTab === 'function') {
+			window.showAddressSectionTab(e, 'issuedAssets');
+			return;
+		}
+
+		$('#issuedNftsHolder').show();
 		$('#nftsShowIssued').show();
-		$('#showIssuedNftsAction').hide();
-		$('#hideIssuedNftsAction').show();
-		$('#issuedNftsTitle').html('<strong>Issued Assets</strong>');
 
 		loadIssuedNfts();
 		AddressState.issuedNftsShown = true;
 
-		if (e) {
-			scrollToElement($('#issuedNftsTitle'));
-			e.preventDefault();
-		}
+		if (e) e.preventDefault();
 	},
 
 	/**
@@ -108,10 +104,6 @@ export const UIControllers = {
 	 */
 	hideIssuedNfts(e) {
 		$('#nftsShowIssued').hide();
-		$('#showIssuedNftsAction').show();
-		$('#hideIssuedNftsAction').hide();
-		$('#issuedNftsTitle').html('<strong>Issued Assets</strong> (' + AddressState.issuedNftsCount + ') ');
-		scrollToElement($('#issuedNftsTitle'));
 
 		AddressState.issuedNftsShown = false;
 

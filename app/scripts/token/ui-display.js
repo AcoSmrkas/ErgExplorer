@@ -170,6 +170,7 @@ export const TokenUIDisplay = {
 			html += '</tr>';
 		}
 
+		$('#swapsHeader').show();
 		$('#swapsTableBody').html(html);
 		$('#swapsTable').show();
 	},
@@ -262,4 +263,3 @@ export const TokenUIDisplay = {
 		$('#priceLoading').hide();
 	}
 };
-

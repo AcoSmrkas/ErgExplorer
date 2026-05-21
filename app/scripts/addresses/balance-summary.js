@@ -31,14 +31,14 @@ export const BalanceSummary = {
 	_displayBalance(data) {
 		// ERG balance
 		const ergBalance = formatErgValueString(data.confirmed.nanoErgs, 4, true);
-		let balanceHtml = '<strong class="erg-span">ERG</strong><span class="gray-color"> balance:</span> <strong>' + ergBalance + '</strong>';
+		let balanceHtml = ergBalance;
 
 		const ergDollarValue = formatAssetDollarPrice(data.confirmed.nanoErgs, ERG_DECIMALS, 'ERG');
 		if (gotPrices) {
-			balanceHtml += ' ' + formatDollarPriceString(ergDollarValue, 2);
+			balanceHtml += '<span class="address-balance-fiat">' + formatDollarPriceString(ergDollarValue, 2) + '</span>';
 		}
 
-		$('#finalErgBalance').html(balanceHtml);
+		$('#finalErgBalance').html(this._formatBalanceRow('<span class="erg-span">ERG</span>', balanceHtml));
 
 		// Tokens
 		if (data.confirmed.tokens && data.confirmed.tokens.length > 0) {
@@ -54,12 +54,14 @@ export const BalanceSummary = {
 
 			if (financialTokens.length > 0) {
 				const html = this._formatFinancialTokensHtmlString(financialTokens, ergDollarValue);
+				$('#financialAssetsTitle').text('Financial assets (' + financialTokens.length + ')');
 				$('#financialTokens').html(html);
 				$('#financialAssetsHolder').show();
 			}
 
 			if (otherTokens.length > 0) {
 				const html = this._formatOtherTokensHtmlString(otherTokens);
+				$('#otherTokensTitle').text('Tokens (' + otherTokens.length + ')');
 				$('#otherTokens').html(html);
 				$('#otherTokensHolder').show();
 				this._loadOtherTokensNftInfo(otherTokens);
@@ -128,13 +130,19 @@ export const BalanceSummary = {
 		});
 
 		if (totalAssetsValue > 0) {
-			$('#finalAssetsBalance').html('<span class="gray-color">Tokens balance:</span> $' + formatValue(totalAssetsValue, 2));
-			$('#finalAssetsBalance').show();
-			$('#finalBalance').html('<span class="grey-color"><b>Total:</b></span> $' + formatValue(ergDollarValue + totalAssetsValue, 2));
-			$('#finalBalance').show();
+			$('#finalAssetsBalance')
+				.html(this._formatBalanceRow('Tokens', '$' + formatValue(totalAssetsValue, 2)))
+				.css('display', 'grid');
+			$('#finalBalance')
+				.html(this._formatBalanceRow('Total', '$' + formatValue(ergDollarValue + totalAssetsValue, 2)))
+				.css('display', 'grid');
 		}
 
 		return html;
+	},
+
+	_formatBalanceRow(labelHtml, valueHtml) {
+		return '<span class="address-balance-label">' + labelHtml + '</span><span class="address-balance-value">' + valueHtml + '</span>';
 	},
 
 	/**

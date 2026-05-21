@@ -47,7 +47,6 @@ function getNetworkState() {
 
 	var jqxhr = $.get(networkStateUrl, function(data) {
 		$('#blockHeight').html(data.height.toLocaleString('en-US', { maximumFractionDigits: 0, minimumFractionDigits: 0 }));
-		$('#totalTransactions').html(data.maxTxGix.toLocaleString('en-US', { maximumFractionDigits: 0, minimumFractionDigits: 0 }));
 	});
 }
 
@@ -350,7 +349,9 @@ function getStats() {
 
 		//Transactions summary
 		//Number of transactions
-		$('#statsNumberOfTransactions').html('<p>' + data.transactionsSummary.total + '</p>');
+		const transactionCount = data.transactionsSummary.total.toLocaleString('en-US', { maximumFractionDigits: 0, minimumFractionDigits: 0 });
+		$('#totalTransactions').html(transactionCount);
+		$('#statsNumberOfTransactions').html('<p>' + transactionCount + '</p>');
 
 		//Total transaction fees
 		$('#statsTotalTransactionFees').html('<p class="text-white">' + formatErgValueString(data.transactionsSummary.totalFee) + ' <span class="text-light">' + formatAssetDollarPriceString(data.transactionsSummary.totalFee, ERG_DECIMALS, 'ERG') + '</span></p>');

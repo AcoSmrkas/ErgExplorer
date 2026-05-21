@@ -1,10 +1,110 @@
 import { AddressState } from './state.js';
 
+function getOwnedAssetTypeTabs() {
+	return [
+		{ key: 'image', type: NFT_TYPE.Image, tab: '#ownedNftImagesTab', panel: '#nftImagesHolder', countSelector: '#ownedNftImagesTab .address-asset-type-tab-count' },
+		{ key: 'audio', type: NFT_TYPE.Audio, tab: '#ownedNftAudioTab', panel: '#nftAudioHolder', countSelector: '#ownedNftAudioTab .address-asset-type-tab-count' },
+		{ key: 'video', type: NFT_TYPE.Video, tab: '#ownedNftVideoTab', panel: '#nftVideoHolder', countSelector: '#ownedNftVideoTab .address-asset-type-tab-count' },
+		{ key: 'artCollection', type: NFT_TYPE.ArtCollection, tab: '#ownedNftArtCollectionTab', panel: '#nftArtCollectionHolder', countSelector: '#ownedNftArtCollectionTab .address-asset-type-tab-count' },
+		{ key: 'fileAttachment', type: NFT_TYPE.FileAttachment, tab: '#ownedNftFileTab', panel: '#nftFileHolder', countSelector: '#ownedNftFileTab .address-asset-type-tab-count' },
+		{ key: 'membershipToken', type: NFT_TYPE.MembershipToken, tab: '#ownedNftMembershipTab', panel: '#nftMembershipHolder', countSelector: '#ownedNftMembershipTab .address-asset-type-tab-count' }
+	];
+}
+
+function getIssuedAssetTypeTabs() {
+	return [
+		{ key: 'token', type: 'token', tab: '#issuedAssetTokensTab', panel: '#issuedTokenHolder', countSelector: '#issuedAssetTokensTab .address-asset-type-tab-count' },
+		{ key: 'image', type: NFT_TYPE.Image, tab: '#issuedAssetImagesTab', panel: '#issuedNftImagesHolder', countSelector: '#issuedAssetImagesTab .address-asset-type-tab-count' },
+		{ key: 'audio', type: NFT_TYPE.Audio, tab: '#issuedAssetAudioTab', panel: '#issuedNftAudioHolder', countSelector: '#issuedAssetAudioTab .address-asset-type-tab-count' },
+		{ key: 'video', type: NFT_TYPE.Video, tab: '#issuedAssetVideoTab', panel: '#issuedNftVideoHolder', countSelector: '#issuedAssetVideoTab .address-asset-type-tab-count' },
+		{ key: 'artCollection', type: NFT_TYPE.ArtCollection, tab: '#issuedAssetArtCollectionTab', panel: '#issuedNftArtCollectionHolder', countSelector: '#issuedAssetArtCollectionTab .address-asset-type-tab-count' },
+		{ key: 'fileAttachment', type: NFT_TYPE.FileAttachment, tab: '#issuedAssetFileTab', panel: '#issuedNftFileHolder', countSelector: '#issuedAssetFileTab .address-asset-type-tab-count' },
+		{ key: 'membershipToken', type: NFT_TYPE.MembershipToken, tab: '#issuedAssetMembershipTab', panel: '#issuedNftMembershipHolder', countSelector: '#issuedAssetMembershipTab .address-asset-type-tab-count' }
+	];
+}
+
+function createAssetTypeCounts(configs) {
+	return configs.reduce((counts, config) => {
+		counts[config.key] = 0;
+		return counts;
+	}, {});
+}
+
 /**
  * NFT display and management
  * Handles owned and issued NFT data processing and display
  */
 export const NftManager = {
+	activeAssetTypeTabs: {
+		owned: null,
+		issued: null
+	},
+
+	getAssetTypeTabs(group) {
+		return group === 'issued' ? getIssuedAssetTypeTabs() : getOwnedAssetTypeTabs();
+	},
+
+	getAssetTypeTabsHolder(group) {
+		return group === 'issued' ? '#issuedAssetTypeTabs' : '#ownedNftTypeTabs';
+	},
+
+	updateAssetTypeTabs(group, counts) {
+		const configs = this.getAssetTypeTabs(group);
+		let firstAvailable = null;
+		const activeKey = this.activeAssetTypeTabs[group];
+
+		configs.forEach(config => {
+			const count = counts[config.key] || 0;
+			const isAvailable = count > 0;
+
+			$(config.tab)
+				.data('available', isAvailable)
+				.toggle(isAvailable);
+			$(config.countSelector).text('(' + count + ')');
+
+			if (isAvailable && !firstAvailable) {
+				firstAvailable = config.key;
+			}
+		});
+
+		const activeStillAvailable = configs.some(config => {
+			return config.key === activeKey && $(config.tab).data('available') === true;
+		});
+
+		this.activeAssetTypeTabs[group] = activeStillAvailable ? activeKey : firstAvailable;
+		$(this.getAssetTypeTabsHolder(group)).css('display', firstAvailable ? 'flex' : 'none');
+		this.syncAssetTypeTabs(group);
+	},
+
+	showAssetTypeTab(e, group, key) {
+		if (e) e.preventDefault();
+
+		const config = this.getAssetTypeTabs(group).find(assetType => assetType.key === key);
+		if (!config || $(config.tab).data('available') !== true) return;
+
+		this.activeAssetTypeTabs[group] = key;
+		this.syncAssetTypeTabs(group);
+
+		if (group === 'owned') {
+			this.loadOwnedNfts();
+		} else if (group === 'issued') {
+			this.loadIssuedNfts();
+		}
+	},
+
+	syncAssetTypeTabs(group) {
+		const activeKey = this.activeAssetTypeTabs[group];
+
+		this.getAssetTypeTabs(group).forEach(config => {
+			const isActive = activeKey === config.key;
+
+			$(config.tab)
+				.toggleClass('active', isActive)
+				.attr('aria-selected', isActive ? 'true' : 'false');
+			$(config.panel).toggle(isActive);
+		});
+	},
+
 	/**
 	 * Handle owned NFT info response
 	 */
@@ -22,6 +122,8 @@ export const NftManager = {
 		});
 
 		const html = {};
+		const assetTypeTabs = this.getAssetTypeTabs('owned');
+		const assetTypeCounts = createAssetTypeCounts(assetTypeTabs);
 		AddressState.nftsCount = 0;
 		html['token'] = '';
 		html[NFT_TYPE.Image] = '';
@@ -77,9 +179,12 @@ export const NftManager = {
 					break;
 			}
 
+			const assetTypeConfig = assetTypeTabs.find(config => config.type === nft.type);
+			if (!assetTypeConfig || !nftHolderId || !nftContentHolderId) return;
+
 			html[nft.type] += '<a href="' + getTokenUrl(nft.data.id) + '"><div class="card m-1" style="width: 100px;"><div class="cardImgHolder"><img onload="onNftImageLoaded(this, \'nft-img-owned\')" onerror="onNftImageLoaded(this, \'nft-img-owned\')" csrc="' + cSrc + '" src="' + imgSrc + '" class="nft-img-owned card-img-top p-4"></div><div class="card-body p-2"><p class="card-text">' + nft.data.name + '</p></div></div></a>';
 
-			$(nftHolderId).show();
+			assetTypeCounts[assetTypeConfig.key]++;
 			AddressState.nftsCount++;
 		});
 
@@ -91,14 +196,17 @@ export const NftManager = {
 			$('#nftFileContentHolder').html(html[NFT_TYPE.FileAttachment]);
 			$('#nftMembershipContentHolder').html(html[NFT_TYPE.MembershipToken]);
 
+			this.updateAssetTypeTabs('owned', assetTypeCounts);
 			$('#nftsHolder').show();
 			$('#nftsTitle').html('<strong>Owned NFTs</strong> (' + AddressState.nftsCount + ') ');
-			$('#hideAllNftsAction').hide();
+			if (typeof window.setAddressSectionTabAvailable === 'function') {
+				window.setAddressSectionTabAvailable('ownedNfts', AddressState.nftsCount);
+			}
 		}
 
 		if (AddressState.ownedNftsShown) {
 			AddressState.loadingOwnedNfts = false;
-			loadOwnedNfts();
+			this.loadOwnedNfts();
 		}
 	},
 
@@ -171,6 +279,8 @@ export const NftManager = {
 		});
 
 		const html = {};
+		const assetTypeTabs = this.getAssetTypeTabs('issued');
+		const assetTypeCounts = createAssetTypeCounts(assetTypeTabs);
 		AddressState.issuedNftsCount = 0;
 		html['token'] = '';
 		html[NFT_TYPE.Image] = '';
@@ -219,14 +329,18 @@ export const NftManager = {
 						break;
 				}
 
+				const assetTypeConfig = assetTypeTabs.find(config => config.type === nft.type);
+				if (!assetTypeConfig || !nftHolderId) return;
+
 				const isBurned = nft.data.isBurned === 't';
 				html[nft.type] += '<a href="' + getTokenUrl(nft.data.id) + '"><div class="card m-1" style="width: 100px;' + (isBurned ? 'border:1.5px solid red;' : '') + '"><div class="cardImgHolder"><img onload="onNftImageLoaded(this, \'nft-img-issued\')" onerror="onNftImageLoaded(this, \'nft-img-issued\')" csrc="' + cSrc + '" ' + (isBurned ? 'style="opacity: 0.4;"' : '') + 'src="' + imgSrc + '" class="nft-img-issued card-img-top p-4"></div><div class="card-body p-2"><p class="card-text">' + nft.data.name + '</p></div></div></a>';
+				assetTypeCounts[assetTypeConfig.key]++;
 			} else {
 				nftHolderId = '#issuedTokenHolder';
 				html['token'] += '<p><a href="' + getTokenUrl(nft.data.id) + '">' + nft.data.name + ' - ' + formatAddressString(nft.data.id) + '</a>' + (nft.data.isBurned === 't' ? ' (<span class="text-danger">Burned</span>)' : '') + '</p>';
+				assetTypeCounts.token++;
 			}
 
-			$(nftHolderId).show();
 			AddressState.issuedNftsCount++;
 		});
 
@@ -238,9 +352,12 @@ export const NftManager = {
 		$('#issuedNftFileContentHolder').html(html[NFT_TYPE.FileAttachment]);
 		$('#issuedNftMembershipContentHolder').html(html[NFT_TYPE.MembershipToken]);
 
+		this.updateAssetTypeTabs('issued', assetTypeCounts);
 		$('#issuedNftsHolder').show();
 		$('#issuedNftsTitle').html('<strong>Issued Assets</strong> (' + AddressState.issuedNftsCount + ') ');
-		$('#hideIssuedNftsAction').hide();
+		if (typeof window.setAddressSectionTabAvailable === 'function') {
+			window.setAddressSectionTabAvailable('issuedAssets', AddressState.issuedNftsCount);
+		}
 
 		if (AddressState.issuedNftsShown) {
 			AddressState.loadingIssuedNfts = false;
@@ -253,6 +370,7 @@ export const NftManager = {
 window.loadOwnedNfts = () => NftManager.loadOwnedNfts();
 window.loadIssuedNfts = () => NftManager.loadIssuedNfts();
 window.onNftImageLoaded = (element, type) => NftManager.onNftImageLoaded(element, type);
+window.showAddressAssetTypeTab = (e, group, key) => NftManager.showAssetTypeTab(e, group, key);
 
 // Make available for callbacks from common modules
 window.onGotOwnedNftInfo = (nfts, msg) => NftManager.onGotOwnedNftInfo(nfts, msg);

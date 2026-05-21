@@ -27,8 +27,11 @@
 	</div>
 
 	<div id="tokenDataHolder" style="display: none;" class="col-md-12">
-		<div class="row w-100 div-cell-dark p-3 border-bottom-flat">
-			<div id="tokenHeader" class="col pe-0 ps-0 ps-md-0 pe-md-0"></div>
+		<div class="row w-100 div-cell-dark token-header-row border-bottom-flat align-items-center">
+			<div id="tokenHeader" class="col pe-2 ps-0 ps-md-0"></div>
+			<div class="col-auto pe-0">
+				<a id="tokenBuyLink" target="_new" class="btn btn-info token-buy-btn" href="">Buy</a>
+			</div>
 		</div>
 
 		<div class="row w-100 two-column-holder-top-flat-lg">
@@ -289,10 +292,9 @@
 							<input id="showGainersLosers24h" onclick="printGainersLosers24h()" style="margin-right:5px;display:inline-block;" class="p-2 p-sm-2 btn btn-info float-end" type="button" value="24h">
 						</div>
 					</div>
-					<canvas style="width:100%;padding-bottom:10px;" id="chart"></canvas>
-
-					<p>Trade now on <a target="_new" id="spectrumLink" href="">Mew Finance <i class="erg-span fa-solid fa-up-right-from-square"></i></a></p>
-					<p>View on <a target="_new" id="cruxLink" href="">Crux Finance <i class="erg-span fa-solid fa-up-right-from-square"></i></a></p>
+					<div class="token-chart-frame">
+						<canvas id="chart"></canvas>
+					</div>
 
 					<hr class="my-3 d-lg-none">
 				</div>
@@ -319,7 +321,7 @@
 				</div>
 			</div>
 			<div id="txsHolder" style="display: none; margin-top:20px !important;" class="div-cell-dark row w-100 p-0">
-				<div class="p-0 col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+				<div class="p-0 pe-lg-2 col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
 					<h4 style="display: inline-block;padding-right:10px !important;" class="p-3 pb-2">Latest Transactions</h4>
 					<div id="txsLoading"> 
 						<div id="txsLoadingInner">
@@ -344,15 +346,15 @@
 					</table>
 				</div>
 			</div>
-			<div id="swapsHolder" style="display: none; margin-top:20px !important;" class="div-cell-dark row w-100 p-0">
+			<h3 id="swapsHeader" style="display: none; margin-top:20px !important;" class="p-2">Latest DEX Swaps</h3>
+			<div id="swapsHolder" style="display: none;" class="div-cell-dark row w-100 p-1">
 				<div class="p-0 col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-					<h4 style="display: inline-block;padding-right:10px !important;" class="p-3 pb-2">Latest DEX Swaps</h4>
 					<div id="swapsLoading"> 
 						<div id="swapsLoadingInner">
 							<canvas id="loadingImgSwaps" class="loadingImg" width="150" height="150"></canvas>
 						</div>
 					</div>
-					<table id="swapsTable" style="display:none; border-left: 0 !important;" class="w-100 w-full table table-dark table-striped table-mobile m-0">
+					<table id="swapsTable" style="display:none;" class="w-100 w-full table table-dark table-striped table-mobile rounded-data-table m-0">
 						<thead>
 							<tr>
 								<th scope="col">Address</th>

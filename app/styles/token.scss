@@ -22,6 +22,19 @@ table > tbody > tr > td {
 	background-color: var(--striped-1);
 }
 
+#supplyHolder > .div-cell-dark {
+	overflow: hidden;
+}
+
+#swapsHolder {
+	margin-top: 0.25rem !important;
+	overflow: hidden;
+}
+
+#swapsTable {
+	border: 0 !important;
+}
+
 #nftCollectionHolder {
 	padding-left: unset;
 	padding-right: unset;
@@ -34,6 +47,60 @@ table > tbody > tr > td {
 
 #tokenDescription {
 	overflow-wrap: anywhere;
+}
+
+.token-header-row {
+	gap: 8px;
+	padding: 10px 12px !important;
+}
+
+#tokenHeader {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+#tokenHeader p {
+	line-height: 1.35;
+	margin: 0;
+}
+
+#tokenBuyLink {
+	white-space: nowrap;
+}
+
+.token-buy-btn {
+	align-items: center;
+	display: inline-flex;
+	font-size: 0.9rem;
+	font-weight: 700;
+	justify-content: center;
+	line-height: 1;
+	min-height: 30px;
+	padding: 4px 12px !important;
+}
+
+.token-chart-frame {
+	height: 315px;
+	position: relative;
+	width: 100%;
+}
+
+#chart {
+	display: block;
+	height: 100% !important;
+	width: 100% !important;
+}
+
+@media (max-width: 1199.98px) {
+	.token-chart-frame {
+		height: 360px;
+	}
+}
+
+@media (max-width: 575.98px) {
+	.token-chart-frame {
+		height: 300px;
+	}
 }
 
 #nftPreviewImgHolder {

@@ -322,6 +322,9 @@ window.onGetNftInfoDone = function(nftInfo, message) {
 	// Fetch holders, transactions, and prices for ALL tokens (including NFTs)
 	TokenApiClient.getPriceHistory().then(() => {
 		TokenUIDisplay.printSupplyInfo();
+		if (TokenState.hasPrice) {
+			TokenUIControllers.printGainersLosers(0);
+		}
 
 		TokenApiClient.getTxsData().then(txs => {
 			if (txs && txs.length > 0) TokenUIDisplay.printTxs(txs);

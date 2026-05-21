@@ -13,6 +13,28 @@ import { TransactionFilters } from './filters.js';
 import { NftManager } from './nft-manager.js';
 import { getTxType, isWalletAddress, getTxInOutType, analyzeTransfers } from './transaction-analyzer.js';
 
+const ADDRESS_SECTION_TABS = {
+	ownedNfts: {
+		tab: '#ownedNftsTab',
+		holder: '#nftsHolder',
+		panel: '#nftsShowAll',
+		countSelector: '#ownedNftsTab .address-section-tab-count'
+	},
+	issuedAssets: {
+		tab: '#issuedAssetsTab',
+		holder: '#issuedNftsHolder',
+		panel: '#nftsShowIssued',
+		countSelector: '#issuedAssetsTab .address-section-tab-count'
+	},
+	unspentBoxes: {
+		tab: '#unspentBoxesTab',
+		holder: '#unspentBoxesSection',
+		panel: '#unspentBoxesHolder',
+		countSelector: '#unspentBoxesTab .address-section-tab-count'
+	}
+};
+let activeAddressSectionTab = null;
+
 // Initialize on document ready
 $(function() {
 	AddressState.walletAddress = getWalletAddressFromUrl();
@@ -131,6 +153,7 @@ async function printUnspentBoxes(force = false) {
 			$('#unspentBoxesHolder').empty();
 			$('#unspentBoxesPagination').hide();
 			$('#unspentBoxesHeading').html('<strong>Unspent Boxes</strong> (0) ');
+			setAddressSectionTabAvailable('unspentBoxes', 0);
 			return;
 		}
 
@@ -149,12 +172,8 @@ function renderUnspentBoxes(data) {
 	AddressState.unspentBoxesCount = data.total;
 	$('#unspentBoxesHolder').html(html);
 	$('#unspentBoxesHeading').html('<strong>Unspent Boxes</strong> (' + AddressState.unspentBoxesCount + ') ');
+	setAddressSectionTabAvailable('unspentBoxes', AddressState.unspentBoxesCount);
 	renderUnspentBoxesPagination();
-
-	if (!AddressState.firstTime && $('#unspentBoxesHolder').is(':visible')) {
-		$('#hideUnspentBoxesAction').show();
-		$('#showUnspentBoxesAction').hide();
-	}
 }
 
 function renderUnspentBoxesPagination() {
@@ -194,41 +213,107 @@ function getLastUnspentBoxesOffset(totalItems) {
 async function showUnspentBoxesPage(e, boxOffset) {
 	if (e) e.preventDefault();
 
+	activeAddressSectionTab = 'unspentBoxes';
+	syncAddressSectionTabs();
 	AddressState.unspentBoxesOffset = Math.max(0, Math.min(boxOffset, getLastUnspentBoxesOffset(AddressState.unspentBoxesCount)));
 	AddressState.printedUnspentBoxes = false;
 	$('#unspentBoxesHolder').show();
 	$('#unspentBoxesPagination').show();
 	await printUnspentBoxes(true);
-	scrollToElement($('#unspentBoxesHeading'));
+	scrollToElement($('#addressSectionTabs'));
 }
 
 /**
  * Show unspent boxes
  */
 function showUnspentBoxes(e) {
-	$('#unspentBoxesHolder').show();
-	if (AddressState.unspentBoxesCount > AddressState.unspentBoxesPageSize) {
-		$('#unspentBoxesPagination').show();
-	}
-	$('#showUnspentBoxesAction').hide();
-	$('#hideUnspentBoxesAction').show();
-	$('#unspentBoxesHeading').html('<strong>Unspent Boxes</strong> (' + AddressState.unspentBoxesCount + ') ');
-	scrollToElement($('#unspentBoxesHeading'));
-	if (e) e.preventDefault();
+	showAddressSectionTab(e, 'unspentBoxes');
 }
 
 /**
  * Hide unspent boxes
  */
 function hideUnspentBoxes(e) {
-	$('#unspentBoxesHolder').hide();
-	$('#unspentBoxesPagination').hide();
-	$('#showUnspentBoxesAction').show();
-	$('#hideUnspentBoxesAction').hide();
-	$('#unspentBoxesHeading').html('<strong>Unspent Boxes</strong> (' + AddressState.unspentBoxesCount + ') ');
+	if (activeAddressSectionTab === 'unspentBoxes') {
+		activeAddressSectionTab = null;
+	}
+
+	syncAddressSectionTabs();
 	if (e) {
-		scrollToElement($('#unspentBoxesHeading'));
 		e.preventDefault();
+	}
+}
+
+function setAddressSectionTabAvailable(section, count) {
+	const tabConfig = ADDRESS_SECTION_TABS[section];
+	if (!tabConfig) return;
+
+	const isAvailable = count > 0;
+	$(tabConfig.tab)
+		.data('available', isAvailable)
+		.toggle(isAvailable);
+	$(tabConfig.countSelector).text('(' + count + ')');
+
+	if (!isAvailable && activeAddressSectionTab === section) {
+		activeAddressSectionTab = null;
+	}
+
+	const hasVisibleTabs = Object.values(ADDRESS_SECTION_TABS).some(config => $(config.tab).data('available') === true);
+	$('#addressSectionTabs').css('display', hasVisibleTabs ? 'flex' : 'none');
+	syncAddressSectionTabs();
+}
+
+function showAddressSectionTab(e, section) {
+	if (e) e.preventDefault();
+	if (!isAddressSectionTabAvailable(section)) return;
+
+	activeAddressSectionTab = section;
+	syncAddressSectionTabs();
+}
+
+function isAddressSectionTabAvailable(section) {
+	const tabConfig = ADDRESS_SECTION_TABS[section];
+	return tabConfig && $(tabConfig.tab).data('available') === true;
+}
+
+function syncAddressSectionTabs() {
+	Object.keys(ADDRESS_SECTION_TABS).forEach(section => {
+		const tabConfig = ADDRESS_SECTION_TABS[section];
+		const isActive = activeAddressSectionTab === section;
+
+		$(tabConfig.tab)
+			.toggleClass('active', isActive)
+			.attr('aria-selected', isActive ? 'true' : 'false');
+		$(tabConfig.holder).hide();
+		$(tabConfig.panel).hide();
+	});
+
+	$('#unspentBoxesPagination').hide();
+	AddressState.ownedNftsShown = false;
+	AddressState.issuedNftsShown = false;
+
+	if (!activeAddressSectionTab || !isAddressSectionTabAvailable(activeAddressSectionTab)) return;
+
+	const tabConfig = ADDRESS_SECTION_TABS[activeAddressSectionTab];
+	$(tabConfig.holder).show();
+	$(tabConfig.panel).show();
+
+	if (activeAddressSectionTab === 'ownedNfts') {
+		AddressState.ownedNftsShown = true;
+		if (typeof window.loadOwnedNfts === 'function') {
+			window.loadOwnedNfts();
+		}
+	}
+
+	if (activeAddressSectionTab === 'issuedAssets') {
+		AddressState.issuedNftsShown = true;
+		if (typeof window.loadIssuedNfts === 'function') {
+			window.loadIssuedNfts();
+		}
+	}
+
+	if (activeAddressSectionTab === 'unspentBoxes') {
+		renderUnspentBoxesPagination();
 	}
 }
 
@@ -422,6 +507,8 @@ window.clearFilter = (e) => TransactionFilters.clearFilter(e);
 // Unspent Boxes
 window.showUnspentBoxes = (e) => showUnspentBoxes(e);
 window.hideUnspentBoxes = (e) => hideUnspentBoxes(e);
+window.showAddressSectionTab = (e, section) => showAddressSectionTab(e, section);
+window.setAddressSectionTabAvailable = (section, count) => setAddressSectionTabAvailable(section, count);
 
 // Other functions
 window.checkMempoolChanged = () => checkMempoolChanged();
