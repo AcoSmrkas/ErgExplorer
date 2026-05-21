@@ -20,16 +20,21 @@
 		</div>		
 
 		<div id="addressbookHolder" style="display: none;">
-			<div id="search" class="row w-100 p-2 m-0">
-				<div class="d-hidden d-md-block col-md-6"></div>
-				<div class="col-12 col-lg-6 d-flex justify-content-end">
+			<div id="search" class="row w-100 g-2 p-2 m-0 addressbook-controls">
+				<div class="col-12 p-0">
+					<form class="addressbook-search-form" onsubmit="onAddressBookSearch(event)">
+						<input id="addressbookSearchInput" class="form-control addressbook-search-input" type="search" autocomplete="off" placeholder="Search name, address, token...">
+						<button class="btn btn-info" type="submit">Search</button>
+					</form>
+				</div>
+				<div class="col-12 d-flex addressbook-filter-controls p-0">
 					<label for="orderBy" class="form-label">Order: </label>
-					<select id="orderBy" selected="recent" class="form-select form-control form-control-lg" onchange="onOrderChanged()">
+					<select id="orderBy" selected="recent" class="form-select form-control" onchange="onOrderChanged()">
 						<option value="nameAsc">Alphabetical: A to Z</option>
 						<option value="nameDesc">Alphabetical: Z to A</option>
 					</select>
 					<label for="addressType" class="form-label">  Filter: </label>
-					<select id="addressType" class="form-select form-control form-control-lg" onchange="onAddressTypeChanged()">
+					<select id="addressType" class="form-select form-control" onchange="onAddressTypeChanged()">
 						<option value="all">All</option>
 						<option value="exchange">Exchange</option>
 						<option value="service">Service</option>
@@ -58,5 +63,5 @@
 {% block scripts %}
 	<script src="./scripts/common/prices.js?v=41"></script>
 	<script src="./scripts/common/pagination.js?v=41"></script>
-	<script src="./scripts/addressbook.js?v=42"></script>
+	<script src="./scripts/addressbook.js?v=45"></script>
 {% endblock %}

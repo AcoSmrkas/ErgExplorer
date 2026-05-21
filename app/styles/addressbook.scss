@@ -12,6 +12,81 @@ label {
 	}
 }
 
+.addressbook-controls {
+	row-gap: 0.75rem;
+
+	.form-control,
+	.form-select {
+		background-color: var(--forms-bg) !important;
+		border: 1px solid var(--forms-bg) !important;
+		color: var(--text-strong) !important;
+	}
+
+	option {
+		background-color: var(--forms-bg);
+		color: var(--text-strong);
+	}
+
+	.form-control::placeholder {
+		color: var(--text-light) !important;
+	}
+
+	.form-control:focus,
+	.form-select:focus {
+		background-color: var(--forms-bg) !important;
+		border: 1px solid var(--main-color) !important;
+		box-shadow: none;
+		color: var(--text-strong) !important;
+	}
+}
+
+.addressbook-search-form {
+	display: flex;
+	gap: 0.5rem;
+	width: 100%;
+
+	.form-control,
+	.btn {
+		height: 42px;
+	}
+}
+
+.addressbook-search-input {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.addressbook-filter-controls {
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+	justify-content: flex-end;
+
+	.form-select {
+		height: 42px;
+		max-width: 260px;
+	}
+}
+
 .addressbook-address-group + .addressbook-address-group {
 	margin-top: 0.75rem;
+}
+
+@media (max-width: 575.98px) {
+	.addressbook-search-form {
+		flex-wrap: wrap;
+	}
+
+	.addressbook-search-input {
+		flex-basis: 100%;
+	}
+
+	.addressbook-filter-controls {
+		justify-content: flex-start;
+
+		.form-select {
+			flex: 1 1 100%;
+			max-width: none;
+		}
+	}
 }

@@ -1,7 +1,9 @@
 const TOKEN_TYPE_PARAM = 'type';
 const ORDER_BY_PARAM = 'order';
+const QUERY_PARAM = 'query';
 var addressType = 'all';
 var orderBy = 'nameAsc';
+var query = '';
 var setup = true;
 
 updateUi();
@@ -11,7 +13,7 @@ $(function() {
 });
 
 function printAddresses() {
-   var jqxhr = $.get(ERGEXPLORER_API_HOST + 'addressbook/getAddresses?offset=' + offset + '&limit=' + ITEMS_PER_PAGE + '&type=' + addressType + '&order=' + orderBy + '&testnet=' + (networkType == 'testnet' ? '1' : '0'),
+   var jqxhr = $.get(ERGEXPLORER_API_HOST + 'addressbook/getAddresses?offset=' + offset + '&limit=' + ITEMS_PER_PAGE + '&type=' + addressType + '&order=' + orderBy + '&query=' + encodeURIComponent(query) + '&testnet=' + (networkType == 'testnet' ? '1' : '0'),
     function (data) {
 		let formattedResult = '';
 		let items = data.items;
@@ -48,7 +50,7 @@ function printAddresses() {
                     for (let j = 0; j < data.tokens.length; j++) {
                         let token = data.tokens[j];
                         if (token.addressname == item.name) {
-                            formattedResult += '<br><p><strong>Token:</strong></p><a style="word-wrap:break-word;" href="' + getTokenUrl(token.id) + '">' + token.id + '</a>';
+                            formattedResult += printToken(token);
                             break;
                         }
                     }
@@ -60,7 +62,7 @@ function printAddresses() {
                 i += nameItems.length - 1;
     		}
         } else {
-            formattedResult += '<div class="div-cell-dark">There are no entries in the address book.</div>';
+            formattedResult += '<div class="div-cell-dark">' + (query ? 'No address book entries matching "' + escapeHtml(query) + '".' : 'There are no entries in the address book.') + '</div>';
             $('#pagination').remove();
         }
 
@@ -145,11 +147,62 @@ function printAddress(item) {
     return '<p><a href="' + getWalletAddressUrl(item.address) + '">' + formatAddressString(item.address, 35) + '</a>' + (item.urltype == '' ? '' : ' <span class="text-light">(' + item.urltype + ')</span>') + '</p>';
 }
 
+function printToken(token) {
+    let tokenName = token.tokenname ? escapeHtml(token.tokenname) : '';
+    let shortId = formatAddressString(token.id, 18);
+    let tokenLabel = tokenName || shortId;
+    let idSuffix = tokenName && tokenName != token.id ? ' <span class="text-light">(' + shortId + ')</span>' : '';
+
+    return '<br><p class="addressbook-token"><strong>Token: </strong><a href="' + getTokenUrl(token.id) + '">' + tokenLabel + idSuffix + '</a></p>';
+}
+
 function updateUi() {
+    setupSearchInput();
     setupOrderSelect();
     setupTypeSelect();
 
     setup = false;
+}
+
+function setupSearchInput() {
+    query = params[QUERY_PARAM];
+
+    if (query == undefined) {
+        query = '';
+    } else {
+        query = decodeURIComponent(query.replace(/\+/g, '%20'));
+    }
+
+    $('#addressbookSearchInput').val(query);
+}
+
+function onAddressBookSearch(e) {
+    if (e) {
+        e.preventDefault();
+    }
+
+    if (setup) {
+        return;
+    }
+
+    setAddressBookSearchQuery($('#addressbookSearchInput').val());
+}
+
+function setAddressBookSearchQuery(searchQuery) {
+    searchQuery = searchQuery.trim();
+
+    if (searchQuery === '') {
+        delete(params[QUERY_PARAM]);
+    } else {
+        params[QUERY_PARAM] = encodeURIComponent(searchQuery);
+    }
+
+    params['offset'] = 0;
+    window.location.assign(getCurrentUrlWithParams());
+}
+
+function escapeHtml(value) {
+    return $('<div>').text(value).html();
 }
 
 function setupTypeSelect() {
