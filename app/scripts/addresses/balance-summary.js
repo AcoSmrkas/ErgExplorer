@@ -1,5 +1,8 @@
-import { ApiClient } from './api-client.js';
+import { ApiClient } from './api-client.js?v=44';
 import { AddressState } from './state.js';
+import { isLpTokenData } from '../common/lp-tokens.js?v=2';
+
+const LP_UNDERLYING_MIN_LIQUIDITY_ERG = 1000;
 
 /**
  * Balance summary display and token formatting
@@ -8,6 +11,7 @@ export const BalanceSummary = {
 	_tokenHolderHeightObserver: null,
 	_tokenHolderHeightResizeHandler: null,
 	_underlyingTokenPriceCache: {},
+	_underlyingTokenLiquidityCache: {},
 
 	/**
 	 * Print address summary with balance and tokens
@@ -179,21 +183,37 @@ export const BalanceSummary = {
 			ApiClient.getTokenInfo(token.tokenId),
 			ApiClient.getUnspentBoxesByTokenId(token.tokenId)
 		]);
+		this._hydrateTokenMetadata(token, tokenInfo);
+
 		const poolBox = this._findLpPoolBox(boxesData.items || [], token.tokenId, tokenInfo.emissionAmount);
 		if (!poolBox) return null;
+		if (poolBox.address === AddressState.walletAddress) return null;
 
 		const lpReserve = this._getAssetAmount(poolBox, token.tokenId);
 		const circulatingSupply = this._getLpCirculatingSupply(tokenInfo.emissionAmount, lpReserve);
 		if (circulatingSupply <= 0) return null;
 
+		const walletLpAmount = Number(token.amount);
+		const walletLpAmountBigInt = this._safeBigInt(token.amount);
+		const lpReserveBigInt = this._safeBigInt(lpReserve);
+		if (walletLpAmountBigInt === lpReserveBigInt || walletLpAmount > circulatingSupply) return null;
+
 		const poolUsdValue = await this._getLpPoolUsdValue(poolBox, token);
 		if (poolUsdValue <= 0) return null;
 
-		const walletLpAmount = Number(token.amount);
 		return {
 			usdValue: poolUsdValue * walletLpAmount / circulatingSupply,
 			poolUsdValue
 		};
+	},
+
+	_hydrateTokenMetadata(token, tokenInfo) {
+		if (!token || !tokenInfo) return;
+
+		if (!token.name && tokenInfo.name) token.name = tokenInfo.name;
+		if ((token.decimals === undefined || token.decimals === null) && tokenInfo.decimals !== undefined && tokenInfo.decimals !== null) {
+			token.decimals = tokenInfo.decimals;
+		}
 	},
 
 	_findLpPoolBox(boxes, lpTokenId, emissionAmount) {
@@ -212,19 +232,22 @@ export const BalanceSummary = {
 
 		if (candidateBoxes.length === 0) return null;
 
-		const likelyPoolBoxes = emission > 0n
+		const poolCandidates = emission > 0n
 			? candidateBoxes.filter(candidate => candidate.lpAmount > emission / 2n)
 			: candidateBoxes;
-		const poolCandidates = likelyPoolBoxes.length > 0 ? likelyPoolBoxes : candidateBoxes;
+		if (poolCandidates.length === 0) return null;
+
 		poolCandidates.sort((a, b) => a.lpAmount > b.lpAmount ? -1 : 1);
 		return poolCandidates[0].box;
 	},
 
 	_getLpReserveAssets(poolBox, lpTokenId) {
 		return (poolBox.assets || []).filter(asset => {
+			const amount = Number(asset.amount);
 			if (asset.tokenId === lpTokenId) return false;
 			if (asset.decimals === undefined || asset.decimals === null) return false;
-			return Number(asset.amount) > 0;
+			if (asset.index === 0 && amount === 1) return false;
+			return amount > 0;
 		});
 	},
 
@@ -247,6 +270,8 @@ export const BalanceSummary = {
 			: 0;
 
 		const reserveValues = await Promise.all(reserveAssets.map(asset => this._getTokenReserveUsdValue(asset)));
+		if (reserveValues.some(value => value === null)) return 0;
+
 		reserveValues.forEach(value => {
 			totalUsdValue += value;
 		});
@@ -260,9 +285,54 @@ export const BalanceSummary = {
 	},
 
 	async _getTokenReserveUsdValue(asset) {
+		const hasEnoughLiquidity = await this._hasEnoughLpUnderlyingLiquidity(asset);
+		if (!hasEnoughLiquidity) return null;
+
 		const usdPrice = await this._getTokenUsdUnitPrice(asset.tokenId);
-		if (!usdPrice || !asset.decimals && asset.decimals !== 0) return 0;
+		if (!usdPrice || !asset.decimals && asset.decimals !== 0) return null;
 		return Number(asset.amount) / Math.pow(10, asset.decimals) * usdPrice;
+	},
+
+	async _hasEnoughLpUnderlyingLiquidity(asset) {
+		const tokenData = await this._getSpectrumTokenData(asset);
+		if (!tokenData) return false;
+
+		const liquidity = Number(tokenData.liquidity_erg !== undefined ? tokenData.liquidity_erg : tokenData.liquidity);
+		return Number.isFinite(liquidity) && liquidity >= LP_UNDERLYING_MIN_LIQUIDITY_ERG;
+	},
+
+	async _getSpectrumTokenData(asset) {
+		if (!asset || !asset.tokenId) return null;
+
+		if (this._underlyingTokenLiquidityCache[asset.tokenId] !== undefined) {
+			return this._underlyingTokenLiquidityCache[asset.tokenId];
+		}
+
+		const tokenData = Array.isArray(pricesData)
+			? pricesData.find(token => token.id === asset.tokenId)
+			: null;
+		if (tokenData) {
+			this._underlyingTokenLiquidityCache[asset.tokenId] = tokenData;
+			return tokenData;
+		}
+
+		if (!asset.name) {
+			this._underlyingTokenLiquidityCache[asset.tokenId] = null;
+			return null;
+		}
+
+		try {
+			const tokenList = await ApiClient.getSpectrumTokenList(asset.name);
+			const matchedToken = Array.isArray(tokenList)
+				? tokenList.find(token => token.id === asset.tokenId)
+				: null;
+			this._underlyingTokenLiquidityCache[asset.tokenId] = matchedToken || null;
+			return this._underlyingTokenLiquidityCache[asset.tokenId];
+		} catch (error) {
+			console.warn('Failed to fetch Spectrum token liquidity:', asset.tokenId, error);
+			this._underlyingTokenLiquidityCache[asset.tokenId] = null;
+			return null;
+		}
 	},
 
 	async _getTokenUsdUnitPrice(tokenId) {
@@ -472,7 +542,6 @@ export const BalanceSummary = {
 	},
 
 	_isLpToken(token) {
-		const name = (token.name || '').trim();
-		return /(?:\sLP|_LP)(?:\sToken)?$/i.test(name);
+		return isLpTokenData(token);
 	}
 };

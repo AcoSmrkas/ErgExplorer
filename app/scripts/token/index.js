@@ -3,11 +3,7 @@ import { TokenApiClient } from './api-client.js';
 import { TokenUIDisplay } from './ui-display.js';
 import { TokenUIControllers } from './ui-controllers.js';
 import { TokenAnalyzer } from './token-analyzer.js';
-
-function isLpTokenData(tokenData) {
-	const name = (tokenData && tokenData.name ? tokenData.name : '').trim();
-	return /(?:\sLP|_LP)(?:\sToken)?$/i.test(name);
-}
+import { isLpTokenData } from '../common/lp-tokens.js?v=2';
 
 // Main initialization
 $(function() {

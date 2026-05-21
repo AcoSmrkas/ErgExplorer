@@ -205,6 +205,28 @@ export const ApiClient = {
 	},
 
 	/**
+	 * Fetch Spectrum token rows, including liquidity
+	 */
+	async getSpectrumTokenList(nameFilter) {
+		const response = await fetch('https://api.cruxfinance.io/spectrum/token_list', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				sort_by: 'Volume',
+				sort_order: 'Desc',
+				limit: 10,
+				offset: 0,
+				filter_window: 'Day',
+				name_filter: nameFilter || ''
+			})
+		});
+		if (!response.ok) throw new Error('Spectrum token list fetch failed');
+		return response.json();
+	},
+
+	/**
 	 * Fetch unspent boxes
 	 */
 	async getUnspentBoxes(boxOffset = AddressState.unspentBoxesOffset, limit = AddressState.unspentBoxesPageSize) {
