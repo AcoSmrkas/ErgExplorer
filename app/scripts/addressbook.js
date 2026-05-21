@@ -108,7 +108,7 @@ function printAddressGroups(items) {
     let p2pkAddresses = items.filter(item => isP2pkAddress(item.address));
     let contractAddresses = items.filter(item => !isP2pkAddress(item.address));
 
-    return printAddressGroup('P2PK addresses', p2pkAddresses) + printAddressGroup('Contract addresses', contractAddresses);
+    return printAddressGroup('Addresses', p2pkAddresses) + printAddressGroup('Contracts', contractAddresses);
 }
 
 function printAddressGroup(title, items) {
