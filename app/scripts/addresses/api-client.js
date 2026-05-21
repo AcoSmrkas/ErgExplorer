@@ -178,52 +178,29 @@ export const ApiClient = {
 	},
 
 	/**
-	 * Fetch token metadata
+	 * Fetch cached LP pool values
 	 */
-	async getTokenInfo(tokenId) {
-		const response = await fetch(API_HOST_2 + 'tokens/' + tokenId);
-		if (!response.ok) throw new Error('Token info fetch failed');
-		return response.json();
-	},
+	async getLpPools(tokenIds) {
+		const ids = [...new Set((tokenIds || []).filter(Boolean))];
+		const batchSize = 40;
+		const batches = [];
 
-	/**
-	 * Fetch unspent boxes containing token
-	 */
-	async getUnspentBoxesByTokenId(tokenId, limit = 100) {
-		const response = await fetch(API_HOST_2 + 'boxes/unspent/byTokenId/' + tokenId + '?limit=' + limit);
-		if (!response.ok) throw new Error('Token boxes fetch failed');
-		return response.json();
-	},
+		for (let i = 0; i < ids.length; i += batchSize) {
+			batches.push(ids.slice(i, i + batchSize));
+		}
 
-	/**
-	 * Fetch Crux token info, including value in ERG
-	 */
-	async getCruxTokenInfo(tokenId) {
-		const response = await fetch('https://api.cruxfinance.io/crux/token_info/' + tokenId);
-		if (!response.ok) throw new Error('Crux token info fetch failed');
-		return response.json();
-	},
+		const responses = await Promise.all(batches.map(async batch => {
+			const response = await fetch(ERGEXPLORER_API_HOST + 'tokens/getLpPools?ids=' + encodeURIComponent(batch.join(',')));
+			if (!response.ok) throw new Error('LP pools fetch failed');
+			return response.json();
+		}));
 
-	/**
-	 * Fetch Spectrum token rows, including liquidity
-	 */
-	async getSpectrumTokenList(nameFilter) {
-		const response = await fetch('https://api.cruxfinance.io/spectrum/token_list', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				sort_by: 'Volume',
-				sort_order: 'Desc',
-				limit: 10,
-				offset: 0,
-				filter_window: 'Day',
-				name_filter: nameFilter || ''
-			})
-		});
-		if (!response.ok) throw new Error('Spectrum token list fetch failed');
-		return response.json();
+		return responses.reduce((merged, response) => {
+			const items = response && response.items ? response.items : {};
+			merged.items = Object.assign(merged.items, items);
+			merged.total += Object.keys(items).length;
+			return merged;
+		}, { items: {}, total: 0 });
 	},
 
 	/**

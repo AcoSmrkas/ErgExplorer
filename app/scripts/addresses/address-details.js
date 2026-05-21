@@ -1,5 +1,5 @@
 import { AddressState } from './state.js';
-import { ApiClient } from './api-client.js?v=44';
+import { ApiClient } from './api-client.js?v=47';
 import { detectContractFromErgotree } from './transaction-analyzer.js';
 
 export const AddressDetails = {

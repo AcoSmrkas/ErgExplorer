@@ -4,8 +4,6 @@ var addresses = new Array();
 var addressbook = new Array();
 var shownNotificationPermissionToast = false;
 
-var popupKeyPrefix = 'bvb';
-
 setupMainnetTestnet();
 
 $.ajaxSetup({
@@ -36,10 +34,6 @@ $(function() {
 
 	$('#cyear').html(new Date().getFullYear());
 
-	// Check and show welcome popup if needed
-	if (shouldShowWelcomePopup()) {
-		showWelcomePopup();
-	}
 });
 
 window.addEventListener('hashchange', () => {
@@ -1227,49 +1221,4 @@ function formatTxAddressString(address, formattedAddress = null, walletAddress =
 	addressString = '<a title="' + address + '" onclick="copyAddress(event, this)" href="Copy to clipboard!">&#128203;</a> ' + addressString;
 
 	return addressString;
-}
-
-// Welcome Popup functions
-function shouldShowWelcomePopup() {
-	// Check if permanently dismissed
-	const dismissed = localStorage.getItem(popupKeyPrefix + 'PopupDismissed');
-	if (dismissed === 'true') {
-		return false;
-	}
-
-	// Check when last shown
-	const lastShown = localStorage.getItem(popupKeyPrefix + 'PopupLastShown');
-	if (!lastShown) {
-		return true; // Never shown before
-	}
-
-	// Check if more than 24 hours have passed
-	const now = Date.now();
-	const ONE_DAY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-	const timeSinceLastShown = now - parseInt(lastShown);
-
-	return timeSinceLastShown > ONE_DAY;
-}
-
-function showWelcomePopup() {
-	const modalElement = document.getElementById('welcomePopupModal');
-	if (modalElement) {
-		const modal = new bootstrap.Modal(modalElement);
-		modal.show();
-
-		// Update last shown timestamp
-		localStorage.setItem(popupKeyPrefix + 'PopupLastShown', Date.now().toString());
-	}
-}
-
-function dismissWelcomePopupPermanently() {
-	localStorage.setItem(popupKeyPrefix + 'PopupDismissed', 'true');
-
-	const modalElement = document.getElementById('welcomePopupModal');
-	if (modalElement) {
-		const modal = bootstrap.Modal.getInstance(modalElement);
-		if (modal) {
-			modal.hide();
-		}
-	}
 }

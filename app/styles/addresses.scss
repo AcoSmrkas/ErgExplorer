@@ -481,6 +481,74 @@ select:hover {
 	overflow-y: auto;	
 }
 
+@media only screen and (max-width: 991.98px) {
+	#txView {
+		margin-left: 0;
+		margin-right: 0;
+		max-width: 100%;
+		overflow-x: hidden;
+	}
+
+	.address-tx-table {
+		display: block;
+		width: 100% !important;
+		max-width: 100%;
+		border: 0 !important;
+		background: transparent;
+	}
+
+	.address-tx-table > thead,
+	.address-tx-table > tbody {
+		display: block;
+		width: 100%;
+	}
+
+	.address-tx-table > tbody {
+		border-top: 0 !important;
+	}
+
+	.address-tx-table > tbody > tr {
+		display: block;
+		width: 100%;
+		max-width: 100%;
+		margin-bottom: 0.75rem;
+		border: 1px solid var(--borders);
+		border-top: 2px solid var(--main-color);
+		border-radius: 5px;
+		overflow: hidden;
+	}
+
+	.address-tx-table > tbody > tr > td {
+		display: flex !important;
+		align-items: flex-start;
+		gap: 0.5rem;
+		width: 100% !important;
+		min-width: 0 !important;
+		max-width: 100%;
+		border-top: 0 !important;
+		border-bottom: 1px solid var(--borders);
+		padding: 0.55rem 0.65rem;
+		overflow-wrap: anywhere;
+		white-space: normal;
+	}
+
+	.address-tx-table > tbody > tr > td:last-child {
+		display: block !important;
+		border-bottom: 0;
+	}
+
+	.address-tx-table > tbody > tr > td > .float-end {
+		float: none !important;
+		margin-left: auto;
+		text-align: right;
+		overflow-wrap: normal;
+	}
+
+	.address-tx-table > tbody > tr:first-child > * {
+		border-top: 0 !important;
+	}
+}
+
 #unspentBoxesHolder > .div-cell {
 	border-radius: 0;
 	max-height: 200px;
