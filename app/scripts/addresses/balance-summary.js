@@ -145,7 +145,7 @@ export const BalanceSummary = {
 
 		if (totalAssetsValue > 0) {
 			$('#finalAssetsBalance')
-				.html(this._formatBalanceRow('Tokens', '$' + formatValue(totalAssetsValue, 2)))
+				.html(this._formatBalanceRow('Tokens', this._formatTokensBalanceValue(totalAssetsValue)))
 				.css('display', 'grid');
 			$('#finalBalance')
 				.html(this._formatBalanceRow('Total', '$' + formatValue(ergDollarValue + totalAssetsValue, 2)))
@@ -153,6 +153,19 @@ export const BalanceSummary = {
 		}
 
 		return html;
+	},
+
+	_formatTokensBalanceValue(totalAssetsValue) {
+		if (!prices || !prices.ERG || prices.ERG <= 0) {
+			return '$' + formatValue(totalAssetsValue, 2);
+		}
+
+		const tokenErgValue = new BigNumber(totalAssetsValue)
+			.dividedBy(prices.ERG)
+			.times(Math.pow(10, ERG_DECIMALS))
+			.toString();
+		return formatErgValueString(tokenErgValue, 4, true) +
+			'<span class="address-balance-fiat">' + formatDollarPriceString(totalAssetsValue, 2) + '</span>';
 	},
 
 	async _loadLpTokenValues(lpTokens) {
