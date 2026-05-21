@@ -5,7 +5,7 @@
 
 import { AddressState, FilterState } from './state.js';
 import { ApiClient } from './api-client.js?v=47';
-import { BalanceSummary } from './balance-summary.js?v=55';
+import { BalanceSummary } from './balance-summary.js?v=61';
 import { AddressDetails } from './address-details.js?v=47';
 import { TransactionFormatter } from './transaction-formatter.js';
 import { UIControllers } from './ui-controllers.js';
@@ -39,6 +39,7 @@ let activeAddressSectionTab = null;
 $(function() {
 	AddressState.walletAddress = getWalletAddressFromUrl();
 	setDocumentTitle(AddressState.walletAddress);
+	BalanceSummary.showLoading();
 	initializeAddressPage();
 });
 
@@ -358,6 +359,7 @@ function onMempoolAndTransactionsDataFetched() {
 	}
 
 	$('#txLoading').hide();
+	BalanceSummary.syncLoadingVisibility();
 	if (typeof getAddressesInfo === 'function') {
 		getAddressesInfo();
 	}

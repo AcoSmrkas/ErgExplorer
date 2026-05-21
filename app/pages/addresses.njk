@@ -21,6 +21,9 @@
 				<h2 class="m-0">Address</h2>
 			</div>
 		</div>
+		<div id="summaryLoading" class="mb-3 address-summary-loading" style="display: none;">
+			<img src="./images/logo.png" alt="Loading" class="loadingImg address-summary-loading-img">
+		</div>
 		<div id="summaryOk" class="mb-3" style="display: none;">
 			<div class="row w-100 div-cell-dark border-bottom-flat p-2 p-lg-3 address-identity-row">
 				<div class="col pe-0 ps-0">
@@ -47,6 +50,7 @@
 										<div class="address-balance-rows">
 											<div id="finalErgBalance" class="address-balance-row"></div>
 											<div id="finalAssetsBalance" class="address-balance-row" style="display: none;"></div>
+											<div id="finalLiquidityBalance" class="address-balance-row" style="display: none;"></div>
 											<div id="finalBalance" class="me-0 me-lg-3 address-balance-row address-balance-total" style="display: none;"></div>
 										</div>
 									</div>
@@ -303,6 +307,6 @@
 	<script src="./scripts/common/prices.js?v=41"></script>
 	<script src="./scripts/common/pagination.js?v=41"></script>
 	<script src="./scripts/common/nft.js?v=41"></script>
-	<script type="module" src="./scripts/addresses/index.js?v=55"></script>
+	<script type="module" src="./scripts/addresses/index.js?v=61"></script>
 	<script src="./scripts/3rd-party/qrcode.min.js?v=41"></script>
 {% endblock %}

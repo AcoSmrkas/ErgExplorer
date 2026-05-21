@@ -147,7 +147,7 @@ select:hover {
 }
 
 .address-balance-title {
-	font-size: 1.35rem;
+	font-size: 1.5rem;
 	font-weight: 700;
 	line-height: 1.1;
 	margin-bottom: 0.55rem;
@@ -166,6 +166,17 @@ select:hover {
 	grid-template-columns: 5rem minmax(0, 1fr);
 	line-height: 1.25;
 	max-width: 32rem;
+}
+
+.address-summary-loading {
+	align-items: center;
+	justify-content: center;
+	min-height: 8rem;
+}
+
+.address-summary-loading-img {
+	height: 5rem;
+	width: 5rem;
 }
 
 .address-balance-label {

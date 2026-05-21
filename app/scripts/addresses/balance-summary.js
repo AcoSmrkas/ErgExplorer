@@ -8,6 +8,23 @@ import { isLpTokenData } from '../common/lp-tokens.js?v=3';
 export const BalanceSummary = {
 	_tokenHolderHeightObserver: null,
 	_tokenHolderHeightResizeHandler: null,
+	_isLoading: false,
+
+	showLoading() {
+		this._isLoading = true;
+		$('#summaryOk').hide();
+		this.syncLoadingVisibility();
+	},
+
+	syncLoadingVisibility() {
+		if (!this._isLoading) {
+			$('#summaryLoading').hide();
+			return;
+		}
+
+		const txLoadingVisible = $('#txLoading').length > 0 && $('#txLoading').is(':visible');
+		$('#summaryLoading').css('display', txLoadingVisible ? 'none' : 'flex');
+	},
 
 	/**
 	 * Print address summary with balance and tokens
@@ -21,6 +38,8 @@ export const BalanceSummary = {
 			const data = await ApiClient.getAddressSummary();
 			await this._displayBalance(data);
 		} catch (error) {
+			this._isLoading = false;
+			$('#summaryLoading').hide();
 			console.error('Failed to print address summary:', error);
 			showLoadError('No results matching your query.');
 		}
@@ -39,7 +58,9 @@ export const BalanceSummary = {
 			balanceHtml += '<span class="address-balance-fiat">' + formatDollarPriceString(ergDollarValue, 2) + '</span>';
 		}
 
-		$('#finalErgBalance').html(this._formatBalanceRow('<span class="erg-span">ERG</span>', balanceHtml));
+		$('#finalErgBalance')
+			.html(this._formatBalanceRow('<span class="erg-span">ERG</span>', balanceHtml))
+			.css('display', 'grid');
 
 		// Tokens
 		if (data.confirmed.tokens && data.confirmed.tokens.length > 0) {
@@ -81,7 +102,14 @@ export const BalanceSummary = {
 			}
 		}
 
-		// Address display
+		this._renderAddressHeader();
+		this._isLoading = false;
+		$('#summaryLoading').hide();
+		$('#summaryOk').show();
+		this._syncTokenHolderHeight();
+	},
+
+	_renderAddressHeader() {
 		const addressString = this._formatAddressDisplay(AddressState.walletAddress);
 		const compactAddressString = this._formatCompactAddressDisplay(AddressState.walletAddress);
 		$('#address')
@@ -95,8 +123,6 @@ export const BalanceSummary = {
 			$('#officialLink').attr('href', getOfficialExplorereAddressUrl(AddressState.walletAddress));
 			$('#officialLink').show();
 		}
-		$('#summaryOk').show();
-		this._syncTokenHolderHeight();
 	},
 
 	_formatAddressDisplay(address) {
@@ -114,6 +140,7 @@ export const BalanceSummary = {
 	 */
 	_formatFinancialTokensHtmlString(tokensArray, ergDollarValue) {
 		let totalBalanceAssetsValue = 0;
+		let totalLiquidityValue = 0;
 		let html = '';
 
 		// Calculate prices and sort by USD value
@@ -122,7 +149,9 @@ export const BalanceSummary = {
 			if (!price && gotPrices && prices[token.tokenId]) {
 				price = formatAssetDollarPrice(token.amount, token.decimals, token.tokenId);
 			}
-			if (!token.lpEstimated) {
+			if (token.lpEstimated) {
+				totalLiquidityValue += price;
+			} else {
 				totalBalanceAssetsValue += price;
 			}
 			token.usdPrice = price;
@@ -145,15 +174,30 @@ export const BalanceSummary = {
 			html += tokenStr;
 		});
 
+		const totalPortfolioValue = ergDollarValue + totalBalanceAssetsValue + totalLiquidityValue;
+
 		if (totalBalanceAssetsValue > 0) {
 			$('#finalAssetsBalance')
 				.html(this._formatBalanceRow('Tokens', this._formatTokensBalanceValue(totalBalanceAssetsValue)))
 				.css('display', 'grid');
-			$('#finalBalance')
-				.html(this._formatBalanceRow('Total', '$' + formatValue(ergDollarValue + totalBalanceAssetsValue, 2)))
+		} else {
+			$('#finalAssetsBalance').hide();
+		}
+
+		if (totalLiquidityValue > 0) {
+			$('#finalLiquidityBalance')
+				.html(this._formatBalanceRow('Liquidity', this._formatTokensBalanceValue(totalLiquidityValue)))
 				.css('display', 'grid');
 		} else {
-			$('#finalAssetsBalance, #finalBalance').hide();
+			$('#finalLiquidityBalance').hide();
+		}
+
+		if (totalBalanceAssetsValue > 0 || totalLiquidityValue > 0) {
+			$('#finalBalance')
+				.html(this._formatBalanceRow('Total', '$' + formatValue(totalPortfolioValue, 2)))
+				.css('display', 'grid');
+		} else {
+			$('#finalBalance').hide();
 		}
 
 		return html;
