@@ -593,6 +593,13 @@ select, option {
 	box-shadow: none !important;
 }
 
+html[data-theme="mew"] #searchInput ~ .btn-info,
+html[data-theme="mew"] #searchInput ~ .btn-info:hover,
+html[data-theme="mew"] #searchInput ~ .btn-info:focus,
+html[data-theme="mew"] #searchInput ~ .btn-info:active {
+	color: var(--footer) !important;
+}
+
 .btn-info:focus {
 	box-shadow: none;
 }
