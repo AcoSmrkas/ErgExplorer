@@ -15,57 +15,49 @@ function printAddresses() {
     function (data) {
 		let formattedResult = '';
 		let items = data.items;
-        let lastName = '';
 
         if (data.total > 0) {
     		for (let i = 0; i < items.length; i++) {
                 let item = items[i];
+                let nameItems = getAddressBookNameItems(items, i);
 
-                if (lastName == item.name) {
-                    formattedResult += printAddress(item);
-                } else {  
-                    lastName = item.name;
+                formattedResult += '<div class="col-12 mb-md-3"><div class="row div-cell-dark">';
+                formattedResult += '<div class="col-12 col-sm-12 col-lg-4 col-xl-3">';
+                
+                //Name
+                formattedResult +='<p><strong>Name: </strong>' + item.name + '</p>';
 
-                    formattedResult += '<div class="col-12 mb-md-3"><div class="row div-cell-dark">';
-                    formattedResult += '<div class="col-12 col-sm-12 col-lg-4 col-xl-3">';
-                    
-                    //Name
-                    formattedResult +='<p><strong>Name: </strong>' + item.name + '</p>';
+                 //Type
+                let type = item.type;
+                let spanClass = getOwnerTypeClass(type);
 
-                     //Type
-                    let type = item.type;
-                    let spanClass = getOwnerTypeClass(type);
+                formattedResult += '<p><strong>Type: </strong><span class="' + spanClass + '">' + type + '</span></p>';
 
-                    formattedResult += '<p><strong>Type: </strong><span class="' + spanClass + '">' + type + '</span></p>';
-
-                    //Url
-                    if (item.url) {
-                        formattedResult += '<p><strong>Url: </strong><a target="_new" href="' + item.url + '">' + item.url + '</a></p>';
-                    }
-                    
-                    formattedResult += '</div>';
-                    formattedResult += '<div class="col border-lg-start">';
-                    formattedResult += '<hr class="my-3 d-lg-none">';
-
-                    formattedResult += '<p><strong>Address:</strong></p>';
-
-                    formattedResult += printAddress(item);
+                //Url
+                if (item.url) {
+                    formattedResult += '<p><strong>Url: </strong><a target="_new" href="' + item.url + '">' + item.url + '</a></p>';
                 }
+                
+                formattedResult += '</div>';
+                formattedResult += '<div class="col border-lg-start">';
+                formattedResult += '<hr class="my-3 d-lg-none">';
 
-                if (i == items.length - 1 || lastName != items[i + 1].name) {
-                    if (data.tokens.length > 0) {
-                        for (let j = 0; j < data.tokens.length; j++) {
-                            let token = data.tokens[j];
-                            if (token.addressname == item.name) {
-                                formattedResult += '<br><p><strong>Token:</strong></p><a style="word-wrap:break-word;" href="' + getTokenUrl(token.id) + '">' + token.id + '</a>';
-                                break;
-                            }
+                formattedResult += printAddressGroups(nameItems);
+
+                if (data.tokens.length > 0) {
+                    for (let j = 0; j < data.tokens.length; j++) {
+                        let token = data.tokens[j];
+                        if (token.addressname == item.name) {
+                            formattedResult += '<br><p><strong>Token:</strong></p><a style="word-wrap:break-word;" href="' + getTokenUrl(token.id) + '">' + token.id + '</a>';
+                            break;
                         }
                     }
-
-                    formattedResult += '</div>';
-                    formattedResult += '</div></div>';
                 }
+
+                formattedResult += '</div>';
+                formattedResult += '</div></div>';
+
+                i += nameItems.length - 1;
     		}
         } else {
             formattedResult += '<div class="div-cell-dark">There are no entries in the address book.</div>';
@@ -95,6 +87,46 @@ function countUniqueNames(arr) {
   });
 
   return uniqueNames.size; // Return the size of the Set (number of unique names)
+}
+
+function getAddressBookNameItems(items, startIndex) {
+    let nameItems = [];
+    let name = items[startIndex].name;
+
+    for (let i = startIndex; i < items.length; i++) {
+        if (items[i].name != name) {
+            break;
+        }
+
+        nameItems.push(items[i]);
+    }
+
+    return nameItems;
+}
+
+function printAddressGroups(items) {
+    let p2pkAddresses = items.filter(item => isP2pkAddress(item.address));
+    let contractAddresses = items.filter(item => !isP2pkAddress(item.address));
+
+    return printAddressGroup('P2PK addresses', p2pkAddresses) + printAddressGroup('Contract addresses', contractAddresses);
+}
+
+function printAddressGroup(title, items) {
+    if (items.length == 0) {
+        return '';
+    }
+
+    let formattedResult = '<p><strong>' + title + ':</strong></p>';
+
+    for (let i = 0; i < items.length; i++) {
+        formattedResult += printAddress(items[i]);
+    }
+
+    return formattedResult;
+}
+
+function isP2pkAddress(address) {
+    return address.startsWith('9');
 }
 
 function printAddress(item) {
