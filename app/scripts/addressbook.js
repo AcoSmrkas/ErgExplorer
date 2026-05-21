@@ -23,7 +23,7 @@ function printAddresses() {
                 let item = items[i];
                 let nameItems = getAddressBookNameItems(items, i);
 
-                formattedResult += '<div class="col-12 mb-md-3"><div class="row div-cell-dark">';
+                formattedResult += '<div class="col-12 mb-md-3 ps-2 pe-2 ps-md-0 pe-md-0"><div class="row div-cell-dark">';
                 formattedResult += '<div class="col-12 col-sm-12 col-lg-4 col-xl-3">';
                 
                 //Name
