@@ -113,7 +113,7 @@ export const BalanceSummary = {
 	 * Format financial tokens (tokens with prices)
 	 */
 	_formatFinancialTokensHtmlString(tokensArray, ergDollarValue) {
-		let totalAssetsValue = 0;
+		let totalBalanceAssetsValue = 0;
 		let html = '';
 
 		// Calculate prices and sort by USD value
@@ -122,7 +122,9 @@ export const BalanceSummary = {
 			if (!price && gotPrices && prices[token.tokenId]) {
 				price = formatAssetDollarPrice(token.amount, token.decimals, token.tokenId);
 			}
-			totalAssetsValue += price;
+			if (!token.lpEstimated) {
+				totalBalanceAssetsValue += price;
+			}
 			token.usdPrice = price;
 		});
 
@@ -143,13 +145,15 @@ export const BalanceSummary = {
 			html += tokenStr;
 		});
 
-		if (totalAssetsValue > 0) {
+		if (totalBalanceAssetsValue > 0) {
 			$('#finalAssetsBalance')
-				.html(this._formatBalanceRow('Tokens', this._formatTokensBalanceValue(totalAssetsValue)))
+				.html(this._formatBalanceRow('Tokens', this._formatTokensBalanceValue(totalBalanceAssetsValue)))
 				.css('display', 'grid');
 			$('#finalBalance')
-				.html(this._formatBalanceRow('Total', '$' + formatValue(ergDollarValue + totalAssetsValue, 2)))
+				.html(this._formatBalanceRow('Total', '$' + formatValue(ergDollarValue + totalBalanceAssetsValue, 2)))
 				.css('display', 'grid');
+		} else {
+			$('#finalAssetsBalance, #finalBalance').hide();
 		}
 
 		return html;
