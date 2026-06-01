@@ -49,7 +49,7 @@ function getUrlWithOffset(setOffset) {
 
 	params['offset'] = setOffset;
 
-	let urlWithOffset = getUrlWithParams(window.location.pathname.substring(1));
+	let urlWithOffset = getUrlWithParams(window.location.pathname.split('/')[1]);
 
 	if (temp != undefined) {
 		params['offset'] = temp;

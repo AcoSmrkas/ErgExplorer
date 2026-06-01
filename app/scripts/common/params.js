@@ -3,14 +3,24 @@ var params = [];
 readParams();
 
 function readParams() {
-	let hash = window.location.hash;
+	let raw;
 
-	if (hash == '') {
-		return;
+	if (IS_DEV_ENVIRONMENT) {
+		const hash = window.location.hash;
+		if (hash == '') return;
+		raw = hash.substring(1);
+	} else {
+		const parts = window.location.pathname.split('/');
+		if (parts.length >= 3 && parts[2] !== '') {
+			raw = parts[2];
+		} else {
+			const hash = window.location.hash;
+			if (hash == '') return;
+			raw = hash.substring(1);
+		}
 	}
 
-	hash = hash.substring(1);
-	let temp = hash.split('&');
+	let temp = raw.split('&');
 
 	for (let i = 0; i < temp.length; i++) {
 		let param = temp[i].split('=');
@@ -26,8 +36,9 @@ function readParams() {
 }
 
 function getUrlWithParams(page, includeId = true) {
+	const pageName = (page || '').split('/')[0];
 	let separator = (IS_DEV_ENVIRONMENT) ? '#' : '/';
-	let address = '/' + page + separator;
+	let address = '/' + pageName + separator;
 
 	Object.keys(params).forEach((param) => {
     	if (params[param] == param) {
@@ -49,5 +60,5 @@ function getUrlWithParams(page, includeId = true) {
 }
 
 function getCurrentUrlWithParams() {
-	return getUrlWithParams(window.location.pathname.substring(1));
+	return getUrlWithParams(window.location.pathname.split('/')[1]);
 }
