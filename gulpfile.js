@@ -122,10 +122,10 @@ const stylescss = gulp.parallel(stylescssApp, stylescssCompiled);
 function extras() {
 	return gulp.src([
     	'app/*',
+    	'app/.*',
     	'!app/*.html'
 	], {
-		encoding: false,
- 		dot: true
+		encoding: false
 	}).pipe(gulp.dest('dist'));
 }
 
