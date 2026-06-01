@@ -290,19 +290,23 @@ select:hover {
 }
 
 .address-detail-name.address-detail-success {
-	color: var(--bs-success) !important;
+	color: var(--bs-success);
 }
 
 .address-detail-name.address-detail-warning {
-	color: var(--bs-warning) !important;
+	color: var(--bs-warning);
 }
 
 .address-detail-name.address-detail-info {
-	color: var(--bs-info) !important;
+	color: var(--bs-info);
 }
 
 .address-detail-name.address-detail-danger {
-	color: var(--bs-danger) !important;
+	color: var(--bs-danger);
+}
+
+.address-detail-name.address-detail-meme {
+	color: #ff27d4;
 }
 
 .address-detail-type {

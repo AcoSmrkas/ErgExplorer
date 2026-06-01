@@ -1050,6 +1050,9 @@ function getOwnerTypeClass(type) {
         case 'Mining pool':
         	return 'text-danger';
 
+		case 'Meme':
+			return 'text-meme';
+
         default:
         	return '';
     }
