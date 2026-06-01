@@ -163,6 +163,23 @@ table > tbody > tr > td {
 	color: #fff !important;
 }
 
+html[data-theme="mew"] {
+	#chartColumn .token-chart-range-btn {
+		background: var(--footer) !important;
+		border: none !important;
+		color: #eee !important;
+	}
+
+	#chartColumn .token-chart-range-btn.btn-info,
+	#chartColumn .token-chart-range-btn.btn-info:hover,
+	#chartColumn .token-chart-range-btn.btn-info:focus,
+	#chartColumn .token-chart-range-btn.btn-primary:hover,
+	#chartColumn .token-chart-range-btn.btn-primary:focus {
+		background: var(--main-color) !important;
+		color: var(--footer) !important;
+	}
+}
+
 .token-chart-frame {
 	height: 315px;
 	position: relative;

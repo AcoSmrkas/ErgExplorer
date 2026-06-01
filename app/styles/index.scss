@@ -79,3 +79,20 @@ table {
   border-color: var(--main-color-hover) !important;
   color: #fff !important;
 }
+
+html[data-theme="mew"] {
+  .token-chart-range-btn {
+    background: var(--forms-bg) !important;
+    border: none !important;
+    color: #eee !important;
+  }
+
+  .token-chart-range-btn.btn-info,
+  .token-chart-range-btn.btn-info:hover,
+  .token-chart-range-btn.btn-info:focus,
+  .token-chart-range-btn.btn-primary:hover,
+  .token-chart-range-btn.btn-primary:focus {
+    background: var(--main-color) !important;
+    color: var(--footer) !important;
+  }
+}

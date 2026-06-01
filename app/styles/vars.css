@@ -71,14 +71,15 @@ html[data-theme="mew"] {
 	}
 
 	.btn {
-		color: var(--footer) !important;
+		border: none !important;
+		color: #eee !important;
 	}
 
 	.btn-primary:hover {
-		background: var(--info-color) !important;
+		background: var(--main-color) !important;
 	}
 
 	.btn-primary {
-		background: #fff !important;
+		background: var(--forms-bg) !important;
 	}
 }

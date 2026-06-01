@@ -597,8 +597,14 @@ html[data-theme="mew"] .btn-info,
 html[data-theme="mew"] .btn-info:hover,
 html[data-theme="mew"] .btn-info:focus,
 html[data-theme="mew"] .btn-info:active,
-html[data-theme="mew"] .btn-primary {
+html[data-theme="mew"] .btn-primary:hover,
+html[data-theme="mew"] .btn-primary:focus,
+html[data-theme="mew"] .btn-primary:active {
 	color: var(--footer) !important;
+}
+
+html[data-theme="mew"] .btn-primary {
+	color: #eee !important;
 }
 
 .btn-info:focus {
