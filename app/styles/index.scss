@@ -39,3 +39,43 @@
 table {
   margin-bottom: 0 !important;
 }
+
+.token-chart-controls {
+  align-items: center;
+  display: flex;
+  gap: 5px;
+  justify-content: flex-end;
+}
+
+.token-chart-range-btn {
+  background: var(--borders) !important;
+  border: 1px solid var(--borders) !important;
+  box-shadow: none !important;
+  color: var(--text-color) !important;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.1;
+  min-height: 34px;
+  min-width: 42px;
+  padding: 5px 9px !important;
+}
+
+.token-chart-range-btn.btn-primary:hover,
+.token-chart-range-btn.btn-primary:focus {
+  background: var(--main-color) !important;
+  border-color: var(--main-color) !important;
+  color: #fff !important;
+}
+
+.token-chart-range-btn.btn-info {
+  background: var(--main-color) !important;
+  border-color: var(--main-color) !important;
+  color: #fff !important;
+}
+
+.token-chart-range-btn.btn-info:hover,
+.token-chart-range-btn.btn-info:focus {
+  background: var(--main-color-hover) !important;
+  border-color: var(--main-color-hover) !important;
+  color: #fff !important;
+}
