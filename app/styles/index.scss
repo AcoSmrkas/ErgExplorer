@@ -87,12 +87,15 @@ html[data-theme="mew"] {
     color: #eee !important;
   }
 
-  .token-chart-range-btn.btn-info,
+  .token-chart-range-btn.btn-info {
+    background: var(--main-color) !important;
+    color: var(--footer) !important;
+  }
+
   .token-chart-range-btn.btn-info:hover,
-  .token-chart-range-btn.btn-info:focus,
   .token-chart-range-btn.btn-primary:hover,
   .token-chart-range-btn.btn-primary:focus {
-    background: var(--main-color) !important;
+    background: var(--main-color-hover) !important;
     color: var(--footer) !important;
   }
 }

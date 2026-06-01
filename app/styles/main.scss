@@ -603,6 +603,11 @@ html[data-theme="mew"] .btn-primary:active {
 	color: var(--footer) !important;
 }
 
+html[data-theme="mew"] .btn-info:focus,
+html[data-theme="mew"] .btn-info:active {
+	background-color: var(--main-color) !important;
+}
+
 html[data-theme="mew"] .btn-primary {
 	color: #eee !important;
 }

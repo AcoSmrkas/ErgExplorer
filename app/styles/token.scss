@@ -170,12 +170,15 @@ html[data-theme="mew"] {
 		color: #eee !important;
 	}
 
-	#chartColumn .token-chart-range-btn.btn-info,
+	#chartColumn .token-chart-range-btn.btn-info {
+		background: var(--main-color) !important;
+		color: var(--footer) !important;
+	}
+
 	#chartColumn .token-chart-range-btn.btn-info:hover,
-	#chartColumn .token-chart-range-btn.btn-info:focus,
 	#chartColumn .token-chart-range-btn.btn-primary:hover,
 	#chartColumn .token-chart-range-btn.btn-primary:focus {
-		background: var(--main-color) !important;
+		background: var(--main-color-hover) !important;
 		color: var(--footer) !important;
 	}
 }

@@ -76,7 +76,7 @@ html[data-theme="mew"] {
 	}
 
 	.btn-primary:hover {
-		background: var(--main-color) !important;
+		background: var(--main-color-hover) !important;
 	}
 
 	.btn-primary {
