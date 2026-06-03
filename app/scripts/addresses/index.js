@@ -32,7 +32,12 @@ function slugifyAddressbookName(value) {
 }
 
 async function resolveAddressbookSlug(slug) {
-	const target = slugifyAddressbookName(slug);
+	// Decode first so a literal/encoded space (e.g. "Mew Finance-Treasury" -> "Mew%20Finance-Treasury")
+	// slugifies the same as the hyphenated form "Mew-Finance-Treasury".
+	let decoded = slug;
+	try { decoded = decodeURIComponent(slug); } catch (e) { /* malformed escape: use raw */ }
+
+	const target = slugifyAddressbookName(decoded);
 	if (target === '') return null;
 
 	const url = ERGEXPLORER_API_HOST + 'addressbook/getAddresses?offset=0&limit=1000&type=&order=&query=&testnet=' + (networkType === 'testnet' ? '1' : '0');
