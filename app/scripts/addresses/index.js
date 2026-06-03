@@ -79,17 +79,18 @@ $(async function() {
 	const addressFromUrl = getWalletAddressFromUrl();
 	BalanceSummary.showLoading();
 
-	// Friendly addressbook URLs (e.g. /addresses/FAKU-Treasury): resolve to the real
-	// address and redirect. Skipped for normal addresses, so no extra request is made.
+	// Friendly addressbook URLs (e.g. /addresses/FAKU-Treasury): resolve the slug to the
+	// real address but keep the friendly URL in the bar. Normal addresses skip this, so
+	// no extra request is made for them.
+	let walletAddress = addressFromUrl;
 	if (addressFromUrl && !isErgoAddress(addressFromUrl)) {
 		const resolved = await resolveAddressbookSlug(addressFromUrl);
 		if (resolved) {
-			window.location.replace(getWalletAddressUrl(resolved));
-			return;
+			walletAddress = resolved;
 		}
 	}
 
-	AddressState.walletAddress = addressFromUrl;
+	AddressState.walletAddress = walletAddress;
 	setDocumentTitle(AddressState.walletAddress);
 	initializeAddressPage();
 });
