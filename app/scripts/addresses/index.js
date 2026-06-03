@@ -13,6 +13,45 @@ import { TransactionFilters } from './filters.js';
 import { NftManager } from './nft-manager.js';
 import { getTxType, isWalletAddress, getTxInOutType, analyzeTransfers } from './transaction-analyzer.js';
 
+/**
+ * Friendly addressbook URLs, e.g. /addresses/FAKU-Treasury -> the real address.
+ * A slug is built from an addressbook entry's name + urltype:
+ *   { name: 'FAKU', urltype: 'Treasury' } -> 'faku-treasury'
+ *   { name: 'Mew Finance', urltype: 'Treasury' } -> 'mew-finance-treasury'
+ */
+function isErgoAddress(value) {
+	// Real Ergo addresses are Base58 and at least ~40 chars; slugs are short and/or contain '-'.
+	return /^[1-9A-HJ-NP-Za-km-z]{40,}$/.test(value);
+}
+
+function slugifyAddressbookName(value) {
+	return String(value || '')
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/^-+|-+$/g, '');
+}
+
+async function resolveAddressbookSlug(slug) {
+	const target = slugifyAddressbookName(slug);
+	if (target === '') return null;
+
+	const url = ERGEXPLORER_API_HOST + 'addressbook/getAddresses?offset=0&limit=1000&type=&order=&query=&testnet=' + (networkType === 'testnet' ? '1' : '0');
+
+	try {
+		const response = await fetch(url);
+		if (!response.ok) return null;
+
+		const data = await response.json();
+		const items = (data && data.items) || [];
+		const match = items.find(item => slugifyAddressbookName((item.name || '') + ' ' + (item.urltype || '')) === target);
+
+		return match ? match.address : null;
+	} catch (error) {
+		console.warn('Failed to resolve addressbook slug:', error);
+		return null;
+	}
+}
+
 const ADDRESS_SECTION_TABS = {
 	ownedNfts: {
 		tab: '#ownedNftsTab',
@@ -36,10 +75,22 @@ const ADDRESS_SECTION_TABS = {
 let activeAddressSectionTab = null;
 
 // Initialize on document ready
-$(function() {
-	AddressState.walletAddress = getWalletAddressFromUrl();
-	setDocumentTitle(AddressState.walletAddress);
+$(async function() {
+	const addressFromUrl = getWalletAddressFromUrl();
 	BalanceSummary.showLoading();
+
+	// Friendly addressbook URLs (e.g. /addresses/FAKU-Treasury): resolve to the real
+	// address and redirect. Skipped for normal addresses, so no extra request is made.
+	if (addressFromUrl && !isErgoAddress(addressFromUrl)) {
+		const resolved = await resolveAddressbookSlug(addressFromUrl);
+		if (resolved) {
+			window.location.replace(getWalletAddressUrl(resolved));
+			return;
+		}
+	}
+
+	AddressState.walletAddress = addressFromUrl;
+	setDocumentTitle(AddressState.walletAddress);
 	initializeAddressPage();
 });
 
