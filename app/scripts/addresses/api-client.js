@@ -1,5 +1,28 @@
 import { AddressState, FilterState } from './state.js';
 
+// The primary tx API (sigmaspace) can hang when it's down, so abort and fail over after this.
+const TX_PRIMARY_TIMEOUT_MS = 8000;
+// The fallback (ergoplatform) gets a more generous budget before giving up.
+const TX_FALLBACK_TIMEOUT_MS = 20000;
+// Other address data fetches (mempool, balance, unspent boxes) abort after this to avoid hanging.
+const DATA_FETCH_TIMEOUT_MS = 15000;
+
+/**
+ * Fetch with an abort-based timeout that also covers reading the response body, so a host
+ * that hangs (no response, or headers-then-stall) rejects instead of waiting forever.
+ */
+async function fetchWithTimeout(url, timeoutMs, readBody) {
+	const controller = new AbortController();
+	const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+	try {
+		const response = await fetch(url, { signal: controller.signal });
+		return await readBody(response);
+	} finally {
+		clearTimeout(timer);
+	}
+}
+
 /**
  * API client for address page data fetching
  * Wraps jQuery $.get/$.ajax and fetch calls for cleaner API
@@ -115,12 +138,12 @@ export const ApiClient = {
 	 */
 	async getMempoolData() {
 		try {
-			const response = await fetch(this.getMempoolUrl());
-			if (!response.ok) throw new Error('Mempool fetch failed');
-
-			const arrayBuffer = await response.arrayBuffer();
-			const buffer = new TextDecoder('utf-8').decode(arrayBuffer);
-			const data = JSONbig.parse(buffer);
+			const data = await fetchWithTimeout(this.getMempoolUrl(), DATA_FETCH_TIMEOUT_MS, async (response) => {
+				if (!response.ok) throw new Error('Mempool fetch failed');
+				const arrayBuffer = await response.arrayBuffer();
+				const buffer = new TextDecoder('utf-8').decode(arrayBuffer);
+				return JSONbig.parse(buffer);
+			});
 
 			AddressState.mempoolData = data;
 				AddressState.mempoolCount = data.total;
@@ -137,25 +160,28 @@ export const ApiClient = {
 	},
 
 	/**
-	 * Fetch transactions data with retry fallback
+	 * Fetch transactions data with retry fallback.
+	 * The primary (sigmaspace) request is aborted if it doesn't respond within the
+	 * timeout, so a hung/down host fails over to the fallback instead of hanging.
 	 */
 	async getTransactionsData(attempt = 1) {
+		const url = this.getTxsDataUrl(attempt);
+		const timeoutMs = attempt === 1 ? TX_PRIMARY_TIMEOUT_MS : TX_FALLBACK_TIMEOUT_MS;
+
 		try {
-			const url = this.getTxsDataUrl(attempt);
-
-			const response = await fetch(url);
-			if (!response.ok) throw new Error('Transactions fetch failed');
-
-			const arrayBuffer = await response.arrayBuffer();
-			const buffer = new TextDecoder('utf-8').decode(arrayBuffer);
-			const data = JSONbig.parse(buffer);
+			const data = await fetchWithTimeout(url, timeoutMs, async (response) => {
+				if (!response.ok) throw new Error('Transactions fetch failed');
+				const arrayBuffer = await response.arrayBuffer();
+				const buffer = new TextDecoder('utf-8').decode(arrayBuffer);
+				return JSONbig.parse(buffer);
+			});
 
 			AddressState.transactionsData = data;
 
 			return data;
 		} catch (error) {
 			if (attempt === 1) {
-				console.warn('Primary API failed, trying fallback...');
+				console.warn('Primary API failed or timed out, trying fallback...', error);
 				return this.getTransactionsData(2);
 			}
 			console.error('Transactions fetch failed:', error);
@@ -168,9 +194,10 @@ export const ApiClient = {
 	 */
 	async getAddressSummary() {
 		try {
-			const response = await fetch(this.getTxsUrl());
-			if (!response.ok) throw new Error('Balance fetch failed');
-			return await response.json();
+			return await fetchWithTimeout(this.getTxsUrl(), DATA_FETCH_TIMEOUT_MS, async (response) => {
+				if (!response.ok) throw new Error('Balance fetch failed');
+				return response.json();
+			});
 		} catch (error) {
 			console.error('Balance fetch failed:', error);
 			throw error;
@@ -208,9 +235,10 @@ export const ApiClient = {
 	 */
 	async getUnspentBoxes(boxOffset = AddressState.unspentBoxesOffset, limit = AddressState.unspentBoxesPageSize) {
 		try {
-			const response = await fetch(this.getUnspentBoxesDataUrl(boxOffset, limit));
-			if (!response.ok) throw new Error('Unspent boxes fetch failed');
-			return await response.json();
+			return await fetchWithTimeout(this.getUnspentBoxesDataUrl(boxOffset, limit), DATA_FETCH_TIMEOUT_MS, async (response) => {
+				if (!response.ok) throw new Error('Unspent boxes fetch failed');
+				return response.json();
+			});
 		} catch (error) {
 			console.error('Unspent boxes fetch failed:', error);
 			throw error;
