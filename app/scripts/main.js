@@ -624,7 +624,10 @@ function getAssetTitleParams(token, tokenId, name, iconIsToTheLeft, scam = false
 		return name;
 	}
 
-	return '<a title="' + (scam ? 'Reported as suspicious by users.' : '') + '" class="' + (scam ? 'text-danger' : '') + '" href="' + getTokenUrl(tokenId) + '">' + (iconIsToTheLeft ? iconHtml + ' ' : '') + ((name == '' || name == null) ? formatAddressString(tokenId, 15) : name) + (iconIsToTheLeft ? '' : ' ' + iconHtml) + '</a>';
+	let displayName = (name == '' || name == null) ? formatAddressString(tokenId, 15) : name;
+	let dataName = ('' + displayName).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+	return '<a title="' + (scam ? 'Reported as suspicious by users.' : '') + '" class="token-link' + (scam ? ' text-danger' : '') + '" href="' + getTokenUrl(tokenId) + '" data-token-id="' + tokenId + '" data-token-name="' + dataName + '"' + (scam ? ' data-token-scam="1"' : '') + '>' + (iconIsToTheLeft ? iconHtml + ' ' : '') + displayName + (iconIsToTheLeft ? '' : ' ' + iconHtml) + '</a>';
 }
 
 function getAssetValue(amount, decimals) {

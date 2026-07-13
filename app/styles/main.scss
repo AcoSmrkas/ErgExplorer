@@ -835,3 +835,154 @@ html[data-theme="mew"] .btn-primary {
 .text-meme {
 	color: #ff27d4;
 }
+
+/* Token hover popup (simplified, solid style - no glassmorphism) */
+.token-hover-popup {
+	position: fixed;
+	z-index: 3000;
+	min-width: 240px;
+	max-width: 320px;
+	padding: 0.85rem;
+	background: var(--forms-bg);
+	border: 1px solid var(--borders);
+	border-radius: 8px;
+	box-shadow: 0 6px 22px rgba(0, 0, 0, 0.28);
+	color: var(--text-color);
+	font-size: 0.85rem;
+	line-height: 1.4;
+	pointer-events: auto;
+}
+
+.token-hover-popup .thp-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem;
+	margin-bottom: 0.6rem;
+	padding-bottom: 0.5rem;
+	border-bottom: 1px solid var(--borders);
+}
+
+.token-hover-popup .thp-title {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	min-width: 0;
+}
+
+.token-hover-popup .thp-name {
+	font-weight: 600;
+	color: var(--text-strong);
+	word-break: break-word;
+}
+
+.token-hover-popup .thp-icon {
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	object-fit: cover;
+	flex-shrink: 0;
+}
+
+.token-hover-popup .thp-fa-icon {
+	color: var(--main-color);
+	flex-shrink: 0;
+}
+
+.token-hover-popup .thp-copy {
+	cursor: pointer;
+	color: var(--text-light);
+	flex-shrink: 0;
+
+	&:hover {
+		color: var(--main-color);
+	}
+}
+
+.token-hover-popup .thp-image {
+	text-align: center;
+	margin-bottom: 0.6rem;
+
+	img {
+		max-width: 100%;
+		max-height: 120px;
+		border-radius: 6px;
+		object-fit: contain;
+	}
+}
+
+.token-hover-popup .thp-row {
+	margin-bottom: 0.35rem;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+}
+
+.token-hover-popup .thp-label {
+	font-weight: 600;
+	color: var(--text-strong);
+}
+
+.token-hover-popup .thp-description {
+	margin-top: 0.55rem;
+	padding-top: 0.55rem;
+	border-top: 1px solid var(--borders);
+}
+
+.token-hover-popup .thp-desc-text {
+	color: var(--text-light);
+	word-break: break-word;
+}
+
+.token-hover-popup .thp-loading {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	color: var(--text-light);
+	padding: 0.2rem 0;
+}
+
+.token-hover-popup .thp-spinner {
+	display: inline-block;
+	width: 12px;
+	height: 12px;
+	border: 2px solid var(--borders);
+	border-top-color: var(--main-color);
+	border-radius: 50%;
+	animation: thp-spin 0.8s linear infinite;
+}
+
+@keyframes thp-spin {
+	to { transform: rotate(360deg); }
+}
+
+.token-hover-popup .thp-warning {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	margin-top: 0.55rem;
+	padding: 0.4rem 0.5rem;
+	background: rgba(220, 53, 69, 0.1);
+	border: 1px solid rgba(220, 53, 69, 0.25);
+	border-radius: 6px;
+	color: #dc3545;
+	font-size: 0.78rem;
+}
+
+.token-hover-popup .thp-actions {
+	margin-top: 0.6rem;
+	padding-top: 0.55rem;
+	border-top: 1px solid var(--borders);
+	text-align: center;
+}
+
+.token-hover-popup .thp-link {
+	color: var(--main-color);
+	text-decoration: none;
+	font-weight: 500;
+
+	&:hover {
+		color: var(--main-color-hover);
+	}
+}
