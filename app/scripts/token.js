@@ -28,9 +28,17 @@ $(function() {
 });
 
 function getCruxData() {
-	$.get('https://api.cruxfinance.io/crux/token_info/' + tokenId,
-		function (data) {
+	// Supply info (liquid/locked) still has no self-hosted equivalent. Crux is
+	// currently unreachable and a hung XHR here would stall getPrices() below
+	// for the browser's full timeout, so cap it and carry on without supply.
+	$.ajax({
+		url: 'https://api.cruxfinance.io/crux/token_info/' + tokenId,
+		type: 'GET',
+		dataType: 'json',
+		timeout: 8000,
+		success: function (data) {
 			amountsData = data;
+		}
 	}).always(function (data) {
 		getPrices(getPriceHistory, true);
 	});

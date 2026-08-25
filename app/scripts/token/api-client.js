@@ -4,9 +4,17 @@ export const TokenApiClient = {
 	// Fetch supply info from Crux Finance
 	async getCruxData() {
 		return new Promise((resolve) => {
-			$.get('https://api.cruxfinance.io/crux/token_info/' + TokenState.tokenId, function (data) {
-				TokenState.amountsData = data;
-				resolve(data);
+			// Crux is currently unreachable; without a timeout a hung XHR stalls
+			// the getPrices() call chained below for the browser's full timeout.
+			$.ajax({
+				url: 'https://api.cruxfinance.io/crux/token_info/' + TokenState.tokenId,
+				type: 'GET',
+				dataType: 'json',
+				timeout: 8000,
+				success: function (data) {
+					TokenState.amountsData = data;
+					resolve(data);
+				}
 			}).fail(function(error) {
 				console.error('Error fetching Crux data:', error);
 				resolve(null);

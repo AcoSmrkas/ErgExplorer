@@ -52,25 +52,18 @@ function getPrices(callback, force = false) {
     prices['ERG'] = ergPrice;
     pricesNames['ERG'] = ergPrice;
 
-    // Fetch token data from Crux Finance
+    // Fetch token data from our own Spectrum price feed.
+    // Was api.cruxfinance.io/spectrum/token_list, which first started returning
+    // HTTP 200 with a truncated body and is now unreachable entirely. This feed
+    // is derived on-chain from Spectrum pool boxes; same field names
+    // (id / ticker / price_erg / liquidity), wrapped in { items }.
     $.ajax({
-      url: 'https://api.cruxfinance.io/spectrum/token_list',
-      type: 'POST',
-      contentType: 'application/json',
-      headers: {
-        'Origin': 'https://cruxfinance.io',
-        'Referer': 'https://cruxfinance.io/'
-      },
-      data: JSON.stringify({
-        sort_by: 'Volume',
-        sort_order: 'Desc',
-        limit: 500,
-        offset: 0,
-        filter_window: 'Day',
-        name_filter: ''
-      }),
+      url: 'https://api.ergexplorer.com/tokens/getTokenPrices',
+      type: 'GET',
+      dataType: 'json',
+      timeout: 15000,
       success: function(data) {
-        pricesData = data;
+        pricesData = (data && data.items) ? data.items : [];
         handlePrices(force, ergPrice);
       },
       error: function() {
