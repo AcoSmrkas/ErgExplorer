@@ -269,6 +269,7 @@
 
 			{% include "partials/pagination.njk" %}
 
+			<div class="table-responsive-xl">
 			<table class="table table-dark table-striped table-mobile address-tx-table">
 				<thead>
 					<tr>
@@ -287,6 +288,7 @@
 				<tbody id="transactionsTableBody">
 				</tbody>
 			</table>
+			</div>
 
 			{% include "partials/pagination.njk" %}
 		</div>
@@ -307,6 +309,6 @@
 	<script src="./scripts/common/prices.js?v=42"></script>
 	<script src="./scripts/common/pagination.js?v=41"></script>
 	<script src="./scripts/common/nft.js?v=41"></script>
-	<script type="module" src="./scripts/addresses/index.js?v=62"></script>
+	<script type="module" src="./scripts/addresses/index.js?v=64"></script>
 	<script src="./scripts/3rd-party/qrcode.min.js?v=41"></script>
 {% endblock %}

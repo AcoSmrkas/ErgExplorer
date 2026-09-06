@@ -27,11 +27,11 @@ export const TransactionFormatter = {
 	 * Format single transaction row (ported from original getFormattedTransactionsString loop)
 	 */
 	formatTransactionRow(item, index, isMempool, walletAddress, networkType) {
-		let html = '<tr>';
+		let html = '';
 
 		// Ensure arrays exist
 		if (!item) {
-			return '<tr><td colspan="10">Invalid transaction</td></tr>';
+			return '<tr><td colspan="9">Invalid transaction</td></tr>';
 		}
 		if (!Array.isArray(item.outputs)) item.outputs = [];
 		if (!Array.isArray(item.inputs)) item.inputs = [];
@@ -237,16 +237,17 @@ export const TransactionFormatter = {
 
 		// Build HTML table cells
 		const timestamp = isMempool ? item.creationTimestamp : item.timestamp;
-		let blockNr = item.inclusionHeight || 0;
-		if (isMempool && item.outputs && item.outputs.length > 0) {
-			blockNr = item.outputs[0].creationHeight || blockNr;
-		}
+		const blockNr = item.inclusionHeight || 0;
+
+		// Row: direction / status classes drive the mobile card CSS (addresses.scss); tx id for tooling
+		const dirClass = txInOut === TxInOut.In ? 'tx-in' : txInOut === TxInOut.Out ? 'tx-out' : txInOut === TxInOut.Mixed ? 'tx-mixed' : 'tx-consolidation';
+		html += '<tr class="tx-row ' + dirClass + (isMempool ? ' tx-pending' : ' tx-confirmed') + '" data-tx-id="' + item.id + '">';
 
 		// Tx link
-		html += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionsUrl(item.id) + '"><i class="fas fa-link text-info"></i></a><span class="d-inline d-lg-none text-white float-end">' + formatDateString(timestamp) + '</span></td>';
+		html += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionsUrl(item.id) + '"><i class="fas fa-link text-info"></i><span class="tx-hash d-inline d-lg-none d-xl-inline"> ' + formatAddressString(item.id, 6) + '</span></a><span class="d-inline d-lg-none text-light float-end tx-time" title="' + formatDateString(timestamp) + '">' + formatShortDateString(timestamp) + '</span></td>';
 
 		// Timestamp
-		html += '<td class="d-none d-lg-table-cell"><span class="d-lg-none"><strong>Time: </strong></span>' + formatDateString(timestamp) + '</td>';
+		html += '<td class="d-none d-lg-table-cell">' + formatDateString(timestamp) + '</td>';
 
 		// Type & Block
 		let classString = 'text-info';
@@ -267,11 +268,14 @@ export const TransactionFormatter = {
 			inOutString += smartString;
 		}
 
-		const blockHtml = isMempool ? blockNr : (item.blockId ? '<a href="' + getBlockUrl(item.blockId) + '">' + blockNr + '</a>' : blockNr);
-		html += '<td><span class="d-inline d-lg-none"><strong>Type: </strong><span class="' + classString + '">' + inOutString + '</span></span><span class="d-inline d-lg-none float-end"><strong>Block: </strong>' + blockHtml + '</span><span class="d-none d-lg-inline">' + blockHtml + '</span></td>';
+		// A mempool tx is in no block yet -- it used to print outputs[0].creationHeight here,
+		// which is not a block number and linked nowhere.
+		const blockHtml = isMempool ? '<span class="text-light">&mdash;</span>' :
+			(item.blockId ? '<a href="' + getBlockUrl(item.blockId) + '">' + blockNr + '</a>' : blockNr);
+		html += '<td><span class="d-inline d-lg-none"><strong>Type: </strong><span class="' + classString + '">' + inOutString + '</span></span><span class="d-lg-none float-end tx-block"><strong>Block: </strong>' + blockHtml + '</span><span class="d-none d-lg-inline">' + blockHtml + '</span></td>';
 
 		// Type for desktop
-		html += '<td class="d-none d-lg-table-cell"><span class="d-lg-none"><strong>Type: </strong></span><span class="' + classString + '">' + inOutString + '</span></td>';
+		html += '<td class="d-none d-lg-table-cell"><span class="' + classString + '">' + inOutString + '</span></td>';
 
 		// From address
 		addAddress(fromAddress);
@@ -281,7 +285,7 @@ export const TransactionFormatter = {
 		    typeof getAddressFromErgotree === 'function') {
 			formattedFromAddress = getAddressFromErgotree(item.inputs[0].ergoTree, fromAddress, formattedFromAddress);
 		}
-		html += '<td><span class="d-lg-none"><strong>From: </strong></span>' + formattedFromAddress + '</td>';
+		html += '<td' + (fromAddress === walletAddress ? ' class="tx-self"' : '') + '><span class="d-lg-none"><strong>From: </strong></span>' + formattedFromAddress + '</td>';
 
 		// To address
 		addAddress(toAddress);
@@ -291,13 +295,13 @@ export const TransactionFormatter = {
 		    typeof getAddressFromErgotree === 'function') {
 			formattedToAddress = getAddressFromErgotree(item.outputs[0].ergoTree, toAddress, formattedToAddress);
 		}
-		html += '<td><span class="d-lg-none"><strong>To: </strong></span>' + formattedToAddress + '</td>';
+		html += '<td' + (toAddress === walletAddress ? ' class="tx-self"' : '') + '><span class="d-lg-none"><strong>To: </strong></span>' + formattedToAddress + '</td>';
 
 		// Status & Fee
-		html += '<td><span class="d-lg-none"><strong>Status: </strong></span><span class="' + (isMempool ? 'text-warning' : 'text-success') + '">' + (isMempool ? 'Pending' : 'Confirmed') + '</span><span class="d-inline d-lg-none text-white float-end"><strong>Fee: </strong>' + formatErgValueString(fee) + '</span></td>';
+		html += '<td><span class="tx-status"><span class="d-lg-none"><strong>Status: </strong></span><span class="' + (isMempool ? 'text-warning' : 'text-success') + '">' + (isMempool ? 'Pending' : 'Confirmed') + '</span></span><span class="d-inline d-lg-none text-white float-end tx-fee"><strong>Fee: </strong>' + formatErgValueString(fee) + '</span></td>';
 
 		// Fee
-		html += '<td class="d-none d-lg-table-cell"><span class="d-lg-none"><strong>Fee: </strong></span>' + formatErgValueString(fee) + '</td>';
+		html += '<td class="d-none d-lg-table-cell">' + formatErgValueString(fee) + '</td>';
 
 		// Value
 		if (txInOut !== TxInOut.Mixed) {
@@ -313,21 +317,25 @@ export const TransactionFormatter = {
 			}
 		}
 
-		let valueStr = formatErgValueString(totalTransferedAssets.value, 4) || '0.00 ERG';
+		// Outgoing amounts read as negative on every breakpoint; incoming ones carry no sign.
+		// Mixed rows keep whatever sign the number itself has (they are not abs()'d above).
+		const ergValue = totalTransferedAssets.value;
+		const ergSign = (txInOut === TxInOut.Out && !ergValue.isZero()) ? '<span class="tx-sign">-</span>' : '';
+		let valueStr = ergSign + (formatErgValueString(ergValue, 4) || '0.00 ERG');
 		let assetKeys = Object.keys(totalTransferedAssets.assets);
 		if (assetKeys.length > 0) {
 			for (let j = 0; j < assetKeys.length; j++) {
 				let asset = totalTransferedAssets.assets[assetKeys[j]];
 				if (!asset || !asset.amount || asset.amount.toString() === '0') continue;
 
-				const sign = txInOut === TxInOut.Out ? '-' : '';
+				const sign = txInOut === TxInOut.Out ? '<span class="tx-sign">-</span>' : '';
 				const isScan = AddressState.scamList.includes(asset.tokenId);
 				valueStr += '<br><strong>' + sign + formatAssetValueString(asset.amount, asset.decimals, 4) + '</strong> ' +
 					getAssetTitle(asset, false, isScan);
 			}
 		}
 
-		html += '<td id="txValue' + index + '">' + valueStr + '</td>';
+		html += '<td><span class="d-lg-none"><strong>Value: </strong></span><span id="txValue' + index + '" class="tx-value">' + valueStr + '</span></td>';
 
 		html += '</tr>';
 		return html;

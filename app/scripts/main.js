@@ -371,6 +371,13 @@ function formatDateString(dateString) {
 	return zeroPad(date.getHours(), 2) + ':' + zeroPad(date.getMinutes(), 2) + ':' + zeroPad(date.getSeconds(), 2) + ', ' + date.toLocaleDateString(getLang());
 }
 
+function formatShortDateString(dateString) {
+	const date = new Date(dateString);
+	const sameYear = date.getFullYear() === new Date().getFullYear();
+
+	return formatTimeString(dateString, false) + ' \u00b7 ' + date.toLocaleDateString(getLang(), sameYear ? { day: 'numeric', month: 'short' } : { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
 function getLang() {
 	if (navigator.languages != undefined) {
 		return navigator.languages[0];
@@ -711,6 +718,10 @@ function copyToClipboard(e, text) {
 	}
 
 	showToast();
+}
+
+function copyAddress(e, element) {
+	copyToClipboard(e, $(element).attr('title'));
 }
 
 function showCustomToast(text) {
@@ -1224,7 +1235,10 @@ function formatTxAddressString(address, formattedAddress = null, walletAddress =
 		addressString = '<span class="text-light" title="This transaction has multiple receiving addresses. Check transaction link for more details.">' + AddressType.Multiple + '</span>';
 	}
 
-	addressString = '<a title="' + address + '" onclick="copyAddress(event, this)" href="Copy to clipboard!">&#128203;</a> ' + addressString;
+	// N/A and Multiple are placeholders, not addresses -- offering to copy the word itself is noise
+	if (address != AddressType.NA && address != AddressType.Multiple) {
+		addressString = '<a title="' + address + '" onclick="copyAddress(event, this)" href="Copy to clipboard!">&#128203;</a> ' + addressString;
+	}
 
 	return addressString;
 }

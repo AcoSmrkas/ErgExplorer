@@ -6,35 +6,10 @@ import { AddressState } from './state.js';
  */
 export const UIControllers = {
 	/**
-	 * Show full transaction value with all assets
-	 */
-	showFullValue(e, index) {
-		$('#txValue' + index).html(AddressState.valueFieldsFull[index]);
-		e.preventDefault();
-	},
-
-	/**
-	 * Show truncated transaction value
-	 */
-	hideFullValue(e, index) {
-		$('#txValue' + index).html(AddressState.valueFields[index]);
-		scrollToElement($('#txValue' + index));
-		e.preventDefault();
-	},
-
-	/**
 	 * Copy wallet address to clipboard
 	 */
 	copyWalletAddress(e) {
 		copyToClipboard(e, AddressState.walletAddress);
-	},
-
-	/**
-	 * Copy address from element to clipboard
-	 */
-	copyAddress(e, element) {
-		const address = $(element).attr('title');
-		copyToClipboard(e, address);
 	},
 
 	/**

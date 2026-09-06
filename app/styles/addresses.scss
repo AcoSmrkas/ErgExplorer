@@ -490,17 +490,12 @@ select:hover {
 	}
 }
 
-#transactionsTableBody > tr > td:last-child > span:last-child {
-	display: block;
-	max-height: 110px;
-	overflow-y: auto;	
-}
-
+// Transaction list: phone / tablet-portrait card layout (< 992px).
+// Rule of thumb: never set `display` with !important on an element that also carries a Bootstrap d-* class.
+// Bootstrap's `.d-none{display:none!important}` is (0,1,0); the old `... > td{display:flex!important}` was (0,1,3)
+// and therefore un-hid the three desktop-only cells (Time / Type / Fee) -> duplicate labels on mobile.
 @media only screen and (max-width: 991.98px) {
 	#txView {
-		margin-left: 0;
-		margin-right: 0;
-		max-width: 100%;
 		overflow-x: hidden;
 	}
 
@@ -512,46 +507,87 @@ select:hover {
 		background: transparent;
 	}
 
-	.address-tx-table > thead,
+	.address-tx-table > thead {
+		display: none;
+	}
+
 	.address-tx-table > tbody {
 		display: block;
 		width: 100%;
-	}
-
-	.address-tx-table > tbody {
 		border-top: 0 !important;
 	}
 
+	// the card: a column flexbox so `order` can re-stack cells without touching the DOM (desktop columns untouched)
 	.address-tx-table > tbody > tr {
-		display: block;
+		display: flex;
+		flex-direction: column;
 		width: 100%;
 		max-width: 100%;
 		margin-bottom: 0.75rem;
 		border: 1px solid var(--borders);
-		border-top: 2px solid var(--main-color);
 		border-radius: 5px;
 		overflow: hidden;
 	}
 
-	.address-tx-table > tbody > tr > td {
-		display: flex !important;
-		align-items: flex-start;
+	// orange accent reserved for mempool rows
+	.address-tx-table > tbody > tr.tx-pending {
+		border-top: 2px solid var(--main-color);
+	}
+
+	// safety net (0,2,3)!: beats any future (0,1,3)! td rule and Bootstrap .d-none (0,1,0)!
+	.address-tx-table > tbody > tr > td.d-none {
+		display: none !important;
+	}
+
+	// THE FIX: `:not(.d-none)` so Bootstrap's .d-none is never out-specified; no !important on display
+	.address-tx-table > tbody > tr > td:not(.d-none) {
+		display: flex;
+		align-items: center;
 		gap: 0.5rem;
 		width: 100% !important;
 		min-width: 0 !important;
 		max-width: 100%;
-		border-top: 0 !important;
-		border-bottom: 1px solid var(--borders);
 		padding: 0.55rem 0.65rem;
+		border-top: 1px solid var(--borders);
+		border-bottom: 0;
 		overflow-wrap: anywhere;
 		white-space: normal;
 	}
 
-	.address-tx-table > tbody > tr > td:last-child {
-		display: block !important;
-		border-bottom: 0;
+	// stacking order: Tx/time (DOM 1st) -> Value (DOM 9th) -> Type/Block -> From -> To -> Status/Fee
+	.address-tx-table > tbody > tr.tx-row > td:first-child {
+		order: -2;
+		border-top: 0;
 	}
 
+	.address-tx-table > tbody > tr.tx-row > td:last-child {
+		order: -1;
+		align-items: flex-start;
+	}
+
+	// first card: main.scss `.address-tx-table tbody tr:first-child > *` paints a 2px orange top rule (0,2,2)!
+	.address-tx-table > tbody > tr:first-child > td {
+		border-top: 1px solid var(--borders) !important;
+	}
+
+	.address-tx-table > tbody > tr:first-child > td:first-child {
+		border-top: 0 !important;
+	}
+
+	// hide what is noise on a phone (DOM kept for desktop, address-book fill and screen readers)
+	.address-tx-table > tbody > tr.tx-row > td.tx-self {
+		display: none; // "From/To: This Address"
+	}
+
+	.address-tx-table > tbody > tr.tx-confirmed > td > .tx-status {
+		display: none; // "Status: Confirmed"; pending rows keep it
+	}
+
+	.address-tx-table > tbody > tr.tx-pending > td > .tx-block {
+		display: none; // no block yet -- the desktop table shows a dash, the card just omits it
+	}
+
+	// paired cells: time (Tx cell), Block (Type cell), Fee (Status cell) go to the right edge
 	.address-tx-table > tbody > tr > td > .float-end {
 		float: none !important;
 		margin-left: auto;
@@ -559,7 +595,101 @@ select:hover {
 		overflow-wrap: normal;
 	}
 
-	.address-tx-table > tbody > tr:first-child > * {
+	// when Status is hidden the fee is alone on its line: hug the left like every other single value
+	.address-tx-table > tbody > tr.tx-confirmed > td > .tx-fee {
+		margin-left: 0;
+		text-align: left;
+	}
+
+	// Value: label + wrapper; many-token rows scroll inside the card (mobile only)
+	.address-tx-table > tbody > tr > td > .tx-value {
+		display: block;
+		flex: 1 1 auto;
+		min-width: 0;
+		max-height: 110px;
+		overflow-y: auto;
+	}
+
+	// small hierarchy nudges
+	.address-tx-table .tx-time {
+		font-size: 0.85rem;
+	}
+
+	.address-tx-table > tbody > tr > td > .d-lg-none > strong:first-child,
+	.address-tx-table > tbody > tr > td > .tx-status > .d-lg-none > strong,
+	.address-tx-table > tbody > tr > td > .float-end > strong:first-child {
+		color: var(--text-light); // the label words only
+	}
+
+	.address-tx-table > tbody > tr > td > a[onclick] {
+		display: inline-block; // the copy anchor: >= 30px tap box
+		min-width: 1.9rem;
+		line-height: 1.9rem;
+		text-align: center;
+	}
+
+	.address-tx-table > tbody > tr > td:first-child > a {
+		display: inline-block; // icon + short hash: ~100x30px tap target
+		padding: 0.15rem 0;
+	}
+}
+
+// Desktop: a tx touching a dozen tokens would otherwise make one row taller than the viewport.
+// This is what the old `#transactionsTableBody > tr > td:last-child > span:last-child` rule was
+// aiming for -- it never matched anything, because the Value cell had no inner span until now.
+@media only screen and (min-width: 992px) {
+	.address-tx-table > tbody > tr > td > .tx-value {
+		display: block;
+		max-height: 110px;
+		overflow-y: auto;
+	}
+}
+
+// Landscape tablets / small laptops: the desktop table is wider than the 960px container, so it scrolls
+// inside the .table-responsive-xl wrapper (addresses.njk). Tighten it so that rarely happens.
+@media only screen and (min-width: 992px) and (max-width: 1199.98px) {
+	.address-tx-table {
+		font-size: 0.9rem;
+	}
+
+	.address-tx-table > thead > tr > th {
+		min-width: 0 !important;
+	}
+
+	.address-tx-table > :not(caption) > * > * {
+		padding: 0.4rem 0.45rem;
+	}
+
+	.address-tx-table > tbody > tr > td:nth-child(2),
+	.address-tx-table > tbody > tr > td:nth-child(8) {
+		white-space: nowrap; // Time and Fee stay on one line
+	}
+}
+
+// Sticky column headers on desktop (>= 1200px), so the header row stays readable while
+// scrolling a full page of transactions. Not below 1200px: there the table sits inside
+// `.table-responsive-xl` (addresses.njk), whose `overflow-x: auto` is itself a scroll
+// container, so `top: 0` would stick to that box instead of the page and do nothing.
+@media only screen and (min-width: 1200px) {
+	// main.scss sets `overflow: hidden` on .address-tx-table to clip the rounded corners,
+	// which also makes the table a scroll container and kills position:sticky inside it.
+	// `clip` clips exactly the same way without creating one.
+	.address-tx-table {
+		overflow: clip;
+	}
+
+	.address-tx-table > thead > tr > th {
+		position: sticky;
+		top: 0;
+		z-index: 2;
+		// border-collapse is `separate` on this table (main.scss), so the cell's own
+		// borders travel with it while it is stuck -- same trick as the token page headers.
+		border-bottom: 2px solid var(--main-color) !important;
+	}
+
+	// the orange rule now lives on the header, so drop the duplicate one main.scss paints
+	// on the first body row (`.address-tx-table tbody tr:first-child > *`, (0,2,2)!)
+	.address-tx-table > tbody > tr:first-child > td {
 		border-top: 0 !important;
 	}
 }

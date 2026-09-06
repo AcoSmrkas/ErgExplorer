@@ -7,8 +7,8 @@ import { AddressState, FilterState } from './state.js';
 import { ApiClient } from './api-client.js?v=48';
 import { BalanceSummary } from './balance-summary.js?v=61';
 import { AddressDetails } from './address-details.js?v=47';
-import { TransactionFormatter } from './transaction-formatter.js';
-import { UIControllers } from './ui-controllers.js';
+import { TransactionFormatter } from './transaction-formatter.js?v=64';
+import { UIControllers } from './ui-controllers.js?v=64';
 import { TransactionFilters } from './filters.js';
 import { NftManager } from './nft-manager.js';
 import { getTxType, isWalletAddress, getTxInOutType, analyzeTransfers } from './transaction-analyzer.js';
@@ -540,13 +540,8 @@ window.printTransactions = printTransactions;
 window.printUnspentBoxes = printUnspentBoxes;
 window.refreshData = refreshData;
 
-// UI Controllers - Transaction value
-window.showFullValue = (e, index) => UIControllers.showFullValue(e, index);
-window.hideFullValue = (e, index) => UIControllers.hideFullValue(e, index);
-
-// UI Controllers - Clipboard
+// UI Controllers - Clipboard (copyAddress itself is a global in main.js, shared with the token page)
 window.copyWalletAddress = (e) => UIControllers.copyWalletAddress(e);
-window.copyAddress = (e, element) => UIControllers.copyAddress(e, element);
 window.setupQrCode = () => UIControllers.setupQrCode();
 
 // UI Controllers - NFT display

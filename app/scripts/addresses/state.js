@@ -32,8 +32,6 @@ export const AddressState = {
 
 	// Transaction display
 	totalTransactions: 0,
-	valueFields: [],
-	valueFieldsFull: [],
 	formattedResult: '',
 	printed: false,
 	printedAddressSummary: false,
@@ -89,8 +87,6 @@ export const AddressState = {
 		this.tokensArray = [];
 		this.lpTokenValues = {};
 		this.totalTransactions = 0;
-		this.valueFields = [];
-		this.valueFieldsFull = [];
 		this.printed = false;
 		this.printedAddressSummary = false;
 		this.printedUnspentBoxes = false;
