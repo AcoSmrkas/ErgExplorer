@@ -180,7 +180,10 @@ function getBoxDataById(boxId) {
 }
 
 function ergoTreeToAddress(ergoTree) {
-	return qfleetSDKcore.ErgoAddress.fromErgoTree(ergoTree).toString();
+	// getFleetNetwork() lives in main.js, which every page loads. Without it
+	// Fleet defaults to mainnet and testnet mempool boxes render mainnet
+	// addresses.
+	return qfleetSDKcore.ErgoAddress.fromErgoTree(ergoTree, getFleetNetwork()).toString();
 }
 
 function collectTokenIds(

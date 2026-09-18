@@ -764,6 +764,45 @@ function formatInputsOutputs(data) {
 	return formattedData;
 }
 
+/**
+ * A box's real address.
+ *
+ * The explorer API substitutes a placeholder address for ErgoTrees its sigma
+ * version cannot parse. LithosDex's fee vault is the live example: it comes
+ * back as 4MQyMKvMbnCJG3aJ on mainnet and Ms7smJmdbakqfwNo on testnet, both of
+ * which are the 7-byte sigmaProp(false) script rather than the box's own. The
+ * ergoTree served beside it is correct, and building an address from it needs
+ * no script parsing at all -- an address is a network prefix, the tree bytes
+ * and a checksum -- so derive it rather than trust the field.
+ *
+ * The network argument is not optional: Fleet defaults to mainnet, so omitting
+ * it would hand back mainnet addresses while the explorer is in testnet mode.
+ *
+ * Falls back to whatever the API said when there is no tree, or if the
+ * derivation throws, so a box always renders something.
+ */
+function getBoxAddress(box) {
+	if (!box) {
+		return undefined;
+	}
+
+	if (!box.ergoTree) {
+		return box.address;
+	}
+
+	try {
+		return qfleetSDKcore.ErgoAddress.fromErgoTree(box.ergoTree, getFleetNetwork()).toString();
+	} catch (e) {
+		return box.address;
+	}
+}
+
+function getFleetNetwork() {
+	return networkType == 'testnet'
+		? qfleetSDKcore.Network.Testnet
+		: qfleetSDKcore.Network.Mainnet;
+}
+
 function formatBox(box, trueBox = false, unspent = false) {
 	let formattedData = '<div class="row div-cell border-flat p-2">';
 		
@@ -778,8 +817,9 @@ function formatBox(box, trueBox = false, unspent = false) {
 	}
 
 	//Address
-	addAddress(box.address);
-	formattedData += '<div class="ps-0 pe-0 pe-md-2 ps-md-2 col-9">' + customIdString + '<span><strong>Address: </strong></span><a class="address-string" addr="' + box.address + '" href="' + getWalletAddressUrl(box.address) + '" >' + formatAddressString(box.address, 8) + '</a> <a title="' + box.address + '" onclick="copyId(event, this)" href="Copy to clipboard!">&#128203;</a></p>';
+	const boxAddress = getBoxAddress(box);
+	addAddress(boxAddress);
+	formattedData += '<div class="ps-0 pe-0 pe-md-2 ps-md-2 col-9">' + customIdString + '<span><strong>Address: </strong></span><a class="address-string" addr="' + boxAddress + '" href="' + getWalletAddressUrl(boxAddress) + '" >' + formatAddressString(boxAddress, 8) + '</a> <a title="' + boxAddress + '" onclick="copyId(event, this)" href="Copy to clipboard!">&#128203;</a></p>';
 
 
 	if (trueBox) {
