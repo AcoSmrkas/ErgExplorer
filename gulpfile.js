@@ -36,7 +36,7 @@ function doserve() {
     gulp.watch('app/**/*.njk', gulp.series(nunjucks));
     gulp.watch('app/styles/**/*.scss', gulp.series(styles));
     gulp.watch('app/styles/**/*.css', gulp.series(stylescss));
-    gulp.watch('app/scripts/*.js', gulp.series(scripts));
+	gulp.watch('app/scripts/**/*.js', gulp.series(scripts));
     gulp.watch('app/fonts/**/*', gulp.series(fonts));
 }
 

@@ -1,6 +1,15 @@
 import { AddressState } from './state.js';
 import { TxType, TxInOut, AddressType } from './constants.js';
-import { getTxType, getTxInOutType, analyzeTransfers } from './transaction-analyzer.js';
+import { detectContractFromErgotree, getTxType, getTxInOutType, analyzeTransfers } from './transaction-analyzer.js';
+
+function formatContractAddress(boxes, address, fallback, walletAddress) {
+	const box = boxes.find(item => item.address === address && item.ergoTree);
+	const contractName = box && detectContractFromErgotree(box.ergoTree);
+
+	return contractName
+		? formatTxAddressString(address, contractName, walletAddress)
+		: fallback;
+}
 
 /**
  * Transaction formatting - ported from original getFormattedTransactionsString
@@ -280,10 +289,8 @@ export const TransactionFormatter = {
 		// From address
 		addAddress(fromAddress);
 		let formattedFromAddress = formatTxAddressString(fromAddress, null, walletAddress);
-		if (networkType !== 'testnet' && (txType === TxType.Wallet2Contract || txType === TxType.Contract2Wallet) &&
-		    item.inputs && item.inputs.length > 0 && item.inputs[0].ergoTree &&
-		    typeof getAddressFromErgotree === 'function') {
-			formattedFromAddress = getAddressFromErgotree(item.inputs[0].ergoTree, fromAddress, formattedFromAddress);
+		if (networkType !== 'testnet' && (txType === TxType.Wallet2Contract || txType === TxType.Contract2Wallet)) {
+			formattedFromAddress = formatContractAddress(item.inputs, fromAddress, formattedFromAddress, walletAddress);
 		}
 		html += '<td' + (fromAddress === walletAddress ? ' class="tx-self"' : '') + '><span class="d-lg-none"><strong>From: </strong></span>' + formattedFromAddress + '</td>';
 
@@ -291,9 +298,8 @@ export const TransactionFormatter = {
 		addAddress(toAddress);
 		let formattedToAddress = formatTxAddressString(toAddress, null, walletAddress);
 		if ((txType === TxType.Wallet2Contract || txType === TxType.Contract2Wallet) &&
-		    item.outputs && item.outputs.length > 0 && item.outputs[0].ergoTree &&
-		    typeof getAddressFromErgotree === 'function') {
-			formattedToAddress = getAddressFromErgotree(item.outputs[0].ergoTree, toAddress, formattedToAddress);
+		    item.outputs && item.outputs.length > 0) {
+			formattedToAddress = formatContractAddress(item.outputs, toAddress, formattedToAddress, walletAddress);
 		}
 		html += '<td' + (toAddress === walletAddress ? ' class="tx-self"' : '') + '><span class="d-lg-none"><strong>To: </strong></span>' + formattedToAddress + '</td>';
 
