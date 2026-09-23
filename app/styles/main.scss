@@ -911,6 +911,19 @@ html[data-theme="mew"] .btn-primary {
 	}
 }
 
+.token-hover-popup .thp-nsfw {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.4rem;
+	margin-bottom: 0.6rem;
+	padding: 1.2rem 0.5rem;
+	border: 1px dashed var(--borders);
+	border-radius: 6px;
+	font-size: 0.78rem;
+	opacity: 0.75;
+}
+
 .token-hover-popup .thp-row {
 	margin-bottom: 0.35rem;
 

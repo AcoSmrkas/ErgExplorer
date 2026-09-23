@@ -146,8 +146,10 @@
 
 	function renderToken(id, fallbackName, token, triggerScam) {
 		var name = (token && token.name) || fallbackName || shortId(id);
-		var iconUrl = token && token.iconurl;
-		var nftImage = token && token.cachedurl;
+		// NSFW tokens: never load their images, same as the token/address pages.
+		var nsfw = !!(token && token.nsfw);
+		var iconUrl = !nsfw && token && token.iconurl;
+		var nftImage = !nsfw && token && token.cachedurl;
 		var scam = (token && token.scam === true) || triggerScam;
 
 		var iconHtml = iconUrl
@@ -194,6 +196,7 @@
 				'<span class="thp-copy" title="Copy token ID"><i class="fas fa-copy"></i></span>' +
 			'</div>' +
 			(nftImage ? '<div class="thp-image"><img src="' + escapeHtml(nftImage) + '" alt="" onerror="this.parentNode.remove()" /></div>' : '') +
+			(nsfw && token.cachedurl ? '<div class="thp-nsfw"><i class="fas fa-eye-slash"></i> NSFW image hidden</div>' : '') +
 			'<div class="thp-details">' + rows + '</div>' +
 			(scam ? '<div class="thp-warning"><i class="fas fa-exclamation-triangle"></i> Reported as suspicious by users</div>' : '') +
 			'<div class="thp-actions"><a class="thp-link" href="' + escapeHtml(tokenUrl(id)) + '">' +
