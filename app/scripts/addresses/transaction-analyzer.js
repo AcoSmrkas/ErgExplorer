@@ -1,4 +1,4 @@
-import { CRUX_TEMPLATES, SPECTRUM_TEMPLATES, SWAP_TEMPLATES, TxInOut, TxType } from './constants.js';
+import { CRUX_TEMPLATES, LITHOS_TEMPLATES, SPECTRUM_TEMPLATES, SWAP_TEMPLATES, TxInOut, TxType } from './constants.js';
 
 /**
  * Determine transaction type based on input/output address types
@@ -101,7 +101,11 @@ export function detectContractFromErgotree(ergoTree, addressType = 'label') {
 		[SPECTRUM_TEMPLATES.LP_REDEEM]: 'Spectrum Finance LP Redeem',
 		[SPECTRUM_TEMPLATES.YF_DEPOSIT]: 'Spectrum Finance YF Deposit',
 		[SPECTRUM_TEMPLATES.YF_REDEEM]: 'Spectrum Finance YF Redeem',
-		[CRUX_TEMPLATES.LIMIT_ORDER]: 'Crux Finance Limit Order'
+		[CRUX_TEMPLATES.LIMIT_ORDER]: 'Crux Finance Limit Order',
+		[LITHOS_TEMPLATES.SWAP_SELL]: 'Lithos LP Swap',
+		[LITHOS_TEMPLATES.SWAP_BUY]: 'Lithos LP Swap',
+		[LITHOS_TEMPLATES.LP_DEPOSIT]: 'Lithos LP Deposit',
+		[LITHOS_TEMPLATES.LP_REDEEM]: 'Lithos LP Redeem'
 	};
 
 	for (const [template, label] of Object.entries(templates)) {
