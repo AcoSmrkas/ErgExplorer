@@ -24,6 +24,8 @@ window.onfocus = (event) => {
 
 let socket = undefined;
 let printedFromSocket = false;
+// A pending tx can be found by the REST lookup, the explorer fallback and the socket; print it once.
+let printedPending = false;
 let mempoolTxs = [];
 let assetInfos = {};
 let boxes = [];
@@ -31,6 +33,7 @@ function initSocket() {
 	if (socket !== undefined) return;
 
 	const newSocket = io(SOCKET_URL);
+	socket = newSocket;
 
 	newSocket?.on('connect', () => {
 		console.log('Connected to server at', SOCKET_URL);
@@ -48,6 +51,11 @@ function initSocket() {
 			console.log('Socket on', 'mempoolTxs');
 
 			mempoolTxs = transactions;
+
+			if (printedPending) {
+				newSocket.disconnect();
+				return;
+			}
 
 			try {
 				let tx = mempoolTxs.find((tx) => tx.id === txId);
@@ -260,6 +268,36 @@ function getTxUrl(mempool) {
 }
 
 function getTransaction(mempool, retries = 0) {
+	if (!mempool || !MEMPOOL_API_HOST) {
+		getExplorerTransaction(mempool, retries);
+		return;
+	}
+
+	// Pending: our node's pool first (see mergeMempoolItems), then the explorer's.
+	getOwnPendingTransaction().then(tx => {
+		if (tx) {
+			printTransaction(tx, true);
+		} else {
+			getExplorerTransaction(true, retries);
+		}
+	});
+}
+
+async function getOwnPendingTransaction() {
+	try {
+		const response = await fetch(MEMPOOL_API_HOST + 'transactions/' + txId);
+		if (!response.ok) return null;
+
+		const buffer = new TextDecoder('utf-8').decode(await response.arrayBuffer());
+		const tx = JSONbig.parse(buffer);
+
+		return tx && tx.id === txId ? tx : null;
+	} catch {
+		return null;
+	}
+}
+
+function getExplorerTransaction(mempool, retries = 0) {
 	let txUrl = getTxUrl(mempool);
 
 	fetch(txUrl)
@@ -312,10 +350,11 @@ function getTransaction(mempool, retries = 0) {
     		showLoadError('No results matching your query.<br>Just submitted your transaction? Hang tight for a little longer!');
 	        $('#txLoading').hide();
 
-	        if (retries < 5) {
+	        // A tx submitted through another node can take a few seconds to reach ours.
+	        if (retries < 10) {
 	        	setTimeout(() => {
 				    getTransaction(true, retries + 1);
-				}, 2000);
+				}, 3000);
 	    	} else {
 	    		showLoadError('No results matching your query.<br>Just submitted your transaction? Try reloading this page.');
 	    	}
@@ -327,6 +366,17 @@ function getTransaction(mempool, retries = 0) {
 
 function printTransaction(data, mempool) {	
 	if (printedFromSocket) return;
+
+	if (mempool) {
+		if (printedPending) return;
+		printedPending = true;
+	} else if (socket) {
+		// The socket only helps find pending txs; don't keep receiving the whole mempool.
+		socket.disconnect();
+	}
+
+	// A retry that finds the tx replaces the "no results yet" message.
+	$('#loadError').hide();
 
 	if (mempool) {
 		showNotificationPermissionToast();
@@ -444,10 +494,15 @@ function printTransaction(data, mempool) {
 		$('#txConfirmations').html(data.numConfirmations);
 	}
 
-	//Total coins transferred
+	//Total coins transferred. Summed exactly: values above 2^53 arrive as BigNumber
+	//objects (JSONbig), which `+=` turned into string concatenation.
+	let coinsTransferred = new BigNumber(0);
 	for (let i = 0; i < data.outputs.length; i++) {
-		totalCoinsTransferred += data.outputs[i].value;
+		coinsTransferred = coinsTransferred.plus(data.outputs[i].value.toString());
 	}
+	totalCoinsTransferred = coinsTransferred.isLessThanOrEqualTo(Number.MAX_SAFE_INTEGER)
+		? coinsTransferred.toNumber()
+		: coinsTransferred.toFixed();
 
 	$('#txTotalCoinsTransferred').html(formatErgValueString(totalCoinsTransferred, 6) + ' ' + formatAssetDollarPriceString(totalCoinsTransferred, ERG_DECIMALS, 'ERG'));
 

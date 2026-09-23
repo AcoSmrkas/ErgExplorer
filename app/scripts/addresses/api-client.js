@@ -134,29 +134,62 @@ export const ApiClient = {
 	},
 
 	/**
-	 * Fetch mempool data
+	 * Our node's pending txs for this address (see mergeMempoolItems in main.js)
 	 */
-	async getMempoolData() {
-		try {
-			const data = await fetchWithTimeout(this.getMempoolUrl(), DATA_FETCH_TIMEOUT_MS, async (response) => {
-				if (!response.ok) throw new Error('Mempool fetch failed');
+	getOwnMempoolUrl() {
+		if (!MEMPOOL_API_HOST) return null;
+		return MEMPOOL_API_HOST + 'transactions/byAddress/' + AddressState.walletAddress;
+	},
+
+	/**
+	 * Fetch pending txs from every mempool source and merge them.
+	 * Rejects only if all sources fail.
+	 */
+	async fetchMempool() {
+		const urls = [this.getOwnMempoolUrl(), this.getMempoolUrl()].filter(Boolean);
+
+		const results = await Promise.allSettled(urls.map(url =>
+			fetchWithTimeout(url, DATA_FETCH_TIMEOUT_MS, async (response) => {
+				if (!response.ok) throw new Error('Mempool fetch failed: ' + url);
 				const arrayBuffer = await response.arrayBuffer();
 				const buffer = new TextDecoder('utf-8').decode(arrayBuffer);
 				return JSONbig.parse(buffer);
-			});
+			})
+		));
 
-			AddressState.mempoolData = data;
-				AddressState.mempoolCount = data.total;
+		const lists = results
+			.filter(result => result.status === 'fulfilled' && result.value && Array.isArray(result.value.items))
+			.map(result => result.value.items);
 
-			if (data.total > 0 && AddressState.mempoolTxIds.length === 0) {
-				AddressState.mempoolTxIds = data.items.map(tx => tx.id);
-			}
-
-			return data;
-		} catch (error) {
-			console.error('Mempool fetch failed:', error);
-			throw error;
+		if (lists.length === 0) {
+			throw new Error('Mempool fetch failed');
 		}
+
+		return mergeMempoolItems(lists);
+	},
+
+	/**
+	 * Fetch mempool data
+	 */
+	async getMempoolData() {
+		let data;
+
+		try {
+			data = await this.fetchMempool();
+		} catch (error) {
+			// Don't let a mempool outage hide the confirmed history.
+			console.error('Mempool fetch failed:', error);
+			data = { items: [], total: 0 };
+		}
+
+		AddressState.mempoolData = data;
+		AddressState.mempoolCount = data.total;
+
+		if (data.total > 0 && AddressState.mempoolTxIds.length === 0) {
+			AddressState.mempoolTxIds = data.items.map(tx => tx.id);
+		}
+
+		return data;
 	},
 
 	/**

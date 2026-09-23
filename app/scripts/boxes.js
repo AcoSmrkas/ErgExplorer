@@ -35,6 +35,11 @@ function getBoxUrl(mempool) {
 }
 
 function getBox(mempool) {
+	if (mempool && MEMPOOL_API_HOST) {
+		getPendingBox();
+		return;
+	}
+
 	let boxUrl = getBoxUrl(mempool);
 
 	fetch(boxUrl)
@@ -82,6 +87,23 @@ function getBox(mempool) {
     		getBox(true);
     	}
     });
+}
+
+// An output of a pending tx, from our node's pool.
+function getPendingBox() {
+	fetch(MEMPOOL_API_HOST + 'boxes/' + boxId)
+	.then(async response => {
+		if (!response.ok) {
+			throw new Error('Network response was not ok');
+		}
+
+		const buffer = new TextDecoder("utf-8").decode(await response.arrayBuffer());
+		printBox(JSONbig.parse(buffer), true);
+	})
+	.catch(function() {
+		showLoadError('No results matching your query.');
+		$('#txLoading').hide();
+	});
 }
 
 function printBox(data, mempool) {	

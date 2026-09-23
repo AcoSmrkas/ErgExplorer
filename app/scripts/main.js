@@ -241,15 +241,12 @@ function checkErgoIdentifier(input) {
 	  		});
 		} catch {}
 
-		try {
-	  		$.get(`${API_HOST}mempool/transactions/byAddress/${input}`, function(data) {
-				for (let i = 0; i < data.items.length; i++) {
-					if (data.items[i].id == input) {
-						searchType = "1";
-					}
-				}
-			})
-  		} catch {}
+		if (MEMPOOL_API_HOST) {
+			$.get(`${MEMPOOL_API_HOST}transactions/${input}`,
+			function (data) {
+				searchType = "1";
+			});
+		}
 
 		try {
 			$.get(`${API_HOST}tokens/${input}`,
@@ -667,6 +664,7 @@ function setupMainnetTestnet() {
 		$('.networkType').addClass('erg-span-important');
 		localStorage.setItem('network', 'testnet');
 		API_HOST = API_HOST_2 = 'https://api-testnet.ergoplatform.com/';
+		MEMPOOL_API_HOST = null;
 		FEE_ADDRESS = 'Bf1X9JgQTUtgntaer91B24n6kP8L2kqEiQqNf1z97BKo9UbnW3WRP9VXu8BXd1LsYCiYbHJEdWKxkF5YNx5n7m31wsDjbEuB3B13ZMDVBWkepGmWfGa71otpFViHDCuvbw1uNicAQnfuWfnj8fbCa4';
 	} else {
 		$('.networkType').html('Mainnet')
@@ -919,6 +917,56 @@ function formatBox(box, trueBox = false, unspent = false) {
 	formattedData += '</div>';
 
 	return formattedData;
+}
+
+/**
+ * Pending txs are read from our node's mempool (MEMPOOL_API_HOST) and from
+ * api.ergoplatform.com, then merged. The explorer's mempool misses txs that
+ * entered the network through other nodes (Nautilus submits via sigmaspace) and
+ * at times serves empty pages; ours pulls from several nodes but is mainnet-only.
+ */
+function mergeMempoolItems(lists) {
+	const byId = new Map();
+
+	for (const items of lists) {
+		for (const tx of items || []) {
+			if (tx && tx.id && !byId.has(tx.id)) {
+				byId.set(tx.id, tx);
+			}
+		}
+	}
+
+	// Sources can hold different sides of a double-spend (e.g. a fee-bumped replacement
+	// only one node has seen). Keep one tx per spent box: the best fee per byte, as nodes do.
+	const spent = new Set();
+	const kept = [];
+
+	Array.from(byId.values())
+		.sort((a, b) => mempoolFeePerByte(b) - mempoolFeePerByte(a))
+		.forEach(tx => {
+			const inputIds = (tx.inputs || []).map(input => input.boxId || input.id);
+
+			if (inputIds.some(id => spent.has(id))) return;
+
+			inputIds.forEach(id => spent.add(id));
+			kept.push(tx);
+		});
+
+	const items = kept.sort((a, b) => (b.creationTimestamp || 0) - (a.creationTimestamp || 0));
+
+	return { items: items, total: items.length };
+}
+
+function mempoolFeePerByte(tx) {
+	let fee = 0;
+
+	for (const output of tx.outputs || []) {
+		if (output.address === FEE_ADDRESS) {
+			fee += Number(output.value);
+		}
+	}
+
+	return tx.size ? fee / tx.size : fee;
 }
 
 function showLoadError(message) {

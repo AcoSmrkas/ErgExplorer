@@ -4,7 +4,7 @@
  */
 
 import { AddressState, FilterState } from './state.js';
-import { ApiClient } from './api-client.js?v=48';
+import { ApiClient } from './api-client.js?v=49';
 import { BalanceSummary } from './balance-summary.js?v=61';
 import { AddressDetails } from './address-details.js?v=47';
 import { TransactionFormatter } from './transaction-formatter.js?v=64';
@@ -387,6 +387,13 @@ function onMempoolAndTransactionsDataFetched() {
 
 	AddressDetails.printAddressDetails();
 
+	// A mempool source can still list a tx for a while after it confirms; show it once, as confirmed.
+	if (AddressState.mempoolData && AddressState.transactionsData && Array.isArray(AddressState.transactionsData.items)) {
+		const confirmedIds = new Set(AddressState.transactionsData.items.map(tx => tx.id));
+		const pending = AddressState.mempoolData.items.filter(tx => !confirmedIds.has(tx.id));
+		AddressState.mempoolData = { items: pending, total: pending.length };
+	}
+
 	let html = '';
 	const mempoolCount = AddressState.mempoolData && AddressState.mempoolData.items ? AddressState.mempoolData.items.length : 0;
 
@@ -449,9 +456,7 @@ function refreshData() {
  * Check if mempool has changed
  */
 function checkMempoolChanged() {
-	const mempoolUrl = ApiClient.getMempoolUrl();
-
-	$.get(mempoolUrl, function(data) {
+	ApiClient.fetchMempool().then(function(data) {
 		const newMempoolCount = data.total;
 
 		if (newMempoolCount !== AddressState.mempoolCount) {
@@ -479,6 +484,8 @@ function checkMempoolChanged() {
 				}
 			});
 		}
+	}).catch(function(error) {
+		console.error('Mempool check failed:', error);
 	});
 }
 

@@ -9,7 +9,29 @@ function printMempool() {
         apiUrl = 'https://api-testnet.ergoplatform.com/';
     }
 
-	var jqxhr = $.get(apiUrl + 'transactions/unconfirmed?limit=' + ITEMS_PER_PAGE + '&offset=' + offset + '&sortBy=size&sortDirection=desc', function(data) {
+    const query = '?limit=' + ITEMS_PER_PAGE + '&offset=' + offset + '&sortBy=size&sortDirection=desc';
+    const explorerUrl = apiUrl + 'transactions/unconfirmed' + query;
+
+    // Our node's pool first: the explorer's list intermittently returns empty pages
+    // (items: [] with total > 0) and misses txs that entered through other nodes.
+    if (MEMPOOL_API_HOST) {
+        $.get(MEMPOOL_API_HOST + 'transactions' + query, printMempoolPage)
+            .fail(() => getMempoolPage(explorerUrl));
+    } else {
+        getMempoolPage(explorerUrl);
+    }
+}
+
+function getMempoolPage(url) {
+	var jqxhr = $.get(url, printMempoolPage)
+    .fail(function() {
+        showLoadError('Failed to fetch mempool transactions.');
+    }).always(function() {        
+        $('#txLoading').hide();
+    });
+}
+
+function printMempoolPage(data) {
 		let formattedResult = '';
 		let totalBlocks = data.total;
 		let items = data.items;
@@ -45,10 +67,5 @@ function printMempool() {
 		$('#transactionsTableBody').html(formattedResult);
 
         $('#mempoolHolder').show();
-    })
-    .fail(function() {
-        showLoadError('Failed to fetch mempool transactions.');
-    }).always(function() {        
         $('#txLoading').hide();
-    });
 }
