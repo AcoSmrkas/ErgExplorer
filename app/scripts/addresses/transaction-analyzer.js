@@ -105,12 +105,36 @@ export function detectContractFromErgotree(ergoTree, addressType = 'label') {
 		[LITHOS_TEMPLATES.SWAP_SELL]: 'Lithos LP Swap',
 		[LITHOS_TEMPLATES.SWAP_BUY]: 'Lithos LP Swap',
 		[LITHOS_TEMPLATES.LP_DEPOSIT]: 'Lithos LP Deposit',
-		[LITHOS_TEMPLATES.LP_REDEEM]: 'Lithos LP Redeem'
+		[LITHOS_TEMPLATES.LP_REDEEM]: 'Lithos LP Redeem',
+		[LITHOS_TEMPLATES.POOL]: 'Lithos Liquidity Pool'
 	};
 
 	for (const [template, label] of Object.entries(templates)) {
 		if (ergoTree.endsWith(template)) {
 			return label;
+		}
+	}
+
+	return null;
+}
+
+/**
+ * Name a Lithos pool box after the order the batcher filled with it. The pool is
+ * input 0 of the fill, so it is what shows as the sender of the swapped assets;
+ * the order box spent beside it says what the fill was.
+ */
+export function detectLithosFill(inputs, ergoTree) {
+	if (!ergoTree.endsWith(LITHOS_TEMPLATES.POOL)) {
+		return null;
+	}
+
+	for (const box of inputs) {
+		const contractName = box.ergoTree && !box.ergoTree.endsWith(LITHOS_TEMPLATES.POOL)
+			? detectContractFromErgotree(box.ergoTree)
+			: null;
+
+		if (contractName) {
+			return contractName;
 		}
 	}
 

@@ -1,10 +1,10 @@
 import { AddressState } from './state.js';
 import { TxType, TxInOut, AddressType } from './constants.js';
-import { detectContractFromErgotree, getTxType, getTxInOutType, analyzeTransfers } from './transaction-analyzer.js';
+import { detectContractFromErgotree, detectLithosFill, getTxType, getTxInOutType, analyzeTransfers } from './transaction-analyzer.js';
 
 function formatContractAddress(boxes, address, fallback, walletAddress) {
 	const box = boxes.find(item => item.address === address && item.ergoTree);
-	const contractName = box && detectContractFromErgotree(box.ergoTree);
+	const contractName = box && (detectLithosFill(boxes, box.ergoTree) || detectContractFromErgotree(box.ergoTree));
 
 	return contractName
 		? formatTxAddressString(address, contractName, walletAddress)
@@ -289,7 +289,8 @@ export const TransactionFormatter = {
 		// From address
 		addAddress(fromAddress);
 		let formattedFromAddress = formatTxAddressString(fromAddress, null, walletAddress);
-		if (networkType !== 'testnet' && (txType === TxType.Wallet2Contract || txType === TxType.Contract2Wallet)) {
+		// Contract2Contract covers batcher fills: the pool is both input 0 and output 0
+		if (networkType !== 'testnet' && (txType === TxType.Wallet2Contract || txType === TxType.Contract2Wallet || txType === TxType.Contract2Contract)) {
 			formattedFromAddress = formatContractAddress(item.inputs, fromAddress, formattedFromAddress, walletAddress);
 		}
 		html += '<td' + (fromAddress === walletAddress ? ' class="tx-self"' : '') + '><span class="d-lg-none"><strong>From: </strong></span>' + formattedFromAddress + '</td>';
