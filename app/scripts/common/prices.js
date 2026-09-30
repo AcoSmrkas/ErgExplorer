@@ -11,7 +11,9 @@ const FORCE_CACHE_KEY = 'priceCacheFull';
 const CACHE_TIME = 5 * 60 * 1000; // 5 minutes
 const EXCEPTIONS = [
   '6122f7289e7bb2df2de273e09d4b2756cda6aeb0f40438dc9d257688f45183ad',
-  'a55b8735ed1a99e46c2c89f8994aacdf4b1109bdcf682f1e5b34479c6e392669'
+  'a55b8735ed1a99e46c2c89f8994aacdf4b1109bdcf682f1e5b34479c6e392669',
+  // LIT, priced from its Lithos pool; keep it a financial asset if the pool thins
+  'c1980d829988229516430a47a5eca376060b6ce859616db0936e78ab25cb6de7'
 ];
 
 function getPrices(callback, force = false) {
