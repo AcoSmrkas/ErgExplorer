@@ -3,7 +3,7 @@ import { TokenApiClient } from './api-client.js?v=2';
 import { TokenUIDisplay } from './ui-display.js';
 import { TokenUIControllers } from './ui-controllers.js';
 import { TokenAnalyzer } from './token-analyzer.js';
-import { isLpTokenData } from '../common/lp-tokens.js?v=2';
+import { isLpTokenData } from '../common/lp-tokens.js?v=4';
 
 // Main initialization
 $(function() {

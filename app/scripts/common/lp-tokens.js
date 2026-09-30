@@ -21,5 +21,7 @@ export function isLpTokenData(tokenData) {
 
 	return LP_TOKEN_IDS.includes(tokenId)
 		|| /(?:\sLP|_LP)(?:\sToken)?$/i.test(name)
-		|| LP_TOKEN_NAMES.includes(normalizedName);
+		|| LP_TOKEN_NAMES.includes(normalizedName)
+		// Lithos DEX position NFT; priced only if getLpPools knows its id
+		|| /^LD-NFT-[0-9a-f]{6}$/i.test(name);
 }

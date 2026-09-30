@@ -1,6 +1,6 @@
 import { ApiClient } from './api-client.js?v=47';
 import { AddressState } from './state.js';
-import { isLpTokenData } from '../common/lp-tokens.js?v=3';
+import { isLpTokenData } from '../common/lp-tokens.js?v=4';
 
 /**
  * Balance summary display and token formatting
@@ -248,7 +248,8 @@ export const BalanceSummary = {
 
 		const walletLpAmountBigInt = this._safeBigInt(token.amount);
 		const emission = this._safeBigInt(lpPool.emissionAmount);
-		if (emission > 0n && walletLpAmountBigInt > emission / 2n) return null;
+		// A position NFT's whole supply is 1, so holding all of it is the normal case.
+		if (!lpPool.position && emission > 0n && walletLpAmountBigInt > emission / 2n) return null;
 
 		const lpReserveBigInt = this._safeBigInt(lpPool.lpReserveAmount);
 		const circulatingSupplyBigInt = this._safeBigInt(lpPool.circulatingSupply);
