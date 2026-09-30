@@ -1,4 +1,4 @@
-import { ApiClient } from './api-client.js?v=47';
+import { ApiClient } from './api-client.js?v=50';
 import { AddressState } from './state.js';
 import { isLpTokenData } from '../common/lp-tokens.js?v=4';
 

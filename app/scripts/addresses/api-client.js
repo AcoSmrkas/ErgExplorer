@@ -1,4 +1,4 @@
-import { AddressState, FilterState } from './state.js';
+import { AddressState } from './state.js';
 
 // The primary tx API (sigmaspace) can hang when it's down, so abort and fail over after this.
 const TX_PRIMARY_TIMEOUT_MS = 8000;
@@ -40,17 +40,6 @@ export const ApiClient = {
 	},
 
 	/**
-	 * Fetch user profile data
-	 */
-	getUser(address) {
-		return new Promise((resolve, reject) => {
-			$.get(ERGEXPLORER_API_HOST + 'user/getUser?address=' + address,
-				(data) => resolve(data)
-			).fail(() => reject(new Error('Failed to fetch user data')));
-		});
-	},
-
-	/**
 	 * Fetch verified address book details for the current address
 	 */
 	getAddressInfo() {
@@ -87,13 +76,6 @@ export const ApiClient = {
 	 * Get transactions data URL with fallback support
 	 */
 	getTxsDataUrl(attempt = 1) {
-		// Check if using filters (from URL params, not FilterState alone)
-		const hasFilters = typeof params !== 'undefined' && params['filterTxs'] === 'true';
-
-		if (hasFilters) {
-			return this._buildFilterUrl();
-		}
-
 		if (attempt === 1) {
 			if (networkType === 'testnet') {
 				return API_HOST + 'api/v1/addresses/' + AddressState.walletAddress + '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
@@ -104,22 +86,6 @@ export const ApiClient = {
 
 		// Fallback: Use ergoplatform API
 		return API_HOST_2 + 'addresses/' + AddressState.walletAddress + '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
-	},
-
-	/**
-	 * Build filter URL with query parameters
-	 */
-	_buildFilterUrl() {
-		let url = ERGEXPLORER_API_HOST + 'user/getUserTransactions?filterTx&address=' + AddressState.walletAddress + '&offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
-
-		if (FilterState.tokenId) url += '&tokenId=' + FilterState.tokenId;
-		if (FilterState.minValue !== undefined) url += '&minValue=' + FilterState.minValue;
-		if (FilterState.maxValue !== undefined) url += '&maxValue=' + FilterState.maxValue;
-		if (FilterState.fromDate !== undefined) url += '&fromDate=' + FilterState.fromDate;
-		if (FilterState.toDate !== undefined) url += '&toDate=' + FilterState.toDate;
-		if (FilterState.txType !== 'all') url += '&txType=' + FilterState.txType;
-
-		return url;
 	},
 
 	/**
@@ -276,21 +242,6 @@ export const ApiClient = {
 			console.error('Unspent boxes fetch failed:', error);
 			throw error;
 		}
-	},
-
-	/**
-	 * Fetch chart data for address statistics
-	 */
-	getChartData(tokenId) {
-		return new Promise((resolve, reject) => {
-			let url = ERGEXPLORER_API_HOST + 'user/getAddressStats?address=' + AddressState.walletAddress + '&tokenId=' + tokenId + '&type=1';
-
-			if (FilterState.fromDate) url += '&fromDate=' + FilterState.fromDate;
-			if (FilterState.toDate) url += '&toDate=' + FilterState.toDate;
-
-			$.get(url, (data) => resolve(data))
-				.fail(() => reject(new Error('Chart data fetch failed')));
-		});
 	},
 
 	/**

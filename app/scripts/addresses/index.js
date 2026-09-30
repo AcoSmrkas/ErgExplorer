@@ -3,13 +3,12 @@
  * This file orchestrates initialization and data loading
  */
 
-import { AddressState, FilterState } from './state.js';
-import { ApiClient } from './api-client.js?v=49';
-import { BalanceSummary } from './balance-summary.js?v=62';
-import { AddressDetails } from './address-details.js?v=47';
+import { AddressState } from './state.js';
+import { ApiClient } from './api-client.js?v=50';
+import { BalanceSummary } from './balance-summary.js?v=63';
+import { AddressDetails } from './address-details.js?v=48';
 import { TransactionFormatter } from './transaction-formatter.js?v=64';
 import { UIControllers } from './ui-controllers.js?v=64';
-import { TransactionFilters } from './filters.js';
 import { NftManager } from './nft-manager.js';
 import { getTxType, isWalletAddress, getTxInOutType, analyzeTransfers } from './transaction-analyzer.js';
 
@@ -560,10 +559,6 @@ window.hideIssuedNfts = (e) => UIControllers.hideIssuedNfts(e);
 // UI Controllers - Notifications
 window.onNotificationToastYes = () => UIControllers.onNotificationToastYes();
 window.onNotificationToastNo = () => UIControllers.onNotificationToastNo();
-
-// Filters
-window.filterTransactions = (e) => TransactionFilters.filterTransactions(e);
-window.clearFilter = (e) => TransactionFilters.clearFilter(e);
 
 // Unspent Boxes
 window.showUnspentBoxes = (e) => showUnspentBoxes(e);

@@ -42,11 +42,6 @@ export const AddressState = {
 	unspentBoxesOffset: 0,
 	unspentBoxesPageSize: 8,
 
-	// Date filtering
-	datePickerFrom: undefined,
-	datePickerTo: undefined,
-	tempDate: -1,
-
 	// Notifications and UI state
 	txNotification: undefined,
 	txNotificationId: undefined,
@@ -95,24 +90,5 @@ export const AddressState = {
 		this.unspentBoxesPageSize = 8;
 		this.getTxData = false;
 		this.firstTime = true;
-	}
-};
-
-// Filter state
-export const FilterState = {
-	tokenId: '',
-	minValue: undefined,
-	maxValue: undefined,
-	fromDate: undefined,
-	toDate: undefined,
-	txType: 'all',
-
-	reset() {
-		this.tokenId = '';
-		this.minValue = undefined;
-		this.maxValue = undefined;
-		this.fromDate = undefined;
-		this.toDate = undefined;
-		this.txType = 'all';
 	}
 };
