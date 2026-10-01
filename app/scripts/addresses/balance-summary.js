@@ -1,4 +1,4 @@
-import { ApiClient } from './api-client.js?v=51';
+import { ApiClient } from './api-client.js?v=52';
 import { AddressState } from './state.js';
 import { isLpTokenData } from '../common/lp-tokens.js?v=4';
 
@@ -30,7 +30,8 @@ export const BalanceSummary = {
 	 * Print address summary with balance and tokens
 	 */
 	async printAddressSummary() {
-		if (!gotPrices || AddressState.printedAddressSummary) return;
+		// Prices are optional here: without them the balance shows without USD values.
+		if (AddressState.printedAddressSummary) return;
 
 		AddressState.printedAddressSummary = true;
 

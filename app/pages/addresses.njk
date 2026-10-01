@@ -1,6 +1,14 @@
 {% extends "layout.njk" %}
 
 {% block styles %}
+	<!-- The first API calls: open their connections while the scripts load. A TLS handshake to
+	     our own hosts costs ~0.4 s from Europe. crossorigin matches the pages' CORS requests. -->
+	<link rel="preconnect" href="https://api.ergexplorer.com" crossorigin>
+	<link rel="preconnect" href="https://api2.ergexplorer.com" crossorigin>
+	<link rel="preconnect" href="https://socket.ergexplorer.com" crossorigin>
+	<link rel="preconnect" href="https://api.sigmaspace.io" crossorigin>
+	<link rel="preconnect" href="https://api.ergoplatform.com" crossorigin>
+
 	<!-- build:css styles/addresses.css -->
 	<link rel="stylesheet" href="styles/addresses.css">
 	<!-- endbuild -->
@@ -309,6 +317,6 @@
 	<script src="./scripts/common/prices.js?v=44"></script>
 	<script src="./scripts/common/pagination.js?v=41"></script>
 	<script src="./scripts/common/nft.js?v=41"></script>
-	<script type="module" src="./scripts/addresses/index.js?v=68"></script>
+	<script type="module" src="./scripts/addresses/index.js?v=69"></script>
 	<script src="./scripts/3rd-party/qrcode.min.js?v=41"></script>
 {% endblock %}

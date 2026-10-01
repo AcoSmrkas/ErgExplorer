@@ -4,12 +4,12 @@
  */
 
 import { AddressState } from './state.js';
-import { ApiClient } from './api-client.js?v=51';
-import { BalanceSummary } from './balance-summary.js?v=64';
-import { AddressDetails } from './address-details.js?v=49';
-import { TransactionFormatter } from './transaction-formatter.js?v=65';
+import { ApiClient } from './api-client.js?v=52';
+import { BalanceSummary } from './balance-summary.js?v=65';
+import { AddressDetails } from './address-details.js?v=50';
+import { TransactionFormatter } from './transaction-formatter.js?v=66';
 import { UIControllers } from './ui-controllers.js?v=65';
-import { PendingTracker } from './pending-tracker.js?v=1';
+import { PendingTracker } from './pending-tracker.js?v=2';
 import { NftManager } from './nft-manager.js';
 import { getTxType, isWalletAddress, getTxInOutType, analyzeTransfers } from './transaction-analyzer.js';
 
@@ -105,28 +105,32 @@ $(async function() {
  * Initialize the address page
  */
 async function initializeAddressPage() {
-	try {
-		AddressState.scamList = await ApiClient.getScamList();
-	} catch (error) {
-		console.warn('Failed to load scam list:', error);
-	}
+	ApiClient.prefetch({ mempool: isFirstPage() });
 
-	// Coordinate initialization requests
-	AddressState.initRequestCount = -1;
-	AddressState.initRequestDone = 0;
+	// The scam list, token icons and prices are only needed to render, so they load in
+	// parallel and the page renders once all three have answered or failed.
+	let initRequestsLeft = 3;
+	const onInitRequestDone = () => {
+		if (--initRequestsLeft === 0) onInitRequestsFinished();
+	};
+
+	ApiClient.getScamList()
+		.then(scamList => { AddressState.scamList = scamList; })
+		.catch(error => console.warn('Failed to load scam list:', error))
+		.finally(onInitRequestDone);
 
 	if (typeof getTokenIcons === 'function') {
-		getTokenIcons(onInitRequestsFinished);
+		getTokenIcons(onInitRequestDone);
 	} else {
 		console.warn('getTokenIcons function not found');
-		onInitRequestsFinished();
+		onInitRequestDone();
 	}
 
 	if (typeof getPrices === 'function') {
-		getPrices(onInitRequestsFinished);
+		getPrices(onInitRequestDone);
 	} else {
 		console.warn('getPrices function not found');
-		onInitRequestsFinished();
+		onInitRequestDone();
 	}
 
 	if (typeof getIssuedNfts === 'function') {
@@ -137,11 +141,10 @@ async function initializeAddressPage() {
 }
 
 /**
- * Called when all init requests complete
+ * Called once the init requests have all answered or failed, and on every refresh.
+ * A failed icon lookup no longer stops the page: it renders with the built-in icons.
  */
 function onInitRequestsFinished() {
-	if (!gotTokenIcons) return;
-
 	printAddressSummary();
 	printTransactions();
 	printUnspentBoxes();
@@ -464,12 +467,14 @@ function refreshData() {
 	AddressState.totalTransactions = 0;
 	AddressState.firstTime = false;
 
+	// Don't wait on getPrices: once its 5-min cache has expired it refetches without calling
+	// back (prices.js only re-arms the callback on the cache path), which stopped this refresh
+	// and the pending tracker's. Re-render with the current prices; a refetch lands next time.
 	if (typeof getPrices === 'function') {
-		getPrices(onInitRequestsFinished);
-	} else {
-		console.warn('getPrices function not found');
-		onInitRequestsFinished();
+		getPrices(() => {});
 	}
+
+	onInitRequestsFinished();
 }
 
 // Expose functions to global scope for HTML onclick handlers
