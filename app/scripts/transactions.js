@@ -1,7 +1,5 @@
 var totalCoinsTransferred = 0;
 var txId = '';
-var mempoolInterval = undefined;
-var txNotification = undefined;
 
 const treasuryOriginTx = '{"id":"e179f12156061c04d375f599bd8aea7ea5e704fab2d95300efb2d87460d60b83","blockId":"307a42f9811f03514a6296113f0f3932ea418974a1de279b321f346fe806bf5f","inclusionHeight":3850,"timestamp":1562142058940,"index":2,"globalIndex":3888,"numConfirmations":1067072,"inputs":[],"dataInputs":[],"outputs":[{"boxId":"8e130114a671171e566382911404a67fc37ccbfe637212eaab90037e19c3336c","transactionId":"e179f12156061c04d375f599bd8aea7ea5e704fab2d95300efb2d87460d60b83","blockId":"307a42f9811f03514a6296113f0f3932ea418974a1de279b321f346fe806bf5f","value":4330776400000000,"index":0,"globalIndex":7778,"creationHeight":5,"settlementHeight":3850,"ergoTree":"100e040004c094400580809cde91e7b0010580acc7f03704be944004808948058080c7b7e4992c0580b4c4c32104fe884804c0fd4f0580bcc1960b04befd4f05000400ea03d192c1b2a5730000958fa373019a73029c73037e997304a305958fa373059a73069c73077e997308a305958fa373099c730a7e99730ba305730cd193c2a7c2b2a5730d00d5040800","address":"4L1ktFSzm3SH1UioDuUf5hyaraHird4D2dEACwQ1qHGjSKtA6KaNvSzRCZXZGf9jkfNAEC1SrYaZmCuvb2BKiXk5zW9xuvrXFT7FdNe2KqbymiZvo5UQLAm5jQY8ZBRhTZ4AFtZa1UF5nd4aofwPiL7YkJuyiL5hDHMZL1ZnyL746tHmRYMjAhCgE7d698dRhkdSeVy","assets":[],"additionalRegisters":{"R4":{"serializedValue":"0e6f98040483030808cd039bb5fe52359a64c99a60fd944fc5e388cbdc4d37ff091cc841c3ee79060b864708cd031fb52cf6e805f80d97cde289f4f757d49accf0c83fb864b27d2cf982c37f9a8b08cd0352ac2a471339b0d23b3d2c5ce0db0e81c969f77891b9edf0bda7fd39a78184e7","sigmaType":"Coll[SByte]","renderedValue":"98040483030808cd039bb5fe52359a64c99a60fd944fc5e388cbdc4d37ff091cc841c3ee79060b864708cd031fb52cf6e805f80d97cde289f4f757d49accf0c83fb864b27d2cf982c37f9a8b08cd0352ac2a471339b0d23b3d2c5ce0db0e81c969f77891b9edf0bda7fd39a78184e7"}},"spentTransactionId":"6be0b3878681e211afbc255584692c7720f8df5058ca86c818a1da6dd0b277cf","mainChain":true},{"boxId":"eb73a48270b490529ccf052e70c667c4836a2799e65ab974eceda82df30b5438","transactionId":"e179f12156061c04d375f599bd8aea7ea5e704fab2d95300efb2d87460d60b83","blockId":"307a42f9811f03514a6296113f0f3932ea418974a1de279b321f346fe806bf5f","value":5000000000,"index":1,"globalIndex":7779,"creationHeight":5,"settlementHeight":3850,"ergoTree":"0008cd039bb5fe52359a64c99a60fd944fc5e388cbdc4d37ff091cc841c3ee79060b8647","address":"9heP7nBJRtSD9nEgJ4LSexPMtsoweLX8Gtp92LNLMcu2xdUp1EH","assets":[],"additionalRegisters":{},"spentTransactionId":"d6b0908e01371f93042158be18249130afcf2b74d9b99298ac63c5d37797ffed","mainChain":true},{"boxId":"16c29667d28f7cacadd0bb02165575a25f06eb396f4fbe0e311523129061ff2a","transactionId":"e179f12156061c04d375f599bd8aea7ea5e704fab2d95300efb2d87460d60b83","blockId":"307a42f9811f03514a6296113f0f3932ea418974a1de279b321f346fe806bf5f","value":5000000000,"index":2,"globalIndex":7780,"creationHeight":5,"settlementHeight":3850,"ergoTree":"0008cd031fb52cf6e805f80d97cde289f4f757d49accf0c83fb864b27d2cf982c37f9a8b","address":"9ghmd4QqqMYVDsZ8t4bZFqDCGtM5dh5UQjakKGBPRWgsYzBN9CP","assets":[],"additionalRegisters":{},"spentTransactionId":"d6b0908e01371f93042158be18249130afcf2b74d9b99298ac63c5d37797ffed","mainChain":true},{"boxId":"b312a84766b397fa1c6e08e3e9a39a5c14ad43a8eb265e479dd93d928be17246","transactionId":"e179f12156061c04d375f599bd8aea7ea5e704fab2d95300efb2d87460d60b83","blockId":"307a42f9811f03514a6296113f0f3932ea418974a1de279b321f346fe806bf5f","value":5000000000,"index":3,"globalIndex":7781,"creationHeight":5,"settlementHeight":3850,"ergoTree":"0008cd0352ac2a471339b0d23b3d2c5ce0db0e81c969f77891b9edf0bda7fd39a78184e7","address":"9h6DT44xdB6C6nTosNZQVDZusMscGuEFqccQNocKrj165C7G6hf","assets":[],"additionalRegisters":{},"spentTransactionId":"d6b0908e01371f93042158be18249130afcf2b74d9b99298ac63c5d37797ffed","mainChain":true},{"boxId":"3777697d3e41c41e95b7ab475845f59053af02327ecf1b9f7990bf921b1a1783","transactionId":"e179f12156061c04d375f599bd8aea7ea5e704fab2d95300efb2d87460d60b83","blockId":"307a42f9811f03514a6296113f0f3932ea418974a1de279b321f346fe806bf5f","value":100000000,"index":4,"globalIndex":7782,"creationHeight":5,"settlementHeight":3850,"ergoTree":"1005040004000e36100204a00b08cd0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ea02d192a39a8cc7a701730073011001020402d19683030193a38cc7b2a57300000193c2b2a57301007473027303830108cdeeac93b1a57304","address":"2iHkR7CWvD1R4j1yZg5bkeDRQavjAaVPeTDFGGLZduHyfWMuYpmhHocX8GJoaieTx78FntzJbCBVL6rf96ocJoZdmWBL2fci7NqWgAirppPQmZ7fN9V6z13Ay6brPriBKYqLp1bT2Fk4FkFLCfdPpe","assets":[],"additionalRegisters":{},"spentTransactionId":"7eb2fbc86e8bfa7bfe431933a716e8d71f0bc71f11171881aa4b3f195bff9843","mainChain":true}],"size":692}';
 
@@ -15,15 +13,13 @@ $(function() {
 	setDocumentTitle(txId);
 });
 
-window.onfocus = (event) => {
-	if (txNotification != undefined) {
-		txNotification.close();
-		location.reload();
-	}
-};
+// A tracked tx that settled while the page was not looked at is told in the tab title until it is.
+window.addEventListener('focus', restoreTitle);
+document.addEventListener('visibilitychange', () => {
+	if (!document.hidden) restoreTitle();
+});
 
 let socket = undefined;
-let printedFromSocket = false;
 // A pending tx can be found by the REST lookup, the explorer fallback and the socket; print it once.
 let printedPending = false;
 let mempoolTxs = [];
@@ -75,12 +71,11 @@ function initSocket() {
 					updateAssets(tx, assetInfos);
 
 					printTransaction(tx, true);
-					printedFromSocket = true;
 
 					newSocket.disconnect();
 				}
 			} catch (error) {
-				printedFromSocket = false;
+				console.error('Pending tx from socket failed:', error);
 			}
 		}
 	);
@@ -364,9 +359,8 @@ function getExplorerTransaction(mempool, retries = 0) {
     });
 }
 
-function printTransaction(data, mempool) {	
-	if (printedFromSocket) return;
-
+// Also run again by the tracker, to show a tx that confirmed in place of its pending view.
+function printTransaction(data, mempool) {
 	if (mempool) {
 		if (printedPending) return;
 		printedPending = true;
@@ -537,60 +531,233 @@ function printTransaction(data, mempool) {
 	$('#infoBottom').html($('#infoTop').html());
 }
 
-function checkMempoolChanged() {
-	var jqxhr = $.get(getTxUrl(false), function(data) {
-		onMempoolTxConfirmed();
-	});
-}
+/**
+ * "Notify me when it confirms" for a pending tx (the prompt toast in layout.njk), on the lines of
+ * the address page's addresses/pending-tracker.js. Tracking runs whatever the notification
+ * permission: the toast, the tab title and the tx view tell, and a browser notification is added
+ * where the browser allows one.
+ */
 
-function onMempoolTxConfirmed() {
-	if (Notification.permission === 'granted') {
-		const img = 'https://ergexplorer.com/images/logo.png';
-		const text = 'Transaction  ' + txId + ' has been confirmed.';
-		txNotification = new Notification('Transaction confirmed', { body: text, icon: img });
-		
-		txNotification.onclick = function(x) {
-			window.focus();
-			this.close();
-			location.reload();
-		};
-	}
+// While tracking, the tx is checked this often.
+const TRACK_INTERVAL_MS = 20000;
+// Every this many checks the indexers are asked even while our node's pool still lists the tx,
+// in case that pool is stale or our node is behind.
+const FULL_CHECK_EVERY = 3;
+// A tx that has left every mempool but is in no indexed block is only called dropped
+// (replaced, double-spent or evicted) after this long: the indexers can trail the node.
+const DROP_GRACE_MS = 10 * 60 * 1000;
+// The final toast closes itself after this.
+const DONE_TOAST_MS = 10000;
+const TRACK_FETCH_TIMEOUT_MS = 15000;
 
-	if (mempoolInterval != undefined) {
-		clearInterval(mempoolInterval);
-	}
-
-	if (document.hasFocus()) {
-		location.reload();
-	}
-}
-
-function trackTransaction() {
-	if (Notification.permission !== 'granted') {
-		return;
-	}
-
-	if (mempoolInterval != undefined) {
-		return;
-	}
-
-	showCustomToast('Monitoring mempool<span id="dots">...</span>');
-	setInterval(animateDots, 300);
-
-	mempoolInterval = setInterval(checkMempoolChanged, 30000);
-}
+let tracking = false;
+let trackChecks = 0;
+let missingSince = null;
+let dotsTimer = null;
+let titleBeforeAlert = null;
 
 function onNotificationToastYes() {
-	requestNotificationPermission(() => {
-		trackTransaction();
-	});
+	hideNotificationPermissionToast();
 
-	hideNotificationPermissionToast();	
+	// Asked from the click, as browsers require, but not waited for.
+	if (canShowSystemNotifications() && Notification.permission === 'default') {
+		requestNotificationPermission();
+	}
+
 	trackTransaction();
 }
 
 function onNotificationToastNo() {
 	hideNotificationPermissionToast();
+}
+
+function trackTransaction() {
+	if (tracking) return;
+	tracking = true;
+
+	showCustomToast('Monitoring mempool<span id="dots">...</span>');
+	dotsTimer = setInterval(animateDots, 300);
+
+	checkTrackedTransaction();
+}
+
+async function checkTrackedTransaction() {
+	let outcome = null;
+
+	try {
+		outcome = await getTrackedTransactionOutcome();
+	} catch (error) {
+		console.error('Pending tx check failed:', error);
+	}
+
+	if (outcome) {
+		onTrackedTransactionSettled(outcome);
+	} else {
+		setTimeout(checkTrackedTransaction, TRACK_INTERVAL_MS);
+	}
+}
+
+/**
+ * { confirmed: tx } once an indexer has the tx in a block, { dropped: true } once it has been
+ * missing from complete mempool views for DROP_GRACE_MS, or null while it is still pending.
+ */
+async function getTrackedTransactionOutcome() {
+	const fullCheck = trackChecks++ % FULL_CHECK_EVERY === 0;
+	const pool = await getPoolState();
+	const now = Date.now();
+
+	if (pool && pool.listed) {
+		missingSince = null;
+	} else if (pool && pool.complete && missingSince === null) {
+		missingSince = now;
+	}
+
+	// Our node drops a tx from its pool as soon as the tx is in a block, while the explorer's pool
+	// can keep listing it for minutes; so ours decides when a lookup is worth it.
+	const inNodePool = pool !== null && (pool.inOwnPool !== null ? pool.inOwnPool : pool.listed);
+
+	if (inNodePool && !fullCheck) return null;
+
+	const tx = await getConfirmedTransaction();
+
+	if (tx) {
+		return { confirmed: tx };
+	}
+
+	if (pool && pool.complete && !pool.listed && missingSince !== null && now - missingSince >= DROP_GRACE_MS) {
+		return { dropped: true };
+	}
+
+	return null;
+}
+
+/**
+ * Whether the mempools list the tx: { listed, inOwnPool, complete }, or null when none answered.
+ * inOwnPool is null where our node's pool was not asked (testnet) or did not answer.
+ */
+async function getPoolState() {
+	const ownUrl = MEMPOOL_API_HOST ? MEMPOOL_API_HOST + 'transactions/' + txId : null;
+	const urls = [ownUrl, getTxUrl(true)].filter(Boolean);
+	const answers = await Promise.all(urls.map(isListedInPool));
+	const answered = answers.filter(answer => answer !== null);
+
+	if (answered.length === 0) return null;
+
+	return {
+		listed: answered.includes(true),
+		inOwnPool: ownUrl ? answers[0] : null,
+		complete: answered.length === urls.length
+	};
+}
+
+// true or false as the pool at url answers (404 once the tx has left it), null when it does not
+async function isListedInPool(url) {
+	try {
+		return await fetchWithTimeout(url, TRACK_FETCH_TIMEOUT_MS, async (response) => {
+			if (response.status === 404) return false;
+			if (!response.ok) return null;
+
+			const tx = await response.json();
+			return tx && tx.id === txId ? true : null;
+		});
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * The tx as an indexer has it once it is in a block, or null while none does (still pending, its
+ * block not indexed yet, or dropped). The explorer's copy comes first: sigmaspace's lacks
+ * spentTransactionId (the Unspent badge) and the decompiled scripts.
+ */
+async function getConfirmedTransaction() {
+	const urls = [getTxUrl(false)];
+
+	if (networkType != 'testnet') {
+		urls.push('https://api.sigmaspace.io/api/v1/transactions/' + txId);
+	}
+
+	const results = await Promise.allSettled(urls.map(url =>
+		fetchWithTimeout(url, TRACK_FETCH_TIMEOUT_MS, async (response) => {
+			if (!response.ok) return null;
+
+			const buffer = new TextDecoder('utf-8').decode(await response.arrayBuffer());
+			return JSONbig.parse(buffer);
+		})
+	));
+
+	// sigmaspace answers an unknown id with HTTP 200 and an error body, hence the id check
+	const found = results.find(result => result.status === 'fulfilled' && result.value &&
+		result.value.id === txId && result.value.blockId);
+
+	return found ? found.value : null;
+}
+
+// The timeout also covers reading the body, so a host that hangs can't stall the tracker.
+async function fetchWithTimeout(url, timeoutMs, readBody) {
+	const controller = new AbortController();
+	const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+	try {
+		const response = await fetch(url, { signal: controller.signal });
+		return await readBody(response);
+	} finally {
+		clearTimeout(timer);
+	}
+}
+
+function onTrackedTransactionSettled(outcome) {
+	const shortId = formatAddressString(txId, 8);
+
+	if (outcome.confirmed) {
+		const height = outcome.confirmed.inclusionHeight;
+
+		showTrackingOutcome('Transaction confirmed in block ' + height + '.');
+		notifyTrackingOutcome('✓ Confirmed', 'Transaction confirmed', 'Transaction ' + shortId + ' was confirmed in block ' + height + '.');
+
+		printTransaction(outcome.confirmed, false);
+	} else {
+		showTrackingOutcome('Transaction dropped from the mempool without being confirmed.');
+		notifyTrackingOutcome('⚠ Dropped', 'Transaction dropped', 'Transaction ' + shortId + ' left the mempool without being confirmed. It may have been replaced or double-spent.');
+
+		$('#txConfirmations').html('<span class="text-danger">Dropped</span>');
+		$('#infoBottom').html($('#infoTop').html());
+	}
+}
+
+// "Monitoring mempool..." gives way to one line of outcome, in the same toast, which then closes.
+function showTrackingOutcome(text) {
+	clearInterval(dotsTimer);
+	dotsTimer = null;
+
+	if ($('#customToast').hasClass('show')) {
+		$('#customToastBody').text(text);
+	} else {
+		showCustomToast(text);
+	}
+
+	setTimeout(hideCustomToast, DONE_TOAST_MS);
+}
+
+// Browser notification and tab title, for when the user is not looking at the page
+// (when they are, the toast and the tx view say it all).
+function notifyTrackingOutcome(titlePrefix, title, body) {
+	if (document.hasFocus()) return;
+
+	showSystemNotification(title, body);
+
+	if (titleBeforeAlert === null) {
+		titleBeforeAlert = document.title;
+	}
+
+	document.title = titlePrefix + ' · ' + titleBeforeAlert;
+}
+
+function restoreTitle() {
+	if (titleBeforeAlert === null) return;
+
+	document.title = titleBeforeAlert;
+	titleBeforeAlert = null;
 }
 
 function copyTransactionAddress(e) {
