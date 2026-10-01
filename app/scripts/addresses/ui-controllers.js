@@ -83,51 +83,5 @@ export const UIControllers = {
 		AddressState.issuedNftsShown = false;
 
 		if (e) e.preventDefault();
-	},
-
-	/**
-	 * Handle notification toast - yes button
-	 */
-	onNotificationToastYes() {
-		requestNotificationPermission(() => {
-			this.trackTransaction();
-		});
-		hideNotificationPermissionToast();
-		this.trackTransaction();
-	},
-
-	/**
-	 * Handle notification toast - no button
-	 */
-	onNotificationToastNo() {
-		hideNotificationPermissionToast();
-	},
-
-	/**
-	 * Start tracking pending transaction
-	 */
-	trackTransaction() {
-		if (Notification.permission !== 'granted') {
-			return;
-		}
-
-		if (AddressState.mempoolInterval !== undefined) {
-			return;
-		}
-
-		showCustomToast('Monitoring mempool<span id="dots">...</span>');
-		setInterval(this._animateDots, 300);
-
-		AddressState.mempoolInterval = setInterval(checkMempoolChanged, 30000);
-	},
-
-	/**
-	 * Animate dots in "Monitoring mempool..." message
-	 */
-	_animateDots() {
-		const dots = $('#dots');
-		let content = dots.html();
-		content = content === '...' ? '.' : (content === '.' ? '..' : '...');
-		dots.html(content);
 	}
 };

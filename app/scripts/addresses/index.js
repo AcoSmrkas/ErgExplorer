@@ -4,11 +4,12 @@
  */
 
 import { AddressState } from './state.js';
-import { ApiClient } from './api-client.js?v=50';
-import { BalanceSummary } from './balance-summary.js?v=63';
-import { AddressDetails } from './address-details.js?v=48';
-import { TransactionFormatter } from './transaction-formatter.js?v=64';
-import { UIControllers } from './ui-controllers.js?v=64';
+import { ApiClient } from './api-client.js?v=51';
+import { BalanceSummary } from './balance-summary.js?v=64';
+import { AddressDetails } from './address-details.js?v=49';
+import { TransactionFormatter } from './transaction-formatter.js?v=65';
+import { UIControllers } from './ui-controllers.js?v=65';
+import { PendingTracker } from './pending-tracker.js?v=1';
 import { NftManager } from './nft-manager.js';
 import { getTxType, isWalletAddress, getTxInOutType, analyzeTransfers } from './transaction-analyzer.js';
 
@@ -96,6 +97,7 @@ $(async function() {
 
 	AddressState.walletAddress = walletAddress;
 	setDocumentTitle(AddressState.walletAddress);
+	PendingTracker.init({ refresh: refreshData });
 	initializeAddressPage();
 });
 
@@ -164,15 +166,27 @@ async function printAddressSummary() {
 }
 
 /**
+ * Pending txs are newer than any confirmed one, so they are listed (and offered for
+ * tracking) on the first page only, not on top of every page.
+ */
+function isFirstPage() {
+	return !(Number(offset) > 0);
+}
+
+/**
  * Print transactions
  */
 async function printTransactions() {
 	if (AddressState.getTxData) return;
 	AddressState.getTxData = true;
 
+	if (!isFirstPage()) {
+		AddressState.mempoolData = { items: [], total: 0 };
+	}
+
 	try {
 		await Promise.all([
-			ApiClient.getMempoolData(),
+			isFirstPage() ? ApiClient.getMempoolData() : null,
 			ApiClient.getTransactionsData()
 		]);
 		AddressState.mempoolRequestDone = true;
@@ -387,9 +401,10 @@ function onMempoolAndTransactionsDataFetched() {
 	AddressDetails.printAddressDetails();
 
 	// A mempool source can still list a tx for a while after it confirms; show it once, as confirmed.
+	// The tracker may already know that from the tx's own lookup, before this page of history has it.
 	if (AddressState.mempoolData && AddressState.transactionsData && Array.isArray(AddressState.transactionsData.items)) {
 		const confirmedIds = new Set(AddressState.transactionsData.items.map(tx => tx.id));
-		const pending = AddressState.mempoolData.items.filter(tx => !confirmedIds.has(tx.id));
+		const pending = AddressState.mempoolData.items.filter(tx => !confirmedIds.has(tx.id) && !AddressState.confirmedTxIds.has(tx.id));
 		AddressState.mempoolData = { items: pending, total: pending.length };
 	}
 
@@ -415,7 +430,11 @@ function onMempoolAndTransactionsDataFetched() {
 	$('#totalTransactions').html('<strong>Total transactions:</strong> ' + AddressState.totalTransactions);
 
 	if (AddressState.totalTransactions > 0) {
-		$('#transactionsTableBody').html(html);
+		// The 60s refresh mostly finds nothing new: leave the rows (and any open token popup or
+		// scrolled Value cell) alone then.
+		if (updateHtml) {
+			$('#transactionsTableBody').html(html);
+		}
 		$('#txView').show();
 	} else {
 		showLoadError('No transactions.');
@@ -426,6 +445,8 @@ function onMempoolAndTransactionsDataFetched() {
 	if (typeof getAddressesInfo === 'function') {
 		getAddressesInfo();
 	}
+
+	PendingTracker.onPendingTxsRendered(AddressState.mempoolData.items.map(tx => tx.id));
 
 	AddressState.printed = true;
 }
@@ -451,93 +472,6 @@ function refreshData() {
 	}
 }
 
-/**
- * Check if mempool has changed
- */
-function checkMempoolChanged() {
-	ApiClient.fetchMempool().then(function(data) {
-		const newMempoolCount = data.total;
-
-		if (newMempoolCount !== AddressState.mempoolCount) {
-			const balanceUrl = ApiClient.getTxsDataUrl();
-
-			$.get(balanceUrl, function(data) {
-				for (let i = 0; i < data.items.length; i++) {
-					let found = false;
-					for (let j = 0; j < AddressState.mempoolTxIds.length; j++) {
-						if (data.items[i].id === AddressState.mempoolTxIds[j]) {
-							onMempoolTxConfirmed();
-							found = true;
-							break;
-						}
-					}
-
-					if (found) {
-						break;
-					}
-
-					if (i === data.items.length - 1 && !found && newMempoolCount === 0) {
-						onMempoolEmptyNoConfirmation();
-						break;
-					}
-				}
-			});
-		}
-	}).catch(function(error) {
-		console.error('Mempool check failed:', error);
-	});
-}
-
-/**
- * Handle mempool transaction confirmed
- */
-function onMempoolTxConfirmed() {
-	if (Notification.permission === 'granted') {
-		const img = 'https://ergexplorer.com/images/logo.png';
-		const text = 'Transaction on address ' + AddressState.walletAddress + ' has been confirmed.';
-		AddressState.txNotification = new Notification('Transaction confirmed', { body: text, icon: img });
-
-		AddressState.txNotification.onclick = function(x) {
-			window.focus();
-			this.close();
-			location.reload();
-		};
-	}
-
-	if (AddressState.mempoolInterval !== undefined) {
-		clearTimeout(AddressState.mempoolInterval);
-	}
-
-	if (document.hasFocus()) {
-		location.reload();
-	}
-}
-
-/**
- * Handle mempool empty (no confirmation)
- */
-function onMempoolEmptyNoConfirmation() {
-	if (Notification.permission === 'granted') {
-		const img = 'https://ergexplorer.com/images/logo.png';
-		const text = 'Transaction on address ' + AddressState.walletAddress + ' status updated.';
-		const notification = new Notification('Transaction updated', { body: text, icon: img });
-
-		notification.onclick = function(x) {
-			window.focus();
-			this.close();
-			location.reload();
-		};
-	}
-
-	if (AddressState.mempoolInterval !== undefined) {
-		clearTimeout(AddressState.mempoolInterval);
-	}
-
-	if (document.hasFocus()) {
-		location.reload();
-	}
-}
-
 // Expose functions to global scope for HTML onclick handlers
 
 // Main orchestration
@@ -556,15 +490,13 @@ window.hideNfts = (e) => UIControllers.hideNfts(e);
 window.showIssuedNfts = (e) => UIControllers.showIssuedNfts(e);
 window.hideIssuedNfts = (e) => UIControllers.hideIssuedNfts(e);
 
-// UI Controllers - Notifications
-window.onNotificationToastYes = () => UIControllers.onNotificationToastYes();
-window.onNotificationToastNo = () => UIControllers.onNotificationToastNo();
+// Pending tx tracking: the prompt toast (layout.njk) and the bell on pending rows
+window.onNotificationToastYes = () => PendingTracker.acceptPrompt();
+window.onNotificationToastNo = () => PendingTracker.declinePrompt();
+window.togglePendingTxTracking = (e, txId) => PendingTracker.toggle(e, txId);
 
 // Unspent Boxes
 window.showUnspentBoxes = (e) => showUnspentBoxes(e);
 window.hideUnspentBoxes = (e) => hideUnspentBoxes(e);
 window.showAddressSectionTab = (e, section) => showAddressSectionTab(e, section);
 window.setAddressSectionTabAvailable = (section, count) => setAddressSectionTabAvailable(section, count);
-
-// Other functions
-window.checkMempoolChanged = () => checkMempoolChanged();

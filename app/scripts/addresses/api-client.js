@@ -112,7 +112,8 @@ export const ApiClient = {
 	 * Rejects only if all sources fail.
 	 */
 	async fetchMempool() {
-		const urls = [this.getOwnMempoolUrl(), this.getMempoolUrl()].filter(Boolean);
+		const ownUrl = this.getOwnMempoolUrl();
+		const urls = [ownUrl, this.getMempoolUrl()].filter(Boolean);
 
 		const results = await Promise.allSettled(urls.map(url =>
 			fetchWithTimeout(url, DATA_FETCH_TIMEOUT_MS, async (response) => {
@@ -123,15 +124,25 @@ export const ApiClient = {
 			})
 		));
 
-		const lists = results
-			.filter(result => result.status === 'fulfilled' && result.value && Array.isArray(result.value.items))
-			.map(result => result.value.items);
+		const pages = results.map(result =>
+			result.status === 'fulfilled' && result.value && Array.isArray(result.value.items) ? result.value : null);
+		const answered = pages.filter(Boolean);
 
-		if (lists.length === 0) {
+		if (answered.length === 0) {
 			throw new Error('Mempool fetch failed');
 		}
 
-		return mergeMempoolItems(lists);
+		const data = mergeMempoolItems(answered.map(page => page.items));
+
+		// For pending-tracker.js: every tx a source lists (the merge keeps one side of a double-spend),
+		data.ids = new Set(answered.flatMap(page => page.items.map(tx => tx.id)));
+		// what our node holds (null on testnet or when it failed to answer),
+		data.ownIds = ownUrl && pages[0] ? new Set(pages[0].items.map(tx => tx.id)) : null;
+		// and whether that is everything: a failed source, a paged list, or the explorer's
+		// `items: []` with `total > 0` would hide txs that are still pending.
+		data.complete = answered.length === urls.length && answered.every(page => page.items.length >= Number(page.total || 0));
+
+		return data;
 	},
 
 	/**
@@ -149,13 +160,30 @@ export const ApiClient = {
 		}
 
 		AddressState.mempoolData = data;
-		AddressState.mempoolCount = data.total;
-
-		if (data.total > 0 && AddressState.mempoolTxIds.length === 0) {
-			AddressState.mempoolTxIds = data.items.map(tx => tx.id);
-		}
 
 		return data;
+	},
+
+	/**
+	 * A tx as an indexer has it once it is in a block, or null while no indexer knows it
+	 * (still pending, its block not indexed yet, or dropped).
+	 */
+	async getConfirmedTransaction(txId) {
+		const urls = networkType === 'testnet'
+			? [API_HOST + 'api/v1/transactions/' + txId]
+			: [API_HOST_2 + 'transactions/' + txId, 'https://api.sigmaspace.io/api/v1/transactions/' + txId];
+
+		const results = await Promise.allSettled(urls.map(url =>
+			fetchWithTimeout(url, DATA_FETCH_TIMEOUT_MS, async (response) => {
+				return response.ok ? response.json() : null;
+			})
+		));
+
+		// sigmaspace answers an unknown id with HTTP 200 and an error body, hence the id check
+		const found = results.find(result => result.status === 'fulfilled' && result.value &&
+			result.value.id === txId && result.value.blockId);
+
+		return found ? found.value : null;
 	},
 
 	/**

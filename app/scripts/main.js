@@ -725,10 +725,11 @@ function copyAddress(e, element) {
 function showCustomToast(text) {
 	$('#customToastBody').html(text);
 
-	const toastLiveExample = document.getElementById('customToast');
-	const toast = new bootstrap.Toast(toastLiveExample);
+	bootstrap.Toast.getOrCreateInstance(document.getElementById('customToast')).show();
+}
 
-	toast.show();
+function hideCustomToast() {
+	bootstrap.Toast.getOrCreateInstance(document.getElementById('customToast')).hide();
 }
 
 function showQRcode(text) {
@@ -992,27 +993,62 @@ function showToast() {
 	toast.show();
 }
 
-function showNotificationPermissionToast() {
+function showNotificationPermissionToast(text) {
 	if (shownNotificationPermissionToast) {
 		return;
 	}
 
-	const toastLiveExample = document.getElementById('notificationToast');
-	const toast = new bootstrap.Toast(toastLiveExample);
+	if (text) {
+		$('#notificationToastText').text(text);
+	}
 
-	toast.show();
+	bootstrap.Toast.getOrCreateInstance(document.getElementById('notificationToast')).show();
 
 	shownNotificationPermissionToast = true;
 }
 
+// Through Bootstrap, not a jQuery fade: a faded-out toast keeps its `show` class and inline
+// display:none, so it could never be shown again.
 function hideNotificationPermissionToast() {
-	$('#notificationToast').fadeOut(200);
+	bootstrap.Toast.getOrCreateInstance(document.getElementById('notificationToast')).hide();
+}
+
+// iOS Safari outside an installed web app has no Notification API at all.
+function canShowSystemNotifications() {
+	return 'Notification' in window;
 }
 
 function requestNotificationPermission(action) {
-	Notification.requestPermission((result) => {
-		action();
-	});
+	if (!canShowSystemNotifications()) {
+		return;
+	}
+
+	try {
+		Notification.requestPermission(() => {
+			if (action) action();
+		});
+	} catch (error) {
+		console.warn('Notification permission request failed:', error);
+	}
+}
+
+// Does nothing where no notification can be shown: no API, no permission, or Chrome on Android,
+// whose Notification constructor throws (it only allows service worker notifications).
+function showSystemNotification(title, body) {
+	if (!canShowSystemNotifications() || Notification.permission !== 'granted') {
+		return;
+	}
+
+	try {
+		const notification = new Notification(title, { body: body, icon: 'https://ergexplorer.com/images/logo.png' });
+
+		notification.onclick = function() {
+			window.focus();
+			this.close();
+		};
+	} catch (error) {
+		console.warn('Notification failed:', error);
+	}
 }
 
 function isJson(str) {

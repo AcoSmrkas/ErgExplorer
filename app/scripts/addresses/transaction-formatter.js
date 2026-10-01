@@ -1,6 +1,7 @@
 import { AddressState } from './state.js';
 import { TxType, TxInOut, AddressType } from './constants.js';
 import { detectContractFromErgotree, detectLithosFill, getTxType, getTxInOutType, analyzeTransfers } from './transaction-analyzer.js';
+import { PendingTracker } from './pending-tracker.js?v=1';
 
 function formatContractAddress(boxes, address, fallback, walletAddress) {
 	const box = boxes.find(item => item.address === address && item.ergoTree);
@@ -304,8 +305,9 @@ export const TransactionFormatter = {
 		}
 		html += '<td' + (toAddress === walletAddress ? ' class="tx-self"' : '') + '><span class="d-lg-none"><strong>To: </strong></span>' + formattedToAddress + '</td>';
 
-		// Status & Fee
-		html += '<td><span class="tx-status"><span class="d-lg-none"><strong>Status: </strong></span><span class="' + (isMempool ? 'text-warning' : 'text-success') + '">' + (isMempool ? 'Pending' : 'Confirmed') + '</span></span><span class="d-inline d-lg-none text-white float-end tx-fee"><strong>Fee: </strong>' + formatErgValueString(fee) + '</span></td>';
+		// Status & Fee (a pending row gets the "notify me when it confirms" bell)
+		const statusHtml = isMempool ? '<span class="text-warning">Pending</span>' + PendingTracker.trackButtonHtml(item.id) : '<span class="text-success">Confirmed</span>';
+		html += '<td><span class="tx-status"><span class="d-lg-none"><strong>Status: </strong></span>' + statusHtml + '</span><span class="d-inline d-lg-none text-white float-end tx-fee"><strong>Fee: </strong>' + formatErgValueString(fee) + '</span></td>';
 
 		// Fee
 		html += '<td class="d-none d-lg-table-cell">' + formatErgValueString(fee) + '</td>';

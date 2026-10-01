@@ -196,30 +196,27 @@
 		<!-- Footer -->
 		{% include "partials/footer.njk" %}
 
-		<!-- Bootstrap Custom Toast -->
+		<!-- Bootstrap toasts: one container, so toasts shown together stack instead of covering each other -->
 		<div class="toast-container position-fixed bottom-0 end-0 p-3">
-			<div id="customToast" data-bs-config='{"autohide":false}' class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-				<div id="customToastBody" class="toast-body"></div>
-			</div>
-		</div>
-
-		<!-- Bootstrap Toast Clipboard -->
-		<div class="toast-container position-fixed bottom-0 end-0 p-3">
-			<div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-				<div id="toastBody" class="toast-body">
-					Copied to clipboard!
-				</div>
-			</div>
-		</div>
-
-		<!-- Bootstrap Toast Notification -->
-		<div class="toast-container position-fixed bottom-0 end-0 p-3">
+			<!-- Notification prompt -->
 			<div id="notificationToast" data-bs-config='{"autohide":false}' class="toast" role="alert" aria-live="assertive" aria-atomic="true">
 				<div id="notificationToastBody" class="toast-body d-flex align-items-end">
 					<p id="notificationToastText">Transaction pending. Do you want to get notified when it confirms?</p>
 					<br>
-					<button class="btn btn-primary m-1 end-0" onclick="onNotificationToastNo()">No</button> 
+					<button class="btn btn-primary m-1 end-0" onclick="onNotificationToastNo()">No</button>
 					<button class="btn btn-info m-1 end-0" onclick="onNotificationToastYes()">Yes</button>
+				</div>
+			</div>
+
+			<!-- Custom toast (pending tx tracking) -->
+			<div id="customToast" data-bs-config='{"autohide":false}' class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+				<div id="customToastBody" class="toast-body"></div>
+			</div>
+
+			<!-- Clipboard -->
+			<div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+				<div id="toastBody" class="toast-body">
+					Copied to clipboard!
 				</div>
 			</div>
 		</div>
@@ -236,7 +233,7 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/bignumber.js/8.0.2/bignumber.min.js" integrity="sha512-7UzDjRNKHpQnkh1Wf1l6i/OPINS9P2DDzTwQNX79JxfbInCXGpgI1RPb3ZD+uTP3O5X7Ke4e0+cxt2TxV7n0qQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 		<script src="https://cdn.jsdelivr.net/npm/json-bigint-parser-browser@1.0.4/json-bigint-browser.min.js"></script>
 		<script src="./scripts/common/token-icons.js?v=41"></script>
-		<script src="./scripts/main.js?v=44"></script>
+		<script src="./scripts/main.js?v=45"></script>
 		<script src="./scripts/common/token-popup.js?v=41"></script>
 
 <!--

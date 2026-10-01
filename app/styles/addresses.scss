@@ -694,6 +694,35 @@ select:hover {
 	}
 }
 
+// Pending tx tracking (pending-tracker.js): the bell after "Pending" in the Status cell
+.address-tx-table .tx-status {
+	white-space: nowrap;
+}
+
+.tx-track {
+	background: none;
+	border: 0;
+	border-radius: 4px;
+	color: var(--text-light);
+	cursor: pointer;
+	line-height: 1;
+	margin-left: 0.3rem;
+	padding: 0.15rem 0.25rem;
+}
+
+.tx-track:hover,
+.tx-track:focus-visible,
+.tx-track.active {
+	color: var(--main-color);
+}
+
+@media only screen and (max-width: 991.98px) {
+	.tx-track {
+		min-height: 1.9rem; // tap target
+		min-width: 1.9rem;
+	}
+}
+
 #unspentBoxesHolder > .div-cell {
 	border-radius: 0;
 	max-height: 200px;

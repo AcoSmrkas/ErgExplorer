@@ -11,12 +11,10 @@ export const AddressState = {
 	mempoolRequestDone: false,
 	transactionsRequestDone: false,
 
-	// Mempool management
-	mempoolCount: 0,
-	mempoolInterval: undefined,
-	mempoolTxIds: [],
-	mempoolIndexOffset: 0,
-	checkMempoolChangesFn: null, // Store interval function reference
+	// Pending txs the user asked to be notified about: tx id -> { missing, missingSince } (pending-tracker.js)
+	trackedTxs: new Map(),
+	// Watched txs found in a block, kept off the Pending rows while a mempool still lists them
+	confirmedTxIds: new Set(),
 
 	// NFT data
 	nftsCount: 0,
@@ -42,10 +40,6 @@ export const AddressState = {
 	unspentBoxesOffset: 0,
 	unspentBoxesPageSize: 8,
 
-	// Notifications and UI state
-	txNotification: undefined,
-	txNotificationId: undefined,
-
 	// Scam list
 	scamList: [],
 
@@ -70,9 +64,8 @@ export const AddressState = {
 		this.transactionsData = undefined;
 		this.mempoolRequestDone = false;
 		this.transactionsRequestDone = false;
-		this.mempoolCount = 0;
-		this.mempoolTxIds = [];
-		this.mempoolIndexOffset = 0;
+		this.trackedTxs = new Map();
+		this.confirmedTxIds = new Set();
 		this.nftsCount = 0;
 		this.issuedNftsCount = 0;
 		this.loadingOwnedNfts = false;
