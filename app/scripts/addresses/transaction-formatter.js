@@ -254,7 +254,7 @@ export const TransactionFormatter = {
 		html += '<tr class="tx-row ' + dirClass + (isMempool ? ' tx-pending' : ' tx-confirmed') + '" data-tx-id="' + item.id + '">';
 
 		// Tx link
-		html += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionsUrl(item.id) + '"><i class="fas fa-link text-info"></i><span class="tx-hash d-inline d-lg-none d-xl-inline"> ' + formatAddressString(item.id, 6) + '</span></a><span class="d-inline d-lg-none text-light float-end tx-time" title="' + formatDateString(timestamp) + '">' + formatShortDateString(timestamp) + '</span></td>';
+		html += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionsUrl(item.id) + '"><i class="fas fa-link text-info"></i><span class="tx-hash d-inline d-lg-none d-xl-inline"> ' + formatAddressString(item.id, 4) + '</span></a><span class="d-inline d-lg-none text-light float-end tx-time" title="' + formatDateString(timestamp) + '">' + formatShortDateString(timestamp) + '</span></td>';
 
 		// Timestamp
 		html += '<td class="d-none d-lg-table-cell">' + formatDateString(timestamp) + '</td>';
