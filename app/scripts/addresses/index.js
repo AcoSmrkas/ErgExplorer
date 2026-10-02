@@ -350,7 +350,8 @@ function showAddressSectionTab(e, section) {
 	if (e) e.preventDefault();
 	if (!isAddressSectionTabAvailable(section)) return;
 
-	activeAddressSectionTab = section;
+	// Clicking the open tab again closes its panel
+	activeAddressSectionTab = activeAddressSectionTab === section ? null : section;
 	syncAddressSectionTabs();
 }
 
