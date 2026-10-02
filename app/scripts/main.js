@@ -1205,12 +1205,72 @@ function getAddressesInfo() {
 
 		addressbook = data.items;
 
-		$('.address-string').each(function(index) {
-			if ($(this).html() != 'This Address') {
-				$(this).html(getOwner($(this).attr('addr')));
-			}
-		});
+		labelAddressStrings();
 	});
+
+	loadContractTemplates().then(function(analyzer) {
+		contractAnalyzer = analyzer;
+		labelAddressStrings();
+	});
+}
+
+//The book's name wins; a contract template only names an address still shown as
+//its shortened self, so it never replaces a label a page already chose (the
+//address page names Lithos pool boxes after the fill they took part in).
+function labelAddressStrings() {
+	$('.address-string').each(function(index) {
+		if ($(this).html() == 'This Address') {
+			return;
+		}
+
+		let address = $(this).attr('addr');
+		let label = getOwner(address);
+
+		if (label == undefined && isShortenedAddress($(this).text(), address)) {
+			label = getContractLabel(address);
+		}
+
+		if (label != undefined) {
+			$(this).html(label);
+		}
+	});
+}
+
+function isShortenedAddress(text, address) {
+	let parts = text.split('...');
+
+	return text == address || (parts.length == 2 && address.startsWith(parts[0]) && address.endsWith(parts[1]));
+}
+
+//Contract templates (addresses/constants.js) are some 200 kB, so they load only
+//once a page has addresses to label.
+var contractAnalyzer = null;
+var contractAnalyzerImport = null;
+
+function loadContractTemplates() {
+	if (contractAnalyzerImport == null) {
+		contractAnalyzerImport = import('./addresses/transaction-analyzer.js').catch(function() {
+			return null;
+		});
+	}
+
+	return contractAnalyzerImport;
+}
+
+//A P2S address carries its whole ErgoTree, so the templates the address page
+//matches against box trees match the address itself just as well.
+function getContractLabel(address) {
+	if (contractAnalyzer == null) {
+		return undefined;
+	}
+
+	try {
+		let ergoTree = qfleetSDKcore.ErgoAddress.fromBase58(address).ergoTree;
+
+		return contractAnalyzer.detectContractFromErgotree(ergoTree) || undefined;
+	} catch (e) {
+		return undefined;
+	}
 }
 
 function addAddress(address) {
