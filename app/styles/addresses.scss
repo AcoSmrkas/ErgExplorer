@@ -430,8 +430,23 @@ select:hover {
 	display: none;
 }
 
+// The tabs show and hide these, which replays the animation: the panel eases in instead of popping
 .address-section-panel {
 	margin-top: 0.1rem;
+	animation: address-panel-in 0.18s ease-out;
+}
+
+@keyframes address-panel-in {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.address-section-panel {
+		animation: none;
+	}
 }
 
 @media only screen and (min-width: 992px) {
@@ -749,10 +764,9 @@ select:hover {
 	}
 }
 
+// No height cap: the box card scrolls its own token list, and a capped card cut that list after two rows
 #unspentBoxesHolder > .div-cell {
 	border-radius: 0;
-	max-height: 200px;
-	overflow-y: auto;
 }
 
 #unspentBoxesHolder > .div-cell:not(:first-child) {

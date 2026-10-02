@@ -895,10 +895,10 @@ function formatBox(box, trueBox = false, unspent = false, change = false) {
 
 	//Assets
 	if (box.assets != undefined && box.assets.length > 0) {
-		//Long lists scroll inside a fixed height, faded at the bottom until scrolled to the end
+		//Long lists scroll inside a fixed height, with faded edges
 		const scrolls = box.assets.length > BOX_TOKENS_SHOWN;
 
-		html += '<div class="box-section">Tokens <span class="box-count">(' + box.assets.length + ')</span></div><div class="box-tokens' + (scrolls ? ' box-tokens-scroll' : '') + '">';
+		html += '<div class="box-section">Tokens <span class="box-count">(' + box.assets.length + ')</span></div><div class="box-tokens' + (scrolls ? ' box-tokens-scroll scroll-fade' : '') + '">';
 
 		for (let j = 0; j < box.assets.length; j++) {
 			let asset = box.assets[j];
@@ -924,14 +924,49 @@ function formatBox(box, trueBox = false, unspent = false, change = false) {
 
 const BOX_TOKENS_SHOWN = 6;
 
-//Scroll doesn't bubble, so one capturing listener drops the fade once a token list hits its end
+//A .scroll-fade list fades at the top once scrolled down and at the bottom until scrolled to its end
+function updateScrollFade(list) {
+	list.classList.toggle('scrolled-down', list.scrollTop > 2);
+	list.classList.toggle('scrolled-end', list.scrollTop + list.clientHeight >= list.scrollHeight - 2);
+}
+
+//Scroll doesn't bubble, so one capturing listener serves every faded list
 document.addEventListener('scroll', function(e) {
 	const list = e.target;
 
-	if (list.classList && list.classList.contains('box-tokens-scroll')) {
-		list.classList.toggle('scrolled-end', list.scrollTop + list.clientHeight >= list.scrollHeight - 2);
+	if (list.classList && list.classList.contains('scroll-fade')) {
+		updateScrollFade(list);
 	}
 }, true);
+
+//Lists whose height comes from the layout fade only while they overflow. This rechecks the container,
+//or the lists inside it matching selector, whenever it resizes (including being shown) or is refilled
+function watchScrollFade(container, selector) {
+	if (!container) {
+		return;
+	}
+
+	const refresh = function() {
+		const lists = selector ? container.querySelectorAll(selector) : [container];
+
+		for (const list of lists) {
+			const overflows = list.scrollHeight > list.clientHeight + 2;
+
+			list.classList.toggle('scroll-fade', overflows);
+
+			if (overflows) {
+				updateScrollFade(list);
+			}
+		}
+	};
+
+	if (typeof ResizeObserver != 'undefined') {
+		new ResizeObserver(refresh).observe(container);
+	}
+
+	new MutationObserver(refresh).observe(container, { childList: true, subtree: !!selector });
+	refresh();
+}
 
 //The miner fee output on one line: it never holds tokens or registers worth a card
 function formatFeeBox(box) {

@@ -1065,18 +1065,41 @@ html[data-theme="mew"] .btn-primary {
 	font-weight: 400;
 }
 
-// About six rows, with a scrollbar that stays visible (macOS hides unstyled ones)
-// and a fade over the last row until the list is scrolled to its end
+// About six rows
 .box-tokens-scroll {
 	max-height: 152px;
 	overflow-y: auto;
 	padding-right: 8px;
-	-webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
-	mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
+}
+
+// Registered so the fades below slide in and out instead of snapping
+@property --fade-top {
+	syntax: '<length>';
+	inherits: false;
+	initial-value: 0px;
+}
+
+@property --fade-bottom {
+	syntax: '<length>';
+	inherits: false;
+	initial-value: 0px;
+}
+
+// A list that scrolls inside a fixed height: a scrollbar that stays visible (macOS hides unstyled ones),
+// a fade over the last row until the list is scrolled to its end, and one over the first row once it
+// leaves the top. main.js sets scrolled-down / scrolled-end
+.scroll-fade {
+	--fade-bottom: 28px;
+	-webkit-mask-image: linear-gradient(to bottom, transparent, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent);
+	mask-image: linear-gradient(to bottom, transparent, #000 var(--fade-top), #000 calc(100% - var(--fade-bottom)), transparent);
+	transition: --fade-top 0.2s ease, --fade-bottom 0.2s ease;
+
+	&.scrolled-down {
+		--fade-top: 20px;
+	}
 
 	&.scrolled-end {
-		-webkit-mask-image: none;
-		mask-image: none;
+		--fade-bottom: 0px;
 	}
 
 	&::-webkit-scrollbar {
@@ -1124,7 +1147,10 @@ html[data-theme="mew"] .btn-primary {
 	padding: 1px 0;
 }
 
+// Grows into the free space: a logo SVG with only a viewBox (RSN's) counts as 0px wide when the row
+// sizes this, which left the name an icon's width short and printed it as "..."
 .box-token-name {
+	flex-grow: 1;
 	min-width: 0;
 	overflow: hidden;
 	text-overflow: ellipsis;

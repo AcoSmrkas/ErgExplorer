@@ -98,8 +98,17 @@ $(async function() {
 	AddressState.walletAddress = walletAddress;
 	setDocumentTitle(AddressState.walletAddress);
 	PendingTracker.init({ refresh: refreshData });
+	watchScrollingLists();
 	initializeAddressPage();
 });
+
+// Token lists, NFT grids and many-token Value cells scroll inside a fixed height: fade their edges while they overflow
+function watchScrollingLists() {
+	watchScrollFade(document.getElementById('financialTokens'));
+	watchScrollFade(document.getElementById('otherTokens'));
+	document.querySelectorAll('#nftsHolder [id$="ContentHolder"], #issuedNftsHolder [id$="ContentHolder"]').forEach(holder => watchScrollFade(holder));
+	watchScrollFade(document.getElementById('transactionsTableBody'), '.tx-value');
+}
 
 /**
  * Initialize the address page
