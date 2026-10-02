@@ -1095,6 +1095,11 @@ html[data-theme="mew"] .btn-primary {
 	}
 }
 
+// The box page card spans the whole container, which pushes amounts far from their names
+#boxHolder .box-tokens {
+	max-width: 640px;
+}
+
 .box-fee {
 	align-items: center;
 	color: var(--text-light);
@@ -1139,6 +1144,8 @@ html[data-theme="mew"] .btn-primary {
 	grid-template-columns: max-content minmax(0, 1fr);
 	column-gap: 12px;
 	row-gap: 2px;
+	// Labels and monospace hex values differ in size, so line them up on the text
+	align-items: baseline;
 
 	> span:nth-child(odd) {
 		color: var(--text-strong);

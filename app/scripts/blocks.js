@@ -9,8 +9,27 @@ $(function() {
 	setDocumentTitle(blockId);
 });
 
+//The url can hold a height instead of an id; only the v0 api resolves heights
+function resolveBlockId() {
+	if (!/^\d+$/.test(blockId)) {
+		return Promise.resolve(blockId);
+	}
+
+	return fetch(API_HOST.replace('api/v1/', 'api/v0/') + 'blocks/at/' + blockId)
+	.then(response => response.ok ? response.json() : [])
+	.then(ids => {
+		if (ids.length == 0) {
+			throw new Error('No block at height ' + blockId);
+		}
+
+		blockId = ids[0];
+		return blockId;
+	});
+}
+
 function printBlock() {
-	fetch(API_HOST + 'blocks/' + blockId)
+	resolveBlockId()
+	.then(id => fetch(API_HOST + 'blocks/' + id))
 	.then(async response => {
 		if (!response.ok) {
             throw new Error('Network response was not ok');

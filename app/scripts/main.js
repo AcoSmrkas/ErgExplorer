@@ -878,7 +878,7 @@ function formatBox(box, trueBox = false, unspent = false, change = false) {
 	}
 
 	//Value
-	html += '<div class="box-value">' + formatErgValueString(box.value, 9, true, !trueBox) + ' <span class="text-light">' + formatAssetDollarPriceString(box.value, ERG_DECIMALS, 'ERG') + '</span></div>';
+	html += '<div class="box-value">' + formatErgValueString(box.value, 9, true, true) + ' <span class="text-light">' + formatAssetDollarPriceString(box.value, ERG_DECIMALS, 'ERG') + '</span></div>';
 
 	//The box page shows the full ids and heights
 	if (trueBox) {
@@ -889,7 +889,7 @@ function formatBox(box, trueBox = false, unspent = false, change = false) {
 			html += '<span>Spent in</span><span class="box-hex"><a href="' + getTransactionsUrl(box.spentTransactionId) + '">' + box.spentTransactionId + '</a> ' + copyIcon(box.spentTransactionId) + '</span>';
 		}
 
-		html += '<span>Created at</span><span>' + nFormatter(box.creationHeight, 0, true, true) + '</span>';
+		html += '<span>Created at</span><span><a href="' + getBlockUrl(box.creationHeight) + '">' + nFormatter(box.creationHeight, 0, true, true) + '</a></span>';
 		html += '</div>';
 	}
 
