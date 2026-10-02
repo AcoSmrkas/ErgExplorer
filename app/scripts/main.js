@@ -34,7 +34,34 @@ $(function() {
 
 	$('#cyear').html(new Date().getFullYear());
 
+	initFooterHeart();
 });
+
+//Now and then the footer heart turns red and beats on its own: on one page in six a few seconds after it
+//loads, and on a page left open about every three minutes
+function initFooterHeart() {
+	const heart = document.querySelector('.footer-heart');
+
+	if (!heart || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+		return;
+	}
+
+	const beat = function(chance) {
+		if (!document.hidden && Math.random() < chance) {
+			heart.classList.add('beating');
+		}
+	};
+
+	//The floating heart's own animationend bubbles here too, so only the beat itself ends it
+	heart.addEventListener('animationend', function(e) {
+		if (e.animationName == 'footer-heartbeat') {
+			heart.classList.remove('beating');
+		}
+	});
+
+	setTimeout(beat, 3000 + Math.random() * 5000, 1 / 6);
+	setInterval(beat, 20000, 1 / 9);
+}
 
 window.addEventListener('hashchange', () => {
 		if (IS_DEV_ENVIRONMENT) {

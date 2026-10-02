@@ -626,6 +626,76 @@ html[data-theme="mew"] .btn-primary {
 	z-index: 2;
 }
 
+// The donate heart: pink, red with a lub-dub heartbeat on hover. Now and then main.js makes it beat on
+// its own (.beating), and a small heart floats up out of it
+.footer-heart {
+	position: relative;
+	display: inline-block;
+	color: pink;
+	transition: color 0.3s ease;
+}
+
+.footer-donate:hover .footer-heart,
+.footer-heart.beating {
+	color: #ff3b5c;
+	animation: footer-heartbeat 1.2s ease-in-out infinite;
+}
+
+.footer-heart.beating {
+	animation-iteration-count: 2;
+
+	&::after {
+		content: '\2665';
+		position: absolute;
+		top: 0;
+		left: 50%;
+		font-size: 0.7em;
+		pointer-events: none;
+		animation: footer-heart-float 1.8s ease-out forwards;
+	}
+}
+
+@keyframes footer-heartbeat {
+	0%, 45%, 100% {
+		transform: scale(1);
+	}
+
+	12% {
+		transform: scale(1.3);
+	}
+
+	24% {
+		transform: scale(1.05);
+	}
+
+	34% {
+		transform: scale(1.22);
+	}
+}
+
+@keyframes footer-heart-float {
+	from {
+		opacity: 0.9;
+		transform: translate(-50%, 0);
+	}
+
+	to {
+		opacity: 0;
+		transform: translate(-10%, -1.6em) scale(0.8);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.footer-donate:hover .footer-heart,
+	.footer-heart.beating {
+		animation: none;
+	}
+
+	.footer-heart.beating::after {
+		display: none;
+	}
+}
+
 .token-icon {
 	max-width: 18px;
 	max-height: 18px;
