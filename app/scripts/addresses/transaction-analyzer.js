@@ -1,4 +1,4 @@
-import { CRUX_TEMPLATES, LITHOS_TEMPLATES, SPECTRUM_TEMPLATES, SWAP_TEMPLATES, TxInOut, TxType } from './constants.js';
+import { CRUX_TEMPLATES, ERGORAFFLE_TEMPLATES, LITHOS_TEMPLATES, SPECTRUM_TEMPLATES, SWAP_TEMPLATES, TxInOut, TxType } from './constants.js';
 
 /**
  * Determine transaction type based on input/output address types
@@ -108,6 +108,24 @@ export function detectContractFromErgotree(ergoTree, addressType = 'label') {
 		[LITHOS_TEMPLATES.LP_REDEEM]: 'Lithos LP Redeem',
 		[LITHOS_TEMPLATES.POOL]: 'Lithos Liquidity Pool'
 	};
+
+	const ergoRaffleLabels = {
+		SERVICE: 'ErgoRaffle Service',
+		CREATE_PROXY: 'ErgoRaffle Raffle Creation',
+		RAFFLE_SETUP: 'ErgoRaffle Raffle Setup',
+		RAFFLE_TOKENS: 'ErgoRaffle Raffle Setup',
+		ACTIVE: 'ErgoRaffle Active Raffle',
+		TICKET_PROXY: 'ErgoRaffle Ticket Purchase',
+		TICKET: 'ErgoRaffle Ticket',
+		WINNER: 'ErgoRaffle Winner Prize',
+		REFUND: 'ErgoRaffle Refund'
+	};
+
+	for (const [key, label] of Object.entries(ergoRaffleLabels)) {
+		for (const template of ERGORAFFLE_TEMPLATES[key]) {
+			templates[template] = label;
+		}
+	}
 
 	for (const [template, label] of Object.entries(templates)) {
 		if (ergoTree.endsWith(template)) {
