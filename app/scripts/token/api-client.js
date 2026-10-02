@@ -26,7 +26,7 @@ export const TokenApiClient = {
 						console.log('Prices loaded, checking for price history data');
 
 						// Refresh UI components that depend on prices
-						import('./ui-display.js').then(module => {
+						import('./ui-display.js?v=2').then(module => {
 							if (TokenState.amountsData) module.TokenUIDisplay.printSupplyInfo();
 							if (TokenState.holders && TokenState.holders.length > 0) module.TokenUIDisplay.printHolders(TokenState.holders);
 							if (TokenState.txs && TokenState.txs.length > 0) module.TokenUIDisplay.printTxs(TokenState.txs);
