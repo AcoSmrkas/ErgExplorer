@@ -2,6 +2,11 @@
 	background-color: var(--striped-1);
 }
 
+// Clip the striped last box to the column's rounded corner, as blocks.scss does for .block-tx-column
+#ioHolder > div {
+	overflow: hidden;
+}
+
 #txInputs > .div-cell, #txOutputs > .div-cell {
 	border: 0;
 	border-top: 1px solid var(--borders);

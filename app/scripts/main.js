@@ -753,14 +753,34 @@ function showQRcode(text) {
 	window.scrollTo(0, 0);
 }
 
-function formatInputsOutputs(data) {
+//Pass a tx's inputs with its outputs to tag the outputs that return change to a spending wallet
+function formatInputsOutputs(data, inputs = null) {
 	let formattedData = '';
+	const changeAddresses = new Set();
+
+	for (const input of inputs || []) {
+		if (isWalletBox(input)) {
+			changeAddresses.add(getBoxAddress(input));
+		}
+	}
 
 	for (let i = 0; i < data.length; i++) {
-		formattedData += formatBox(data[i]);
+		const change = isWalletBox(data[i]) && changeAddresses.has(getBoxAddress(data[i]));
+
+		formattedData += formatBox(data[i], false, false, change);
 	}
 
 	return formattedData;
+}
+
+//A box guarded by a single public key (P2PK), i.e. a plain wallet rather than a contract.
+//Block API inputs come without an ErgoTree; a P2PK address is 51 chars from 9 (mainnet) or 3 (testnet)
+function isWalletBox(box) {
+	if (box.ergoTree) {
+		return box.ergoTree.startsWith('0008cd');
+	}
+
+	return typeof box.address == 'string' && box.address.length == 51 && /^[93]/.test(box.address);
 }
 
 /**
@@ -802,81 +822,128 @@ function getFleetNetwork() {
 		: qfleetSDKcore.Network.Mainnet;
 }
 
-function formatBox(box, trueBox = false, unspent = false) {
-	let formattedData = '<div class="row div-cell border-flat p-2">';
-		
-	let customIdString = '';
-	
+function formatBox(box, trueBox = false, unspent = false, change = false) {
 	if (box.id) {
 		box.boxId = box.id;
 	}
 
-	if (box.boxId) {
-		customIdString = '<p><strong class="text-white">Box Id: </strong><a href=" ' + getBoxUrl(box.boxId) + '">'+box.boxId.substr(0, 8) + '...' + box.boxId.substr(box.boxId.length - 4)+'</a> <a title="' + box.boxId + '" onclick="copyId(event, this)" href="Copy to clipboard!">&#128203;</a></p>';
-	}
-
-	//Address
 	const boxAddress = getBoxAddress(box);
+
+	if (boxAddress == FEE_ADDRESS && !trueBox && !unspent) {
+		return formatFeeBox(box);
+	}
+
 	addAddress(boxAddress);
-	formattedData += '<div class="ps-0 pe-0 pe-md-2 ps-md-2 col-9">' + customIdString + '<span><strong>Address: </strong></span><a class="address-string" addr="' + boxAddress + '" href="' + getWalletAddressUrl(boxAddress) + '" >' + formatAddressString(boxAddress, 8) + '</a> <a title="' + boxAddress + '" onclick="copyId(event, this)" href="Copy to clipboard!">&#128203;</a></p>';
 
+	let html = '<div class="row div-cell border-flat p-2"><div class="col-12 box-card">';
 
-	if (trueBox) {
-		formattedData += '<p><strong class="text-white">Transaction Id: </strong><a href=" ' + getTransactionsUrl(box.transactionId) + '">'+box.transactionId+'</a> <a title="' + box.transactionId + '" onclick="copyId(event, this)" href="Copy to clipboard!">&#128203;</a></p>';
+	//Header: index and address, with spent status and the creating tx to the right
+	let status = change ? '<span class="text-light" title="Goes back to an address that funded this transaction">Change</span>' : '';
+
+	if (!unspent && box.spentTransactionId !== undefined) {
+		status += box.spentTransactionId === null
+			? '<span class="text-success">Unspent</span>'
+			: '<a class="text-danger" title="Transaction that spent this box" href="' + getTransactionsUrl(box.spentTransactionId) + '">Spent</a>';
 	}
 
-	//Status
-	if (trueBox) {
-		if (box.spentTransactionId) {
-			formattedData += '<p><strong class="text-white">Spent Transaction Id: </strong><a href=" ' + getTransactionsUrl(box.spentTransactionId) + '">'+box.spentTransactionId+'</a> <a title="' + box.spentTransactionId + '" onclick="copyId(event, this)" href="Copy to clipboard!">&#128203;</a></p>';
-		}
-		formattedData += '<p><strong class="text-white">Creation height</strong>: ' + nFormatter(box.creationHeight, 0, true, true) + '</p>';
+	if (box.outputTransactionId != undefined) {
+		status += '<a title="Transaction that created this box" href="' + getTransactionsUrl(box.outputTransactionId) + '">Output</a>';
 	}
 
-	//Inputs carry the height and block of the tx that created them under output* names
+	//The address page lists its own unspent boxes, where the address would only repeat the page's
+	if (!unspent) {
+		html += '<div class="box-head">'
+			+ '<div class="box-address">' + (box.index != undefined && !trueBox ? '<span class="box-index">#' + box.index + '</span>' : '')
+			+ '<a class="address-string" addr="' + boxAddress + '" href="' + getWalletAddressUrl(boxAddress) + '" >' + formatAddressString(boxAddress, 8) + '</a> ' + copyIcon(boxAddress) + '</div>'
+			+ (status ? '<div class="box-status">' + status + '</div>' : '')
+			+ '</div>';
+	}
+
+
+	//Box id and heights. Inputs carry the height and block of the tx that created them under output* names
 	const settlementHeight = box.settlementHeight || box.outputSettledAt;
 	const settlementBlockId = box.blockId || box.outputBlockId;
+	let meta = [];
 
-	if (settlementHeight) {
-		formattedData += '<p><strong class="text-white">Settlement height</strong>: <a href="' + getBlockUrl(settlementBlockId) + '">' + nFormatter(settlementHeight, 0, true, true) + '</a></p>';
+	if (box.boxId && !trueBox) {
+		meta.push('<strong>ID</strong> <a href="' + getBoxUrl(box.boxId) + '">' + formatAddressString(box.boxId, 8) + '</a> ' + copyIcon(box.boxId));
 	}
 
-	formattedData += '</div>';
+	if (settlementHeight) {
+		meta.push('<strong>Height</strong> <a href="' + getBlockUrl(settlementBlockId) + '">' + nFormatter(settlementHeight, 0, true, true) + '</a>');
+	}
 
-	if (!unspent) {
-		formattedData += '<div class="ps-0 pe-0 pe-md-2 ps-md-2 col-3 d-flex justify-content-end">' + (box.spentTransactionId === undefined ? '' : box.spentTransactionId === null ? '<span class="text-success">Unspent' : '<span class="text-danger">Spent') + '</span></div>';
+	if (meta.length > 0) {
+		html += '<div class="box-meta">' + meta.join('<span class="box-dot">·</span>') + '</div>';
 	}
 
 	//Value
-	formattedData += '<div style="padding-bottom:10px;" class="ps-0 pe-0 pe-md-2 ps-md-2 col-10"><span><strong>Value: </strong></span><span class="">' + formatErgValueString(box.value, 9, true, !trueBox) + ' <span class="text-light">' + formatAssetDollarPriceString(box.value, ERG_DECIMALS, 'ERG') + '</span></span></div>';
-	
-	//Output transaction
-	if (box.outputTransactionId != undefined) {
-		formattedData += '<div class="ps-0 pe-0 pe-md-2 ps-md-2 col-2 d-flex justify-content-end"><a href="' + getTransactionsUrl(box.outputTransactionId) + '" >Output</a></div>';
+	html += '<div class="box-value">' + formatErgValueString(box.value, 9, true, !trueBox) + ' <span class="text-light">' + formatAssetDollarPriceString(box.value, ERG_DECIMALS, 'ERG') + '</span></div>';
+
+	//The box page shows the full ids and heights
+	if (trueBox) {
+		html += '<div class="box-section">Details</div><div class="box-grid">';
+		html += '<span>Transaction</span><span class="box-hex"><a href="' + getTransactionsUrl(box.transactionId) + '">' + box.transactionId + '</a> ' + copyIcon(box.transactionId) + '</span>';
+
+		if (box.spentTransactionId) {
+			html += '<span>Spent in</span><span class="box-hex"><a href="' + getTransactionsUrl(box.spentTransactionId) + '">' + box.spentTransactionId + '</a> ' + copyIcon(box.spentTransactionId) + '</span>';
+		}
+
+		html += '<span>Created at</span><span>' + nFormatter(box.creationHeight, 0, true, true) + '</span>';
+		html += '</div>';
 	}
 
 	//Assets
-	if (box.assets != undefined && box.assets.length > 0 ) {
-		formattedData += '<h5 class="ps-0 pe-0 pe-md-2 ps-md-2"><strong>Tokens:</strong></h5><div style="max-height:300px;overflow-y:auto;" class="ps-0 pe-0 pe-md-2 ps-md-2">';
+	if (box.assets != undefined && box.assets.length > 0) {
+		//Long lists scroll inside a fixed height, faded at the bottom until scrolled to the end
+		const scrolls = box.assets.length > BOX_TOKENS_SHOWN;
+
+		html += '<div class="box-section">Tokens <span class="box-count">(' + box.assets.length + ')</span></div><div class="box-tokens' + (scrolls ? ' box-tokens-scroll' : '') + '">';
+
 		for (let j = 0; j < box.assets.length; j++) {
 			let asset = box.assets[j];
 			let assetPrice = formatAssetDollarPrice(asset.amount, asset.decimals, asset.tokenId);
 
-			formattedData += '<p><strong>' + getAssetTitle(asset, true) + '</strong>: <span class="text-white">' + formatAssetValueString(asset.amount, asset.decimals, 4, !trueBox) + ' ' + (assetPrice == -1 ? '' : '<span class="text-light">' + formatDollarPriceString(assetPrice) + '</span>') + '</span></p>';
+			html += '<div class="box-token"><span class="box-token-name">' + getAssetTitle(asset, true) + '</span>'
+				+ '<span class="box-token-amount">' + formatAssetValueString(asset.amount, asset.decimals, 4, !trueBox)
+				+ (assetPrice == -1 ? '' : ' <span class="text-light">' + formatDollarPriceString(assetPrice) + '</span>') + '</span></div>';
 		}
-		formattedData += '</div>'
+
+		html += '</div>';
 	}
 
 	//Registers
-	formattedData += formatBoxRegisters(box.additionalRegisters);
+	html += formatBoxRegisters(box.additionalRegisters);
 
 	if (trueBox) {
-		formattedData += '<p> </p><p style="margin-bottom:5px;"><strong class="text-white">Ergo tree:</strong></p> <div style="word-wrap:break-word;background: var(--striped-1);" class="div-cell-dark">' + box.ergoTree + '</div>';
+		html += '<div class="box-section">Ergo tree</div><div class="div-cell-dark box-hex box-tree">' + box.ergoTree + '</div>';
 	}
 
-	formattedData += '</div>';
+	return html + '</div></div>';
+}
 
-	return formattedData;
+const BOX_TOKENS_SHOWN = 6;
+
+//Scroll doesn't bubble, so one capturing listener drops the fade once a token list hits its end
+document.addEventListener('scroll', function(e) {
+	const list = e.target;
+
+	if (list.classList && list.classList.contains('box-tokens-scroll')) {
+		list.classList.toggle('scrolled-end', list.scrollTop + list.clientHeight >= list.scrollHeight - 2);
+	}
+}, true);
+
+//The miner fee output on one line: it never holds tokens or registers worth a card
+function formatFeeBox(box) {
+	return '<div class="row div-cell border-flat p-2"><div class="col-12 box-card"><div class="box-head box-fee">'
+		+ '<div>' + (box.index != undefined ? '<span class="box-index">#' + box.index + '</span>' : '')
+		+ '<a href="' + getWalletAddressUrl(FEE_ADDRESS) + '">Miner fee</a> ' + copyIcon(FEE_ADDRESS) + '</div>'
+		+ '<div class="box-fee-value">' + formatErgValueString(box.value, 9, true, true) + ' <span class="text-light">' + formatAssetDollarPriceString(box.value, ERG_DECIMALS, 'ERG') + '</span></div>'
+		+ '</div></div></div>';
+}
+
+function copyIcon(value) {
+	return '<a title="' + value + '" onclick="copyId(event, this)" href="Copy to clipboard!">&#128203;</a>';
 }
 
 /**
@@ -898,7 +965,7 @@ function formatBoxRegisters(registers) {
 		return '';
 	}
 
-	let html = '<div style="margin-top:5px;" class="ps-0 pe-0 pe-md-2 ps-md-2 col-10"><p style="margin-bottom:5px;"><strong class="text-white">Additional registers:</strong></p>';
+	let html = '<div class="box-section">Registers</div><div class="box-grid box-registers">';
 
 	for (const key of keys) {
 		const register = registers[key];
@@ -912,10 +979,10 @@ function formatBoxRegisters(registers) {
 			value = formatRegisterValue(constant.data, constant.type, true);
 		} catch (e) {
 			//SBox, SAvlTree and non-ProveDlog SigmaProps: as the explorer rendered them, or raw hex
-			value = escapeHtmlString(register.renderedValue || serialized || '');
+			value = '<span class="box-hex">' + escapeHtmlString(register.renderedValue || serialized || '') + '</span>';
 		}
 
-		html += '<p style="word-break:break-all;"><strong' + (type ? ' title="' + escapeHtmlString(type) + '"' : '') + '>' + escapeHtmlString(key) + '</strong>: ' + value + '</p>';
+		html += '<span' + (type ? ' title="' + escapeHtmlString(type) + '"' : '') + '>' + escapeHtmlString(key) + '</span><span>' + value + '</span>';
 	}
 
 	return html + '</div>';
@@ -982,7 +1049,7 @@ function formatRegisterBytes(bytes, topLevel) {
 		return escapeHtmlString(text);
 	}
 
-	return topLevel ? hex + ' <a title="' + hex + '" onclick="copyId(event, this)" href="Copy to clipboard!">&#128203;</a>' : hex;
+	return '<span class="box-hex">' + hex + '</span>' + (topLevel ? ' ' + copyIcon(hex) : '');
 }
 
 function formatRegisterPublicKey(publicKeyHex) {
@@ -996,7 +1063,7 @@ function formatRegisterPublicKey(publicKeyHex) {
 
 	addAddress(address);
 
-	return '<a class="address-string" addr="' + address + '" title="' + publicKeyHex + '" href="' + getWalletAddressUrl(address) + '">' + formatAddressString(address, 8) + '</a> <a title="' + address + '" onclick="copyId(event, this)" href="Copy to clipboard!">&#128203;</a>';
+	return '<a class="address-string" addr="' + address + '" title="' + publicKeyHex + '" href="' + getWalletAddressUrl(address) + '">' + formatAddressString(address, 8) + '</a> ' + copyIcon(address);
 }
 
 //Text only for valid UTF-8 without control characters, so hashes and ids stay

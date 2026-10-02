@@ -999,3 +999,169 @@ html[data-theme="mew"] .btn-primary {
 		color: var(--main-color-hover);
 	}
 }
+// Box card (formatBox): inputs/outputs, box page, address unspent boxes
+.box-card {
+	padding: 2px 8px;
+	overflow-wrap: anywhere;
+
+	p {
+		margin-bottom: 0;
+	}
+}
+
+.box-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+.box-address {
+	min-width: 0;
+	color: var(--text-strong);
+}
+
+.box-index {
+	color: var(--text-strong);
+	font-size: 0.8rem;
+	margin-right: 6px;
+}
+
+.box-status {
+	display: flex;
+	gap: 10px;
+	flex-shrink: 0;
+	font-size: 0.85rem;
+}
+
+.box-value {
+	font-size: 1.1rem;
+	color: var(--text-strong);
+	margin-top: 2px;
+}
+
+.box-meta {
+	font-size: 0.8rem;
+	color: var(--text-strong);
+}
+
+.box-dot {
+	margin: 0 6px;
+}
+
+.box-section {
+	margin: 10px 0 4px;
+	padding-top: 6px;
+	border-top: 1px solid var(--borders);
+	font-size: 0.7rem;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--text-strong);
+}
+
+.box-count {
+	margin-left: 4px;
+	font-weight: 400;
+}
+
+// About six rows, with a scrollbar that stays visible (macOS hides unstyled ones)
+// and a fade over the last row until the list is scrolled to its end
+.box-tokens-scroll {
+	max-height: 152px;
+	overflow-y: auto;
+	padding-right: 8px;
+	-webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
+	mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
+
+	&.scrolled-end {
+		-webkit-mask-image: none;
+		mask-image: none;
+	}
+
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background: var(--borders);
+		border-radius: 3px;
+	}
+
+	// Chrome lets these override the ::-webkit-scrollbar styles, so only Firefox gets them
+	@supports not selector(::-webkit-scrollbar) {
+		scrollbar-width: thin;
+		scrollbar-color: var(--borders) transparent;
+	}
+}
+
+.box-fee {
+	align-items: center;
+	color: var(--text-light);
+}
+
+.box-fee-value {
+	color: var(--text-strong);
+	white-space: nowrap;
+}
+
+.io-count {
+	margin-left: 4px;
+	color: var(--text-light);
+	font-weight: 400;
+}
+
+.box-token {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 12px;
+	padding: 1px 0;
+}
+
+.box-token-name {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-weight: 600;
+}
+
+.box-token-amount {
+	flex-shrink: 0;
+	text-align: right;
+	color: var(--text-strong);
+	font-variant-numeric: tabular-nums;
+}
+
+.box-grid {
+	display: grid;
+	grid-template-columns: max-content minmax(0, 1fr);
+	column-gap: 12px;
+	row-gap: 2px;
+
+	> span:nth-child(odd) {
+		color: var(--text-strong);
+		font-weight: 600;
+	}
+
+	> span:nth-child(even) {
+		word-break: break-all;
+	}
+}
+
+// Register keys stay quiet so the values read first
+.box-registers > span:nth-child(odd) {
+	color: var(--text-light);
+}
+
+.box-hex {
+	font-family: var(--bs-font-monospace);
+	font-size: 0.82rem;
+	word-break: break-all;
+}
+
+.box-tree {
+	background: var(--striped-1);
+	padding: 10px;
+}

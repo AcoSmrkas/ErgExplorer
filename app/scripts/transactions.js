@@ -437,9 +437,11 @@ function printTransaction(data, mempool) {
 	
 	//Inputs
 	$('#txInputs').html(formatInputsOutputs(data.inputs));
+	$('#txInputsCount').text('(' + data.inputs.length + ')');
 
 	//Outputs
-	$('#txOutputs').html(formatInputsOutputs(data.outputs));
+	$('#txOutputs').html(formatInputsOutputs(data.outputs, data.inputs));
+	$('#txOutputsCount').text('(' + data.outputs.length + ')');
 
 	//Burned
 	if (hasBurnedAssets) {
