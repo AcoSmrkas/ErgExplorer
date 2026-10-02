@@ -102,6 +102,23 @@ async function readBalance(response) {
  * API client for address page data fetching
  * Wraps jQuery $.get/$.ajax and fetch calls for cleaner API
  */
+/**
+ * Put each box's real address on it. The explorer API files ErgoTrees it cannot parse
+ * (ErgoTree v3, e.g. Lithos orders and pools) under the burn address 4MQyMKvMbnCJG3aJ,
+ * so without this they would match that address's book entry and lose their template label.
+ */
+function withRealAddresses(data) {
+	if (data && Array.isArray(data.items)) {
+		for (const tx of data.items) {
+			for (const box of [...(tx.inputs || []), ...(tx.outputs || [])]) {
+				box.address = getBoxAddress(box);
+			}
+		}
+	}
+
+	return data;
+}
+
 export const ApiClient = {
 	// First-load requests started by prefetch(), by request key. Each is handed out once;
 	// later calls (the 60s refresh, paging) fetch fresh.
@@ -270,7 +287,7 @@ export const ApiClient = {
 			data = { items: [], total: 0 };
 		}
 
-		AddressState.mempoolData = data;
+		AddressState.mempoolData = withRealAddresses(data);
 
 		return data;
 	},
@@ -310,7 +327,7 @@ export const ApiClient = {
 			const sources = this.getTxsDataUrls().map(url => ({ url, read: readItemsBigJson }));
 			const data = await fetchFirst(sources, TX_FETCH_TIMEOUT_MS);
 
-			AddressState.transactionsData = data;
+			AddressState.transactionsData = withRealAddresses(data);
 
 			return data;
 		} catch (error) {
