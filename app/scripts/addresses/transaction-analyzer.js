@@ -1,4 +1,4 @@
-import { CRUX_TEMPLATES, ERGO_MIXER_TEMPLATES, ERGOPAD_STAKING_TEMPLATES, ERGORAFFLE_TEMPLATES, LITHOS_TEMPLATES, ORACLE_POOL_V2_TEMPLATES, ROSEN_TEMPLATES, SPECTRUM_TEMPLATES, SWAP_TEMPLATES, TxInOut, TxType } from './constants.js';
+import { CRUX_TEMPLATES, DUCKPOOLS_TEMPLATES, EPERPS_TEMPLATES, ERGO_MIXER_TEMPLATES, ERGONAMES_TEMPLATES, ERGOPAD_STAKING_TEMPLATES, ERGORAFFLE_TEMPLATES, LITHOS_LOCK_TEMPLATES, LITHOS_TEMPLATES, ORACLE_POOL_V2_TEMPLATES, PAIDEIA_TEMPLATES, ROSEN_TEMPLATES, THE_FIELD_TEMPLATES, SPECTRUM_TEMPLATES, SWAP_TEMPLATES, TxInOut, TxType } from './constants.js';
 
 /**
  * Determine transaction type based on input/output address types
@@ -97,11 +97,15 @@ export function detectContractFromErgotree(ergoTree, addressType = 'label') {
 		[SWAP_TEMPLATES.N2T_BUY_SPF]: 'Spectrum Finance N2T Swap',
 		[SWAP_TEMPLATES.T2T_SWAP_ERG]: 'Spectrum Finance T2T Swap',
 		[SWAP_TEMPLATES.T2T_SWAP_SPF]: 'Spectrum Finance T2T Swap',
+		[SWAP_TEMPLATES.N2T_SWAP_ALT_1]: 'Spectrum Finance N2T Swap',
+		[SWAP_TEMPLATES.N2T_SWAP_ALT_2]: 'Spectrum Finance N2T Swap',
 		[SPECTRUM_TEMPLATES.LP_DEPOSIT]: 'Spectrum Finance LP Deposit',
 		[SPECTRUM_TEMPLATES.LP_REDEEM]: 'Spectrum Finance LP Redeem',
 		[SPECTRUM_TEMPLATES.YF_DEPOSIT]: 'Spectrum Finance YF Deposit',
 		[SPECTRUM_TEMPLATES.YF_REDEEM]: 'Spectrum Finance YF Redeem',
 		[CRUX_TEMPLATES.LIMIT_ORDER]: 'Crux Finance Limit Order',
+		[CRUX_TEMPLATES.LIMIT_ORDER_PART]: 'Crux Finance Limit Order',
+		[CRUX_TEMPLATES.LIQUIDITY_POSITION]: 'Crux Finance Liquidity Position',
 		[LITHOS_TEMPLATES.SWAP_SELL]: 'Lithos LP Swap',
 		[LITHOS_TEMPLATES.SWAP_BUY]: 'Lithos LP Swap',
 		[LITHOS_TEMPLATES.LP_DEPOSIT]: 'Lithos LP Deposit',
@@ -150,6 +154,56 @@ export function detectContractFromErgotree(ergoTree, addressType = 'label') {
 			EMISSION: 'ErgoPad Staking Emission',
 			INCENTIVE: 'ErgoPad Staking Incentive',
 			REQUEST: 'ErgoPad Staking Request'
+		}],
+		[LITHOS_LOCK_TEMPLATES, {
+			CAMPAIGN: 'Lithos Lock Campaign'
+		}],
+		[PAIDEIA_TEMPLATES, {
+			STAKE_STATE: 'Paideia Stake State',
+			STAKING: 'Paideia Staking',
+			PROPOSAL: 'Paideia Proposal',
+			TREASURY: 'Paideia DAO Treasury',
+			DAO: 'Paideia DAO',
+			ACTION: 'Paideia DAO Action',
+			ORIGIN: 'Paideia Origin'
+		}],
+		[ERGONAMES_TEMPLATES, {
+			MINT_REQUEST: 'ErgoNames Mint Request',
+			COLLECTION: 'ErgoNames Collection',
+			NAME_MINT: 'ErgoNames Name Mint',
+			REGISTRY: 'ErgoNames Registry',
+			ERGODOMAINS_REGISTRAR: 'ErgoDomains Registrar',
+			ERGODOMAINS_DOMAIN: 'ErgoDomains Domain'
+		}],
+		[DUCKPOOLS_TEMPLATES, {
+			POOL: 'Duckpools Lending Pool',
+			COLLATERAL: 'Duckpools Collateral',
+			REPAYMENT: 'Duckpools Repayment',
+			CHILD_INTEREST: 'Duckpools Child Interest',
+			INTEREST: 'Duckpools Interest',
+			LEND_PROXY: 'Duckpools Lend',
+			WITHDRAW_PROXY: 'Duckpools Withdraw',
+			BORROW_PROXY: 'Duckpools Borrow',
+			REPAY_PROXY: 'Duckpools Repay',
+			PARTIAL_REPAY_PROXY: 'Duckpools Partial Repay'
+		}],
+		[THE_FIELD_TEMPLATES, {
+			MARKET: 'The Field Market',
+			COLLECTION: 'The Field Collection',
+			BID_MARKET: 'The Field Bid Market',
+			BID: 'The Field Bid'
+		}],
+		[EPERPS_TEMPLATES, {
+			RESERVE: 'ePerps Reserve',
+			STAMP: 'ePerps Stamp',
+			STAMPER: 'ePerps Stamper',
+			LPSAT: 'ePerps LP Satellite',
+			FILLSAT: 'ePerps Fill Satellite',
+			RISKSAT: 'ePerps Risk Satellite',
+			SWEEP: 'ePerps Sweep',
+			UPDATE: 'ePerps Update',
+			BALLOT: 'ePerps Ballot',
+			RSV: 'ePerps RSV'
 		}]
 	];
 
