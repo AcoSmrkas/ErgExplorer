@@ -1,5 +1,5 @@
 import { TokenState } from './state.js';
-import { TokenAnalyzer } from './token-analyzer.js?v=2';
+import { TokenAnalyzer } from './token-analyzer.js?v=3';
 
 function getTokenUsdPrice() {
 	if (typeof prices === 'undefined') return 0;
