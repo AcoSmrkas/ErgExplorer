@@ -299,7 +299,7 @@ export const TransactionFormatter = {
 		// To address
 		addAddress(toAddress);
 		let formattedToAddress = formatTxAddressString(toAddress, null, walletAddress);
-		if ((txType === TxType.Wallet2Contract || txType === TxType.Contract2Wallet) &&
+		if ((txType === TxType.Wallet2Contract || txType === TxType.Contract2Wallet || txType === TxType.Contract2Contract) &&
 		    item.outputs && item.outputs.length > 0) {
 			formattedToAddress = formatContractAddress(item.outputs, toAddress, formattedToAddress, walletAddress);
 		}

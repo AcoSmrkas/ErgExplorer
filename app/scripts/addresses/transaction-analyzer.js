@@ -1,4 +1,4 @@
-import { CRUX_TEMPLATES, ERGORAFFLE_TEMPLATES, LITHOS_TEMPLATES, SPECTRUM_TEMPLATES, SWAP_TEMPLATES, TxInOut, TxType } from './constants.js';
+import { CRUX_TEMPLATES, ERGO_MIXER_TEMPLATES, ERGOPAD_STAKING_TEMPLATES, ERGORAFFLE_TEMPLATES, LITHOS_TEMPLATES, ORACLE_POOL_V2_TEMPLATES, ROSEN_TEMPLATES, SPECTRUM_TEMPLATES, SWAP_TEMPLATES, TxInOut, TxType } from './constants.js';
 
 /**
  * Determine transaction type based on input/output address types
@@ -109,21 +109,55 @@ export function detectContractFromErgotree(ergoTree, addressType = 'label') {
 		[LITHOS_TEMPLATES.POOL]: 'Lithos Liquidity Pool'
 	};
 
-	const ergoRaffleLabels = {
-		SERVICE: 'ErgoRaffle Service',
-		CREATE_PROXY: 'ErgoRaffle Raffle Creation',
-		RAFFLE_SETUP: 'ErgoRaffle Raffle Setup',
-		RAFFLE_TOKENS: 'ErgoRaffle Raffle Setup',
-		ACTIVE: 'ErgoRaffle Active Raffle',
-		TICKET_PROXY: 'ErgoRaffle Ticket Purchase',
-		TICKET: 'ErgoRaffle Ticket',
-		WINNER: 'ErgoRaffle Winner Prize',
-		REFUND: 'ErgoRaffle Refund'
-	};
+	// Services whose contracts come in several builds: [templates by role, label by role]
+	const templateGroups = [
+		[ERGORAFFLE_TEMPLATES, {
+			SERVICE: 'ErgoRaffle Service',
+			CREATE_PROXY: 'ErgoRaffle Raffle Creation',
+			RAFFLE_SETUP: 'ErgoRaffle Raffle Setup',
+			RAFFLE_TOKENS: 'ErgoRaffle Raffle Setup',
+			ACTIVE: 'ErgoRaffle Active Raffle',
+			TICKET_PROXY: 'ErgoRaffle Ticket Purchase',
+			TICKET: 'ErgoRaffle Ticket',
+			WINNER: 'ErgoRaffle Winner Prize',
+			REFUND: 'ErgoRaffle Refund'
+		}],
+		[ORACLE_POOL_V2_TEMPLATES, {
+			POOL: 'Oracle Pool v2',
+			DATAPOINT: 'Oracle Pool v2 Datapoint',
+			REFRESH: 'Oracle Pool v2 Refresh',
+			COMPANION: 'Oracle Pool v2 Companion',
+			BUYBACK: 'Oracle Pool v2 Buyback'
+		}],
+		[ROSEN_TEMPLATES, {
+			REPO: 'Rosen Bridge Watcher Repo',
+			COLLATERAL: 'Rosen Bridge Watcher Collateral',
+			PERMIT: 'Rosen Bridge Watcher Permit',
+			COMMITMENT: 'Rosen Bridge Commitment',
+			EVENT_TRIGGER: 'Rosen Bridge Event Trigger',
+			REPO_CONFIG: 'Rosen Bridge Repo Config'
+		}],
+		[ERGO_MIXER_TEMPLATES, {
+			HALF_MIX: 'Ergo Mixer Half-Mix',
+			FULL_MIX: 'Ergo Mixer Full-Mix',
+			FEE: 'Ergo Mixer Fee Box',
+			TOKEN_EMISSION: 'Ergo Mixer Token Emission'
+		}],
+		[ERGOPAD_STAKING_TEMPLATES, {
+			STATE: 'ErgoPad Staking State',
+			STAKE: 'ErgoPad Stake',
+			POOL: 'ErgoPad Staking Pool',
+			EMISSION: 'ErgoPad Staking Emission',
+			INCENTIVE: 'ErgoPad Staking Incentive',
+			REQUEST: 'ErgoPad Staking Request'
+		}]
+	];
 
-	for (const [key, label] of Object.entries(ergoRaffleLabels)) {
-		for (const template of ERGORAFFLE_TEMPLATES[key]) {
-			templates[template] = label;
+	for (const [groupTemplates, labels] of templateGroups) {
+		for (const [key, label] of Object.entries(labels)) {
+			for (const template of groupTemplates[key]) {
+				templates[template] = label;
+			}
 		}
 	}
 
