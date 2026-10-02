@@ -1574,13 +1574,16 @@ const AddressType = {
 }
 
 function formatTxAddressString(address, formattedAddress = null, walletAddress = null) {	
+	//The viewed address reads 'This Address' even when the address book names it
 	if (address == walletAddress) {
 		formattedAddress = 'This Address';
+	} else if (getOwner(address) != undefined) {
+		formattedAddress = getOwner(address);
 	} else if (formattedAddress == null) {
 		formattedAddress = formatAddressString(address, 10);
 	}
 
-	let addressString = '<a title="' + address + '" class="address-string" addr="' + address + '" href="' + getWalletAddressUrl(address) + '" >' + (getOwner(address) == undefined ? formattedAddress : getOwner(address)) + '</a>';
+	let addressString = '<a title="' + address + '" class="address-string" addr="' + address + '" href="' + getWalletAddressUrl(address) + '" >' + formattedAddress + '</a>';
 	if (address == AddressType.NA) {
 		addressString = '<span class="text-light">' + AddressType.NA + '</span>';
 	} else if (address == AddressType.Multiple) {
