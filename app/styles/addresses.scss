@@ -610,6 +610,11 @@ select:hover {
 		overflow-y: auto;
 	}
 
+	// ...and its "Value:" label never gives up width to it (it wrapped as "Valu / e:")
+	.address-tx-table > tbody > tr > td > .d-lg-none:has(+ .tx-value) {
+		flex-shrink: 0;
+	}
+
 	// small hierarchy nudges
 	.address-tx-table .tx-time {
 		font-size: 0.85rem;
@@ -643,6 +648,26 @@ select:hover {
 		max-height: 110px;
 		overflow-y: auto;
 	}
+
+	// Time, Type and Fee stay on one line; this replaced the fixed header min-widths in addresses.njk,
+	// which added up to more than the 1140px container and pushed the Value column off the edge
+	.address-tx-table > tbody > tr > td:nth-child(2),
+	.address-tx-table > tbody > tr > td:nth-child(4),
+	.address-tx-table > tbody > tr > td:nth-child(8) {
+		white-space: nowrap;
+	}
+
+	// From/To: keep the copy icon and the address on one line (a break is allowed right after the
+	// emoji otherwise), while a long label such as "ErgoRaffle (Successful Raffles)" can still wrap
+	.address-tx-table > tbody > tr > td:nth-child(5),
+	.address-tx-table > tbody > tr > td:nth-child(6) {
+		white-space: nowrap;
+	}
+
+	.address-tx-table > tbody > tr > td:nth-child(5) > .address-string,
+	.address-tx-table > tbody > tr > td:nth-child(6) > .address-string {
+		white-space: normal;
+	}
 }
 
 // Landscape tablets / small laptops: the desktop table is wider than the 960px container, so it scrolls
@@ -659,11 +684,6 @@ select:hover {
 	.address-tx-table > :not(caption) > * > * {
 		padding: 0.4rem 0.45rem;
 	}
-
-	.address-tx-table > tbody > tr > td:nth-child(2),
-	.address-tx-table > tbody > tr > td:nth-child(8) {
-		white-space: nowrap; // Time and Fee stay on one line
-	}
 }
 
 // Sticky column headers on desktop (>= 1200px), so the header row stays readable while
@@ -676,6 +696,12 @@ select:hover {
 	// `clip` clips exactly the same way without creating one.
 	.address-tx-table {
 		overflow: clip;
+	}
+
+	// a hair tighter than Bootstrap's 0.5rem so all nine columns fit the 1140px container
+	.address-tx-table > :not(caption) > * > * {
+		padding-left: 0.4rem;
+		padding-right: 0.4rem;
 	}
 
 	.address-tx-table > thead > tr > th {
@@ -772,4 +798,9 @@ select:hover {
 	#unspentBoxesHolder > .div-cell:last-child:nth-child(odd) {
 		border-bottom-left-radius: 5px;
 	}
+}
+
+// Tx cell: the Tx column has no min-width, so a crowded table broke the link between the icon and the hash
+.address-tx-table > tbody > tr > td:first-child > a {
+	white-space: nowrap;
 }
