@@ -833,8 +833,12 @@ function formatBox(box, trueBox = false, unspent = false) {
 		formattedData += '<p><strong class="text-white">Creation height</strong>: ' + nFormatter(box.creationHeight, 0, true, true) + '</p>';
 	}
 
-	if (box.settlementHeight) {
-		formattedData += '<p><strong class="text-white">Settlement height</strong>: <a href="' + getBlockUrl(box.blockId) + '">' + nFormatter(box.settlementHeight, 0, true, true) + '</a></p>';
+	//Inputs carry the height and block of the tx that created them under output* names
+	const settlementHeight = box.settlementHeight || box.outputSettledAt;
+	const settlementBlockId = box.blockId || box.outputBlockId;
+
+	if (settlementHeight) {
+		formattedData += '<p><strong class="text-white">Settlement height</strong>: <a href="' + getBlockUrl(settlementBlockId) + '">' + nFormatter(settlementHeight, 0, true, true) + '</a></p>';
 	}
 
 	formattedData += '</div>';
@@ -864,52 +868,7 @@ function formatBox(box, trueBox = false, unspent = false) {
 	}
 
 	//Registers
-	if (box.additionalRegisters) {
-		let registerKeys = Object.keys(box.additionalRegisters);
-		let shownRegisters = false;
-		if (registerKeys.length > 0) {
-			for (let i = 0; i < registerKeys.length; i++) {
-				let register = box.additionalRegisters[registerKeys[i]];
-
-				if (register.sigmaType == 'Coll[SByte]'
-					|| register.sigmaType == 'SLong'
-					|| register.sigmaType == 'SInt'
-					|| register.sigmaType == 'Coll[SInt]'
-					|| register.sigmaType == 'SBigInt'
-					|| register.sigmaType == 'SSigmaProp'
-					) {
-					if (!shownRegisters) {
-						formattedData += '<div style="margin-top:5px;" class="ps-0 pe-0 pe-md-2 ps-md-2 col-10"><p style="margin-bottom:5px;"><strong class="text-white">Additional registers:</strong></p>'
-						shownRegisters = true;
-					}
-				}
-
-				if (!register.sigmaType) {
-					// formattedData += `<p><strong>${registerKeys[i]}</strong>: ${register}</p>`;
-				} else if (register.sigmaType == 'Coll[SByte]') {
-					let parseResult = hex2a(register.renderedValue);
-
-					if (containsWeirdCharacters(parseResult)) {
-						parseResult = register.renderedValue;
-					}
-
-					formattedData += `<p><strong>${registerKeys[i]}</strong>: ${parseResult}</p>`;
-				} else if (register.sigmaType == 'SLong' ||
-					register.sigmaType == 'SInt'
-				|| register.sigmaType == 'Coll[SInt]') {
-					formattedData += `<p><strong>${registerKeys[i]}</strong>: ${register.renderedValue}</p>`;
-				} else if (register.sigmaType == 'SBigInt') {
-					formattedData += `<p><strong>${registerKeys[i]}</strong>: ${parseInt(register.renderedValue.match(/\d+/)[0], 10)}</p>`;
-				} else if (register.sigmaType == 'SSigmaProp') {
-					formattedData += `<p><strong>${registerKeys[i]}</strong>: <a href="/addresses/${qfleetSDKcore.ErgoAddress.fromPublicKey(register.renderedValue, 0)}">${qfleetSDKcore.ErgoAddress.fromPublicKey(register.renderedValue, 0)}</a></p>`;
-				}
-			}
-
-			if (shownRegisters) {
-				formattedData += '</div>';
-			}
-		}
-	}
+	formattedData += formatBoxRegisters(box.additionalRegisters);
 
 	if (trueBox) {
 		formattedData += '<p> </p><p style="margin-bottom:5px;"><strong class="text-white">Ergo tree:</strong></p> <div style="word-wrap:break-word;background: var(--striped-1);" class="div-cell-dark">' + box.ergoTree + '</div>';
@@ -918,6 +877,152 @@ function formatBox(box, trueBox = false, unspent = false) {
 	formattedData += '</div>';
 
 	return formattedData;
+}
+
+/**
+ * Additional registers (R4-R9), decoded from serializedValue with fleet so every
+ * type renders, including the ones the explorer leaves without a sigmaType and
+ * the raw hex strings our node's mempool returns. Values are shown in their most
+ * obvious form: text for readable bytes, addresses for public keys and P2PK
+ * trees, a date next to millisecond timestamps. Whatever fleet cannot decode
+ * falls back to the explorer's rendering, then to the raw hex.
+ */
+function formatBoxRegisters(registers) {
+	if (!registers) {
+		return '';
+	}
+
+	const keys = Object.keys(registers).sort();
+
+	if (keys.length == 0) {
+		return '';
+	}
+
+	let html = '<div style="margin-top:5px;" class="ps-0 pe-0 pe-md-2 ps-md-2 col-10"><p style="margin-bottom:5px;"><strong class="text-white">Additional registers:</strong></p>';
+
+	for (const key of keys) {
+		const register = registers[key];
+		const serialized = typeof register == 'string' ? register : register.serializedValue;
+		let type = register.sigmaType;
+		let value;
+
+		try {
+			const constant = qfleetSDK.SConstant.from(serialized);
+			type = type || constant.type.toString();
+			value = formatRegisterValue(constant.data, constant.type, true);
+		} catch (e) {
+			//SBox, SAvlTree and non-ProveDlog SigmaProps: as the explorer rendered them, or raw hex
+			value = escapeHtmlString(register.renderedValue || serialized || '');
+		}
+
+		html += '<p style="word-break:break-all;"><strong' + (type ? ' title="' + escapeHtmlString(type) + '"' : '') + '>' + escapeHtmlString(key) + '</strong>: ' + value + '</p>';
+	}
+
+	return html + '</div>';
+}
+
+//An SLong in this range is read as a millisecond timestamp: from mainnet launch to ten years ahead
+const REGISTER_MIN_TIMESTAMP = 1561939200000;
+const REGISTER_TIMESTAMP_SPAN = 10 * 365 * 24 * 3600 * 1000;
+
+function formatRegisterValue(data, type, topLevel = false) {
+	const typeName = type.toString();
+
+	if (data instanceof Uint8Array) {
+		if (typeName == 'SGroupElement' || typeName == 'SSigmaProp') {
+			return formatRegisterPublicKey(bytesToHex(data));
+		}
+
+		return formatRegisterBytes(data, topLevel);
+	}
+
+	if (typeof data == 'bigint' || typeof data == 'number') {
+		let html = data.toString();
+
+		if (typeName == 'SLong' && data >= REGISTER_MIN_TIMESTAMP && data <= Date.now() + REGISTER_TIMESTAMP_SPAN) {
+			html += ' <span class="text-light">(' + formatDateString(Number(data)) + ')</span>';
+		}
+
+		return html;
+	}
+
+	if (typeof data == 'boolean') {
+		return data.toString();
+	}
+
+	if (data === undefined) {
+		return '()';
+	}
+
+	if (Array.isArray(data)) {
+		const isTuple = typeName.startsWith('(');
+		const items = data.map((item, i) => formatRegisterValue(item, isTuple ? type.elementsType[i] : type.elementsType));
+
+		return (isTuple ? '(' : '[') + items.join(', ') + (isTuple ? ')' : ']');
+	}
+
+	return escapeHtmlString(String(data));
+}
+
+//Coll[SByte]: readable UTF-8 as text, a P2PK ErgoTree as its address, anything else as hex
+function formatRegisterBytes(bytes, topLevel) {
+	if (bytes.length == 0) {
+		return '<span class="text-light">empty</span>';
+	}
+
+	const hex = bytesToHex(bytes);
+
+	if (bytes.length == 36 && hex.startsWith('0008cd')) {
+		return formatRegisterPublicKey(hex.substring(6));
+	}
+
+	const text = decodeReadableText(bytes);
+
+	if (text != undefined) {
+		return escapeHtmlString(text);
+	}
+
+	return topLevel ? hex + ' <a title="' + hex + '" onclick="copyId(event, this)" href="Copy to clipboard!">&#128203;</a>' : hex;
+}
+
+function formatRegisterPublicKey(publicKeyHex) {
+	let address;
+
+	try {
+		address = qfleetSDKcore.ErgoAddress.fromPublicKey(publicKeyHex, getFleetNetwork()).toString();
+	} catch (e) {
+		return escapeHtmlString(publicKeyHex);
+	}
+
+	addAddress(address);
+
+	return '<a class="address-string" addr="' + address + '" title="' + publicKeyHex + '" href="' + getWalletAddressUrl(address) + '">' + formatAddressString(address, 8) + '</a> <a title="' + address + '" onclick="copyId(event, this)" href="Copy to clipboard!">&#128203;</a>';
+}
+
+//Text only for valid UTF-8 without control characters, so hashes and ids stay
+//hex while names in any script (emoji included) read as text
+function decodeReadableText(bytes) {
+	let text;
+
+	try {
+		text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+	} catch (e) {
+		return undefined;
+	}
+
+	if (/[\p{Cc}\p{Cf}\p{Co}\p{Cn}]/u.test(text.replace(/[\n\r\t]/g, ''))) {
+		return undefined;
+	}
+
+	return text;
+}
+
+function bytesToHex(bytes) {
+	return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+function escapeHtmlString(value) {
+	return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 /**
@@ -1386,10 +1491,6 @@ async function checkLinkExists(url) {
         console.error('Error checking link:', error);
         return false; // If there's an error, assume the link does not exist
     }
-}
-
-function containsWeirdCharacters(str) {
-	return /[^\x20-\x7E]/.test(str);
 }
 
 function hexToBytes(hex) {
