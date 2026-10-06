@@ -818,3 +818,20 @@ select:hover {
 .address-tx-table > tbody > tr > td:first-child > a {
 	white-space: nowrap;
 }
+
+// Mining tab: Lithos positions and block rewards, each with its own heading inside the one panel
+.mining-section + .mining-section {
+	margin-top: 1.5rem;
+}
+
+.mining-heading {
+	margin: 0.25rem 0 0.35rem;
+	font-size: 1rem;
+	font-weight: 600;
+}
+
+.mining-note {
+	margin-bottom: 0.6rem;
+	color: var(--text-light);
+	font-size: 0.85rem;
+}

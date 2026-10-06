@@ -1209,6 +1209,22 @@ html[data-theme="mew"] .btn-primary {
 	font-weight: 400;
 }
 
+//Lithos pool blocks and txs, in the amber Live uses for mining pools
+.lithos-chip {
+	display: inline-block;
+	padding: 0 0.4rem;
+	border: 1px solid rgba(245, 158, 11, 0.55);
+	border-radius: 5px;
+	background-color: rgba(245, 158, 11, 0.12);
+	color: #f59e0b;
+	font-size: 0.8rem;
+	font-weight: 600;
+	line-height: 1.5;
+	white-space: nowrap;
+	word-break: normal;
+	cursor: help;
+}
+
 .box-token {
 	display: flex;
 	justify-content: space-between;

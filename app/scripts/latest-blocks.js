@@ -22,9 +22,9 @@ function printLatestBlocks() {
             //Transactions
     		formattedResult += '<td><span class="d-lg-none"><strong>Transactions: </strong></span>' + items[i].transactionsCount + '</td>';
 
-            //Mined by
+            //Mined by. A Lithos block gets its chip once the Lithos blocks are known
             addAddress(items[i].miner.address);
-    		formattedResult += '<td><span class="d-lg-none"><strong>Mined by: </strong></span><a class="address-string" addr="' + items[i].miner.address + '" href="' + getWalletAddressUrl(items[i].miner.address) + '">' + items[i].miner.name + '</a></td>';	
+    		formattedResult += '<td data-height="' + items[i].height + '"><span class="d-lg-none"><strong>Mined by: </strong></span><a class="address-string" addr="' + items[i].miner.address + '" href="' + getWalletAddressUrl(items[i].miner.address) + '">' + items[i].miner.name + '</a></td>';	
 
             //Reward
     		formattedResult += '<td><span class="d-lg-none"><strong>Reward: </strong></span>' + formatErgValueString(items[i].minerReward) + ' <span class="text-light">' + formatAssetDollarPriceString(items[i].minerReward, ERG_DECIMALS, 'ERG') + '</span></td>';
@@ -43,6 +43,7 @@ function printLatestBlocks() {
         $('#blocksHolder').show();
 
         getAddressesInfo();
+        tagLithosBlocks(items);
     })
     .fail(function() {
         showLoadError('Failed to fetch latest blocks.');
@@ -50,4 +51,23 @@ function printLatestBlocks() {
     .always(function() {        
         $('#txLoading').hide();
     });
+}
+
+//The miner of a Lithos block is the lender whose collateral it spent, so it reads like any solo miner without the chip
+function tagLithosBlocks(items) {
+	if (items.length == 0) {
+		return;
+	}
+
+	const lowest = Math.min(...items.map(item => item.height));
+
+	getLithosBlockHeights(lowest)
+	.then(heights => {
+		$('#transactionsTableBody td[data-height]').each(function() {
+			if (heights.has(Number($(this).attr('data-height')))) {
+				$(this).find('a.address-string').before(lithosChip() + ' ');
+			}
+		});
+	})
+	.catch(error => console.warn('Lithos blocks unavailable:', error));
 }

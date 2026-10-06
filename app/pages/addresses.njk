@@ -85,6 +85,9 @@
 						<button id="unspentBoxesTab" class="address-section-tab" style="display: none;" type="button" role="tab" onclick="showAddressSectionTab(event, 'unspentBoxes')">
 							<span>Unspent Boxes</span> <span class="address-section-tab-count">(0)</span>
 						</button>
+						<button id="miningTab" class="address-section-tab" style="display: none;" type="button" role="tab" onclick="showAddressSectionTab(event, 'mining')">
+							<span>Mining</span> <span class="address-section-tab-count">(0)</span>
+						</button>
 					</div>
 					<div class="row w-100">
 						<div id="nftsHolder" class="ps-0 pe-0 row w-100 address-section-panel" style="display: none;">
@@ -255,6 +258,10 @@
 							</ul>
 						</nav>
 					</div>
+
+					<div id="miningSection" class="row w-100 ps-0 pe-0 address-section-panel" style="display: none;">
+						<div id="miningHolder" class="col-12 p-0 pe-lg-3"></div>
+					</div>
 					</div>
 				</div>
 				<div class="ps-0 pe-0 ps-lg-3 pe-lg-3 col-xl-6 col-lg-6 col-md-12 border-lg-start" id="tokensHolder" style="display:none">
@@ -317,6 +324,7 @@
 	<script src="./scripts/common/prices.js?v=44"></script>
 	<script src="./scripts/common/pagination.js?v=41"></script>
 	<script src="./scripts/common/nft.js?v=41"></script>
-	<script type="module" src="./scripts/addresses/index.js?v=74"></script>
+	<script src="./scripts/common/lithos.js?v=1"></script>
+	<script type="module" src="./scripts/addresses/index.js?v=75"></script>
 	<script src="./scripts/3rd-party/qrcode.min.js?v=41"></script>
 {% endblock %}

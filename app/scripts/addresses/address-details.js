@@ -1,6 +1,6 @@
 import { AddressState } from './state.js';
 import { ApiClient } from './api-client.js?v=53';
-import { detectContractFromErgotree } from './transaction-analyzer.js';
+import { detectContractFromErgotree } from './transaction-analyzer.js?v=2';
 
 export const AddressDetails = {
 	async printAddressDetails() {

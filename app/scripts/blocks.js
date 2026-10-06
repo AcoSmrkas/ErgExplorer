@@ -68,6 +68,18 @@ function printBlockSummary() {
 	//Height
 	$('#blockHeight').html('<p>' + nFormatter(blockData.header.height, 0, true, true) + '</p>');
 
+	//Pool. In a Lithos block the miner key is the lender's: the collateral contract requires it
+	const genesisTx = findLithosGenesisTx(blockData.blockTransactions);
+
+	if (genesisTx) {
+		const lender = qfleetSDKcore.ErgoAddress.fromPublicKey(blockData.header.powSolutions.pk, getFleetNetwork()).toString();
+
+		$('#blockPool').html(lithosChip()
+			+ '<br><a href="' + getTransactionsUrl(genesisTx.id) + '" title="' + LITHOS_GENESIS_TITLE + '">Genesis tx</a>'
+			+ '<br><span title="The block reward goes to this key">Lender</span> <a href="' + getWalletAddressUrl(lender) + '">' + formatAddressString(lender, 4) + '</a>');
+		$('#blockPoolRow').show();
+	}
+
 	//Previous
 	$('#blockPrevious').html('<p><a href="' + getBlockUrl(blockData.header.parentId) + '">' + blockData.header.parentId + '</a></p>');
 
@@ -123,12 +135,14 @@ function printBlockSummary() {
 function printBlockTransactions() {
 	let formattedData = '';
 	let blockTransactions = blockData.blockTransactions;
+	const genesisTx = findLithosGenesisTx(blockTransactions);
 
 	for (let i = 0; i < blockTransactions.length; i++) {
 		let transactionData = blockTransactions[i];
+		const chip = transactionData === genesisTx ? ' ' + lithosChip('Lithos genesis', LITHOS_GENESIS_TITLE) : '';
 
 		//Header
-		formattedData += '<div class="row w-100 div-cell-dark border-bottom-flat"><div class="col-9" style="word-break: break-all;"><a href="' + getTransactionsUrl(transactionData.id) + '">' + transactionData.id + '</a></div><div id="txTime" class="col-3 d-flex justify-content-end">' + formatDateString(transactionData.timestamp) + '</div></div>';
+		formattedData += '<div class="row w-100 div-cell-dark border-bottom-flat"><div class="col-9" style="word-break: break-all;"><a href="' + getTransactionsUrl(transactionData.id) + '">' + transactionData.id + '</a>' + chip + '</div><div id="txTime" class="col-3 d-flex justify-content-end">' + formatDateString(transactionData.timestamp) + '</div></div>';
 
 		formattedData += '<div class="row w-100 two-column-holder two-column-holder-md"><div class="col-md-6 div-cell-dark p-0 block-tx-column"><h2 class="p-3">Inputs <span class="io-count">(' + transactionData.inputs.length + ')</span></h2><div class="block-tx-holder">';
 

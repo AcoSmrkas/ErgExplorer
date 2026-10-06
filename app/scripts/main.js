@@ -1483,7 +1483,7 @@ var contractAnalyzerImport = null;
 
 function loadContractTemplates() {
 	if (contractAnalyzerImport == null) {
-		contractAnalyzerImport = import('./addresses/transaction-analyzer.js').catch(function() {
+		contractAnalyzerImport = import('./addresses/transaction-analyzer.js?v=2').catch(function() {
 			return null;
 		});
 	}

@@ -1,4 +1,4 @@
-import { CRUX_TEMPLATES, DUCKPOOLS_TEMPLATES, EPERPS_TEMPLATES, ERGO_MIXER_TEMPLATES, ERGONAMES_TEMPLATES, ERGOPAD_STAKING_TEMPLATES, ERGORAFFLE_TEMPLATES, LITHOS_LOCK_TEMPLATES, LITHOS_TEMPLATES, ORACLE_POOL_V2_TEMPLATES, PAIDEIA_TEMPLATES, ROSEN_TEMPLATES, THE_FIELD_TEMPLATES, SPECTRUM_TEMPLATES, SWAP_TEMPLATES, TxInOut, TxType } from './constants.js';
+import { CRUX_TEMPLATES, DUCKPOOLS_TEMPLATES, EPERPS_TEMPLATES, ERGO_MIXER_TEMPLATES, ERGONAMES_TEMPLATES, ERGOPAD_STAKING_TEMPLATES, ERGORAFFLE_TEMPLATES, LITHOS_LOCK_TEMPLATES, LITHOS_POOL_TEMPLATES, LITHOS_TEMPLATES, ORACLE_POOL_V2_TEMPLATES, PAIDEIA_TEMPLATES, ROSEN_TEMPLATES, THE_FIELD_TEMPLATES, SPECTRUM_TEMPLATES, SWAP_TEMPLATES, TxInOut, TxType } from './constants.js?v=2';
 
 /**
  * Determine transaction type based on input/output address types
@@ -157,6 +157,18 @@ export function detectContractFromErgotree(ergoTree, addressType = 'label') {
 		}],
 		[LITHOS_LOCK_TEMPLATES, {
 			CAMPAIGN: 'Lithos Lock Campaign'
+		}],
+		[LITHOS_POOL_TEMPLATES, {
+			EMISSION: 'Lithos Emission',
+			CONFIG: 'Lithos Emission Config',
+			QUEUE: 'Lithos Collateral Queue',
+			COLLATERAL: 'Lithos Collateral',
+			MINER_DICTIONARY: 'Lithos Miner Dictionary',
+			MINER_DATA: 'Lithos Miner Registration',
+			FP_CONTROL: 'Lithos Fraud Proof Registry',
+			HOLDING: 'Lithos Rollup Holding',
+			EVALUATION: 'Lithos Rollup Evaluation',
+			PAYOUT: 'Lithos Rollup Payout'
 		}],
 		[PAIDEIA_TEMPLATES, {
 			STAKE_STATE: 'Paideia Stake State',

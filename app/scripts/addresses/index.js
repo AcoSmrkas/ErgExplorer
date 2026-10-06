@@ -6,12 +6,13 @@
 import { AddressState } from './state.js';
 import { ApiClient } from './api-client.js?v=53';
 import { BalanceSummary } from './balance-summary.js?v=66';
-import { AddressDetails } from './address-details.js?v=51';
-import { TransactionFormatter } from './transaction-formatter.js?v=69';
+import { AddressDetails } from './address-details.js?v=52';
+import { TransactionFormatter } from './transaction-formatter.js?v=70';
 import { UIControllers } from './ui-controllers.js?v=65';
 import { PendingTracker } from './pending-tracker.js?v=3';
 import { NftManager } from './nft-manager.js';
-import { getTxType, isWalletAddress, getTxInOutType, analyzeTransfers } from './transaction-analyzer.js';
+import { MiningPanel } from './mining.js?v=1';
+import { getTxType, isWalletAddress, getTxInOutType, analyzeTransfers } from './transaction-analyzer.js?v=2';
 
 /**
  * Friendly addressbook URLs, e.g. /addresses/FAKU-Treasury -> the real address.
@@ -75,6 +76,12 @@ const ADDRESS_SECTION_TABS = {
 		holder: '#unspentBoxesSection',
 		panel: '#unspentBoxesHolder',
 		countSelector: '#unspentBoxesTab .address-section-tab-count'
+	},
+	mining: {
+		tab: '#miningTab',
+		holder: '#miningSection',
+		panel: '#miningHolder',
+		countSelector: '#miningTab .address-section-tab-count'
 	}
 };
 let activeAddressSectionTab = null;
@@ -147,6 +154,11 @@ async function initializeAddressPage() {
 	} else {
 		console.warn('getIssuedNfts function not found');
 	}
+
+	// Rewards unlock a day after their block, so the tab loads once and the 60s refresh leaves it alone.
+	MiningPanel.load(AddressState.walletAddress)
+		.then(count => setAddressSectionTabAvailable('mining', count))
+		.catch(error => console.warn('Mining tab unavailable:', error));
 }
 
 /**
