@@ -1,5 +1,9 @@
 {% extends "layout.njk" %}
 
+{% block styles %}
+	<link rel="stylesheet" href="styles/mempool.css?v=1">
+{% endblock %}
+
 {% block navigation %}
 	{% import 'macros/nav-macro.njk' as nav %}
 	{{nav.active('mempool')}}
@@ -12,7 +16,19 @@
 				<h2 class="m-0">Mempool</h2>
 			</div>
 		</div>
-	 
+
+		<!-- The same pool, streamed: a way into live.ergexplorer.com (mainnet only, hidden on testnet by mempool.js) -->
+		<div id="liveCta" class="row w-100">
+			<a class="live-cta div-cell-dark" href="https://live.ergexplorer.com">
+				<span class="live-cta-badge"><span class="live-cta-dot"></span>LIVE</span>
+				<span class="live-cta-text">
+					<strong>Watch the mempool in real time</strong>
+					<span>New transactions appear the moment they reach the network, labelled by what they do.</span>
+				</span>
+				<span class="live-cta-button">Open Live <i class="fas fa-arrow-right"></i></span>
+			</a>
+		</div>
+
 		<br>
 
 		<div id="mempoolHolder" style="display: none;">
@@ -48,5 +64,5 @@
 
 {% block scripts %}
 	<script src="./scripts/common/pagination.js?v=41"></script>
-	<script src="./scripts/mempool.js?v=42"></script>
+	<script src="./scripts/mempool.js?v=43"></script>
 {% endblock %}

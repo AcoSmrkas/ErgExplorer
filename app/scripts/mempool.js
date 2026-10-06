@@ -1,4 +1,9 @@
-$(function() {  
+$(function() {
+    // Erg Explorer Live streams mainnet only
+    if (networkType == 'testnet') {
+        $('#liveCta').remove();
+    }
+
     printMempool();
 });
 
