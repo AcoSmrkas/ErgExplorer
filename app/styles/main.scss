@@ -376,6 +376,12 @@ select, option {
   .table-mobile>thead>tr>th {
     display: none;
   }
+
+  // The orange line under the header is the first row's top border. Stacked, each cell of that row
+  // is a line of its own, so only the first cell keeps it. (The address tx cards do this in addresses.scss.)
+  .table-mobile.rounded-data-table tbody tr:first-child > :not(:first-child) {
+    border-top: 0 !important;
+  }
 }
 
 #txView {
