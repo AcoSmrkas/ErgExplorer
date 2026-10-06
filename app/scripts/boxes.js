@@ -13,6 +13,15 @@ $(function() {
 function onGotPrices() {
 	if (!gotTokenIcons || !gotPrices) return;
 
+	// Neither explorer API serves the genesis boxes by id. genesis.js is missing when a browser pairs
+	// this script with an older cached copy of the page.
+	const genesisBox = typeof getGenesisBox == 'function' ? getGenesisBox(boxId) : null;
+
+	if (genesisBox) {
+		printBox(genesisBox, false);
+		return;
+	}
+
 	getBox(false);
 }
 

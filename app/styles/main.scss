@@ -1230,6 +1230,26 @@ html[data-bs-theme="light"] .lithos-chip {
 	color: #8830f8;
 }
 
+//The genesis state's row in an address's tx list, in Ergo orange; darker on the light theme for contrast
+.genesis-chip {
+	display: inline-block;
+	padding: 0 0.4rem;
+	border: 1px solid rgba(251, 92, 22, 0.65);
+	border-radius: 5px;
+	background-color: rgba(251, 92, 22, 0.15);
+	color: #fb5c16;
+	font-size: 0.8rem;
+	font-weight: 600;
+	line-height: 1.5;
+	white-space: nowrap;
+	word-break: normal;
+	cursor: help;
+}
+
+html[data-bs-theme="light"] .genesis-chip {
+	color: #c2410c;
+}
+
 .box-token {
 	display: flex;
 	justify-content: space-between;

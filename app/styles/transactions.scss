@@ -13,6 +13,32 @@
 	border-radius: 0;
 }
 
+// What the genesis pseudo-tx is, between its header and its boxes
+.genesis-note {
+	margin: 0;
+	border-radius: 0;
+	border-bottom: none;
+	border-left: 3px solid #fb5c16;
+
+	p:last-child, ul {
+		margin-bottom: 0;
+	}
+
+	ul {
+		padding-left: 1.25rem;
+	}
+
+	li {
+		margin-top: 4px;
+	}
+}
+
+.genesis-no-inputs {
+	margin: 0;
+	padding: 0.75rem 1rem;
+	border-top: 1px solid var(--borders);
+}
+
 #txRawInput, #txRawOutput {
 	overflow-wrap: anywhere;
 	white-space: break-spaces;

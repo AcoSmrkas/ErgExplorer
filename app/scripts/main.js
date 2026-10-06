@@ -402,6 +402,26 @@ function formatShortDateString(dateString) {
 	return formatTimeString(dateString, false) + ' \u00b7 ' + date.toLocaleDateString(getLang(), sameYear ? { day: 'numeric', month: 'short' } : { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
+//Ergo's genesis state: the boxes the protocol put in place at launch, before block 1. No transaction
+//created them, but sigmaspace lists them under a pseudo-transaction whose id, block id, height and
+//timestamp are all zero, which used to render as a transaction from 1 January 1970.
+const GENESIS_TX_ID = '0'.repeat(64);
+//Mainnet block 1 (2019-07-01 11:02:57 UTC): the genesis boxes have no time of their own
+const MAINNET_LAUNCH_TIMESTAMP = 1561978977137;
+
+function isGenesisTx(tx) {
+	return !!tx && tx.id === GENESIS_TX_ID;
+}
+
+//The launch day the genesis boxes date from, or null on testnet, whose launch the explorer doesn't know
+function formatGenesisDateString() {
+	if (networkType == 'testnet') {
+		return null;
+	}
+
+	return new Date(MAINNET_LAUNCH_TIMESTAMP).toLocaleDateString(getLang(), { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+}
+
 function getLang() {
 	if (navigator.languages != undefined) {
 		return navigator.languages[0];
@@ -916,7 +936,9 @@ function formatBox(box, trueBox = false, unspent = false, change = false) {
 			html += '<span>Spent in</span><span class="box-hex"><a href="' + getTransactionsUrl(box.spentTransactionId) + '">' + box.spentTransactionId + '</a> ' + copyIcon(box.spentTransactionId) + '</span>';
 		}
 
-		html += '<span>Created at</span><span><a href="' + getBlockUrl(box.creationHeight) + '">' + nFormatter(box.creationHeight, 0, true, true) + '</a></span>';
+		html += box.transactionId === GENESIS_TX_ID
+			? '<span>Created at</span><span>Genesis, before block 1</span>'
+			: '<span>Created at</span><span><a href="' + getBlockUrl(box.creationHeight) + '">' + nFormatter(box.creationHeight, 0, true, true) + '</a></span>';
 		html += '</div>';
 	}
 

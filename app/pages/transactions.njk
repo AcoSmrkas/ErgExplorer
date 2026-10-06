@@ -27,6 +27,15 @@
 			</div>
 		</div>
 
+		<div id="genesisNote" class="row w-100 div-cell-dark genesis-note d-none">
+			<p><strong class="text-white">Genesis state.</strong> Ergo started with these three boxes. No transaction created them: the protocol put them in place at mainnet launch, before block 1, so there are no inputs, fee or block here.</p>
+			<ul>
+				<li><strong>Emission contract</strong>: every ERG that miners will ever earn, paid out block by block.</li>
+				<li><strong>No-premine proof</strong>: 1 ERG that nobody can ever spend. Its registers hold that day's Bitcoin and Ethereum block hashes and headlines from The Guardian, Xinhua and RBC, proving that nobody mined before launch.</li>
+				<li><strong>Foundation treasury</strong>: the Ergo Foundation's share, unlocked gradually over Ergo's first years.</li>
+			</ul>
+		</div>
+
 		<div id="infoTop" class="row w-100 two-column-holder-top-flat-md d-none">
 			<div class="col-md-6 div-cell-dark border-top-flat p-0">
 				<div class="row w-100">
@@ -57,7 +66,7 @@
 					<table class="table-dark table-striped div-table">
 						<tbody>
 							<tr>
-								<td><strong>Total coins transferred</strong></td>
+								<td><strong id="txTotalCoinsLabel">Total coins transferred</strong></td>
 								<td id="txTotalCoinsTransferred"></td>
 							</tr>
 							<tr>								
@@ -136,5 +145,6 @@
 {% block scripts %}
 		<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 		<script src="./scripts/common/prices.js?v=44"></script>
-		<script src="./scripts/transactions.js?v=46"></script>
+		<script src="./scripts/common/genesis.js?v=1"></script>
+		<script src="./scripts/transactions.js?v=47"></script>
 {% endblock %}

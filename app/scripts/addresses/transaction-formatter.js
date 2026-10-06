@@ -248,16 +248,24 @@ export const TransactionFormatter = {
 		// Build HTML table cells
 		const timestamp = isMempool ? item.creationTimestamp : item.timestamp;
 		const blockNr = item.inclusionHeight || 0;
+		// The genesis boxes, listed by sigmaspace as a tx with no inputs, no block and timestamp 0.
+		// isGenesisTx is new in main.js, which an older cached copy of the page may still load at its old version.
+		const genesis = typeof isGenesisTx == 'function' && isGenesisTx(item);
+		const genesisTitle = 'Genesis state: created by the protocol at mainnet launch, before block 1';
+		const genesisDate = genesis ? formatGenesisDateString() || '&mdash;' : null;
 
 		// Row: direction / status classes drive the mobile card CSS (addresses.scss); tx id for tooling
 		const dirClass = txInOut === TxInOut.In ? 'tx-in' : txInOut === TxInOut.Out ? 'tx-out' : txInOut === TxInOut.Mixed ? 'tx-mixed' : 'tx-consolidation';
 		html += '<tr class="tx-row ' + dirClass + (isMempool ? ' tx-pending' : ' tx-confirmed') + '" data-tx-id="' + item.id + '">';
 
 		// Tx link
-		html += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionsUrl(item.id) + '"><i class="fas fa-link text-info"></i><span class="tx-hash d-inline d-lg-none d-xl-inline"> ' + formatAddressString(item.id, 4) + '</span></a><span class="d-inline d-lg-none text-light float-end tx-time" title="' + formatDateString(timestamp) + '">' + formatShortDateString(timestamp) + '</span></td>';
+		const txTimeHtml = genesis
+			? '<span class="d-inline d-lg-none text-light float-end tx-time" title="' + genesisTitle + '">' + genesisDate + '</span>'
+			: '<span class="d-inline d-lg-none text-light float-end tx-time" title="' + formatDateString(timestamp) + '">' + formatShortDateString(timestamp) + '</span>';
+		html += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionsUrl(item.id) + '"><i class="fas fa-link text-info"></i><span class="tx-hash d-inline d-lg-none d-xl-inline"> ' + (genesis ? 'Genesis' : formatAddressString(item.id, 4)) + '</span></a>' + txTimeHtml + '</td>';
 
 		// Timestamp
-		html += '<td class="d-none d-lg-table-cell">' + formatDateString(timestamp) + '</td>';
+		html += '<td class="d-none d-lg-table-cell"' + (genesis ? ' title="' + genesisTitle + '">' + genesisDate : '>' + formatDateString(timestamp)) + '</td>';
 
 		// Type & Block
 		let classString = 'text-info';
@@ -278,9 +286,14 @@ export const TransactionFormatter = {
 			inOutString += smartString;
 		}
 
+		if (genesis) {
+			classString = 'genesis-chip';
+			inOutString = '<span title="' + genesisTitle + '">Genesis</span>';
+		}
+
 		// A mempool tx is in no block yet -- it used to print outputs[0].creationHeight here,
-		// which is not a block number and linked nowhere.
-		const blockHtml = isMempool ? '<span class="text-light">&mdash;</span>' :
+		// which is not a block number and linked nowhere. Nor is the genesis state, whose block id is all zeros.
+		const blockHtml = isMempool || genesis ? '<span class="text-light"' + (genesis ? ' title="' + genesisTitle + '"' : '') + '>&mdash;</span>' :
 			(item.blockId ? '<a href="' + getBlockUrl(item.blockId) + '">' + blockNr + '</a>' : blockNr);
 		html += '<td><span class="d-inline d-lg-none"><strong>Type: </strong><span class="' + classString + '">' + inOutString + '</span></span><span class="d-lg-none float-end tx-block"><strong>Block: </strong>' + blockHtml + '</span><span class="d-none d-lg-inline">' + blockHtml + '</span></td>';
 
@@ -293,6 +306,9 @@ export const TransactionFormatter = {
 		// Contract2Contract covers batcher fills: the pool is both input 0 and output 0
 		if (networkType !== 'testnet' && (txType === TxType.Wallet2Contract || txType === TxType.Contract2Wallet || txType === TxType.Contract2Contract)) {
 			formattedFromAddress = formatContractAddress(item.inputs, fromAddress, formattedFromAddress, walletAddress);
+		}
+		if (genesis) {
+			formattedFromAddress = '<span class="text-light" title="' + genesisTitle + '">Ergo protocol</span>';
 		}
 		html += '<td' + (fromAddress === walletAddress ? ' class="tx-self"' : '') + '><span class="d-lg-none"><strong>From: </strong></span>' + formattedFromAddress + '</td>';
 
@@ -307,10 +323,11 @@ export const TransactionFormatter = {
 
 		// Status & Fee (a pending row gets the "notify me when it confirms" bell)
 		const statusHtml = isMempool ? '<span class="text-warning">Pending</span>' + PendingTracker.trackButtonHtml(item.id) : '<span class="text-success">Confirmed</span>';
-		html += '<td><span class="tx-status"><span class="d-lg-none"><strong>Status: </strong></span>' + statusHtml + '</span><span class="d-inline d-lg-none text-white float-end tx-fee"><strong>Fee: </strong>' + formatErgValueString(fee) + '</span></td>';
+		const feeHtml = genesis ? '<span class="text-light">&mdash;</span>' : formatErgValueString(fee);
+		html += '<td><span class="tx-status"><span class="d-lg-none"><strong>Status: </strong></span>' + statusHtml + '</span><span class="d-inline d-lg-none text-white float-end tx-fee"><strong>Fee: </strong>' + feeHtml + '</span></td>';
 
 		// Fee
-		html += '<td class="d-none d-lg-table-cell">' + formatErgValueString(fee) + '</td>';
+		html += '<td class="d-none d-lg-table-cell">' + feeHtml + '</td>';
 
 		// Value
 		if (txInOut !== TxInOut.Mixed) {
