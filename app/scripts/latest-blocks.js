@@ -66,7 +66,7 @@ function printLatestBlocks(pricesLoaded) {
     		formattedResult += '<td><span class="d-lg-none"><strong>Block time: </strong></span>' + formatBlockTime(getMiningTime(items, i)) + '</td>';
             
             //Transactions
-    		formattedResult += '<td><span class="d-lg-none"><strong>Transactions: </strong></span>' + item.transactionsCount + '</td>';
+    		formattedResult += '<td><span class="d-lg-none"><strong>TXs: </strong></span>' + item.transactionsCount + '</td>';
 
             //Mined by: the address book names the known pools. A Lithos block gets its chip once the Lithos blocks are known
             addAddress(item.miner.address);
