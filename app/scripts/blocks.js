@@ -4,7 +4,11 @@ var blockId = '';
 $(function() {
 	blockId = getWalletAddressFromUrl();
 
-	getPrices(printBlock)
+	//The block, the token icons and the prices load side by side. Both callbacks fire on failure too
+	const icons = new Promise(resolve => getTokenIcons(resolve));
+	const pricesLoaded = new Promise(resolve => getPrices(resolve));
+
+	printBlock(Promise.all([icons, pricesLoaded]));
 
 	setDocumentTitle(blockId);
 });
@@ -27,7 +31,7 @@ function resolveBlockId() {
 	});
 }
 
-function printBlock() {
+function printBlock(iconsAndPrices) {
 	resolveBlockId()
 	.then(id => fetch(API_HOST + 'blocks/' + id))
 	.then(async response => {
@@ -40,6 +44,8 @@ function printBlock() {
         const stringFromBuffer = buffer.toString('utf8');
 
         let data = JSONbig.parse(stringFromBuffer);
+
+		await iconsAndPrices;
 
 		blockData = data.block;
 
