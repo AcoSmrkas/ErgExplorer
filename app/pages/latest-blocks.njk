@@ -17,7 +17,18 @@
 
 		<div id="blocksHolder" style="display: none;">
 
-			{% include "partials/pagination.njk" %}
+			<div class="blocks-toolbar">
+				{% include "partials/pagination.njk" %}
+
+				<div class="lithos-toggle">
+					<div class="form-check form-check-reverse checkbox-xl p-0 m-0">
+						<input style="margin-right:0px;" class="form-check-input" onchange="onToggleLithosOnly()" type="checkbox" id="toggleLithos">
+						<label style="padding:0;margin-right:15px;" class="form-check-label" for="toggleLithos" title="Only blocks mined through the Lithos pool">
+							Lithos only:
+						</label>
+					</div>
+				</div>
+			</div>
 	
 			<div class="row w-100">
 				<table class="table table-dark table-striped table-mobile rounded-data-table">
@@ -25,10 +36,11 @@
 						<tr>    
 							<th scope="col">Height</th>
 							<th scope="col">Time</th>
+							<th scope="col" title="Time since the block before it. Ergo aims for 2 minutes">Block time</th>
 							<th scope="col">Transactions</th>
 							<th scope="col">Mined by</th>
-							<th scope="col">Reward</th>
-							<th scope="col">Difficulty</th>
+							<th scope="col" title="The block reward. The miner also gets the fees">Reward</th>
+							<th scope="col" title="Transaction fees in the block, paid to its miner">Fees</th>
 							<th scope="col">Size</th>
 						</tr>   
 					</thead>
@@ -46,11 +58,44 @@
 	</div>
 
 	{% include "partials/loading.njk" %}
+
+	<style>
+		/* The Lithos toggle sits at the right end of the top pager's row */
+		.blocks-toolbar {
+			position: relative;
+		}
+
+		.blocks-toolbar .lithos-toggle {
+			position: absolute;
+			top: 0;
+			right: 0;
+			height: 38px;
+			display: flex;
+			align-items: center;
+		}
+
+		@media (max-width: 767.98px) {
+			.blocks-toolbar .lithos-toggle {
+				position: static;
+				height: auto;
+				justify-content: flex-end;
+				margin: 0 12px 0.75rem 0;
+			}
+		}
+
+		#transactionsTableBody .block-meta {
+			color: var(--bs-secondary-color);
+		}
+
+		#transactionsTableBody .block-slow {
+			color: #fb5c16;
+		}
+	</style>
 {% endblock %}
 
 {% block scripts %}
 	<script src="./scripts/common/prices.js?v=44"></script>
 	<script src="./scripts/common/pagination.js?v=41"></script>
 	<script src="./scripts/common/lithos.js?v=1"></script>
-	<script src="./scripts/latest-blocks.js?v=43"></script>
+	<script src="./scripts/latest-blocks.js?v=45"></script>
 {% endblock %}
