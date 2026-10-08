@@ -24,7 +24,8 @@ document.addEventListener('visibilitychange', () => {
 	if (!document.hidden) restoreTitle();
 });
 
-// Simple mode leaves each box its address, ERG value and tokens: no box id, height or registers.
+// Simple mode leaves each box its address, ERG value and tokens: no box id, height or registers,
+// and drops the repeated info table and the raw inputs and outputs below the boxes.
 // Remembered in this browser only.
 const SIMPLE_MODE_KEY = 'txSimpleMode';
 
@@ -36,13 +37,13 @@ function initSimpleMode() {
 	} catch {}
 
 	$('#toggleSimpleMode').prop('checked', on);
-	$('#ioHolder').toggleClass('simple-mode', on);
+	$('#txDataHolder').toggleClass('simple-mode', on);
 }
 
 function onToggleSimpleMode() {
 	const on = $('#toggleSimpleMode').prop('checked');
 
-	$('#ioHolder').toggleClass('simple-mode', on);
+	$('#txDataHolder').toggleClass('simple-mode', on);
 
 	try {
 		localStorage.setItem(SIMPLE_MODE_KEY, on);

@@ -24,9 +24,10 @@
 	}
 }
 
-// Simple mode (transactions.js): each box keeps its address, ERG value and tokens
-#ioHolder.simple-mode {
-	.box-meta, .box-registers-label, .box-registers {
+// Simple mode (transactions.js): each box keeps its address, ERG value and tokens, and the info
+// table repeated below the boxes and the raw JSON go
+#txDataHolder.simple-mode {
+	.box-meta, .box-registers-label, .box-registers, #txDetails {
 		display: none;
 	}
 }

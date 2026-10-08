@@ -2,7 +2,7 @@
 
 {% block styles %}
 	<!-- build:css styles/transactions.css -->
-	<link rel="stylesheet" href="styles/transactions.css?v=4">
+	<link rel="stylesheet" href="styles/transactions.css?v=5">
 	<!-- endbuild -->
 {% endblock %}
 
@@ -117,26 +117,29 @@
 			<br>
 		</div>
 
-		<div id="infoBottom" class="row w-100 two-column-holder-top-flat-md d-flex">
-		</div>
-		
-		<br>
-
-		<div class="row w-100">
-			<div class="col-12 div-cell-dark">
-				<h2>Raw inputs</h2>
-				<br>
-				<pre id="txRawInput"></pre>
+		<!-- Hidden in simple mode -->
+		<div id="txDetails">
+			<div id="infoBottom" class="row w-100 two-column-holder-top-flat-md d-flex">
 			</div>
-		</div>
+		
+			<br>
 
-		<br>
+			<div class="row w-100">
+				<div class="col-12 div-cell-dark">
+					<h2>Raw inputs</h2>
+					<br>
+					<pre id="txRawInput"></pre>
+				</div>
+			</div>
 
-		<div class="row w-100">
-			<div class="col-12 div-cell-dark">
-				<h2>Raw outputs</h2>
-				<br>
-				<pre id="txRawOutput"></pre>
+			<br>
+
+			<div class="row w-100">
+				<div class="col-12 div-cell-dark">
+					<h2>Raw outputs</h2>
+					<br>
+					<pre id="txRawOutput"></pre>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -152,5 +155,5 @@
 		<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 		<script src="./scripts/common/prices.js?v=44"></script>
 		<script src="./scripts/common/genesis.js?v=1"></script>
-		<script src="./scripts/transactions.js?v=48"></script>
+		<script src="./scripts/transactions.js?v=49"></script>
 {% endblock %}
