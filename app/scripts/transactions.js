@@ -9,6 +9,8 @@ const treasuryOriginTx = '{"id":"e179f12156061c04d375f599bd8aea7ea5e704fab2d9530
 $(function() {
 	txId = getWalletAddressFromUrl();
 
+	initSimpleMode();
+
 	initSocket();
 	getTokenIcons(onGotPrices);
 	getPrices(onGotPrices);
@@ -21,6 +23,31 @@ window.addEventListener('focus', restoreTitle);
 document.addEventListener('visibilitychange', () => {
 	if (!document.hidden) restoreTitle();
 });
+
+// Simple mode leaves each box its address, ERG value and tokens: no box id, height or registers.
+// Remembered in this browser only.
+const SIMPLE_MODE_KEY = 'txSimpleMode';
+
+function initSimpleMode() {
+	let on = false;
+
+	try {
+		on = localStorage.getItem(SIMPLE_MODE_KEY) === 'true';
+	} catch {}
+
+	$('#toggleSimpleMode').prop('checked', on);
+	$('#ioHolder').toggleClass('simple-mode', on);
+}
+
+function onToggleSimpleMode() {
+	const on = $('#toggleSimpleMode').prop('checked');
+
+	$('#ioHolder').toggleClass('simple-mode', on);
+
+	try {
+		localStorage.setItem(SIMPLE_MODE_KEY, on);
+	} catch {}
+}
 
 let socket = undefined;
 // A pending tx can be found by the REST lookup, the explorer fallback and the socket; print it once.

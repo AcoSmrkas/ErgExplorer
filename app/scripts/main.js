@@ -1049,7 +1049,7 @@ function formatBoxRegisters(registers) {
 		return '';
 	}
 
-	let html = '<div class="box-section">Registers</div><div class="box-grid box-registers">';
+	let html = '<div class="box-section box-registers-label">Registers</div><div class="box-grid box-registers">';
 
 	for (const key of keys) {
 		const register = registers[key];

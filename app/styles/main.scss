@@ -1256,18 +1256,32 @@ html[data-bs-theme="light"] .genesis-chip {
 	color: #c2410c;
 }
 
-.box-token {
-	display: flex;
-	justify-content: space-between;
+// Names and amounts as two columns, the amounts right after the longest name rather than at the
+// card's far edge, so the eye doesn't travel across the card. Long names give way with "..."
+.box-tokens {
+	display: grid;
+	grid-template-columns: fit-content(18rem) max-content;
+	justify-content: start;
 	align-items: baseline;
-	gap: 12px;
+	column-gap: 24px;
+}
+
+.box-token {
+	display: contents;
+}
+
+.box-token-name, .box-token-amount {
 	padding: 1px 0;
 }
 
-// Grows into the free space: a logo SVG with only a viewBox (RSN's) counts as 0px wide when the row
-// sizes this, which left the name an icon's width short and printed it as "..."
+// A logo SVG with only a viewBox (RSN's) counts as 0px wide when the column is sized, which would
+// leave the name an icon's width short and print it as "...". A set width counts
+.box-token-name .token-icon {
+	width: 18px;
+	object-fit: contain;
+}
+
 .box-token-name {
-	flex-grow: 1;
 	min-width: 0;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -1276,7 +1290,6 @@ html[data-bs-theme="light"] .genesis-chip {
 }
 
 .box-token-amount {
-	flex-shrink: 0;
 	text-align: right;
 	color: var(--text-strong);
 	font-variant-numeric: tabular-nums;

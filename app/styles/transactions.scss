@@ -13,6 +13,24 @@
 	border-radius: 0;
 }
 
+// Sits a little below the title's baseline, nearer the tx it applies to; less on phones,
+// where the title row's bottom margin is smaller
+#simpleModeToggle {
+	position: relative;
+	top: 4px;
+
+	@media (min-width: 768px) {
+		top: 10px;
+	}
+}
+
+// Simple mode (transactions.js): each box keeps its address, ERG value and tokens
+#ioHolder.simple-mode {
+	.box-meta, .box-registers-label, .box-registers {
+		display: none;
+	}
+}
+
 // What the genesis pseudo-tx is, between its header and its boxes
 .genesis-note {
 	margin: 0;
