@@ -26,6 +26,15 @@
 	}
 }
 
+#txTime {
+	column-gap: 12px;
+}
+
+// The tx's confirmations beside its time, in simple mode only: the info table has them otherwise
+.tx-status {
+	display: none;
+}
+
 // Simple mode (transactions.js) shows what each address sent and received in place of the boxes,
 // and drops the info table repeated below them and the raw JSON
 #netHolder {
@@ -39,6 +48,10 @@
 
 	#netHolder {
 		display: flex;
+	}
+
+	.tx-status {
+		display: block;
 	}
 
 	&.net-unavailable {

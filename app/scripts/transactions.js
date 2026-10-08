@@ -482,10 +482,10 @@ function printTransaction(data, mempool) {
 	//Time
 	if (mempool) {
 		if (data.creationTimestamp) {
-			$('#txTime').html('<p>' + formatDateString(data.creationTimestamp) + '</p>');
+			$('#txTimeText').html(formatDateString(data.creationTimestamp));
 		}
 	} else {
-		$('#txTime').html('<p>' + formatDateString(data.timestamp) + '</p>');
+		$('#txTimeText').html(formatDateString(data.timestamp));
 	}
 	
 	//Inputs
@@ -541,9 +541,9 @@ function printTransaction(data, mempool) {
 
 	//Confirmations nr.
 	if (mempool) {
-		$('#txConfirmations').html('<span class="text-warning">Pending</a>');
+		showConfirmations('<span class="text-warning">Pending</span>');
 	} else {
-		$('#txConfirmations').html(data.numConfirmations);
+		showConfirmations(data.numConfirmations, formatConfirmationsCount(data.numConfirmations));
 	}
 
 	//Total coins transferred. Summed exactly: values above 2^53 arrive as BigNumber
@@ -593,12 +593,25 @@ function printTransaction(data, mempool) {
 	$('#infoBottom').html($('#infoTop').html());
 }
 
+// The info table's confirmations cell, and its short form beside the tx's time (the cell's own
+// content unless given), which simple mode shows as it hides that table
+function showConfirmations(cell, status = cell) {
+	$('#txConfirmations').html(cell);
+	$('#txStatus').html(status);
+}
+
+function formatConfirmationsCount(count) {
+	if (count === undefined || count === null) return 'Confirmed';
+
+	return Number(count).toLocaleString('en-US') + (count == 1 ? ' confirmation' : ' confirmations');
+}
+
 // The genesis pseudo-tx has no time, block, size or fee of its own: say what it is instead
 function showGenesisDetails(data) {
 	const launch = formatGenesisDateString();
 
 	$('#genesisNote').removeClass('d-none');
-	$('#txTime').html('<p>' + launch + '</p>');
+	$('#txTimeText').html(launch);
 	$('#txSize').html('&mdash;');
 	$('#txReceivedTime').html('Mainnet launch, ' + launch);
 	$('#txIncludedInBlocks').html('Genesis, before block 1');
@@ -608,7 +621,7 @@ function showGenesisDetails(data) {
 	$('#txInputs, #txSent').html('<p class="genesis-no-inputs text-light">None: the protocol created these boxes at launch.</p>');
 
 	if (data.numConfirmations === undefined) {
-		$('#txConfirmations').html('&mdash;');
+		showConfirmations('&mdash;', '');
 	}
 }
 
@@ -801,7 +814,7 @@ function onTrackedTransactionSettled(outcome) {
 		showTrackingOutcome('Transaction dropped from the mempool without being confirmed.');
 		notifyTrackingOutcome('⚠ Dropped', 'Transaction dropped', 'Transaction ' + shortId + ' left the mempool without being confirmed. It may have been replaced or double-spent.');
 
-		$('#txConfirmations').html('<span class="text-danger">Dropped</span>');
+		showConfirmations('<span class="text-danger">Dropped</span>');
 		$('#infoBottom').html($('#infoTop').html());
 	}
 }

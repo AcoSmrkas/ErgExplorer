@@ -2,7 +2,7 @@
 
 {% block styles %}
 	<!-- build:css styles/transactions.css -->
-	<link rel="stylesheet" href="styles/transactions.css?v=7">
+	<link rel="stylesheet" href="styles/transactions.css?v=8">
 	<!-- endbuild -->
 {% endblock %}
 
@@ -29,7 +29,9 @@
 			</div>
 			<div id="txHeaderMobile" class="col-6 col-lg-9 d-block d-lg-none ps-0 pe-0 ps-md-2 pe-md-2">
 			</div>
-			<div id="txTime" class="col-6 col-lg-3 d-flex justify-content-end ps-0 pe-0 pe-md-2 pe-lg-3">
+			<div id="txTime" class="col-6 col-lg-3 d-flex flex-wrap justify-content-end ps-0 pe-0 pe-md-2 pe-lg-3">
+				<p id="txStatus" class="tx-status"></p>
+				<p id="txTimeText"></p>
 			</div>
 		</div>
 
@@ -169,5 +171,5 @@
 		<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 		<script src="./scripts/common/prices.js?v=44"></script>
 		<script src="./scripts/common/genesis.js?v=1"></script>
-		<script src="./scripts/transactions.js?v=50"></script>
+		<script src="./scripts/transactions.js?v=51"></script>
 {% endblock %}
