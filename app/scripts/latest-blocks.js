@@ -199,9 +199,6 @@ function queryGql(query, variables = {}) {
 	});
 }
 
-//Ergo aims for a block every 2 minutes; a gap of 3 targets or more is shown in orange
-const TARGET_BLOCK_TIME = 120000;
-
 //The GraphQL source gives each block's mining time; with the explorer it is the gap to the block below, when that is on the page
 function getMiningTime(items, i) {
 	if (items[i].miningTime !== undefined) {
@@ -218,9 +215,7 @@ function formatBlockTime(ms) {
 	}
 
 	const seconds = Math.max(0, Math.round(ms / 1000));
-	const text = (seconds >= 60 ? Math.floor(seconds / 60) + 'm ' : '') + (seconds % 60) + 's';
-
-	return ms >= 3 * TARGET_BLOCK_TIME ? '<span class="block-slow" title="Over 3 times the 2 minute target">' + text + '</span>' : text;
+	return (seconds >= 60 ? Math.floor(seconds / 60) + 'm ' : '') + (seconds % 60) + 's';
 }
 
 function gqlBlockToExplorer(block) {
