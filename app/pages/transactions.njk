@@ -2,7 +2,7 @@
 
 {% block styles %}
 	<!-- build:css styles/transactions.css -->
-	<link rel="stylesheet" href="styles/transactions.css?v=6">
+	<link rel="stylesheet" href="styles/transactions.css?v=7">
 	<!-- endbuild -->
 {% endblock %}
 
@@ -102,6 +102,20 @@
 			</div>
 		</div>
 
+		<!-- Simple mode's view in place of the boxes: what each address gave and got, net of change -->
+		<div id="netHolder" class="row w-100 two-column-holder-top-flat two-column-holder-top-flat-md border-top-flat">
+			<div class="col-md-6 div-cell-dark border-top-flat p-0">
+				<h2 class="p-3 ps-2 ps-md-3 m-0">Sent <span id="txSentCount" class="io-count"></span></h2>
+				<div id="txSent">
+				</div>
+			</div>
+			<div class="col-md-6 div-cell-dark border-top-flat p-0 mt-4 mt-md-0">
+				<h2 class="p-3 ps-2 ps-md-3 m-0">Received <span id="txReceivedCount" class="io-count"></span></h2>
+				<div id="txReceived">
+				</div>
+			</div>
+		</div>
+
 		<br>
 
 		<div id="burnedHolder" class="row w-100 d-none ">
@@ -155,5 +169,5 @@
 		<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 		<script src="./scripts/common/prices.js?v=44"></script>
 		<script src="./scripts/common/genesis.js?v=1"></script>
-		<script src="./scripts/transactions.js?v=49"></script>
+		<script src="./scripts/transactions.js?v=50"></script>
 {% endblock %}

@@ -24,8 +24,8 @@ document.addEventListener('visibilitychange', () => {
 	if (!document.hidden) restoreTitle();
 });
 
-// Simple mode leaves each box its address, ERG value and tokens: no box id, height or registers,
-// and drops the repeated info table and the raw inputs and outputs below the boxes.
+// Simple mode shows what each address sent and received (printNetFlows) in place of the boxes,
+// and drops the repeated info table and the raw inputs and outputs below them.
 // Remembered in this browser only.
 const SIMPLE_MODE_KEY = 'txSimpleMode';
 
@@ -496,6 +496,9 @@ function printTransaction(data, mempool) {
 	$('#txOutputs').html(formatInputsOutputs(data.outputs, data.inputs));
 	$('#txOutputsCount').text('(' + data.outputs.length + ')');
 
+	//Simple mode's net view
+	printNetFlows(data);
+
 	//Burned
 	if (hasBurnedAssets) {
 		let burnedHtml = '';
@@ -602,7 +605,7 @@ function showGenesisDetails(data) {
 	$('#txTotalCoinsLabel').text('Total coins created');
 	$('#txFees').html('&mdash;');
 	$('#txFeesPerByte').html('&mdash;');
-	$('#txInputs').html('<p class="genesis-no-inputs text-light">None: the protocol created these boxes at launch.</p>');
+	$('#txInputs, #txSent').html('<p class="genesis-no-inputs text-light">None: the protocol created these boxes at launch.</p>');
 
 	if (data.numConfirmations === undefined) {
 		$('#txConfirmations').html('&mdash;');
@@ -836,6 +839,119 @@ function restoreTitle() {
 
 	document.title = titleBeforeAlert;
 	titleBeforeAlert = null;
+}
+
+/**
+ * Simple mode shows a tx by what each address gave and got rather than by its boxes: every
+ * address's inputs and outputs are netted, so change that goes back to a sender cancels out.
+ * A sender who puts in a 1B LIT box and gets 950M back is shown sending 50M. An address that
+ * both gives and gets, as either side of a swap does, is in both columns.
+ */
+function printNetFlows(data) {
+	let shown = false;
+
+	try {
+		const flows = getNetFlows(data);
+
+		if (flows !== null) {
+			const sent = flows.map(flow => getFlowSide(flow, -1)).filter(Boolean);
+			const received = flows.map(flow => getFlowSide(flow, 1)).filter(Boolean);
+
+			$('#txSent').html(sent.length > 0 ? sent.map(formatNetFlow).join('') : formatNoFlow());
+			$('#txSentCount').text('(' + sent.length + ')');
+
+			$('#txReceived').html(received.length > 0 ? received.map(formatNetFlow).join('') : formatNoFlow());
+			$('#txReceivedCount').text('(' + received.length + ')');
+
+			shown = true;
+		}
+	} catch (error) {
+		console.error('Net view failed:', error);
+	}
+
+	// Simple mode keeps the boxes rather than show sums it couldn't make
+	$('#txDataHolder').toggleClass('net-unavailable', !shown);
+}
+
+// Per address, in the order the tx first lists them: ERG and each token, outputs minus inputs.
+// Values come as numbers, strings or BigNumbers (JSONbig), so they're summed as BigNumbers.
+// Null when a box has no value, as a pending tx's input can if its box wasn't found.
+function getNetFlows(data) {
+	const boxes = data.inputs.concat(data.outputs);
+
+	if (boxes.some(box => box.value === undefined || box.value === null)) {
+		return null;
+	}
+
+	const flows = new Map();
+
+	const add = (box, sign) => {
+		const address = getBoxAddress(box);
+
+		if (!flows.has(address)) {
+			flows.set(address, { address: address, erg: new BigNumber(0), tokens: new Map() });
+		}
+
+		const flow = flows.get(address);
+		flow.erg = flow.erg.plus(new BigNumber(box.value.toString()).times(sign));
+
+		for (const asset of box.assets || []) {
+			if (!flow.tokens.has(asset.tokenId)) {
+				flow.tokens.set(asset.tokenId, { tokenId: asset.tokenId, name: asset.name, decimals: asset.decimals, amount: new BigNumber(0) });
+			}
+
+			const token = flow.tokens.get(asset.tokenId);
+			token.amount = token.amount.plus(new BigNumber(asset.amount.toString()).times(sign));
+		}
+	};
+
+	data.inputs.forEach(box => add(box, -1));
+	data.outputs.forEach(box => add(box, 1));
+
+	return [...flows.values()];
+}
+
+// What the address gave (sign -1) or got (sign 1), as positive amounts, or null if nothing
+function getFlowSide(flow, sign) {
+	const erg = flow.erg.times(sign).isGreaterThan(0) ? flow.erg.abs() : null;
+	const tokens = [...flow.tokens.values()]
+		.filter(token => token.amount.times(sign).isGreaterThan(0))
+		.map(token => ({ tokenId: token.tokenId, name: token.name, decimals: token.decimals, amount: toPlainAmount(token.amount.abs()) }));
+
+	if (erg === null && tokens.length == 0) return null;
+
+	return { address: flow.address, erg: erg === null ? null : toPlainAmount(erg), tokens: tokens };
+}
+
+// A number where it's exact, else a string, as the formatters take them
+function toPlainAmount(amount) {
+	return amount.isLessThanOrEqualTo(Number.MAX_SAFE_INTEGER) ? amount.toNumber() : amount.toFixed();
+}
+
+// One address's side, in the box card's style
+function formatNetFlow(side) {
+	if (side.address == FEE_ADDRESS) {
+		return formatFeeBox({ value: side.erg });
+	}
+
+	addAddress(side.address);
+
+	let html = '<div class="row div-cell border-flat p-2"><div class="col-12 box-card">'
+		+ '<div class="box-head"><div class="box-address">'
+		+ '<a class="address-string" addr="' + side.address + '" href="' + getWalletAddressUrl(side.address) + '">' + formatAddressString(side.address, 8) + '</a> ' + copyIcon(side.address)
+		+ '</div></div>';
+
+	if (side.erg !== null) {
+		html += '<div class="box-value">' + formatErgValueString(side.erg, 9, true, true) + ' <span class="text-light">' + formatAssetDollarPriceString(side.erg, ERG_DECIMALS, 'ERG') + '</span></div>';
+	}
+
+	html += formatBoxTokens(side.tokens, true);
+
+	return html + '</div></div>';
+}
+
+function formatNoFlow() {
+	return '<p class="genesis-no-inputs text-light">None</p>';
 }
 
 function copyTransactionAddress(e) {

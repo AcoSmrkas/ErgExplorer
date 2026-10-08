@@ -681,9 +681,15 @@ function getAssetTitleParams(token, tokenId, name, iconIsToTheLeft, scam = false
 	return '<a title="' + (scam ? 'Reported as suspicious by users.' : '') + '" class="token-link' + (scam ? ' text-danger' : '') + '" href="' + getTokenUrl(tokenId) + '" data-token-id="' + tokenId + '" data-token-name="' + dataName + '"' + (scam ? ' data-token-scam="1"' : '') + '>' + (iconIsToTheLeft ? iconHtml + ' ' : '') + displayName + (iconIsToTheLeft ? '' : ' ' + iconHtml) + '</a>';
 }
 
+//A raw amount past 2^53 (10M of a 9-decimal token) is divided exactly. What it comes to is a number
+//while it fits one, decimals and all, and a string of whole units only past that
 function getAssetValue(amount, decimals) {
 	if (!isFloat(amount) && isLargerThanMaxSafeInteger(amount)) {
-		return (BigInt(amount) / (BigInt(Math.pow(10, decimals)))).toString();
+		const value = new BigNumber(amount.toString()).shiftedBy(-(decimals || 0));
+
+		return value.isLessThanOrEqualTo(Number.MAX_SAFE_INTEGER)
+			? value.toNumber()
+			: value.integerValue(BigNumber.ROUND_DOWN).toFixed();
 	} else {
 		return amount / Math.pow(10, decimals);
 	}
@@ -900,7 +906,7 @@ function formatBox(box, trueBox = false, unspent = false, change = false) {
 	//The address page lists its own unspent boxes, where the address would only repeat the page's
 	if (!unspent) {
 		html += '<div class="box-head">'
-			+ '<div class="box-address">' + (box.index != undefined && !trueBox ? boxIndexHtml(box.index) : '')
+			+ '<div class="box-address">' + (box.index != undefined && !trueBox ? '<span class="box-index">#' + box.index + '</span>' : '')
 			+ '<a class="address-string" addr="' + boxAddress + '" href="' + getWalletAddressUrl(boxAddress) + '" >' + formatAddressString(boxAddress, 8) + '</a> ' + copyIcon(boxAddress) + '</div>'
 			+ (status ? '<div class="box-status">' + status + '</div>' : '')
 			+ '</div>';
@@ -943,23 +949,7 @@ function formatBox(box, trueBox = false, unspent = false, change = false) {
 	}
 
 	//Assets
-	if (box.assets != undefined && box.assets.length > 0) {
-		//Long lists scroll inside a fixed height, with faded edges
-		const scrolls = box.assets.length > BOX_TOKENS_SHOWN;
-
-		html += '<div class="box-section">Tokens <span class="box-count">(' + box.assets.length + ')</span></div><div class="box-tokens' + (scrolls ? ' box-tokens-scroll scroll-fade' : '') + '">';
-
-		for (let j = 0; j < box.assets.length; j++) {
-			let asset = box.assets[j];
-			let assetPrice = formatAssetDollarPrice(asset.amount, asset.decimals, asset.tokenId);
-
-			html += '<div class="box-token"><span class="box-token-name">' + getAssetTitle(asset, true) + '</span>'
-				+ '<span class="box-token-amount">' + formatAssetValueString(asset.amount, asset.decimals, 4, !trueBox)
-				+ (assetPrice == -1 ? '' : ' <span class="text-light">' + formatDollarPriceString(assetPrice) + '</span>') + '</span></div>';
-		}
-
-		html += '</div>';
-	}
+	html += formatBoxTokens(box.assets, !trueBox);
 
 	//Registers
 	html += formatBoxRegisters(box.additionalRegisters);
@@ -972,6 +962,28 @@ function formatBox(box, trueBox = false, unspent = false, change = false) {
 }
 
 const BOX_TOKENS_SHOWN = 6;
+
+//A box card's token list. Amounts are shortened (1.2M) unless noshort
+function formatBoxTokens(assets, noshort) {
+	if (assets == undefined || assets.length == 0) {
+		return '';
+	}
+
+	//Long lists scroll inside a fixed height, with faded edges
+	const scrolls = assets.length > BOX_TOKENS_SHOWN;
+
+	let html = '<div class="box-section">Tokens <span class="box-count">(' + assets.length + ')</span></div><div class="box-tokens' + (scrolls ? ' box-tokens-scroll scroll-fade' : '') + '">';
+
+	for (const asset of assets) {
+		let assetPrice = formatAssetDollarPrice(asset.amount, asset.decimals, asset.tokenId);
+
+		html += '<div class="box-token"><span class="box-token-name">' + getAssetTitle(asset, true) + '</span>'
+			+ '<span class="box-token-amount">' + formatAssetValueString(asset.amount, asset.decimals, 4, noshort)
+			+ (assetPrice == -1 ? '' : ' <span class="text-light">' + formatDollarPriceString(assetPrice) + '</span>') + '</span></div>';
+	}
+
+	return html + '</div>';
+}
 
 //A .scroll-fade list fades at the top once scrolled down and at the bottom until scrolled to its end
 function updateScrollFade(list) {
@@ -1020,17 +1032,10 @@ function watchScrollFade(container, selector) {
 //The miner fee output on one line: it never holds tokens or registers worth a card
 function formatFeeBox(box) {
 	return '<div class="row div-cell border-flat p-2"><div class="col-12 box-card"><div class="box-head box-fee">'
-		+ '<div>' + (box.index != undefined ? boxIndexHtml(box.index) : '')
+		+ '<div>' + (box.index != undefined ? '<span class="box-index">#' + box.index + '</span>' : '')
 		+ '<a href="' + getWalletAddressUrl(FEE_ADDRESS) + '">Miner fee</a> ' + copyIcon(FEE_ADDRESS) + '</div>'
 		+ '<div class="box-fee-value">' + formatErgValueString(box.value, 9, true, true) + ' <span class="text-light">' + formatAssetDollarPriceString(box.value, ERG_DECIMALS, 'ERG') + '</span></div>'
 		+ '</div></div></div>';
-}
-
-//A box's place in its tx as the chain counts it, from #0. The tx page's simple mode shows the
-//count from #1 instead, so both are here for its CSS to pick from
-function boxIndexHtml(index) {
-	return '<span class="box-index"><span class="box-index-chain">#' + index + '</span>'
-		+ '<span class="box-index-simple">#' + (Number(index) + 1) + '</span></span>';
 }
 
 function copyIcon(value) {

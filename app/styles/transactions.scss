@@ -1,13 +1,15 @@
-#txInputs > div:nth-child(odd), #txOutputs > div:nth-child(odd) {
+#txInputs > div:nth-child(odd), #txOutputs > div:nth-child(odd),
+#txSent > div:nth-child(odd), #txReceived > div:nth-child(odd) {
 	background-color: var(--striped-1);
 }
 
 // Clip the striped last box to the column's rounded corner, as blocks.scss does for .block-tx-column
-#ioHolder > div {
+#ioHolder > div, #netHolder > div {
 	overflow: hidden;
 }
 
-#txInputs > .div-cell, #txOutputs > .div-cell {
+#txInputs > .div-cell, #txOutputs > .div-cell,
+#txSent > .div-cell, #txReceived > .div-cell {
 	border: 0;
 	border-top: 1px solid var(--borders);
 	border-radius: 0;
@@ -24,15 +26,29 @@
 	}
 }
 
-// Simple mode (transactions.js): each box keeps its address, ERG value and tokens, and the info
-// table repeated below the boxes and the raw JSON go. Boxes count from #1
+// Simple mode (transactions.js) shows what each address sent and received in place of the boxes,
+// and drops the info table repeated below them and the raw JSON
+#netHolder {
+	display: none;
+}
+
 #txDataHolder.simple-mode {
-	.box-meta, .box-registers-label, .box-registers, #txDetails, .box-index-chain {
+	#ioHolder, #txDetails {
 		display: none;
 	}
 
-	.box-index-simple {
-		display: inline;
+	#netHolder {
+		display: flex;
+	}
+
+	&.net-unavailable {
+		#ioHolder {
+			display: flex;
+		}
+
+		#netHolder {
+			display: none;
+		}
 	}
 }
 
