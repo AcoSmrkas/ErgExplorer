@@ -1029,13 +1029,14 @@ function watchScrollFade(container, selector) {
 	refresh();
 }
 
-//The miner fee output on one line: it never holds tokens or registers worth a card
+//The miner fee output: a card like the others, its value under the name, but it never holds tokens
+//or registers worth showing
 function formatFeeBox(box) {
-	return '<div class="row div-cell border-flat p-2"><div class="col-12 box-card"><div class="box-head box-fee">'
-		+ '<div>' + (box.index != undefined ? '<span class="box-index">#' + box.index + '</span>' : '')
-		+ '<a href="' + getWalletAddressUrl(FEE_ADDRESS) + '">Miner fee</a> ' + copyIcon(FEE_ADDRESS) + '</div>'
-		+ '<div class="box-fee-value">' + formatErgValueString(box.value, 9, true, true) + ' <span class="text-light">' + formatAssetDollarPriceString(box.value, ERG_DECIMALS, 'ERG') + '</span></div>'
-		+ '</div></div></div>';
+	return '<div class="row div-cell border-flat p-2"><div class="col-12 box-card">'
+		+ '<div class="box-head"><div class="box-address">' + (box.index != undefined ? '<span class="box-index">#' + box.index + '</span>' : '')
+		+ '<a href="' + getWalletAddressUrl(FEE_ADDRESS) + '">Miner fee</a> ' + copyIcon(FEE_ADDRESS) + '</div></div>'
+		+ '<div class="box-value">' + formatErgValueString(box.value, 9, true, true) + ' <span class="text-light">' + formatAssetDollarPriceString(box.value, ERG_DECIMALS, 'ERG') + '</span></div>'
+		+ '</div></div>';
 }
 
 function copyIcon(value) {
