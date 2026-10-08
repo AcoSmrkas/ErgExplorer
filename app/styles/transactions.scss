@@ -25,10 +25,14 @@
 }
 
 // Simple mode (transactions.js): each box keeps its address, ERG value and tokens, and the info
-// table repeated below the boxes and the raw JSON go
+// table repeated below the boxes and the raw JSON go. Boxes count from #1
 #txDataHolder.simple-mode {
-	.box-meta, .box-registers-label, .box-registers, #txDetails {
+	.box-meta, .box-registers-label, .box-registers, #txDetails, .box-index-chain {
 		display: none;
+	}
+
+	.box-index-simple {
+		display: inline;
 	}
 }
 

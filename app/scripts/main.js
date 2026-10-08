@@ -900,7 +900,7 @@ function formatBox(box, trueBox = false, unspent = false, change = false) {
 	//The address page lists its own unspent boxes, where the address would only repeat the page's
 	if (!unspent) {
 		html += '<div class="box-head">'
-			+ '<div class="box-address">' + (box.index != undefined && !trueBox ? '<span class="box-index">#' + box.index + '</span>' : '')
+			+ '<div class="box-address">' + (box.index != undefined && !trueBox ? boxIndexHtml(box.index) : '')
 			+ '<a class="address-string" addr="' + boxAddress + '" href="' + getWalletAddressUrl(boxAddress) + '" >' + formatAddressString(boxAddress, 8) + '</a> ' + copyIcon(boxAddress) + '</div>'
 			+ (status ? '<div class="box-status">' + status + '</div>' : '')
 			+ '</div>';
@@ -1020,10 +1020,17 @@ function watchScrollFade(container, selector) {
 //The miner fee output on one line: it never holds tokens or registers worth a card
 function formatFeeBox(box) {
 	return '<div class="row div-cell border-flat p-2"><div class="col-12 box-card"><div class="box-head box-fee">'
-		+ '<div>' + (box.index != undefined ? '<span class="box-index">#' + box.index + '</span>' : '')
+		+ '<div>' + (box.index != undefined ? boxIndexHtml(box.index) : '')
 		+ '<a href="' + getWalletAddressUrl(FEE_ADDRESS) + '">Miner fee</a> ' + copyIcon(FEE_ADDRESS) + '</div>'
 		+ '<div class="box-fee-value">' + formatErgValueString(box.value, 9, true, true) + ' <span class="text-light">' + formatAssetDollarPriceString(box.value, ERG_DECIMALS, 'ERG') + '</span></div>'
 		+ '</div></div></div>';
+}
+
+//A box's place in its tx as the chain counts it, from #0. The tx page's simple mode shows the
+//count from #1 instead, so both are here for its CSS to pick from
+function boxIndexHtml(index) {
+	return '<span class="box-index"><span class="box-index-chain">#' + index + '</span>'
+		+ '<span class="box-index-simple">#' + (Number(index) + 1) + '</span></span>';
 }
 
 function copyIcon(value) {
