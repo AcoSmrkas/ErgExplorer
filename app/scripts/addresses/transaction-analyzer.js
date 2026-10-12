@@ -1,4 +1,5 @@
-import { CRUX_TEMPLATES, DUCKPOOLS_TEMPLATES, EPERPS_TEMPLATES, ERGO_MIXER_TEMPLATES, ERGONAMES_TEMPLATES, ERGOPAD_STAKING_TEMPLATES, ERGORAFFLE_TEMPLATES, LITHOS_LOCK_TEMPLATES, LITHOS_POOL_TEMPLATES, LITHOS_TEMPLATES, ORACLE_POOL_V2_TEMPLATES, PAIDEIA_TEMPLATES, ROSEN_TEMPLATES, THE_FIELD_TEMPLATES, SPECTRUM_TEMPLATES, SWAP_TEMPLATES, TxInOut, TxType } from './constants.js?v=2';
+import { LITHOS_TEMPLATES, TxInOut, TxType } from './constants.js?v=3';
+import { CONTRACT_TEMPLATES } from './contract-names.js?v=1';
 
 /**
  * Determine transaction type based on input/output address types
@@ -90,146 +91,9 @@ export function checkAssetsSign(assets) {
  * Detect smart contract addresses by matching ergoTree to known templates
  */
 export function detectContractFromErgotree(ergoTree, addressType = 'label') {
-	const templates = {
-		[SWAP_TEMPLATES.N2T_SELL_ERG]: 'Spectrum Finance N2T Swap',
-		[SWAP_TEMPLATES.N2T_SELL_SPF]: 'Spectrum Finance N2T Swap',
-		[SWAP_TEMPLATES.N2T_BUY_ERG]: 'Spectrum Finance N2T Swap',
-		[SWAP_TEMPLATES.N2T_BUY_SPF]: 'Spectrum Finance N2T Swap',
-		[SWAP_TEMPLATES.T2T_SWAP_ERG]: 'Spectrum Finance T2T Swap',
-		[SWAP_TEMPLATES.T2T_SWAP_SPF]: 'Spectrum Finance T2T Swap',
-		[SWAP_TEMPLATES.N2T_SWAP_ALT_1]: 'Spectrum Finance N2T Swap',
-		[SWAP_TEMPLATES.N2T_SWAP_ALT_2]: 'Spectrum Finance N2T Swap',
-		[SPECTRUM_TEMPLATES.LP_DEPOSIT]: 'Spectrum Finance LP Deposit',
-		[SPECTRUM_TEMPLATES.LP_REDEEM]: 'Spectrum Finance LP Redeem',
-		[SPECTRUM_TEMPLATES.YF_DEPOSIT]: 'Spectrum Finance YF Deposit',
-		[SPECTRUM_TEMPLATES.YF_REDEEM]: 'Spectrum Finance YF Redeem',
-		[CRUX_TEMPLATES.LIMIT_ORDER]: 'Crux Finance Limit Order',
-		[CRUX_TEMPLATES.LIMIT_ORDER_PART]: 'Crux Finance Limit Order',
-		[CRUX_TEMPLATES.LIQUIDITY_POSITION]: 'Crux Finance Liquidity Position',
-		[LITHOS_TEMPLATES.SWAP_SELL]: 'Lithos LP Swap',
-		[LITHOS_TEMPLATES.SWAP_BUY]: 'Lithos LP Swap',
-		[LITHOS_TEMPLATES.LP_DEPOSIT]: 'Lithos LP Deposit',
-		[LITHOS_TEMPLATES.LP_REDEEM]: 'Lithos LP Redeem',
-		[LITHOS_TEMPLATES.POOL]: 'Lithos Liquidity Pool'
-	};
-
-	// Services whose contracts come in several builds: [templates by role, label by role]
-	const templateGroups = [
-		[ERGORAFFLE_TEMPLATES, {
-			SERVICE: 'ErgoRaffle Service',
-			CREATE_PROXY: 'ErgoRaffle Raffle Creation',
-			RAFFLE_SETUP: 'ErgoRaffle Raffle Setup',
-			RAFFLE_TOKENS: 'ErgoRaffle Raffle Setup',
-			ACTIVE: 'ErgoRaffle Active Raffle',
-			TICKET_PROXY: 'ErgoRaffle Ticket Purchase',
-			TICKET: 'ErgoRaffle Ticket',
-			WINNER: 'ErgoRaffle Winner Prize',
-			REFUND: 'ErgoRaffle Refund'
-		}],
-		[ORACLE_POOL_V2_TEMPLATES, {
-			POOL: 'Oracle Pool v2',
-			DATAPOINT: 'Oracle Pool v2 Datapoint',
-			REFRESH: 'Oracle Pool v2 Refresh',
-			COMPANION: 'Oracle Pool v2 Companion',
-			BUYBACK: 'Oracle Pool v2 Buyback'
-		}],
-		[ROSEN_TEMPLATES, {
-			REPO: 'Rosen Bridge Watcher Repo',
-			COLLATERAL: 'Rosen Bridge Watcher Collateral',
-			PERMIT: 'Rosen Bridge Watcher Permit',
-			COMMITMENT: 'Rosen Bridge Commitment',
-			EVENT_TRIGGER: 'Rosen Bridge Event Trigger',
-			REPO_CONFIG: 'Rosen Bridge Repo Config'
-		}],
-		[ERGO_MIXER_TEMPLATES, {
-			HALF_MIX: 'Ergo Mixer Half-Mix',
-			FULL_MIX: 'Ergo Mixer Full-Mix',
-			FEE: 'Ergo Mixer Fee Box',
-			TOKEN_EMISSION: 'Ergo Mixer Token Emission'
-		}],
-		[ERGOPAD_STAKING_TEMPLATES, {
-			STATE: 'ErgoPad Staking State',
-			STAKE: 'ErgoPad Stake',
-			POOL: 'ErgoPad Staking Pool',
-			EMISSION: 'ErgoPad Staking Emission',
-			INCENTIVE: 'ErgoPad Staking Incentive',
-			REQUEST: 'ErgoPad Staking Request'
-		}],
-		[LITHOS_LOCK_TEMPLATES, {
-			CAMPAIGN: 'Lithos Lock Campaign'
-		}],
-		[LITHOS_POOL_TEMPLATES, {
-			EMISSION: 'Lithos Emission',
-			CONFIG: 'Lithos Emission Config',
-			QUEUE: 'Lithos Collateral Queue',
-			COLLATERAL: 'Lithos Collateral',
-			MINER_DICTIONARY: 'Lithos Miner Dictionary',
-			MINER_DATA: 'Lithos Miner Registration',
-			FP_CONTROL: 'Lithos Fraud Proof Registry',
-			HOLDING: 'Lithos Rollup Holding',
-			EVALUATION: 'Lithos Rollup Evaluation',
-			PAYOUT: 'Lithos Rollup Payout'
-		}],
-		[PAIDEIA_TEMPLATES, {
-			STAKE_STATE: 'Paideia Stake State',
-			STAKING: 'Paideia Staking',
-			PROPOSAL: 'Paideia Proposal',
-			TREASURY: 'Paideia DAO Treasury',
-			DAO: 'Paideia DAO',
-			ACTION: 'Paideia DAO Action',
-			ORIGIN: 'Paideia Origin'
-		}],
-		[ERGONAMES_TEMPLATES, {
-			MINT_REQUEST: 'ErgoNames Mint Request',
-			COLLECTION: 'ErgoNames Collection',
-			NAME_MINT: 'ErgoNames Name Mint',
-			REGISTRY: 'ErgoNames Registry',
-			ERGODOMAINS_REGISTRAR: 'ErgoDomains Registrar',
-			ERGODOMAINS_DOMAIN: 'ErgoDomains Domain'
-		}],
-		[DUCKPOOLS_TEMPLATES, {
-			POOL: 'Duckpools Lending Pool',
-			COLLATERAL: 'Duckpools Collateral',
-			REPAYMENT: 'Duckpools Repayment',
-			CHILD_INTEREST: 'Duckpools Child Interest',
-			INTEREST: 'Duckpools Interest',
-			LEND_PROXY: 'Duckpools Lend',
-			WITHDRAW_PROXY: 'Duckpools Withdraw',
-			BORROW_PROXY: 'Duckpools Borrow',
-			REPAY_PROXY: 'Duckpools Repay',
-			PARTIAL_REPAY_PROXY: 'Duckpools Partial Repay'
-		}],
-		[THE_FIELD_TEMPLATES, {
-			MARKET: 'The Field Market',
-			COLLECTION: 'The Field Collection',
-			BID_MARKET: 'The Field Bid Market',
-			BID: 'The Field Bid'
-		}],
-		[EPERPS_TEMPLATES, {
-			RESERVE: 'ePerps Reserve',
-			STAMP: 'ePerps Stamp',
-			STAMPER: 'ePerps Stamper',
-			LPSAT: 'ePerps LP Satellite',
-			FILLSAT: 'ePerps Fill Satellite',
-			RISKSAT: 'ePerps Risk Satellite',
-			SWEEP: 'ePerps Sweep',
-			UPDATE: 'ePerps Update',
-			BALLOT: 'ePerps Ballot',
-			RSV: 'ePerps RSV'
-		}]
-	];
-
-	for (const [groupTemplates, labels] of templateGroups) {
-		for (const [key, label] of Object.entries(labels)) {
-			for (const template of groupTemplates[key]) {
-				templates[template] = label;
-			}
-		}
-	}
-
-	for (const [template, label] of Object.entries(templates)) {
+	for (const { name, template } of CONTRACT_TEMPLATES) {
 		if (ergoTree.endsWith(template)) {
-			return label;
+			return name;
 		}
 	}
 

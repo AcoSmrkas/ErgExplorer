@@ -6,13 +6,13 @@
 import { AddressState } from './state.js';
 import { ApiClient } from './api-client.js?v=53';
 import { BalanceSummary } from './balance-summary.js?v=66';
-import { AddressDetails } from './address-details.js?v=52';
-import { TransactionFormatter } from './transaction-formatter.js?v=71';
+import { AddressDetails } from './address-details.js?v=53';
+import { TransactionFormatter } from './transaction-formatter.js?v=72';
 import { UIControllers } from './ui-controllers.js?v=65';
 import { PendingTracker } from './pending-tracker.js?v=3';
 import { NftManager } from './nft-manager.js';
 import { MiningPanel } from './mining.js?v=1';
-import { getTxType, isWalletAddress, getTxInOutType, analyzeTransfers } from './transaction-analyzer.js?v=2';
+import { getTxType, isWalletAddress, getTxInOutType, analyzeTransfers } from './transaction-analyzer.js?v=3';
 
 /**
  * Friendly addressbook URLs, e.g. /addresses/FAKU-Treasury -> the real address.
