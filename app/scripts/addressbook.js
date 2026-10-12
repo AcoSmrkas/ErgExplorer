@@ -259,6 +259,9 @@ function onOrderChanged() {
 //contract runs, never that it is the protocol's own.
 const TEMPLATE_BOXES_PER_PAGE = 100;
 
+//An all-time script loads its whole history at once; past this many boxes a build shows its oldest only
+const ALL_TIME_MAX_BOXES = 2000;
+
 //Shorter templates (a token check, a height lock) are shared by unrelated contracts
 const MIN_TEMPLATE_BYTES = 40;
 
@@ -271,7 +274,7 @@ var addressBookAddresses = null;
 
 function loadContractNames() {
     if (contractNamesImport == null) {
-        contractNamesImport = import('./addresses/contract-names.js?v=1').catch(function(e) {
+        contractNamesImport = import('./addresses/contract-names.js?v=2').catch(function(e) {
             contractNamesImport = null;
             throw e;
         });
@@ -312,7 +315,11 @@ function printTemplateProtocol(protocol) {
     formattedResult += '</div>';
     formattedResult += '<div class="col border-lg-start">';
     formattedResult += '<hr class="my-3 d-lg-none">';
-    formattedResult += '<p><strong>Scripts:</strong></p>';
+    //Spent contracts hold nothing, so a list that includes them says so once, or per script if only some do
+    let protocolContracts = templateContracts.filter(contract => contract.protocol == protocol);
+    let allTime = protocolContracts.every(contract => contract.allTime);
+
+    formattedResult += '<p><strong>Scripts:</strong>' + (allTime ? ' <span class="text-light">(all-time)</span>' : '') + '</p>';
 
     for (let i = 0; i < templateContracts.length; i++) {
         let contract = templateContracts[i];
@@ -324,6 +331,11 @@ function printTemplateProtocol(protocol) {
         formattedResult += '<div class="template-contract">';
         formattedResult += '<a href="#" class="template-contract-toggle" onclick="toggleTemplateContract(event, ' + i + ')">'
             + '<i id="templateContractIcon' + i + '" class="fa-solid fa-chevron-right me-1"></i>' + escapeHtml(getTemplateScriptName(contract)) + '</a>';
+
+        if (contract.allTime && !allTime) {
+            formattedResult += ' <span class="text-light">(all-time)</span>';
+        }
+
         formattedResult += '<div id="templateContract' + i + '" class="template-contract-addresses" style="display: none;"></div>';
         formattedResult += '</div>';
     }
@@ -356,7 +368,7 @@ function findTemplateContracts(contractTemplates, searchQuery) {
         }
 
         if (contractsByName[name] == undefined) {
-            contractsByName[name] = { protocol: contractTemplate.protocol, name: name, templates: [], hashes: null, totals: null, page: 0, request: 0, loaded: false };
+            contractsByName[name] = { protocol: contractTemplate.protocol, name: name, allTime: contractTemplate.allTime, templates: [], hashes: null, totals: null, history: null, page: 0, request: 0, loaded: false };
             contracts.push(contractsByName[name]);
         }
 
@@ -404,6 +416,15 @@ function loadTemplateContractPage(index, page) {
         let hashes = results[0];
         let offset = page * TEMPLATE_BOXES_PER_PAGE;
 
+        //An all-time script pages its addresses, not its boxes: a pool that moved through hundreds of boxes is one address
+        if (contract.allTime) {
+            return contract.history || Promise.all(hashes.map(function(hash) {
+                return fetchAllTemplateBoxes(hash).catch(function() {
+                    return null;
+                });
+            }));
+        }
+
         return Promise.all(hashes.map(function(hash, i) {
             //A build with fewer boxes than this page skips has nothing more to show
             if (contract.totals != null && contract.totals[i] != null && contract.totals[i] <= offset) {
@@ -426,6 +447,7 @@ function loadTemplateContractPage(index, page) {
         }
 
         contract.totals = pages.map(templatePage => templatePage == null ? null : templatePage.total);
+        contract.history = contract.allTime && !pages.includes(null) ? pages : null;
         contract.page = page;
         contract.loaded = true;
 
@@ -459,12 +481,12 @@ function sha256Hex(hex) {
     });
 }
 
-//Unspent boxes whose ErgoTree has this template, oldest first
-function fetchTemplateBoxes(hash, offset) {
+//Unspent boxes whose ErgoTree has this template (or every box ever, spent too), oldest first
+function fetchTemplateBoxes(hash, offset, allTime) {
     let apiHost = API_HOST.endsWith('/api/v1/') ? API_HOST : API_HOST + 'api/v1/';
 
     return Promise.resolve($.ajax({
-        url: apiHost + 'boxes/unspent/byErgoTreeTemplateHash/' + hash + '?offset=' + offset + '&limit=' + TEMPLATE_BOXES_PER_PAGE,
+        url: apiHost + 'boxes/' + (allTime ? '' : 'unspent/') + 'byErgoTreeTemplateHash/' + hash + '?offset=' + offset + '&limit=' + TEMPLATE_BOXES_PER_PAGE,
         timeout: 30000
     }))
     .then(function(data) {
@@ -473,6 +495,21 @@ function fetchTemplateBoxes(hash, offset) {
         }
 
         return data;
+    });
+}
+
+//Every box ever created with this template, up to ALL_TIME_MAX_BOXES, as one page
+function fetchAllTemplateBoxes(hash) {
+    return fetchTemplateBoxes(hash, 0, true).then(function(firstPage) {
+        let offsets = [];
+
+        for (let offset = TEMPLATE_BOXES_PER_PAGE; offset < Math.min(firstPage.total, ALL_TIME_MAX_BOXES); offset += TEMPLATE_BOXES_PER_PAGE) {
+            offsets.push(offset);
+        }
+
+        return Promise.all(offsets.map(offset => fetchTemplateBoxes(hash, offset, true))).then(function(laterPages) {
+            return { items: firstPage.items.concat(...laterPages.map(templatePage => templatePage.items)), total: firstPage.total };
+        });
     });
 }
 
@@ -496,7 +533,6 @@ function loadAddressBookAddresses() {
 
 function formatTemplateContractPage(index, contract, pages) {
     let total = contract.totals.reduce((sum, templateTotal) => sum + (templateTotal || 0), 0);
-    let pageCount = Math.max(1, ...contract.totals.map(templateTotal => Math.ceil((templateTotal || 0) / TEMPLATE_BOXES_PER_PAGE)));
     let failedBuilds = pages.filter(templatePage => templatePage == null).length;
     let contractAddresses = new Set();
     let unreadableBoxes = 0;
@@ -520,23 +556,31 @@ function formatTemplateContractPage(index, contract, pages) {
     }
 
     if (total == 0 && failedBuilds == 0) {
-        return '<p>None right now.</p>';
+        return contract.allTime ? '<p>None yet.</p>' : '<p>None right now.</p>';
     }
 
     let formattedResult = '';
-    let inAddressBook = 0;
+    let addresses = Array.from(contractAddresses).filter(address => addressBookAddresses == null || !addressBookAddresses.has(address));
+    let inAddressBook = contractAddresses.size - addresses.length;
+    let pageCount;
 
-    for (const address of contractAddresses) {
-        if (addressBookAddresses != null && addressBookAddresses.has(address)) {
-            inAddressBook++;
-            continue;
-        }
+    if (contract.allTime) {
+        pageCount = Math.max(1, Math.ceil(addresses.length / TEMPLATE_BOXES_PER_PAGE));
+        addresses = addresses.slice(contract.page * TEMPLATE_BOXES_PER_PAGE, (contract.page + 1) * TEMPLATE_BOXES_PER_PAGE);
+    } else {
+        pageCount = Math.max(1, ...contract.totals.map(templateTotal => Math.ceil((templateTotal || 0) / TEMPLATE_BOXES_PER_PAGE)));
+    }
 
+    for (const address of addresses) {
         formattedResult += '<p><a class="text-nowrap" href="' + getWalletAddressUrl(address) + '">' + escapeHtml(formatAddressString(address, 25)) + '</a></p>';
     }
 
     if (inAddressBook > 0) {
         formattedResult += '<p class="text-light">' + formatInAddressBookNote(inAddressBook, contractAddresses.size) + '</p>';
+    }
+
+    if (contract.allTime && contract.totals.some(templateTotal => templateTotal > ALL_TIME_MAX_BOXES)) {
+        formattedResult += '<p class="text-light">Oldest ' + ALL_TIME_MAX_BOXES + ' boxes only.</p>';
     }
 
     if (unreadableBoxes > 0) {

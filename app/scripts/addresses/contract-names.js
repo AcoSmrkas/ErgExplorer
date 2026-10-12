@@ -138,12 +138,17 @@ const CONTRACT_NAME_GROUPS = [
 	}]
 ];
 
+// Protocols whose scripts have a short enough history for the address book to list every
+// contract that ever used them, spent or not. The rest (a Spectrum swap is a new address per
+// order, ~100k so far) list only the contracts holding boxes now.
+const ALL_TIME_PROTOCOLS = ['Lithos'];
+
 /**
- * Every known contract template with its name, in catalog order: { protocol, name, template, exactTree }.
+ * Every known contract template with its name, in catalog order: { protocol, name, template, exactTree, allTime }.
  * A role holds one template or a list of builds; exactTree marks entries that are whole trees.
  */
 export const CONTRACT_TEMPLATES = CONTRACT_NAME_GROUPS.flatMap(([protocol, groupTemplates, names, exactTreeRoles = []]) =>
 	Object.entries(names).flatMap(([role, name]) =>
-		[].concat(groupTemplates[role]).map(template => ({ protocol, name, template, exactTree: exactTreeRoles.includes(role) }))
+		[].concat(groupTemplates[role]).map(template => ({ protocol, name, template, exactTree: exactTreeRoles.includes(role), allTime: ALL_TIME_PROTOCOLS.includes(protocol) }))
 	)
 );
