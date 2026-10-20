@@ -39,67 +39,17 @@ function printLatestBlocks(pricesLoaded) {
 			return data;
 		})
 		: fetchLatestBlocks().then(data => {
-			lithosHeights = data.items.length ? getLithosBlockHeights(Math.min(...data.items.map(item => item.height))) : Promise.resolve(new Set());
+			lithosHeights = getLithosHeightsFor(data.items);
 			return data;
 		});
 
 	blocks
 	.then(data => {
-		let formattedResult = '';
-		let totalBlocks = data.total;
-		let items = data.items;
+		renderBlocks(data, lithosHeights, pricesLoaded);
 
-        setupPagination(totalBlocks);
-
-		for (let i = 0; i < items.length; i++) {
-			const item = items[i];
-
-    		formattedResult += '<tr>';
-
-            //Height
-    		formattedResult += '<td><span class="d-lg-none"><strong>Height: </strong></span><a href="' + getBlockUrl(item.id) + '">' + nFormatter(item.height, 2, true, true) + '</a></td>';
-
-            //Time
-    		formattedResult += '<td><span class="d-lg-none"><strong>Time: </strong></span>' + formatDateString(item.timestamp) + '</td>';
-
-            //Block time
-    		formattedResult += '<td><span class="d-lg-none"><strong>Block time: </strong></span>' + formatBlockTime(getMiningTime(items, i)) + '</td>';
-            
-            //Transactions
-    		formattedResult += '<td><span class="d-lg-none"><strong>TXs: </strong></span>' + item.transactionsCount + '</td>';
-
-            //Mined by: the address book names the known pools. A Lithos block gets its chip once the Lithos blocks are known
-            addAddress(item.miner.address);
-    		formattedResult += '<td data-height="' + item.height + '"><span class="d-lg-none"><strong>Mined by: </strong></span><a class="address-string" addr="' + item.miner.address + '" href="' + getWalletAddressUrl(item.miner.address) + '">' + item.miner.name + '</a></td>';	
-
-            //Reward. The dollar value fills in once the prices are in
-    		formattedResult += '<td><span class="d-lg-none"><strong>Reward: </strong></span>' + formatErgValueString(item.minerReward) + ' <span class="text-light reward-usd" data-reward="' + item.minerReward + '"></span></td>';
-
-            //Fees. Only the GraphQL source has them
-    		formattedResult += '<td><span class="d-lg-none"><strong>Fees: </strong></span>' + (item.fees === undefined ? '<span class="block-meta">-</span>' : formatErgValueString(item.fees)) + '</td>';
-
-            //Size
-    		formattedResult += '<td><span class="d-lg-none"><strong>Size: </strong></span>' + formatKbSizeString(item.size) + '</td>';
-
-			formattedResult += '</tr>';	
-		}
-
-		if (items.length == 0) {
-			formattedResult = '<tr><td colspan="7">' + (lithosOnly ? 'No Lithos blocks yet.' : 'No blocks.') + '</td></tr>';
-		}
-
-		$('#transactionsTableBody').html(formattedResult);
-        
         $('#blocksHolder').show();
 
-        getAddressesInfo();
-        tagLithosBlocks(lithosHeights);
-
-        pricesLoaded.then(() => {
-        	$('#transactionsTableBody .reward-usd').each(function() {
-        		$(this).html(formatAssetDollarPriceString(Number($(this).attr('data-reward')), ERG_DECIMALS, 'ERG'));
-        	});
-        });
+        startAutoUpdate(data, pricesLoaded);
     })
     .catch(function(error) {
     	console.warn('Latest blocks unavailable:', error);
@@ -108,6 +58,121 @@ function printLatestBlocks(pricesLoaded) {
     .finally(function() {        
         $('#txLoading').hide();
     });
+}
+
+function getLithosHeightsFor(items) {
+	return items.length ? getLithosBlockHeights(Math.min(...items.map(item => item.height))) : Promise.resolve(new Set());
+}
+
+//Rows above newAbove are new since the last render and flash once
+function renderBlocks(data, lithosHeights, pricesLoaded, newAbove = Infinity) {
+	let formattedResult = '';
+	let totalBlocks = data.total;
+	let items = data.items;
+
+    setupPagination(totalBlocks);
+
+	for (let i = 0; i < items.length; i++) {
+		const item = items[i];
+
+    		formattedResult += '<tr' + (item.height > newAbove ? ' class="block-new"' : '') + '>';
+
+        //Height
+    		formattedResult += '<td><span class="d-lg-none"><strong>Height: </strong></span><a href="' + getBlockUrl(item.id) + '">' + nFormatter(item.height, 2, true, true) + '</a></td>';
+
+        //Time
+    		formattedResult += '<td><span class="d-lg-none"><strong>Time: </strong></span>' + formatDateString(item.timestamp) + '</td>';
+
+        //Block time
+    		formattedResult += '<td><span class="d-lg-none"><strong>Block time: </strong></span>' + formatBlockTime(getMiningTime(items, i)) + '</td>';
+        
+        //Transactions
+    		formattedResult += '<td><span class="d-lg-none"><strong>TXs: </strong></span>' + item.transactionsCount + '</td>';
+
+        //Mined by: the address book names the known pools. A Lithos block gets its chip once the Lithos blocks are known
+        addAddress(item.miner.address);
+    		formattedResult += '<td data-height="' + item.height + '"><span class="d-lg-none"><strong>Mined by: </strong></span><a class="address-string" addr="' + item.miner.address + '" href="' + getWalletAddressUrl(item.miner.address) + '">' + item.miner.name + '</a></td>';	
+
+        //Reward. The dollar value fills in once the prices are in
+    		formattedResult += '<td><span class="d-lg-none"><strong>Reward: </strong></span>' + formatErgValueString(item.minerReward) + ' <span class="text-light reward-usd" data-reward="' + item.minerReward + '"></span></td>';
+
+        //Fees. Only the GraphQL source has them
+    		formattedResult += '<td><span class="d-lg-none"><strong>Fees: </strong></span>' + (item.fees === undefined ? '<span class="block-meta">-</span>' : formatErgValueString(item.fees)) + '</td>';
+
+        //Size
+    		formattedResult += '<td><span class="d-lg-none"><strong>Size: </strong></span>' + formatKbSizeString(item.size) + '</td>';
+
+		formattedResult += '</tr>';	
+	}
+
+	if (items.length == 0) {
+		formattedResult = '<tr><td colspan="7">' + (lithosOnly ? 'No Lithos blocks yet.' : 'No blocks.') + '</td></tr>';
+	}
+
+	$('#transactionsTableBody').html(formattedResult);
+    
+    getAddressesInfo();
+    tagLithosBlocks(lithosHeights);
+
+    pricesLoaded.then(() => {
+    	$('#transactionsTableBody .reward-usd').each(function() {
+    		$(this).html(formatAssetDollarPriceString(Number($(this).attr('data-reward')), ERG_DECIMALS, 'ERG'));
+    	});
+    });
+}
+
+//The first page follows the chain: a cheap tip check every AUTO_UPDATE_INTERVAL while the tab is visible,
+//and a full reload of the rows only when a new block is in. Lithos-only and older pages stay as loaded
+const AUTO_UPDATE_INTERVAL = 15000;
+
+function startAutoUpdate(data, pricesLoaded) {
+	if (lithosOnly || Number(offset) != 0) {
+		return;
+	}
+
+	let shownTip = data.items.length ? data.items[0].height : 0;
+	let checking = false;
+
+	const check = () => {
+		if (checking || document.hidden) {
+			return;
+		}
+
+		checking = true;
+
+		fetchTipHeight()
+		.then(tip => {
+			if (tip <= shownTip) {
+				return;
+			}
+
+			return fetchLatestBlocks().then(data => {
+				const top = data.items.length ? data.items[0].height : 0;
+
+				//A source that lags the tip check could hand back an older list
+				if (top <= shownTip) {
+					return;
+				}
+
+				renderBlocks(data, getLithosHeightsFor(data.items), pricesLoaded, shownTip);
+				shownTip = top;
+			});
+		})
+		.catch(error => console.warn('Latest blocks update failed:', error))
+		.finally(() => {
+			checking = false;
+		});
+	};
+
+	setInterval(check, AUTO_UPDATE_INTERVAL);
+	document.addEventListener('visibilitychange', check);
+}
+
+function fetchTipHeight() {
+	const fromExplorer = () => fetchExplorerBlocks(0, 1).then(data => data.items[0].height);
+	const fromGql = () => queryGql('{ state { height } }').then(data => data.state.height);
+
+	return raceSources(networkType == 'testnet' ? [fromExplorer] : [fromGql, fromExplorer]);
 }
 
 //Resolves with the first source to answer, in api.ergoplatform's shape ({ total, items })

@@ -83,6 +83,17 @@
 			}
 		}
 
+		/* A block that came in while the page was open flashes once */
+		#transactionsTableBody tr.block-new > td {
+			animation: block-new 3s ease-out;
+		}
+
+		@keyframes block-new {
+			from {
+				box-shadow: inset 0 0 0 9999px rgba(255, 255, 255, 0.15);
+			}
+		}
+
 		#transactionsTableBody .block-meta {
 			color: var(--bs-secondary-color);
 		}
@@ -93,5 +104,5 @@
 	<script src="./scripts/common/prices.js?v=44"></script>
 	<script src="./scripts/common/pagination.js?v=41"></script>
 	<script src="./scripts/common/lithos.js?v=1"></script>
-	<script src="./scripts/latest-blocks.js?v=47"></script>
+	<script src="./scripts/latest-blocks.js?v=48"></script>
 {% endblock %}
