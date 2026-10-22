@@ -8,9 +8,12 @@ const HEDGE_AFTER_MS = 1500;
 const TX_FETCH_TIMEOUT_MS = 45000;
 // Other address data fetches (mempool, balance, unspent boxes) abort after this to avoid hanging.
 const DATA_FETCH_TIMEOUT_MS = 15000;
-// An indexed node: same /blockchain/balance as the explorer's balance/total (ERG, token ids,
-// amounts and decimals matched on a 2,236-token address), and often faster when that is cold.
-const INDEXED_NODE_HOST = 'https://node.sigmaspace.io/';
+// Indexed nodes behind our gateway: same /blockchain/balance as the explorer's balance/total
+// (ERG, token ids, amounts and decimals matched on a 2,236-token address), and often faster when
+// that is cold. Not node.sigmaspace.io directly: its index kept 193 spent boxes of one tx
+// (height 1883676) as unspent, +1,419.7 ERG on 88dhgz…DBY. The gateway answers a balance only
+// when two indexed nodes agree.
+const INDEXED_NODE_HOST = 'https://chain.mewfinance.com/';
 
 /**
  * Fetch with an abort-based timeout that also covers reading the response body, so a host
@@ -299,7 +302,7 @@ export const ApiClient = {
 	async getConfirmedTransaction(txId) {
 		const urls = networkType === 'testnet'
 			? [API_HOST + 'api/v1/transactions/' + txId]
-			: [API_HOST_2 + 'transactions/' + txId, 'https://api.sigmaspace.io/api/v1/transactions/' + txId];
+			: [API_HOST_2 + 'transactions/' + txId, INDEXED_NODE_HOST + 'blockchain/transaction/byId/' + txId];
 
 		const results = await Promise.allSettled(urls.map(url =>
 			fetchWithTimeout(url, DATA_FETCH_TIMEOUT_MS, async (response) => {
@@ -307,7 +310,8 @@ export const ApiClient = {
 			})
 		));
 
-		// sigmaspace answers an unknown id with HTTP 200 and an error body, hence the id check
+		// The node's copy has only id, blockId and inclusionHeight in common with the explorer's,
+		// which is all the tracker reads. The id check guards against an error body with HTTP 200.
 		const found = results.find(result => result.status === 'fulfilled' && result.value &&
 			result.value.id === txId && result.value.blockId);
 
