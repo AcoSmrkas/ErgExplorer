@@ -1,19 +1,8 @@
-# README #
+# ErgExplorer
 
-### What is this repository for? ###
+Ergo blockchain explorer website (static, built with gulp and Nunjucks).
 
-Erg Explorer project repo
-
-### How do I get set up? ###
-
-Install Node.js
-
-npm install
-
-### Commands ###
-
-gulp serve
-Starts local server host on localhost:9000
-
-gulp build
-Builds the website
+- Domain: ergexplorer.com
+- Live branch: main
+- Ships via: deployer key `ergexplorer` / local build, then rsync of `dist/`
+- Local dev: `npm ci --ignore-scripts && npx gulp serve` (serves on localhost:9000); `npx gulp build` for a production build
