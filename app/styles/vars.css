@@ -4,8 +4,7 @@
 }
 
 html[data-bs-theme="dark"] {
-	--striped-1: #262626;
-	--box-stripe: var(--background);
+	--striped-1: var(--background);
 	--text-color: #AAA;
 	--forms-bg: #333;
 	--borders: #4f4f4f;
@@ -20,8 +19,7 @@ html[data-bs-theme="dark"] {
 }
 
 html[data-bs-theme="light"] {
-	--striped-1: #f8f8f8;
-	--box-stripe: #f0f0f0;
+	--striped-1: #f0f0f0;
 	--text-color: #444;
 	--forms-bg: #FFF;
 	--borders: #CCC;
@@ -41,7 +39,6 @@ html[data-theme="mew"] {
 	--background: #160d25;
   	--footer: #0e0917;
 	--striped-1: var(--background);
-	--box-stripe: var(--striped-1);
 	--main-color: #f9d72d;
 	--main-color-hover: var(--info-color);
 

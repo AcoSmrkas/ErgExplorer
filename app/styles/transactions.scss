@@ -1,8 +1,6 @@
-// Boxes run tall and hold their own lines and lists, so the table stripe (--striped-1) is too faint
-// to tell one from the next; --box-stripe is a stronger one
 #txInputs > div:nth-child(odd), #txOutputs > div:nth-child(odd),
 #txSent > div:nth-child(odd), #txReceived > div:nth-child(odd) {
-	background-color: var(--box-stripe);
+	background-color: var(--striped-1);
 }
 
 // Clip the striped last box to the column's rounded corner, as blocks.scss does for .block-tx-column
