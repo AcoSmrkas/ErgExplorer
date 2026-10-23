@@ -5,3 +5,11 @@ RewriteRule ^(addresses|transactions|boxes|blocks|mempool|issued-tokens|token|ad
 RewriteRule ^ergosanta$ https://ergosanta.ergexplorer.com [L,R=301,NE]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^([^\.]+)$ $1.html [NC,L]
+
+# Pages: browsers check back on every visit (a cheap 304 via the ETag when nothing changed), so a
+# deploy shows up at once and its bumped ?v= stylesheets and scripts get fetched
+<IfModule mod_headers.c>
+	<FilesMatch "\.html$">
+		Header set Cache-Control "no-cache"
+	</FilesMatch>
+</IfModule>
