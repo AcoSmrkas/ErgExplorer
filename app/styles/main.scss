@@ -1092,14 +1092,17 @@ html[data-theme="mew"] .btn-primary {
 	gap: 10px;
 }
 
+// As bold as the token names below it, so the eye finds where each box starts
 .box-address {
 	min-width: 0;
 	color: var(--text-strong);
+	font-weight: 600;
 }
 
 .box-index {
 	color: var(--text-strong);
 	font-size: 0.8rem;
+	font-weight: 600;
 	margin-right: 6px;
 }
 
@@ -1128,7 +1131,8 @@ html[data-theme="mew"] .btn-primary {
 .box-section {
 	margin: 10px 0 4px;
 	padding-top: 6px;
-	border-top: 1px solid var(--borders);
+	// Dashed, so it doesn't read as the solid line between two boxes
+	border-top: 1px dashed var(--borders);
 	font-size: 0.7rem;
 	font-weight: 600;
 	letter-spacing: 0.06em;
