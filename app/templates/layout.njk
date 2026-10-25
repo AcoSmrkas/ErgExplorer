@@ -25,6 +25,9 @@
 		<!-- build:css styles/main.css -->
 		<link rel="stylesheet" href="styles/main.css?v=8">
 		<!-- endbuild -->
+		<link rel="stylesheet" href="styles/mew-ad.css?v=1">
+		<link rel="preload" href="fonts/mew-ad-manrope.woff2" as="font" type="font/woff2" crossorigin>
+		<link rel="preload" href="fonts/mew-ad-satisfy.woff2" as="font" type="font/woff2" crossorigin>
 				
 		{% block styles %}{% endblock %}
 			
@@ -169,6 +172,8 @@
 			</div>
 -->
 
+			{% include "partials/mew-ad.njk" %}
+
 			{% include "partials/search-form.njk" %}
 
 			{% block content %}{% endblock %}
@@ -220,6 +225,7 @@
 		<script src="./scripts/common/token-icons.js?v=41"></script>
 		<script src="./scripts/main.js?v=59"></script>
 		<script src="./scripts/common/token-popup.js?v=41"></script>
+		<script src="./scripts/common/mew-ad.js?v=1"></script>
 
 <!--
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>

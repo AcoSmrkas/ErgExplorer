@@ -1,0 +1,974 @@
+// Mew Finance banner: partials/mew-ad.njk + scripts/common/mew-ad.js
+// Fonts, subset to what the banner uses: Manrope (SIL Open Font License 1.1) and Satisfy (Apache License 2.0).
+// The site's light theme colours every span and link, and links turn orange on hover, so text
+// colours here are set as `.mew-ad &` to stay ahead of those rules.
+
+@font-face {
+	font-family: "MewAd Manrope";
+	src: url('../fonts/mew-ad-manrope.woff2') format('woff2');
+	font-weight: 700 800;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "MewAd Satisfy";
+	src: url('../fonts/mew-ad-satisfy.woff2') format('woff2');
+	font-display: swap;
+}
+
+.mew-ad {
+	--h: 104px;
+	--logo: 66px;
+	--pad-r: 22px;
+	--cyan: #04dfff;
+	--yellow: #f9d72d;
+	--ink: #1d1036;
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 18px;
+	height: var(--h);
+	padding: 0 var(--pad-r) 0 18px;
+	border-radius: 16px;
+	overflow: hidden;
+	isolation: isolate;
+	color: #fff;
+	text-decoration: none;
+	text-align: left;
+	background:
+		radial-gradient(130% 160% at 0% 0%, #2c1859 0%, rgba(44, 24, 89, 0) 52%),
+		radial-gradient(90% 170% at 100% 100%, #3b1352 0%, rgba(59, 19, 82, 0) 60%),
+		linear-gradient(100deg, #150a28 0%, #1c0f35 48%, #221140 100%);
+	font-family: "MewAd Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	-webkit-tap-highlight-color: transparent;
+	user-select: none;
+
+	&:hover,
+	&:focus {
+		color: #fff;
+		text-decoration: none;
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--cyan);
+		outline-offset: 3px;
+	}
+
+	// gradient hairline border
+	&::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+		z-index: 6;
+		border-radius: inherit;
+		padding: 1px;
+		background: linear-gradient(100deg, rgba(4, 223, 255, .6), rgba(160, 110, 255, .32) 45%, rgba(249, 215, 45, .6));
+		-webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+		-webkit-mask-composite: xor;
+		mask-composite: exclude;
+		pointer-events: none;
+	}
+}
+
+html[data-bs-theme="light"] .mew-ad {
+	box-shadow: 0 8px 24px rgba(40, 16, 80, .2);
+}
+
+.mew-ad__defs {
+	position: absolute;
+	width: 0;
+	height: 0;
+	overflow: hidden;
+}
+
+// ---------- sky ----------
+
+.mew-ad__sky {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	pointer-events: none;
+	background-image:
+		radial-gradient(1.3px 1.3px at 6% 74%, rgba(255, 255, 255, .7) 50%, transparent 51%),
+		radial-gradient(1px 1px at 14% 28%, rgba(255, 255, 255, .55) 50%, transparent 51%),
+		radial-gradient(1.2px 1.2px at 22% 86%, rgba(255, 255, 255, .5) 50%, transparent 51%),
+		radial-gradient(1px 1px at 36% 40%, rgba(255, 255, 255, .45) 50%, transparent 51%),
+		radial-gradient(1.4px 1.4px at 41% 88%, rgba(255, 255, 255, .6) 50%, transparent 51%),
+		radial-gradient(1px 1px at 48% 8%, rgba(255, 255, 255, .5) 50%, transparent 51%),
+		radial-gradient(1.2px 1.2px at 58% 30%, rgba(255, 255, 255, .55) 50%, transparent 51%),
+		radial-gradient(1px 1px at 63% 90%, rgba(255, 255, 255, .45) 50%, transparent 51%),
+		radial-gradient(1.3px 1.3px at 71% 42%, rgba(255, 255, 255, .6) 50%, transparent 51%),
+		radial-gradient(1px 1px at 79% 10%, rgba(255, 255, 255, .5) 50%, transparent 51%),
+		radial-gradient(1.2px 1.2px at 88% 84%, rgba(255, 255, 255, .55) 50%, transparent 51%),
+		radial-gradient(1px 1px at 93% 36%, rgba(255, 255, 255, .5) 50%, transparent 51%);
+}
+
+.mew-ad__blob {
+	position: absolute;
+	border-radius: 50%;
+	will-change: transform;
+	animation: mewad-drift 16s ease-in-out infinite alternate;
+}
+
+.mew-ad__blob--a {
+	width: 320px;
+	height: 320px;
+	left: 14%;
+	top: -200px;
+	background: radial-gradient(closest-side, rgba(4, 223, 255, .2), rgba(4, 223, 255, 0));
+}
+
+.mew-ad__blob--b {
+	width: 360px;
+	height: 360px;
+	right: 6%;
+	bottom: -240px;
+	background: radial-gradient(closest-side, rgba(255, 79, 216, .2), rgba(255, 79, 216, 0));
+	animation-duration: 19s;
+	animation-delay: -6s;
+}
+
+.mew-ad__blob--c {
+	width: 280px;
+	height: 280px;
+	left: 44%;
+	top: -130px;
+	background: radial-gradient(closest-side, rgba(143, 91, 255, .22), rgba(143, 91, 255, 0));
+	animation-duration: 23s;
+	animation-delay: -11s;
+}
+
+.mew-ad__spark {
+	position: absolute;
+	left: var(--x);
+	top: var(--y);
+	width: var(--s);
+	height: var(--s);
+	opacity: 0;
+	animation: mewad-twinkle var(--d) ease-in-out var(--dl) infinite;
+}
+
+// ---------- brand ----------
+
+.mew-ad__brand {
+	position: relative;
+	z-index: 2;
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	flex: 0 1 auto;
+
+	&::before {
+		content: "";
+		position: absolute;
+		left: calc(var(--logo) * -.5);
+		top: 50%;
+		width: calc(var(--logo) * 2);
+		height: calc(var(--logo) * 2);
+		margin-top: calc(var(--logo) * -1);
+		border-radius: 50%;
+		background: radial-gradient(closest-side, rgba(249, 215, 45, .16), rgba(249, 215, 45, 0));
+		pointer-events: none;
+	}
+}
+
+.mew-ad__logo {
+	position: relative;
+	display: block;
+	width: var(--logo);
+	height: auto;
+	flex: 0 0 auto;
+	overflow: visible;
+	transform-origin: 50% 100%;
+
+	&.is-hop {
+		animation: mewad-hop .6s ease-out;
+	}
+}
+
+.mew-ad__face {
+	transform-box: fill-box;
+	transform-origin: 50% 70%;
+	transform: rotate(calc(var(--tilt, 0) * 1deg));
+	transition: transform .45s ease-out;
+}
+
+.mew-ad__m {
+	transform-box: fill-box;
+	transform-origin: 50% 100%;
+
+	.is-perk & {
+		animation: mewad-perk .55s ease-out;
+	}
+}
+
+.mew-ad__wl,
+.mew-ad__wr {
+	transform-box: fill-box;
+}
+
+.mew-ad__wl {
+	transform-origin: 100% 50%;
+
+	.is-twitch & {
+		animation: mewad-whisker-l .5s ease-in-out;
+	}
+}
+
+.mew-ad__wr {
+	transform-origin: 0 50%;
+
+	.is-twitch & {
+		animation: mewad-whisker-r .5s ease-in-out;
+	}
+}
+
+.mew-ad__eyes {
+	transform: translate(calc(var(--ex, 0) * 1px), calc(var(--ey, 0) * 1px));
+	transition: transform .22s ease-out, opacity .12s;
+}
+
+.mew-ad__eye {
+	transform-box: fill-box;
+	transform-origin: 50% 50%;
+
+	.is-blink & {
+		animation: mewad-blink .2s ease-in-out;
+	}
+}
+
+.mew-ad__happy {
+	opacity: 0;
+	transition: opacity .12s;
+}
+
+.mew-ad:hover,
+.mew-ad:focus-visible {
+	.mew-ad__eyes {
+		opacity: 0;
+	}
+
+	.mew-ad__happy {
+		opacity: 1;
+	}
+}
+
+.mew-ad__text {
+	display: flex;
+	flex-direction: column;
+	line-height: 1;
+}
+
+.mew-ad__name {
+	display: flex;
+	align-items: baseline;
+	gap: 7px;
+	white-space: nowrap;
+}
+
+.mew-ad__mew {
+	font-family: "MewAd Satisfy", "Brush Script MT", cursive;
+	font-size: 38px;
+	line-height: .9;
+	text-shadow: 0 0 18px rgba(4, 223, 255, .45);
+
+	.mew-ad & {
+		color: var(--cyan);
+	}
+}
+
+.mew-ad__fin {
+	font-size: 24px;
+	font-weight: 800;
+	letter-spacing: -.01em;
+
+	.mew-ad & {
+		color: #fff;
+	}
+}
+
+.mew-ad__lines {
+	display: grid;
+	margin-top: 8px;
+	padding-bottom: 2px;
+	overflow: hidden;
+}
+
+.mew-ad__line {
+	grid-area: 1 / 1;
+	font-size: 14.5px;
+	font-weight: 700;
+	line-height: 1.3;
+	text-wrap: balance; // wraps only when the banner is too narrow for one line
+	visibility: hidden;
+
+	.mew-ad & {
+		color: rgba(255, 255, 255, .8);
+	}
+
+	em {
+		font-style: normal;
+		color: var(--yellow);
+	}
+
+	&.is-on,
+	&.is-off {
+		visibility: visible;
+	}
+}
+
+.mew-ad__w {
+	display: inline-block;
+
+	.mew-ad & {
+		color: inherit;
+	}
+
+	.is-on > &,
+	.is-on > em > & {
+		animation: mewad-word-in .55s cubic-bezier(.2, .9, .3, 1.2) both;
+		animation-delay: calc(var(--i) * 45ms);
+	}
+
+	.is-off > &,
+	.is-off > em > & {
+		animation: mewad-word-out .3s ease-in both;
+		animation-delay: calc(var(--i) * 20ms);
+	}
+}
+
+// ---------- stage ----------
+
+.mew-ad__stage {
+	position: relative;
+	z-index: 1;
+	flex: 1 1 auto;
+	align-self: stretch;
+	min-width: 120px;
+}
+
+.mew-ad__halo {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 210px;
+	height: 210px;
+	margin: -105px 0 0 -105px;
+	border-radius: 50%;
+	color: rgba(4, 223, 255, .34);
+	background: radial-gradient(closest-side, currentColor, rgba(0, 0, 0, 0));
+	transition: color .8s ease;
+	animation: mewad-breathe 4.6s ease-in-out infinite;
+}
+
+.mew-ad__shadow {
+	position: absolute;
+	left: 50%;
+	bottom: 4px;
+	width: 130px;
+	height: 16px;
+	margin-left: -65px;
+	border-radius: 50%;
+	background: radial-gradient(closest-side, rgba(6, 0, 18, .6), rgba(6, 0, 18, 0));
+
+	.is-land > & {
+		animation: mewad-shadow .8s ease-out;
+	}
+}
+
+// carousel: the featured scene in the middle, its neighbours dimmed at the sides.
+// A scene is as wide as the stage, so its translateX percentages are stage widths, the same as
+// `left` percentages on the peeking cat.
+.mew-ad__scene,
+.mew-ad__peek--down {
+	--side-x: 31%;
+}
+
+.mew-ad__scene {
+	--side-s: .64;
+	--side-o: 1;
+	--gone-x: 50%;
+	position: absolute;
+	inset: 6px 0 7px;
+	display: flex;
+	justify-content: center;
+	align-items: flex-end;
+	opacity: 0;
+	visibility: hidden;
+	transform: translateX(var(--gone-x)) scale(.45);
+	transform-origin: 50% 100%;
+	transition: transform .8s cubic-bezier(.55, 0, .2, 1), opacity .6s ease, filter .6s ease, visibility 0s linear .8s;
+
+	&.is-on,
+	&.is-prev,
+	&.is-next {
+		visibility: visible;
+		transition-delay: 0s;
+	}
+
+	&.is-on {
+		z-index: 2;
+		opacity: 1;
+		transform: none;
+	}
+
+	&.is-prev,
+	&.is-next {
+		z-index: 1;
+		opacity: var(--side-o);
+		filter: brightness(.55) saturate(.75);
+	}
+
+	&.is-prev {
+		transform: translateX(calc(var(--side-x) * -1)) scale(var(--side-s));
+	}
+
+	&.is-next {
+		transform: translateX(var(--side-x)) scale(var(--side-s));
+	}
+
+	&.is-gone-l {
+		transform: translateX(calc(var(--gone-x) * -1)) scale(.45);
+	}
+
+	&.is-snap {
+		transition: none;
+	}
+}
+
+// below 1200px the banner is 720px wide or less, too narrow for the side scenes
+@media (max-width: 1199.98px) {
+	.mew-ad__scene {
+		--side-x: 60%;
+		--side-o: 0;
+		--gone-x: 80%;
+	}
+
+	.mew-ad__peek--down {
+		display: none;
+	}
+}
+
+.mew-ad__pop {
+	display: block;
+	min-width: 0;
+	max-width: 100%;
+	height: 100%;
+	transform-origin: 50% 100%;
+
+	.is-on > & {
+		animation: mewad-arrive .9s ease-out .35s both;
+	}
+
+	.is-intro > & {
+		animation: mewad-pop-in .8s ease-out both;
+	}
+}
+
+.mew-ad__img {
+	display: block;
+	width: auto;
+	max-width: 100%;
+	height: 100%;
+	object-fit: contain;
+	object-position: 50% 100%;
+
+	.is-on & {
+		animation: mewad-float 3.2s ease-in-out 1.2s infinite;
+	}
+}
+
+// Mew Lock: the shackle drops shut, then the cat smiles
+.mew-ad__shackle {
+	transform: translateY(-120px);
+
+	.is-on & {
+		animation: mewad-shackle 1.1s ease-out both;
+	}
+}
+
+.mew-ad__lock-happy {
+	opacity: 0;
+
+	.is-on & {
+		animation: mewad-show .01s linear 1.05s both;
+	}
+}
+
+.mew-ad__lock-eyes {
+	.is-on & {
+		animation: mewad-hide .01s linear 1.05s both;
+	}
+}
+
+.mew-ad__click use {
+	opacity: 0;
+	transform-box: fill-box;
+	transform-origin: 50% 50%;
+
+	.is-on & {
+		animation: mewad-click .6s ease-out .74s both;
+	}
+
+	.is-on &:nth-child(2) {
+		animation-delay: .8s;
+	}
+
+	.is-on &:nth-child(3) {
+		animation-delay: .86s;
+	}
+}
+
+.mew-ad__burst {
+	position: absolute;
+	left: 50%;
+	top: 46%;
+	width: 0;
+	height: 0;
+
+	svg {
+		position: absolute;
+		left: -6px;
+		top: -6px;
+		width: 12px;
+		height: 12px;
+		opacity: 0;
+	}
+
+	&.is-go svg {
+		animation: mewad-burst .9s cubic-bezier(.15, .7, .3, 1) both;
+	}
+}
+
+// ---------- peeking cats ----------
+
+.mew-ad__peek {
+	position: absolute;
+	z-index: 3;
+	line-height: 0;
+	pointer-events: none;
+
+	img {
+		display: block;
+		width: auto;
+		height: var(--ph);
+	}
+}
+
+// peeks over the top of the button from behind it; the head ends 50.6% down the image
+.mew-ad__peek--up {
+	--top: calc((var(--h) - 42px) / 2 - 2px);
+	--ph: calc((var(--top) - 2px) / .506);
+	top: 0;
+	right: calc(var(--pad-r) + 26px);
+	width: calc(var(--ph) * 1.768);
+	height: calc(var(--top) + 3px);
+	overflow: hidden;
+
+	img {
+		position: absolute;
+		left: 0;
+		bottom: calc(3px - var(--ph) * .494);
+		transform: translateY(60%);
+		transform-origin: 50% 50.6%;
+	}
+
+	&.is-peek img {
+		animation: mewad-peek-up 3s ease-in-out both;
+	}
+}
+
+// hangs upside down from the top edge over the scene on the left; the head starts 47.6% down the image
+.mew-ad__peek--down {
+	--ph: calc(var(--h) * .7);
+	left: calc(50% - var(--side-x));
+	top: calc(var(--ph) * -.476);
+	transform: translateX(-50%);
+
+	img {
+		transform: translateY(-58%);
+		transform-origin: 50% 47.6%;
+	}
+
+	&.is-peek img {
+		animation: mewad-peek-down 3.2s ease-in-out both;
+	}
+}
+
+// ---------- call to action ----------
+
+.mew-ad__cta {
+	position: relative;
+	z-index: 4;
+	display: inline-flex;
+	align-items: center;
+	flex: 0 0 auto;
+	gap: 8px;
+	height: 42px;
+	padding: 0 16px 0 14px;
+	overflow: hidden;
+	border-radius: 999px;
+	background: linear-gradient(180deg, #ffe873 0%, #f9d72d 55%, #f2c516 100%);
+	font-size: 15px;
+	font-weight: 800;
+	letter-spacing: -.005em;
+	white-space: nowrap;
+	box-shadow: 0 4px 0 #b88f0a, 0 10px 22px rgba(249, 215, 45, .22);
+	transform: translateY(-2px);
+	transition: transform .18s ease, box-shadow .18s ease;
+
+	.mew-ad &,
+	.mew-ad & span {
+		color: var(--ink);
+	}
+
+	&::after {
+		content: "";
+		position: absolute;
+		top: -10%;
+		bottom: -10%;
+		left: -40%;
+		width: 30%;
+		background: linear-gradient(100deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .8), rgba(255, 255, 255, 0));
+		transform: skewX(-18deg);
+		animation: mewad-shine 5s ease-in-out 1.6s infinite;
+	}
+
+	.mew-ad:hover & {
+		transform: translateY(-4px);
+		box-shadow: 0 6px 0 #b88f0a, 0 14px 26px rgba(249, 215, 45, .3);
+	}
+
+	.mew-ad:active & {
+		transform: translateY(1px);
+		box-shadow: 0 1px 0 #b88f0a, 0 6px 14px rgba(249, 215, 45, .2);
+	}
+}
+
+.mew-ad__paw {
+	width: 19px;
+	height: 19px;
+	flex: 0 0 auto;
+	transform-origin: 50% 80%;
+
+	.mew-ad:hover & {
+		animation: mewad-wave .7s ease-in-out;
+	}
+}
+
+.mew-ad__arrow {
+	width: 17px;
+	height: 17px;
+	flex: 0 0 auto;
+	transition: transform .2s ease;
+
+	.mew-ad:hover & {
+		transform: translateX(3px);
+	}
+}
+
+// ---------- pause / reduced motion ----------
+
+.mew-ad.is-paused,
+.mew-ad.is-paused * {
+	&,
+	&::before,
+	&::after {
+		animation-play-state: paused !important;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.mew-ad,
+	.mew-ad * {
+		&,
+		&::before,
+		&::after {
+			animation: none !important;
+			transition: none !important;
+		}
+	}
+
+	.mew-ad__spark {
+		opacity: .7;
+	}
+
+	.mew-ad__shackle {
+		transform: none;
+	}
+
+	.mew-ad__peek {
+		display: none;
+	}
+}
+
+// ---------- sizes ----------
+// The slot (.baner in main.scss) is 1120-1160px wide from 1400px, 912px from 1200px, 720px from
+// 768px, 540px from 576px and the full screen width below that. Media queries rather than
+// container queries: the build's CSS minifier drops @container blocks.
+
+@media (max-width: 1399.98px) {
+	.mew-ad {
+		--h: 100px;
+	}
+}
+
+@media (max-width: 1199.98px) {
+	.mew-ad {
+		--h: 96px;
+		--logo: 58px;
+		--pad-r: 16px;
+		gap: 14px;
+		padding-left: 14px;
+	}
+
+	.mew-ad__mew {
+		font-size: 34px;
+	}
+
+	.mew-ad__fin {
+		font-size: 21px;
+	}
+
+	.mew-ad__line {
+		font-size: 13.5px;
+	}
+}
+
+@media (max-width: 767.98px) {
+	.mew-ad {
+		--h: 88px;
+		--logo: 50px;
+	}
+
+	.mew-ad__cta {
+		width: 42px;
+		padding: 0;
+		justify-content: center;
+	}
+
+	.mew-ad__cta-text,
+	.mew-ad__paw,
+	.mew-ad__peek--up {
+		display: none;
+	}
+}
+
+@media (max-width: 499.98px) {
+	.mew-ad {
+		--h: 84px;
+		--logo: 44px;
+		gap: 10px;
+		padding: 0 12px;
+		border-radius: 12px;
+	}
+
+	.mew-ad__brand {
+		gap: 10px;
+	}
+
+	.mew-ad__mew {
+		font-size: 28px;
+	}
+
+	.mew-ad__fin {
+		font-size: 17px;
+	}
+
+	.mew-ad__lines {
+		margin-top: 5px;
+	}
+
+	.mew-ad__line {
+		font-size: 12px;
+	}
+
+	.mew-ad__stage {
+		min-width: 86px;
+	}
+
+	.mew-ad__cta,
+	.mew-ad__peek {
+		display: none;
+	}
+}
+
+@media (max-width: 359.98px) {
+	.mew-ad {
+		--logo: 40px;
+		gap: 8px;
+		padding: 0 10px;
+	}
+
+	.mew-ad__brand {
+		gap: 8px;
+	}
+
+	.mew-ad__mew {
+		font-size: 26px;
+	}
+
+	.mew-ad__fin {
+		font-size: 16px;
+	}
+
+	.mew-ad__line {
+		font-size: 11.5px;
+	}
+
+	.mew-ad__stage {
+		min-width: 80px;
+	}
+}
+
+// ---------- keyframes ----------
+
+@keyframes mewad-drift {
+	from { transform: translate3d(-30px, 0, 0) scale(1); }
+	to { transform: translate3d(40px, 18px, 0) scale(1.12); }
+}
+
+@keyframes mewad-twinkle {
+	0%, 62%, 100% { opacity: 0; transform: scale(.2) rotate(0deg); }
+	31% { opacity: 1; transform: scale(1) rotate(45deg); }
+}
+
+@keyframes mewad-breathe {
+	0%, 100% { transform: scale(.88); }
+	50% { transform: scale(1.06); }
+}
+
+@keyframes mewad-hop {
+	0% { transform: none; }
+	30% { transform: translateY(-7px) scale(.96, 1.05); }
+	58% { transform: translateY(0) scale(1.06, .93); }
+	78% { transform: scale(.98, 1.02); }
+	100% { transform: none; }
+}
+
+@keyframes mewad-perk {
+	0% { transform: none; }
+	35% { transform: translateY(-28px) scaleY(1.08); }
+	65% { transform: translateY(4px) scaleY(.95); }
+	100% { transform: none; }
+}
+
+@keyframes mewad-whisker-l {
+	0%, 100% { transform: none; }
+	25% { transform: rotate(8deg); }
+	50% { transform: rotate(-6deg); }
+	75% { transform: rotate(3deg); }
+}
+
+@keyframes mewad-whisker-r {
+	0%, 100% { transform: none; }
+	25% { transform: rotate(-8deg); }
+	50% { transform: rotate(6deg); }
+	75% { transform: rotate(-3deg); }
+}
+
+@keyframes mewad-blink {
+	0%, 100% { transform: none; }
+	45%, 55% { transform: scaleY(.1); }
+}
+
+@keyframes mewad-word-in {
+	from { opacity: 0; transform: translateY(105%) rotate(8deg); }
+	to { opacity: 1; transform: none; }
+}
+
+@keyframes mewad-word-out {
+	from { opacity: 1; transform: none; }
+	to { opacity: 0; transform: translateY(-105%); }
+}
+
+@keyframes mewad-pop-in {
+	0% { opacity: 0; transform: translateY(26px) scale(.5) rotate(-8deg); }
+	45% { opacity: 1; transform: translateY(-6px) scale(1.06) rotate(2deg); }
+	65% { transform: translateY(0) scale(1.05, .93) rotate(0deg); }
+	82% { transform: scale(.98, 1.03); }
+	100% { opacity: 1; transform: none; }
+}
+
+@keyframes mewad-arrive {
+	0% { transform: none; }
+	30% { transform: translateY(-9px) scale(.97, 1.04); }
+	55% { transform: translateY(0) scale(1.05, .94); }
+	75% { transform: scale(.98, 1.02); }
+	100% { transform: none; }
+}
+
+@keyframes mewad-float {
+	0%, 100% { transform: translateY(0); }
+	50% { transform: translateY(-3px); }
+}
+
+@keyframes mewad-shadow {
+	0% { opacity: 0; transform: scale(.3); }
+	55% { opacity: 1; transform: scale(1.12); }
+	100% { transform: none; }
+}
+
+@keyframes mewad-shackle {
+	0%, 45% { transform: translateY(-120px); }
+	62% { transform: translateY(14px); }
+	74% { transform: translateY(-8px); }
+	86% { transform: translateY(3px); }
+	100% { transform: translateY(0); }
+}
+
+@keyframes mewad-show {
+	to { opacity: 1; }
+}
+
+@keyframes mewad-hide {
+	to { opacity: 0; }
+}
+
+@keyframes mewad-click {
+	0% { opacity: 0; transform: scale(.2) rotate(0deg); }
+	40% { opacity: 1; transform: scale(1.1) rotate(45deg); }
+	100% { opacity: 0; transform: scale(.6) rotate(90deg); }
+}
+
+@keyframes mewad-burst {
+	0% { opacity: 0; transform: translate(0, 0) scale(.2); }
+	25% { opacity: 1; }
+	100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(180deg) scale(.9); }
+}
+
+// the cut edge of the head stays hidden: overshoot stretches from it, and each tilt shifts the head
+// just enough that the corner it lifts stays behind the edge
+@keyframes mewad-peek-up {
+	0% { transform: translateY(60%) rotate(0deg) scaleY(1); }
+	14% { transform: translateY(0) rotate(0deg) scaleY(1.06); }
+	22% { transform: translateY(0) rotate(0deg) scaleY(.96); }
+	30%, 34% { transform: translateY(0) rotate(0deg) scaleY(1); }
+	46% { transform: translateY(5%) rotate(-6deg) scaleY(1); }
+	60% { transform: translateY(4%) rotate(4deg) scaleY(1); }
+	72%, 82% { transform: translateY(0) rotate(0deg) scaleY(1); }
+	100% { transform: translateY(60%) rotate(0deg) scaleY(1); }
+}
+
+@keyframes mewad-peek-down {
+	0% { transform: translateY(-58%) rotate(0deg) scaleY(1); }
+	16% { transform: translateY(0) rotate(0deg) scaleY(1.06); }
+	24% { transform: translateY(0) rotate(0deg) scaleY(.97); }
+	32%, 36% { transform: translateY(0) rotate(0deg) scaleY(1); }
+	48% { transform: translateY(-5%) rotate(6deg) scaleY(1); }
+	62% { transform: translateY(-4%) rotate(-4deg) scaleY(1); }
+	74%, 82% { transform: translateY(0) rotate(0deg) scaleY(1); }
+	100% { transform: translateY(-58%) rotate(0deg) scaleY(1); }
+}
+
+@keyframes mewad-shine {
+	0%, 70% { transform: translateX(0) skewX(-18deg); }
+	100% { transform: translateX(600%) skewX(-18deg); }
+}
+
+@keyframes mewad-wave {
+	0%, 100% { transform: none; }
+	25% { transform: rotate(-16deg); }
+	55% { transform: rotate(12deg); }
+	80% { transform: rotate(-5deg); }
+}
