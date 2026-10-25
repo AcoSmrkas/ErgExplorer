@@ -62,26 +62,112 @@
 			<span class="mew-ad__scene" data-i="2" data-halo="rgba(25,230,193,.32)"><span class="mew-ad__pop"><img class="mew-ad__img" data-src="images/mew-ad/nftmart.webp" width="179" height="184" alt=""></span></span>
 			<span class="mew-ad__scene" data-i="3" data-halo="rgba(249,215,45,.34)"><span class="mew-ad__pop"><img class="mew-ad__img" data-src="images/mew-ad/bank.webp" width="169" height="184" alt=""></span></span>
 			<span class="mew-ad__scene mew-ad__scene--lock" data-i="4" data-halo="rgba(4,223,255,.36)"><span class="mew-ad__pop">
-				<svg class="mew-ad__img mew-ad__lock" viewBox="0 0 990 1250" width="158" height="200" preserveAspectRatio="xMidYMax meet" focusable="false">
-					<g class="mew-ad__shackle" fill="none" stroke-linecap="round">
-						<path stroke="#2b1a47" stroke-width="128" d="M268 560V330A227 227 0 0 1 722 330V560"/>
-						<path stroke="#e9e3f7" stroke-width="84" d="M268 560V330A227 227 0 0 1 722 330V560"/>
-						<path stroke="#fff" stroke-width="20" stroke-opacity=".75" d="M248 470V335A212 212 0 0 1 330 168"/>
+				<svg class="mew-ad__img mew-ad__lock" viewBox="0 0 1000 1000" width="200" height="200" preserveAspectRatio="xMidYMax meet" focusable="false">
+					<defs>
+						<linearGradient id="mewAdLkGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff09a"/><stop offset=".45" stop-color="#ffcf36"/><stop offset="1" stop-color="#f7ae26"/></linearGradient>
+						<linearGradient id="mewAdLkSteel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#e3dcf3"/><stop offset="1" stop-color="#b3a7cf"/></linearGradient>
+						<linearGradient id="mewAdLkEar" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc4e4"/><stop offset="1" stop-color="#f064ab"/></linearGradient>
+						<linearGradient id="mewAdLkPaw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffbe6"/><stop offset="1" stop-color="#f6d27a"/></linearGradient>
+						<linearGradient id="mewAdLkCoin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2a6"/><stop offset="1" stop-color="#f6b52e"/></linearGradient>
+						<linearGradient id="mewAdLkErg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffa557"/><stop offset="1" stop-color="#ef5c0e"/></linearGradient>
+						<linearGradient id="mewAdLkSplash" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2fd8ff"/><stop offset=".5" stop-color="#8a5cff"/><stop offset="1" stop-color="#ff5fd0"/></linearGradient>
+						<radialGradient id="mewAdLkIris" cx=".5" cy=".9" r=".95"><stop offset="0" stop-color="#7af7ff"/><stop offset=".45" stop-color="#18a8ec"/><stop offset="1" stop-color="#2b1e63"/></radialGradient>
+						<radialGradient id="mewAdLkShine"><stop offset="0" stop-color="#fffbe2" stop-opacity=".75"/><stop offset="1" stop-color="#fffbe2" stop-opacity="0"/></radialGradient>
+						<filter id="mewAdLkSoft" x="-25%" y="-25%" width="150%" height="150%"><feGaussianBlur stdDeviation="16"/></filter>
+						<filter id="mewAdLkVig" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="18"/></filter>
+						<path id="mewAdLkBody" d="M285 905A120 120 0 0 1 165 785V650C165 560 172 440 186 378Q196 336 232 360C268 392 300 470 322 524Q500 500 678 524C700 470 732 392 768 360Q804 336 814 378C828 440 835 560 835 650V785A120 120 0 0 1 715 905Z"/>
+						<clipPath id="mewAdLkClip"><use href="#mewAdLkBody"/></clipPath>
+					</defs>
+
+					<!-- splash and sparkles behind -->
+					<path fill="url(#mewAdLkSplash)" opacity=".7" filter="url(#mewAdLkSoft)" d="M260 360C340 250 520 300 600 260C700 210 860 270 870 400C880 500 820 540 860 640C900 760 760 860 620 840C500 822 420 900 300 860C170 820 120 700 160 600C190 520 190 460 260 360Z"/>
+					<g fill="#fff" opacity=".85"><circle cx="150" cy="440" r="7"/><circle cx="868" cy="296" r="6"/><circle cx="935" cy="560" r="5"/><circle cx="108" cy="700" r="5"/><circle cx="706" cy="236" r="4"/><circle cx="262" cy="256" r="4"/></g>
+					<use href="#mewAdSpark" x="96" y="300" width="50" height="50" color="#fff"/>
+					<use href="#mewAdSpark" x="896" y="420" width="40" height="40" color="#ffd84a"/>
+
+					<ellipse cx="500" cy="952" rx="330" ry="28" fill="#12081f" opacity=".45"/>
+
+					<!-- tail -->
+					<g class="mew-ad__lock-tail" fill="none" stroke-linecap="round">
+						<path stroke="#2a1745" stroke-width="92" d="M760 850C860 878 935 800 920 704C908 632 846 614 856 546"/>
+						<path stroke="#ffcc33" stroke-width="64" d="M760 850C860 878 935 800 920 704C908 632 846 614 856 546"/>
+						<path stroke="#f3a326" stroke-width="64" stroke-linecap="butt" stroke-dasharray="18 40" stroke-dashoffset="-20" d="M760 850C860 878 935 800 920 704C908 632 846 614 856 546"/>
+						<path stroke="#fff4c8" stroke-width="64" d="M858 584C857 572 855 558 856 546"/>
+						<path stroke="#fff6c9" stroke-width="14" stroke-opacity=".85" d="M790 846C866 862 912 800 903 712"/>
 					</g>
-					<g transform="translate(0 410)">
-						<use href="#mewAdFrame"/>
-						<g fill="#04dfff">
-							<path fill="none" stroke="#04dfff" stroke-width="58" stroke-linecap="round" stroke-miterlimit="8" d="M157.3 477L256.7 180Q278 115 330 180L453.7 334.6L708.6 158Q793 99.4 791.1 158L779.2 478"/>
-							<rect x="104" y="525" width="175" height="48" rx="24"/><rect x="104" y="598" width="175" height="48" rx="24"/>
-							<rect x="657" y="525" width="176" height="48" rx="24"/><rect x="657" y="598" width="176" height="48" rx="24"/>
-							<g class="mew-ad__lock-eyes"><rect x="319" y="433" width="79" height="143" rx="39.5"/><rect x="538" y="434" width="79" height="143" rx="39.5"/><rect fill="#fff" x="362" y="456" width="18" height="46" rx="9"/><rect fill="#fff" x="582" y="456" width="18" height="46" rx="9"/></g>
-							<path class="mew-ad__lock-happy" fill="none" stroke="#04dfff" stroke-width="42" stroke-linecap="round" d="M322 540Q358 452 395 540M541 540Q577 452 614 540"/>
-						</g>
+
+					<!-- shackle -->
+					<g class="mew-ad__shackle" fill="none">
+						<path stroke="#2a1745" stroke-width="120" d="M372 600V430A128 128 0 0 1 628 430V600"/>
+						<path stroke="url(#mewAdLkSteel)" stroke-width="92" d="M372 600V430A128 128 0 0 1 628 430V600"/>
+						<path stroke="#998dbf" stroke-width="24" d="M406 600V430A94 94 0 0 1 594 430V600"/>
+						<path stroke="#fff" stroke-width="18" stroke-linecap="round" d="M347 560V430A153 153 0 0 1 423.5 297.5"/>
+						<circle cx="452" cy="286" r="8" fill="#fff"/>
 					</g>
+
+					<!-- body -->
+					<use href="#mewAdLkBody" fill="url(#mewAdLkGold)"/>
+					<g clip-path="url(#mewAdLkClip)">
+						<ellipse cx="330" cy="610" rx="250" ry="150" fill="url(#mewAdLkShine)"/>
+						<use href="#mewAdLkBody" fill="none" stroke="#ec9420" stroke-width="90" stroke-opacity=".55" filter="url(#mewAdLkVig)"/>
+						<path fill="#f3a326" d="M120 780C330 822 660 822 880 760V960H120Z"/>
+						<path fill="#e08519" d="M120 868C330 896 660 896 880 852V960H120Z"/>
+						<path fill="#f3a326" opacity=".85" d="M762 520C812 620 822 770 776 905H900V520Z"/>
+						<path fill="#f3a326" opacity=".85" d="M768 360Q804 336 814 378C828 440 835 560 835 650L806 640C802 560 794 448 768 360Z"/>
+						<g fill="#e39720" opacity=".75"><ellipse cx="372" cy="540" rx="62" ry="22"/><ellipse cx="628" cy="540" rx="62" ry="22"/></g>
+						<path fill="none" stroke="#fffbe6" stroke-width="14" stroke-linecap="round" stroke-opacity=".85" d="M194 820V655C193 590 196 510 207 440"/>
+						<path fill="none" stroke="#fffbe6" stroke-width="10" stroke-linecap="round" stroke-opacity=".7" d="M330 541Q500 518 670 541"/>
+					</g>
+					<path fill="url(#mewAdLkEar)" d="M206 522C204 480 208 432 216 404Q222 384 238 400C260 428 282 474 300 522Q253 532 206 522Z"/>
+					<path fill="url(#mewAdLkEar)" d="M794 522C796 480 792 432 784 404Q778 384 762 400C740 428 718 474 700 522Q747 532 794 522Z"/>
+					<use href="#mewAdLkBody" fill="none" stroke="#2a1745" stroke-width="28" stroke-linejoin="round"/>
+					<path fill="none" stroke="#fff" stroke-width="18" stroke-linecap="round" d="M222 618C224 586 246 566 284 560"/>
+					<circle cx="312" cy="557" r="9" fill="#fff"/>
+
+					<!-- face -->
+					<g fill="#ff5fa2" opacity=".5"><ellipse cx="316" cy="734" rx="42" ry="21"/><ellipse cx="684" cy="734" rx="42" ry="21"/></g>
+					<path fill="none" stroke="#2a1745" stroke-width="9" stroke-linecap="round" opacity=".85" d="M258 708L204 697M258 734L202 741M742 708L796 697M742 734L798 741"/>
+					<g class="mew-ad__lock-eyes">
+						<ellipse cx="408" cy="672" rx="44" ry="52" fill="#2a1745"/>
+						<ellipse cx="592" cy="672" rx="44" ry="52" fill="#2a1745"/>
+						<ellipse cx="408" cy="677" rx="34" ry="42" fill="url(#mewAdLkIris)"/>
+						<ellipse cx="592" cy="677" rx="34" ry="42" fill="url(#mewAdLkIris)"/>
+						<g fill="#fff"><ellipse cx="394" cy="653" rx="14" ry="17"/><ellipse cx="578" cy="653" rx="14" ry="17"/><circle cx="423" cy="692" r="8"/><circle cx="607" cy="692" r="8"/></g>
+					</g>
+					<path class="mew-ad__lock-happy" fill="none" stroke="#2a1745" stroke-width="20" stroke-linecap="round" d="M370 684Q408 628 446 684M554 684Q592 628 630 684"/>
+					<path fill="#ff7fb6" stroke="#2a1745" stroke-width="7" stroke-linejoin="round" d="M486 712Q500 706 514 712Q512 726 500 730Q488 726 486 712Z"/>
+					<path fill="none" stroke="#2a1745" stroke-width="9" stroke-linecap="round" d="M468 736Q484 756 500 734Q516 756 532 736"/>
+
+					<!-- keyhole -->
+					<ellipse cx="500" cy="822" rx="38" ry="42" fill="#eea12a" stroke="#c9741a" stroke-width="6"/>
+					<path fill="none" stroke="#fff3c4" stroke-width="5" stroke-linecap="round" d="M468 808A34 38 0 0 1 492 784"/>
+					<path fill="#2a1745" d="M500 795A17 17 0 0 1 509.3 826.3L514 848Q500 853 486 848L490.7 826.3A17 17 0 0 1 500 795Z"/>
+
+					<!-- paws -->
+					<g fill="url(#mewAdLkPaw)" stroke="#2a1745" stroke-width="13"><ellipse cx="372" cy="900" rx="56" ry="34"/><ellipse cx="628" cy="900" rx="56" ry="34"/></g>
+					<path fill="none" stroke="#2a1745" stroke-width="8" stroke-linecap="round" d="M354 872V888M390 872V888M610 872V888M646 872V888"/>
+
+					<!-- coins -->
+					<g stroke="#2a1745" stroke-width="12" stroke-linejoin="round">
+						<path fill="#d2801a" d="M130 912V934A66 24 0 0 0 262 934V912Z"/>
+						<ellipse cx="196" cy="912" rx="66" ry="24" fill="url(#mewAdLkCoin)"/>
+						<path fill="#d2801a" d="M122 890V912A66 24 0 0 0 254 912V890Z"/>
+						<ellipse cx="188" cy="890" rx="66" ry="24" fill="url(#mewAdLkCoin)"/>
+						<path fill="#d2801a" d="M134 868V890A66 24 0 0 0 266 890V868Z"/>
+						<ellipse cx="200" cy="868" rx="66" ry="24" fill="url(#mewAdLkCoin)"/>
+					</g>
+					<ellipse cx="200" cy="868" rx="42" ry="13" fill="none" stroke="#e6951f" stroke-width="6"/>
+					<circle cx="850" cy="872" r="64" fill="#b9470c" stroke="#2a1745" stroke-width="12"/>
+					<circle cx="838" cy="868" r="64" fill="url(#mewAdLkErg)" stroke="#2a1745" stroke-width="12"/>
+					<circle cx="838" cy="868" r="45" fill="none" stroke="#ffc08f" stroke-width="6" opacity=".7"/>
+					<path fill="none" stroke="#2a1745" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" d="M858 842H818L842 868L818 894H858"/>
+					<path fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" opacity=".65" d="M792 852A48 48 0 0 1 822 818"/>
+
+					<!-- click sparkles -->
 					<g class="mew-ad__click">
-						<use href="#mewAdSpark" x="90" y="300" width="130" height="130" color="#f9d72d"/>
-						<use href="#mewAdSpark" x="790" y="250" width="110" height="110" color="#04dfff"/>
-						<use href="#mewAdSpark" x="830" y="440" width="80" height="80" color="#fff"/>
+						<use href="#mewAdSpark" x="150" y="250" width="110" height="110" color="#f9d72d"/>
+						<use href="#mewAdSpark" x="760" y="200" width="100" height="100" color="#04dfff"/>
+						<use href="#mewAdSpark" x="820" y="380" width="70" height="70" color="#fff"/>
 					</g>
 				</svg>
 			</span></span>

@@ -54,14 +54,14 @@
 		outline-offset: 3px;
 	}
 
-	// gradient hairline border
+	// gradient border
 	&::after {
 		content: "";
 		position: absolute;
 		inset: 0;
 		z-index: 6;
 		border-radius: inherit;
-		padding: 1px;
+		padding: 2px;
 		background: linear-gradient(100deg, rgba(4, 223, 255, .6), rgba(160, 110, 255, .32) 45%, rgba(249, 215, 45, .6));
 		-webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
 		-webkit-mask-composite: xor;
@@ -501,6 +501,15 @@ html[data-bs-theme="light"] .mew-ad {
 	}
 }
 
+// the tail sways while the lock is on show
+.mew-ad__lock-tail {
+	transform-origin: 770px 850px;
+
+	.is-on & {
+		animation: mewad-tail 2.8s ease-in-out infinite;
+	}
+}
+
 .mew-ad__click use {
 	opacity: 0;
 	transform-box: fill-box;
@@ -915,6 +924,11 @@ html[data-bs-theme="light"] .mew-ad {
 	74% { transform: translateY(-8px); }
 	86% { transform: translateY(3px); }
 	100% { transform: translateY(0); }
+}
+
+@keyframes mewad-tail {
+	0%, 100% { transform: rotate(-4deg); }
+	50% { transform: rotate(5deg); }
 }
 
 @keyframes mewad-show {
