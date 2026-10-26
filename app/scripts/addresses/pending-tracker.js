@@ -1,5 +1,5 @@
 import { AddressState } from './state.js';
-import { ApiClient } from './api-client.js?v=54';
+import { ApiClient } from './api-client.js?v=55';
 
 /**
  * "Notify me when it confirms" for the address page's pending txs.
@@ -279,7 +279,7 @@ function settle(confirmed, dropped) {
 	}
 
 	// Move the tx from Pending to its block, and update the balance, without waiting for the next refresh.
-	refreshPage();
+	refreshPage(confirmed.length > 0);
 }
 
 /**

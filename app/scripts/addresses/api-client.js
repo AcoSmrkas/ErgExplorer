@@ -19,12 +19,12 @@ const INDEXED_NODE_HOST = 'https://chain.mewfinance.com/';
  * Fetch with an abort-based timeout that also covers reading the response body, so a host
  * that hangs (no response, or headers-then-stall) rejects instead of waiting forever.
  */
-async function fetchWithTimeout(url, timeoutMs, readBody) {
+async function fetchWithTimeout(url, timeoutMs, readBody, init) {
 	const controller = new AbortController();
 	const timer = setTimeout(() => controller.abort(), timeoutMs);
 
 	try {
-		const response = await fetch(url, { signal: controller.signal });
+		const response = await fetch(url, Object.assign({}, init, { signal: controller.signal }));
 		return await readBody(response);
 	} finally {
 		clearTimeout(timer);
@@ -348,7 +348,36 @@ export const ApiClient = {
 		return this._takePrefetched('summary') || this._fetchAddressSummary();
 	},
 
-	async _fetchAddressSummary() {
+	/**
+	 * After a watched tx confirms: the balance from whichever source has it differing from
+	 * `staleKey` (balanceKey of the balance shown before), or the stale one if none has it yet.
+	 * Every source is asked, since the first to answer can be the one whose index trails.
+	 */
+	async getChangedAddressSummary(staleKey) {
+		const results = await Promise.allSettled(this._addressSummarySources().map(source =>
+			fetchWithTimeout(source.url, DATA_FETCH_TIMEOUT_MS, source.read, source.init)
+		));
+		const answers = results.filter(result => result.status === 'fulfilled').map(result => result.value);
+
+		if (answers.length === 0) {
+			throw new Error('Balance fetch failed');
+		}
+
+		return answers.find(data => this.balanceKey(data) !== staleKey) || answers[0];
+	},
+
+	/**
+	 * ERG and token amounts of a balance answer, as one comparable string
+	 */
+	balanceKey(data) {
+		const tokens = data.confirmed.tokens
+			.map(token => token.tokenId + ':' + token.amount)
+			.sort();
+
+		return [String(data.confirmed.nanoErgs)].concat(tokens).join(',');
+	},
+
+	_addressSummarySources() {
 		const sources = [{ url: this.getTxsUrl(), read: readBalance }];
 
 		if (networkType !== 'testnet') {
@@ -360,8 +389,12 @@ export const ApiClient = {
 			});
 		}
 
+		return sources;
+	},
+
+	async _fetchAddressSummary() {
 		try {
-			return await fetchFirst(sources, DATA_FETCH_TIMEOUT_MS);
+			return await fetchFirst(this._addressSummarySources(), DATA_FETCH_TIMEOUT_MS);
 		} catch (error) {
 			console.error('Balance fetch failed:', error);
 			throw error;

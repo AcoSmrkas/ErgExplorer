@@ -4,12 +4,12 @@
  */
 
 import { AddressState } from './state.js';
-import { ApiClient } from './api-client.js?v=54';
-import { BalanceSummary } from './balance-summary.js?v=67';
-import { AddressDetails } from './address-details.js?v=54';
-import { TransactionFormatter } from './transaction-formatter.js?v=73';
+import { ApiClient } from './api-client.js?v=55';
+import { BalanceSummary } from './balance-summary.js?v=68';
+import { AddressDetails } from './address-details.js?v=55';
+import { TransactionFormatter } from './transaction-formatter.js?v=74';
 import { UIControllers } from './ui-controllers.js?v=65';
-import { PendingTracker } from './pending-tracker.js?v=4';
+import { PendingTracker } from './pending-tracker.js?v=5';
 import { NftManager } from './nft-manager.js';
 import { MiningPanel } from './mining.js?v=1';
 import { getTxType, isWalletAddress, getTxInOutType, analyzeTransfers } from './transaction-analyzer.js?v=3';
@@ -104,7 +104,13 @@ $(async function() {
 
 	AddressState.walletAddress = walletAddress;
 	setDocumentTitle(AddressState.walletAddress);
-	PendingTracker.init({ refresh: refreshData });
+	PendingTracker.init({
+		refresh: (confirmed) => {
+			// The balance indexers can lag the confirmation: keep re-reading it until it changes.
+			if (confirmed) BalanceSummary.expectBalanceChange();
+			refreshData();
+		}
+	});
 	watchScrollingLists();
 	initializeAddressPage();
 });

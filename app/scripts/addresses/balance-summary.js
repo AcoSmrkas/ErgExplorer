@@ -1,6 +1,11 @@
-import { ApiClient } from './api-client.js?v=54';
+import { ApiClient } from './api-client.js?v=55';
 import { AddressState } from './state.js';
 import { isLpTokenData } from '../common/lp-tokens.js?v=4';
+
+// After a watched tx confirms, the balance indexers can trail the lookup that saw it confirm
+// by a block or more: the balance is re-read this often, this many times, until it changes.
+const BALANCE_RECHECK_MS = 10000;
+const BALANCE_RECHECKS = 12;
 
 /**
  * Balance summary display and token formatting
@@ -9,6 +14,11 @@ export const BalanceSummary = {
 	_tokenHolderHeightObserver: null,
 	_tokenHolderHeightResizeHandler: null,
 	_isLoading: false,
+	// balanceKey of the balance on screen, and of the one a confirmed tx made stale
+	_shownBalanceKey: null,
+	_staleBalanceKey: null,
+	_balanceRechecksLeft: 0,
+	_balanceRecheckTimer: null,
 
 	showLoading() {
 		this._isLoading = true;
@@ -34,16 +44,48 @@ export const BalanceSummary = {
 		if (AddressState.printedAddressSummary) return;
 
 		AddressState.printedAddressSummary = true;
+		clearTimeout(this._balanceRecheckTimer);
 
 		try {
-			const data = await ApiClient.getAddressSummary();
+			const staleKey = this._staleBalanceKey;
+			const data = staleKey !== null
+				? await ApiClient.getChangedAddressSummary(staleKey)
+				: await ApiClient.getAddressSummary();
+
+			this._shownBalanceKey = ApiClient.balanceKey(data);
+			this._recheckWhileStale();
 			await this._displayBalance(data);
 		} catch (error) {
+			this._recheckWhileStale();
 			this._isLoading = false;
 			$('#summaryLoading').hide();
 			console.error('Failed to print address summary:', error);
 			showLoadError('No results matching your query.');
 		}
+	},
+
+	/**
+	 * A watched tx confirmed (pending-tracker.js): the balance on screen is out of date.
+	 */
+	expectBalanceChange() {
+		if (this._shownBalanceKey === null) return;
+
+		this._staleBalanceKey = this._shownBalanceKey;
+		this._balanceRechecksLeft = BALANCE_RECHECKS;
+	},
+
+	_recheckWhileStale() {
+		if (this._staleBalanceKey === null) return;
+
+		if (this._shownBalanceKey !== this._staleBalanceKey || this._balanceRechecksLeft-- <= 0) {
+			this._staleBalanceKey = null;
+			return;
+		}
+
+		this._balanceRecheckTimer = setTimeout(() => {
+			AddressState.printedAddressSummary = false;
+			this.printAddressSummary();
+		}, BALANCE_RECHECK_MS);
 	},
 
 	/**
@@ -63,10 +105,11 @@ export const BalanceSummary = {
 			.html(this._formatBalanceRow('<span class="erg-span">ERG</span>', balanceHtml))
 			.css('display', 'grid');
 
-		// Tokens
-		if (data.confirmed.tokens && data.confirmed.tokens.length > 0) {
-			$('#tokensHolder').show();
+		// Tokens. A refresh can find fewer than before (a tx spent them), so a group left empty is hidden.
+		const hasTokens = Boolean(data.confirmed.tokens && data.confirmed.tokens.length > 0);
+		$('#tokensHolder').toggle(hasTokens);
 
+		if (hasTokens) {
 			AddressState.tokensArray = sortTokens(data.confirmed.tokens);
 
 			const lpTokens = AddressState.tokensArray.filter(token => this._isLpToken(token));
@@ -92,6 +135,8 @@ export const BalanceSummary = {
 				$('#financialAssetsTitle').text('Financial assets (' + financialTokens.length + ')');
 				$('#financialTokens').html(html);
 				$('#financialAssetsHolder').show();
+			} else {
+				$('#financialAssetsHolder').hide();
 			}
 
 			if (otherTokens.length > 0) {
@@ -100,6 +145,8 @@ export const BalanceSummary = {
 				$('#otherTokens').html(html);
 				$('#otherTokensHolder').show();
 				this._loadOtherTokensNftInfo(otherTokens);
+			} else {
+				$('#otherTokensHolder').hide();
 			}
 		}
 
