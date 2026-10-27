@@ -64,8 +64,8 @@ function initFooterHeart() {
 	setInterval(beat, 20000, 1 / 9);
 }
 
-//When the donation wallet's ERG is worth less than FUNDING_LOW_MONTHS of hosting, the footer says how long it
-//lasts, the heart beats, and once a day a popup asks for a donation. "Don't show again" holds until funding
+//When the donation wallet's ERG is worth less than FUNDING_LOW_MONTHS of hosting, the footer heart beats and
+//once a day a popup asks for a donation. "Don't show again" holds until funding
 //recovers, so the next shortfall asks again. The USD value is cached for half an hour.
 function checkFunding() {
 	if (networkType == 'testnet') {
@@ -118,11 +118,6 @@ function showFundingStatus(usd) {
 	} else {
 		left = null;
 	}
-
-	$('#fundingNote').html((left ? 'Hosting funded for ' + left : 'Hosting funds have run out') + ' - ')
-		.removeClass('d-none')
-		.off('click')
-		.on('click', showFundingPopup);
 
 	const heart = document.querySelector('.footer-heart');
 

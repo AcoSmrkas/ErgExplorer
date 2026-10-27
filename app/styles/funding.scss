@@ -358,14 +358,6 @@ body.fp-open {
 	}
 }
 
-#fundingNote {
-	cursor: pointer;
-
-	&:hover {
-		color: var(--text-strong);
-	}
-}
-
 // Keyframes
 
 @keyframes fp-fade {
