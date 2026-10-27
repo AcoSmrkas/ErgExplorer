@@ -26,12 +26,13 @@
 		<link rel="stylesheet" href="styles/main.css?v=8">
 		<!-- endbuild -->
 		<link rel="stylesheet" href="styles/mew-ad.css?v=1">
+		<link rel="stylesheet" href="styles/funding.css?v=1">
 		<link rel="preload" href="fonts/mew-ad-manrope.woff2" as="font" type="font/woff2" crossorigin>
 		<link rel="preload" href="fonts/mew-ad-satisfy.woff2" as="font" type="font/woff2" crossorigin>
 				
 		{% block styles %}{% endblock %}
 			
-		<script src="./scripts/common/config.js?v=43"></script>
+		<script src="./scripts/common/config.js?v=44"></script>
 		<script src="./scripts/common/params.js?v=41"></script>
 
         <script type="text/javascript">
@@ -186,6 +187,8 @@
 		<!-- Footer -->
 		{% include "partials/footer.njk" %}
 
+		{% include "partials/funding-popup.njk" %}
+
 		<!-- Bootstrap toasts: one container, so toasts shown together stack instead of covering each other -->
 		<div class="toast-container position-fixed bottom-0 end-0 p-3">
 			<!-- Notification prompt -->
@@ -223,7 +226,7 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/bignumber.js/8.0.2/bignumber.min.js" integrity="sha512-7UzDjRNKHpQnkh1Wf1l6i/OPINS9P2DDzTwQNX79JxfbInCXGpgI1RPb3ZD+uTP3O5X7Ke4e0+cxt2TxV7n0qQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 		<script src="https://cdn.jsdelivr.net/npm/json-bigint-parser-browser@1.0.4/json-bigint-browser.min.js"></script>
 		<script src="./scripts/common/token-icons.js?v=41"></script>
-		<script src="./scripts/main.js?v=59"></script>
+		<script src="./scripts/main.js?v=60"></script>
 		<script src="./scripts/common/token-popup.js?v=41"></script>
 		<script src="./scripts/common/mew-ad.js?v=1"></script>
 

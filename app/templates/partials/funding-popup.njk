@@ -1,0 +1,76 @@
+<!-- Call for funding: shown by main.js when the donation wallet's ERG covers less than FUNDING_LOW_MONTHS of hosting -->
+<div id="fundingPopup" class="fp-backdrop" role="dialog" aria-modal="true" aria-labelledby="fundingPopupTitle" hidden>
+	<div class="fp-card">
+		<button type="button" class="fp-close" aria-label="Close" onclick="hideFundingPopup()"><i class="fa-solid fa-xmark"></i></button>
+
+		<!-- The server bot. It worries while funds are low and cheers up while Donate is hovered -->
+		<svg class="fp-bot" viewBox="50 0 185 190" aria-hidden="true">
+			<ellipse class="fp-shadow" cx="120" cy="176" rx="48" ry="7"/>
+
+			<g class="fp-coins">
+				<g class="fp-coin fp-coin-1"><circle cx="120" cy="-14" r="11"/><text x="120" y="-9.5">&Sigma;</text></g>
+				<g class="fp-coin fp-coin-2"><circle cx="120" cy="-14" r="11"/><text x="120" y="-9.5">&Sigma;</text></g>
+				<g class="fp-coin fp-coin-3"><circle cx="120" cy="-14" r="11"/><text x="120" y="-9.5">&Sigma;</text></g>
+			</g>
+
+			<g class="fp-body">
+				<rect class="fp-case" x="70" y="40" width="100" height="126" rx="18"/>
+				<rect class="fp-slot" x="104" y="36" width="32" height="8" rx="4"/>
+
+				<rect class="fp-screen" x="82" y="54" width="76" height="54" rx="11"/>
+				<g class="fp-worried">
+					<path class="fp-brow" d="M96 70 L108 66"/>
+					<path class="fp-brow" d="M144 70 L132 66"/>
+					<g class="fp-eyes">
+						<rect x="99" y="73" width="8" height="14" rx="4"/>
+						<rect x="133" y="73" width="8" height="14" rx="4"/>
+					</g>
+					<path class="fp-mouth" d="M108 99 q4 -4 8 0 q4 4 8 0 q4 -4 8 0"/>
+				</g>
+				<g class="fp-happy">
+					<path class="fp-mouth" d="M100 79 q4 -7 8 0"/>
+					<path class="fp-mouth" d="M132 79 q4 -7 8 0"/>
+					<path class="fp-mouth" d="M107 94 q13 11 26 0"/>
+				</g>
+
+				<rect class="fp-bay" x="84" y="118" width="72" height="12" rx="4"/>
+				<circle class="fp-led fp-led-1" cx="146" cy="124" r="3"/>
+				<rect class="fp-bay" x="84" y="138" width="72" height="12" rx="4"/>
+				<circle class="fp-led fp-led-2" cx="146" cy="144" r="3"/>
+
+				<path class="fp-sweat" d="M166 52 q-6 9 0 12 q6 -3 0 -12z"/>
+			</g>
+
+			<g class="fp-battery">
+				<rect class="fp-battery-case" x="182" y="20" width="40" height="20" rx="5"/>
+				<rect class="fp-battery-nub" x="222" y="26" width="4" height="8" rx="1.5"/>
+				<rect class="fp-battery-level" x="186" y="24" width="32" height="12" rx="2.5"/>
+			</g>
+		</svg>
+
+		<div class="fp-kicker" id="fundingPopupKicker">Running low on fuel</div>
+		<h4 class="fp-title" id="fundingPopupTitle">Keep Erg Explorer running</h4>
+		<p class="fp-text" id="fundingPopupText"></p>
+
+		<div class="fp-gauge">
+			<div class="fp-gauge-head">
+				<span>Hosting funded</span>
+				<strong id="fundingPopupLeft"></strong>
+			</div>
+			<div class="fp-gauge-bar"><div class="fp-gauge-fill"></div></div>
+			<div class="fp-gauge-foot" id="fundingPopupUsd"></div>
+		</div>
+
+		<div class="fp-address">
+			<span class="fp-address-text">9hW2SRFsgRVwfNdDMjYFnQnctfv9RtkWkRz5WyiGFQFD44S1SrP</span>
+			<button type="button" class="fp-copy" title="Copy address" aria-label="Copy donation address" onclick="copyToClipboard(event, DONATION_ADDRESS)"><i class="fa-regular fa-copy"></i></button>
+		</div>
+
+		<div class="fp-actions">
+			<button type="button" class="btn btn-primary" onclick="hideFundingPopup()">Maybe later</button>
+			<a class="btn btn-info fp-donate" href="addresses/9hW2SRFsgRVwfNdDMjYFnQnctfv9RtkWkRz5WyiGFQFD44S1SrP" onclick="hideFundingPopup()">Donate ERG <span class="fp-donate-heart" aria-hidden="true">&hearts;</span></a>
+		</div>
+
+		<button type="button" class="fp-dismiss" onclick="dismissFundingPopup()">Don't show again</button>
+	</div>
+</div>

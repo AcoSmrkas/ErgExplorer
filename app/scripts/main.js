@@ -35,6 +35,7 @@ $(function() {
 	$('#cyear').html(new Date().getFullYear());
 
 	initFooterHeart();
+	checkFunding();
 });
 
 //Now and then the footer heart turns red and beats on its own: on one page in six a few seconds after it
@@ -61,6 +62,130 @@ function initFooterHeart() {
 
 	setTimeout(beat, 3000 + Math.random() * 5000, 1 / 6);
 	setInterval(beat, 20000, 1 / 9);
+}
+
+//When the donation wallet's ERG is worth less than FUNDING_LOW_MONTHS of hosting, the footer says how long it
+//lasts, the heart beats, and once a day a popup asks for a donation. "Don't show again" holds until funding
+//recovers, so the next shortfall asks again. The USD value is cached for half an hour.
+function checkFunding() {
+	if (networkType == 'testnet') {
+		return;
+	}
+
+	let cached = null;
+
+	try {
+		cached = JSON.parse(localStorage.getItem('fundingUsd'));
+	} catch (e) {}
+
+	if (cached && Date.now() - cached.timestamp < 30 * 60 * 1000) {
+		showFundingStatus(cached.usd);
+		return;
+	}
+
+	$.when(
+		$.get(API_HOST + 'addresses/' + DONATION_ADDRESS + '/balance/confirmed'),
+		$.get(ERGEXPLORER_API_HOST + 'tokens/getErgPrice')
+	).done(function(balance, price) {
+		const usd = balance[0].nanoErgs / Math.pow(10, ERG_DECIMALS) * parseFloat(price[0].items[0].value);
+
+		if (isNaN(usd)) {
+			return;
+		}
+
+		localStorage.setItem('fundingUsd', JSON.stringify({ usd: usd, timestamp: Date.now() }));
+		showFundingStatus(usd);
+	});
+}
+
+function showFundingStatus(usd) {
+	const months = usd / HOSTING_COST_USD_MONTHLY;
+
+	if (months >= FUNDING_LOW_MONTHS) {
+		localStorage.removeItem('fundingPopupDismissed');
+		return;
+	}
+
+	const days = Math.floor(months * 30);
+	let left;
+
+	if (months >= 1.5) {
+		left = 'about ' + Math.round(months) + ' months';
+	} else if (days >= 30) {
+		left = 'about a month';
+	} else if (days > 1) {
+		left = days + ' days';
+	} else {
+		left = null;
+	}
+
+	$('#fundingNote').html((left ? 'Hosting funded for ' + left : 'Hosting funds have run out') + ' - ')
+		.removeClass('d-none')
+		.off('click')
+		.on('click', showFundingPopup);
+
+	const heart = document.querySelector('.footer-heart');
+
+	if (heart && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+		heart.classList.add('beating');
+	}
+
+	$('#fundingPopup')
+		.toggleClass('fp-critical', left != null && months < 1)
+		.toggleClass('fp-empty', left == null)
+		.css('--fp-level', Math.max(months / FUNDING_LOW_MONTHS, 0.03));
+	$('#fundingPopupKicker').html(left == null ? 'Out of fuel' : (months < 1 ? 'Almost out of fuel' : 'Running low on fuel'));
+	$('#fundingPopupText').html('Erg Explorer is free to use and its hosting is paid for by donations. It costs $'
+		+ HOSTING_COST_USD_MONTHLY + ' a month, and the donation wallet '
+		+ (left ? 'now covers only ' + left + ' more.' : 'can no longer cover it.')
+		+ ' Every bit of ERG helps keep it online.');
+	$('#fundingPopupLeft').html(left ? left : 'run out');
+	$('#fundingPopupUsd').html('$' + Math.floor(usd) + ' of ERG in the wallet &middot; $' + HOSTING_COST_USD_MONTHLY + ' a month');
+
+	const lastShown = parseInt(localStorage.getItem('fundingPopupShown')) || 0;
+
+	if (localStorage.getItem('fundingPopupDismissed') || Date.now() - lastShown < 24 * 60 * 60 * 1000) {
+		return;
+	}
+
+	localStorage.setItem('fundingPopupShown', Date.now());
+
+	//Let the page settle first, so the popup's entrance plays where it can be seen
+	setTimeout(showFundingPopup, 1500);
+}
+
+function showFundingPopup() {
+	$('#fundingPopup').removeClass('fp-closing').prop('hidden', false);
+	$('body').addClass('fp-open');
+
+	$(document).off('keydown.funding').on('keydown.funding', function(e) {
+		if (e.key == 'Escape') {
+			hideFundingPopup();
+		}
+	});
+
+	$('#fundingPopup').off('click').on('click', function(e) {
+		if (e.target == this) {
+			hideFundingPopup();
+		}
+	});
+}
+
+function hideFundingPopup() {
+	$(document).off('keydown.funding');
+	$('body').removeClass('fp-open');
+
+	$('#fundingPopup').addClass('fp-closing');
+
+	setTimeout(function() {
+		$('#fundingPopup').prop('hidden', true).removeClass('fp-closing');
+	}, 200);
+}
+
+function dismissFundingPopup() {
+	localStorage.setItem('fundingPopupDismissed', 'true');
+
+	hideFundingPopup();
 }
 
 window.addEventListener('hashchange', () => {

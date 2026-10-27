@@ -1,0 +1,489 @@
+// Call for funding popup (templates/partials/funding-popup.njk). main.js sets --fp-level, the share of
+// FUNDING_LOW_MONTHS still funded, and .fp-critical (under a month) or .fp-empty (run out)
+
+.fp-backdrop {
+	--fp-level: 0.5;
+	--fp-accent: var(--main-color);
+
+	position: fixed;
+	inset: 0;
+	z-index: 4000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 16px;
+	background: rgba(0, 0, 0, 0.6);
+	backdrop-filter: blur(3px);
+	animation: fp-fade 0.3s ease-out;
+
+	&[hidden] {
+		display: none;
+	}
+
+	&.fp-closing {
+		animation: fp-fade 0.2s ease-in reverse forwards;
+
+		.fp-card {
+			animation: fp-card-out 0.2s ease-in forwards;
+		}
+	}
+
+	&.fp-critical,
+	&.fp-empty {
+		--fp-accent: #ff3b5c;
+	}
+}
+
+body.fp-open {
+	overflow: hidden;
+}
+
+.fp-card {
+	position: relative;
+	width: 100%;
+	max-width: 420px;
+	max-height: calc(100vh - 32px);
+	overflow-y: auto;
+	padding: 28px 28px 24px;
+	text-align: center;
+	color: var(--text-color);
+	background: var(--forms-bg);
+	border: 2px solid var(--main-color);
+	border-radius: 18px;
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+	animation: fp-card-in 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.fp-close {
+	position: absolute;
+	top: 10px;
+	right: 12px;
+	width: 32px;
+	height: 32px;
+	border: none;
+	border-radius: 50%;
+	background: transparent;
+	color: var(--text-light);
+	font-size: 1.1rem;
+	transition: background-color 0.2s, color 0.2s;
+
+	&:hover {
+		background: var(--borders);
+		color: var(--text-strong);
+	}
+}
+
+// The bot
+
+.fp-bot {
+	display: block;
+	width: 190px;
+	margin: 6px auto 4px;
+	overflow: visible;
+
+	* {
+		transform-box: fill-box;
+		transform-origin: center;
+	}
+}
+
+.fp-shadow {
+	fill: rgba(0, 0, 0, 0.25);
+	animation: fp-shadow 2.4s ease-in-out infinite;
+}
+
+.fp-body {
+	animation: fp-drop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s backwards, fp-bob 2.4s ease-in-out 0.85s infinite;
+}
+
+.fp-critical .fp-body,
+.fp-empty .fp-body {
+	animation: fp-drop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s backwards, fp-shiver 2.4s ease-in-out 0.85s infinite;
+}
+
+.fp-case {
+	fill: var(--background);
+	stroke: var(--main-color);
+	stroke-width: 3;
+}
+
+.fp-slot,
+.fp-screen {
+	fill: #151515;
+}
+
+.fp-bay {
+	fill: var(--borders);
+}
+
+.fp-eyes rect {
+	fill: var(--main-color);
+	animation: fp-blink 4s infinite;
+}
+
+.fp-brow,
+.fp-mouth {
+	fill: none;
+	stroke: var(--main-color);
+	stroke-width: 3;
+	stroke-linecap: round;
+}
+
+.fp-happy {
+	opacity: 0;
+}
+
+.fp-led-1 {
+	fill: #3ecf6e;
+	animation: fp-led 1.6s steps(1) infinite;
+}
+
+.fp-led-2 {
+	fill: var(--fp-accent);
+	animation: fp-led 0.7s steps(1) infinite;
+}
+
+.fp-empty .fp-led-1 {
+	fill: #ff3b5c;
+}
+
+.fp-sweat {
+	fill: #6ec8ff;
+	animation: fp-sweat 2.4s ease-in infinite;
+}
+
+.fp-battery {
+	animation: fp-drop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s backwards;
+}
+
+.fp-battery-case {
+	fill: none;
+	stroke: var(--text-light);
+	stroke-width: 2.5;
+}
+
+.fp-battery-nub {
+	fill: var(--text-light);
+}
+
+.fp-battery-level {
+	fill: var(--fp-accent);
+	transform-origin: left center !important;
+	transform: scaleX(var(--fp-level));
+	animation: fp-drain 1.4s ease-in-out 0.6s backwards, fp-low 1s ease-in-out 2s infinite;
+}
+
+.fp-coin {
+	opacity: 0;
+
+	circle {
+		fill: #f9b52d;
+		stroke: #c9851d;
+		stroke-width: 2;
+	}
+
+	text {
+		font: bold 13px sans-serif;
+		text-anchor: middle;
+		fill: #7a4a00;
+	}
+}
+
+// Hovering Donate feeds the bot: coins drop into its slot and it cheers up
+
+.fp-card:has(.fp-donate:hover, .fp-donate:focus-visible) {
+	.fp-coin {
+		animation: fp-coin 1.2s ease-in infinite;
+	}
+
+	.fp-coin-2 {
+		animation-delay: 0.4s;
+	}
+
+	.fp-coin-3 {
+		animation-delay: 0.8s;
+	}
+
+	.fp-worried,
+	.fp-sweat {
+		opacity: 0;
+	}
+
+	.fp-happy {
+		opacity: 1;
+	}
+
+	.fp-body {
+		animation: fp-hop 0.6s ease-in-out infinite;
+	}
+
+	.fp-battery-level {
+		animation: none;
+		transform: scaleX(1);
+		fill: #3ecf6e;
+		transition: transform 1.2s ease-out, fill 0.3s;
+	}
+
+	.fp-donate-heart {
+		animation: footer-heartbeat 1.2s ease-in-out infinite;
+	}
+}
+
+// Text, gauge and actions
+
+.fp-kicker {
+	margin-top: 6px;
+	font-size: 0.75rem;
+	font-weight: bold;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--fp-accent);
+}
+
+.fp-title {
+	margin: 4px 0 10px;
+	font-weight: bold;
+	color: var(--text-strong);
+}
+
+.fp-text {
+	margin-bottom: 18px;
+	line-height: 1.5;
+}
+
+.fp-gauge {
+	margin-bottom: 16px;
+	text-align: left;
+}
+
+.fp-gauge-head {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 6px;
+	font-size: 0.9rem;
+
+	strong {
+		color: var(--fp-accent);
+	}
+}
+
+.fp-gauge-bar {
+	height: 12px;
+	border-radius: 6px;
+	background: var(--borders);
+	overflow: hidden;
+}
+
+.fp-gauge-fill {
+	height: 100%;
+	width: calc(var(--fp-level) * 100%);
+	min-width: 6px;
+	border-radius: 6px;
+	background: repeating-linear-gradient(-45deg, var(--fp-accent) 0 10px, color-mix(in srgb, var(--fp-accent) 75%, #000) 10px 20px);
+	background-size: 28px 100%;
+	animation: fp-gauge-drain 1.4s ease-in-out 0.6s backwards, fp-stripes 1s linear infinite;
+}
+
+.fp-gauge-foot {
+	margin-top: 6px;
+	font-size: 0.8rem;
+	color: var(--text-light);
+}
+
+.fp-address {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 18px;
+	padding: 8px 8px 8px 12px;
+	border: 1px solid var(--borders);
+	border-radius: 10px;
+	background: var(--background);
+}
+
+.fp-address-text {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	text-align: left;
+	font-family: var(--bs-font-monospace);
+	font-size: 0.8rem;
+	color: var(--text-strong);
+}
+
+.fp-copy {
+	flex: none;
+	width: 32px;
+	height: 32px;
+	border: none;
+	border-radius: 8px;
+	background: transparent;
+	color: var(--text-light);
+	transition: background-color 0.2s, color 0.2s;
+
+	&:hover {
+		background: var(--borders);
+		color: var(--main-color);
+	}
+}
+
+.fp-actions {
+	display: flex;
+	gap: 10px;
+
+	.btn {
+		flex: 1;
+		padding: 10px;
+		border-radius: 10px;
+	}
+}
+
+.fp-donate-heart {
+	display: inline-block;
+}
+
+.fp-dismiss {
+	margin-top: 12px;
+	padding: 0;
+	border: none;
+	background: none;
+	font-size: 0.8rem;
+	color: var(--text-light);
+	text-decoration: underline;
+
+	&:hover {
+		color: var(--text-strong);
+	}
+}
+
+#fundingNote {
+	cursor: pointer;
+
+	&:hover {
+		color: var(--text-strong);
+	}
+}
+
+// Keyframes
+
+@keyframes fp-fade {
+	from { opacity: 0; }
+}
+
+@keyframes fp-card-in {
+	from {
+		opacity: 0;
+		transform: translateY(40px) scale(0.85);
+	}
+}
+
+@keyframes fp-card-out {
+	to {
+		opacity: 0;
+		transform: translateY(20px) scale(0.95);
+	}
+}
+
+@keyframes fp-drop {
+	from {
+		opacity: 0;
+		transform: translateY(-50px);
+	}
+}
+
+@keyframes fp-bob {
+	0%, 100% { transform: translateY(0); }
+	50% { transform: translateY(-5px); }
+}
+
+@keyframes fp-shiver {
+	0%, 100% { transform: translateY(0); }
+	50% { transform: translateY(-4px); }
+	60%, 70%, 80% { transform: translate(-1.5px, -3px); }
+	65%, 75% { transform: translate(1.5px, -3px); }
+}
+
+@keyframes fp-hop {
+	0%, 100% { transform: translateY(0); }
+	40% { transform: translateY(-8px) rotate(-2deg); }
+}
+
+@keyframes fp-shadow {
+	0%, 100% { transform: scaleX(1); }
+	50% { transform: scaleX(0.88); }
+}
+
+@keyframes fp-blink {
+	0%, 92%, 100% { transform: scaleY(1); }
+	95% { transform: scaleY(0.1); }
+}
+
+@keyframes fp-led {
+	50% { opacity: 0.2; }
+}
+
+@keyframes fp-sweat {
+	0%, 30% {
+		opacity: 0;
+		transform: translateY(0);
+	}
+
+	45% { opacity: 1; }
+
+	100% {
+		opacity: 0;
+		transform: translateY(26px);
+	}
+}
+
+@keyframes fp-drain {
+	from { transform: scaleX(1); }
+}
+
+@keyframes fp-gauge-drain {
+	from { width: 100%; }
+}
+
+@keyframes fp-low {
+	50% { opacity: 0.45; }
+}
+
+@keyframes fp-stripes {
+	to { background-position: 28px 0; }
+}
+
+@keyframes fp-coin {
+	0% {
+		opacity: 0;
+		transform: translateY(-20px);
+	}
+
+	20% { opacity: 1; }
+	75% { opacity: 1; }
+
+	100% {
+		opacity: 0;
+		transform: translateY(52px) scale(0.7);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.fp-backdrop,
+	.fp-backdrop *,
+	.fp-card:has(.fp-donate:hover) * {
+		animation: none !important;
+		transition: none !important;
+	}
+}
+
+@media (max-width: 400px) {
+	.fp-card {
+		padding: 24px 18px 18px;
+	}
+
+	.fp-bot {
+		width: 150px;
+	}
+}
