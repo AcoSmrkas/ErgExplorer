@@ -192,14 +192,22 @@ export const ApiClient = {
 	},
 
 	/**
-	 * Get unspent boxes URL
+	 * Unspent boxes page URLs, in the order they are asked (see fetchFirst). sigmaspace lists
+	 * newest first; api.ergoplatform orders by its own globalIndex, which put boxes from height
+	 * 886k ahead of 1.904M on one address (2026-10-28), and took 25-28 s cold where sigmaspace
+	 * took 0.7-1.2 s.
 	 */
-	getUnspentBoxesDataUrl(boxOffset = 0, limit = AddressState.unspentBoxesPageSize) {
-		let url = API_HOST_2 + 'boxes/unspent/byAddress/' + AddressState.walletAddress;
+	getUnspentBoxesDataUrls(boxOffset = 0, limit = AddressState.unspentBoxesPageSize) {
+		const query = '?offset=' + boxOffset + '&limit=' + limit;
+
 		if (networkType === 'testnet') {
-			url = API_HOST + 'api/v1/boxes/unspent/byAddress/' + AddressState.walletAddress;
+			return [API_HOST + 'api/v1/boxes/unspent/byAddress/' + AddressState.walletAddress + query];
 		}
-		return url + '?offset=' + boxOffset + '&limit=' + limit;
+
+		return [
+			'https://api.sigmaspace.io/api/v1/boxes/unspent/byAddress/' + AddressState.walletAddress + query,
+			API_HOST_2 + 'boxes/unspent/byAddress/' + AddressState.walletAddress + query
+		];
 	},
 
 	/**
@@ -455,12 +463,29 @@ export const ApiClient = {
 		return 'unspentBoxes:' + boxOffset + ':' + limit;
 	},
 
+	// Index into getUnspentBoxesDataUrls() of the source that answered last, asked first next time.
+	// The two list boxes in different orders, so pages from mixed sources would repeat or skip boxes.
+	_unspentBoxesSource: 0,
+
 	async _fetchUnspentBoxes(boxOffset, limit) {
 		try {
-			return await fetchWithTimeout(this.getUnspentBoxesDataUrl(boxOffset, limit), DATA_FETCH_TIMEOUT_MS, async (response) => {
-				if (!response.ok) throw new Error('Unspent boxes fetch failed');
-				return response.json();
-			});
+			const urls = this.getUnspentBoxesDataUrls(boxOffset, limit);
+			const sources = urls.map((url, index) => ({
+				url,
+				read: async (response) => {
+					if (!response.ok) throw new Error('HTTP ' + response.status);
+					const data = await response.json();
+					// sigmaspace can answer HTTP 200 with an error body
+					if (!data || !Array.isArray(data.items)) throw new Error('No items in answer');
+					return { index, data };
+				}
+			}));
+			const preferred = Math.min(this._unspentBoxesSource, sources.length - 1);
+			sources.unshift(sources.splice(preferred, 1)[0]);
+
+			const answer = await fetchFirst(sources, DATA_FETCH_TIMEOUT_MS);
+			this._unspentBoxesSource = answer.index;
+			return answer.data;
 		} catch (error) {
 			console.error('Unspent boxes fetch failed:', error);
 			throw error;
