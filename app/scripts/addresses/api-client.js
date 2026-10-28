@@ -8,6 +8,9 @@ const HEDGE_AFTER_MS = 1500;
 const TX_FETCH_TIMEOUT_MS = 45000;
 // Other address data fetches (mempool, balance, unspent boxes) abort after this to avoid hanging.
 const DATA_FETCH_TIMEOUT_MS = 15000;
+// api.ergoplatform's mempool-by-address took 6.8 s and 11.8 s on cold addresses (2026-10-28)
+// while our node's answered in 0.65 s. See fetchMempool.
+const MEMPOOL_EXTRA_WAIT_MS = 1500;
 // Indexed nodes behind our gateway: same /blockchain/balance as the explorer's balance/total
 // (ERG, token ids, amounts and decimals matched on a 2,236-token address), and often faster when
 // that is cold. Not node.sigmaspace.io directly: its index kept 193 spent boxes of one tx
@@ -242,14 +245,28 @@ export const ApiClient = {
 		const ownUrl = this.getOwnMempoolUrl();
 		const urls = [ownUrl, this.getMempoolUrl()].filter(Boolean);
 
-		const results = await Promise.allSettled(urls.map(url =>
+		const requests = urls.map(url =>
 			fetchWithTimeout(url, DATA_FETCH_TIMEOUT_MS, async (response) => {
 				if (!response.ok) throw new Error('Mempool fetch failed: ' + url);
 				const arrayBuffer = await response.arrayBuffer();
 				const buffer = new TextDecoder('utf-8').decode(arrayBuffer);
 				return JSONbig.parse(buffer);
 			})
-		));
+		);
+
+		// The transactions list waits for this. Once our node has answered, the explorer gets
+		// MEMPOOL_EXTRA_WAIT_MS more; a later answer is left to the 60s refresh. If our node
+		// failed, the explorer keeps its full timeout.
+		const ownAnswered = ownUrl ? requests[0].then(() => true, () => false) : null;
+		const bounded = requests.map((request, i) => {
+			if (!ownAnswered || i === 0) return request;
+			const cutOff = ownAnswered.then(ok => ok
+				? new Promise((resolve, reject) => setTimeout(() => reject(new Error('Mempool source too slow: ' + urls[i])), MEMPOOL_EXTRA_WAIT_MS))
+				: new Promise(() => {}));
+			return Promise.race([request, cutOff]);
+		});
+
+		const results = await Promise.allSettled(bounded);
 
 		const pages = results.map(result =>
 			result.status === 'fulfilled' && result.value && Array.isArray(result.value.items) ? result.value : null);
