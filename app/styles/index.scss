@@ -99,3 +99,65 @@ html[data-theme="mew"] {
     color: var(--footer) !important;
   }
 }
+//Placeholder bar while a value is still loading; gone as soon as it has content
+.skeleton:empty::before {
+  animation: skeleton-pulse 1.8s ease-in-out infinite;
+  background-color: var(--borders);
+  border-radius: 3px;
+  content: '';
+  display: inline-block;
+  height: 0.55em;
+  opacity: 0.35;
+  vertical-align: middle;
+  width: 6em;
+}
+
+span.skeleton:empty::before {
+  width: 4em;
+}
+
+.stats-value.skeleton:empty::before {
+  margin-bottom: 1rem;
+}
+
+.count-up-in {
+  animation: count-up-fade 0.4s ease-out;
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.45; }
+}
+
+@keyframes count-up-fade {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton:empty::before,
+  .count-up-in {
+    animation: none;
+  }
+}
+
+//24h stats: consistent value color, lined-up digits and headings
+.stats-value {
+  color: var(--text-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+#statsHolderLeft .col-12 > h3 {
+  margin-left: -0.25rem;
+}
+
+@media (max-width: 575.98px) {
+  #statsHolderLeft .col-12 > h3 {
+    margin-left: 0;
+  }
+}
+
+//Fixed-width digits so counting values do not jitter
+.skeleton {
+  font-variant-numeric: tabular-nums;
+}

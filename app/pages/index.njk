@@ -24,7 +24,7 @@
 				</div>
 				<div class="flex-grow-1">
 					<p><span class="erg-span"><b>ERG</b></span> price</p>
-					<h2 class="text-white index-card-values" id="ergPrice"></h2>
+					<h2 class="text-white index-card-values skeleton" id="ergPrice" class="skeleton"></h2>
 				</div>
 			</div>
 			<hr class="my-3">
@@ -34,7 +34,7 @@
 				</div>
 				<div class="flex-grow-1">
 					<p><strong class="erg-span"></strong>Market cap</p>
-					<h2 class="text-white index-card-values" id="marketCap"></h2>
+					<h2 class="text-white index-card-values skeleton" id="marketCap" class="skeleton"></h2>
 				</div>
 			</div>
 		</div>
@@ -46,7 +46,7 @@
 				</div>
 				<div class="flex-grow-1">
 					<p>Block height</p>
-					<h2 id="blockHeight" class="text-white index-card-values"></h2>
+					<h2 id="blockHeight" class="text-white index-card-values skeleton"></h2>
 				</div>
 			</div>
 			<hr class="my-3">
@@ -56,7 +56,7 @@
 				</div>
 				<div class="flex-grow-1">
 					<p><strong class="erg-span"></strong>Daily transactions</p>
-					<h2 class="text-white index-card-values" id="totalTransactions"></h2>
+					<h2 class="text-white index-card-values skeleton" id="totalTransactions" class="skeleton"></h2>
 				</div>
 			</div>
 		</div>		
@@ -64,9 +64,9 @@
 		<div class="col p-1 ps-lg-3 border-lg-start">
 			<h2 class="erg-span" style="font-size:1.7em; margin-bottom: 0;">Protocol information</h2>
 			<br>
-			<h5 style="font-size:1em" class="text-light">Version: <span class="text-white" id="ergVersion"></span></h2>
-			<h5 style="font-size:1em" class="text-light">Circulating Supply: <span id="ergSupply"></span></h2>
-			<h5 style="font-size:1em" class="text-light">Max Supply: <span id="ergTotal"></span></h2>
+			<h5 style="font-size:1em" class="text-light">Version: <span class="text-white skeleton" id="ergVersion"></span></h2>
+			<h5 style="font-size:1em" class="text-light">Circulating Supply: <span class="skeleton" id="ergSupply"></span></h2>
+			<h5 style="font-size:1em" class="text-light">Max Supply: <span class="skeleton" id="ergTotal"></span></h2>
 		</div>
 	</div>
 	<div id="tokenLoading" style="display: block;height: 350px;" class="row w-100">
@@ -143,34 +143,34 @@
 					<div class="col-12 p-0 p-sm-1">
 					<div class="row w-100 p-0 p-sm-1">
 						<div class="col-6 ps-1 ps-sm-2"><strong>Blocks mined</strong></div>
-						<div id="statsBlocksMined" class="col"></div>
+						<div id="statsBlocksMined" class="col stats-value skeleton"></div>
 					</div>
 					<hr class="my-1">
 					<div class="row w-100 p-0 p-sm-1">
 						<div class="col-6 ps-1 ps-sm-2"><strong>Average mining time</strong></div>
-						<div id="statsAverageMiningTime" class="col"></div>
+						<div id="statsAverageMiningTime" class="col stats-value skeleton"></div>
 					</div>
 					<hr class="my-1">
 					<div class="row w-100 p-0 p-sm-1">
 						<div class="col-6 ps-1 ps-sm-2"><strong>Coins mined</strong></div>
-						<div id="statsCoinsMined" class="col"></div>
+						<div id="statsCoinsMined" class="col stats-value skeleton"></div>
 					</div>
 					<hr class="d-block d-sm-none my-2" style="border:0;">
 					<h3 class="p-1 p-sm-3 erg-span">Transactions summary</h3>
-					<div class="row w-10p-0 0 sm-p-0 p-sm-1">
+					<div class="row w-100 p-0 p-sm-1">
 						<div class="col-6 ps-1 ps-sm-2"><strong>Number of Transactions</strong></div>
-						<div id="statsNumberOfTransactions" class="col"></div>
+						<div id="statsNumberOfTransactions" class="col stats-value skeleton"></div>
 					</div>
 					<hr class="my-1">
 					<div class="row w-100 p-0 p-sm-1">
 						<div class="col-6 ps-1 ps-sm-2"><strong>Total Transaction Fees</strong></div>
-						<div id="statsTotalTransactionFees" class="col"></div>
+						<div id="statsTotalTransactionFees" class="col stats-value skeleton"></div>
 					</div>
 					<!--
 					<hr class="my-1">
 					<div class="row w-100 p-1">
 						<div class="col-6 ps-1 ps-sm-2"><strong>Total Output Volume</strong></div>
-						<div id="statsTotalOutputVolume" class="col"></div>
+						<div id="statsTotalOutputVolume" class="col stats-value skeleton"></div>
 					</div>
 					-->					
 					<hr class="d-block d-sm-none my-2" style="border:0;">
@@ -181,32 +181,32 @@
 					<div class="col-12 p-0 p-sm-1">
 					<div class="row w-100 p-0 p-sm-1">
 						<div class="col-6 ps-1 ps-sm-2"><strong>Total Miners Revenue</strong></div>
-						<div id="statsTotalMinersRevenue" class="col"></div>
+						<div id="statsTotalMinersRevenue" class="col stats-value skeleton"></div>
 					</div>
 					<hr class="my-1">
 					<div class="row w-100 p-0 p-sm-1">
 						<div class="col-6 ps-1 ps-sm-2"><strong>% Earned From Transaction Fees</strong></div>
-						<div id="statsEarnedFromTransactionFees" class="col"></div>
+						<div id="statsEarnedFromTransactionFees" class="col stats-value skeleton"></div>
 					</div>
 					<hr class="my-1">
 					<div class="row w-100 p-0 p-sm-1">
 						<div class="col-6 ps-1 ps-sm-2"><strong>% Of Transaction Volume</strong></div>
-						<div id="statsOfTransactionVolume" class="col"></div>
+						<div id="statsOfTransactionVolume" class="col stats-value skeleton"></div>
 					</div>
 					<hr class="my-1">
 					<div class="row w-100 p-0 p-sm-1">
 						<div class="col-6 ps-1 ps-sm-2"><strong>Cost per Transaction</strong></div>
-						<div id="statsCostPerTransaction" class="col"></div>
+						<div id="statsCostPerTransaction" class="col stats-value skeleton"></div>
 					</div>
 					<hr class="my-1">
 					<div class="row w-100 p-0 p-sm-1">
 						<div class="col-6 ps-1 ps-sm-2"><strong>Difficulty</strong></div>
-						<div id="statsDifficulty" class="col"></div>
+						<div id="statsDifficulty" class="col stats-value skeleton"></div>
 					</div>
 					<hr class="my-1">
 					<div class="row w-100 p-0 p-sm-1">
 						<div class="col-6 ps-1 ps-sm-2"><strong>Hash Rate</strong></div>
-						<div id="statsHashRate" class="col"></div>
+						<div id="statsHashRate" class="col stats-value skeleton"></div>
 					</div>
 					</div>
 				</div>
@@ -220,5 +220,5 @@
 {% block scripts %}
 	<script src="https://unpkg.com/@sjaakp/telex/dist/telex.js"></script>
 	<script src="./scripts/common/prices.js?v=44"></script>
-	<script src="./scripts/index.js?v=41"></script>
+	<script src="./scripts/index.js?v=42"></script>
 {% endblock %}

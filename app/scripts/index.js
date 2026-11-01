@@ -26,7 +26,7 @@ function getErgPrice() {
 		}
 
 		let ergPriceHtml = '$' + formatValue(parseFloat(data.items[0].value), 2);
-		$('#ergPrice').html(ergPriceHtml + ' (<span class="' + classString + '">' + formatValue(difference, 2) + '%</span> 24h)');
+		setCountUpHtml('#ergPrice', ergPriceHtml + ' (<span class="' + classString + '">' + formatValue(difference, 2) + '%</span> 24h)');
 	});
 }
 
@@ -46,7 +46,7 @@ function getNetworkState() {
 	}
 
 	var jqxhr = $.get(networkStateUrl, function(data) {
-		$('#blockHeight').html(data.height.toLocaleString('en-US', { maximumFractionDigits: 0, minimumFractionDigits: 0 }));
+		setCountUpHtml('#blockHeight', data.height.toLocaleString('en-US', { maximumFractionDigits: 0, minimumFractionDigits: 0 }));
 	});
 }
 
@@ -310,13 +310,13 @@ function getProtocolInfo() {
 	  if (this.readyState === this.DONE) {
 	  	let data = JSON.parse(this.response);
 
-	    $('#ergVersion').html(data.version);
-	    $('#ergSupply').html(formatErgValueString(data.supply, 0, true, true));
-	    $('#ergTotal').html(formatErgValueString(97739924000000000, 0, true, true));
+	    $('#ergVersion').html(data.version).addClass('count-up-in');
+	    setCountUpHtml('#ergSupply', formatErgValueString(data.supply, 0, true, true));
+	    setCountUpHtml('#ergTotal', formatErgValueString(97739924000000000, 0, true, true));
 	    $('#ergHashRate').html(formatHashRateString(data.hashRate));
 	    $('#ergTxAvg').html(data.transactionAverage);
 
-    	$('#marketCap').html('$' + (prices['ERG'] * getAssetValue(data.supply, ERG_DECIMALS)).toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 }));
+    	setCountUpHtml('#marketCap', '$' + (prices['ERG'] * getAssetValue(data.supply, ERG_DECIMALS)).toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 }));
 	  }
 	});
 
@@ -328,6 +328,130 @@ function getProtocolInfo() {
 	xhr.send();
 }
 
+//Sets html and counts every number in it up to its value. On a refresh it
+//counts from the previously shown numbers instead of from zero.
+//Numbers glued to a letter ("24h") are left alone.
+const COUNT_UP_NUMBER_REGEX = /\d[\d,]*(?:\.\d+)?(?![\d\w])/g;
+const COUNT_UP_DURATION = 1000;
+
+function setCountUpHtml(selector, html) {
+	const $el = $(selector);
+	const el = $el[0];
+
+	if (el == undefined) {
+		return;
+	}
+
+	const isFirstFill = el.childNodes.length == 0;
+	cancelAnimationFrame($el.data('countUpFrame'));
+	clearTimeout($el.data('countUpTimeout'));
+	$el.html(html);
+
+	if (isFirstFill) {
+		$el.addClass('count-up-in');
+	}
+
+	const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+	const parts = [];
+	let node;
+
+	while ((node = walker.nextNode())) {
+		const text = node.nodeValue;
+		const numbers = [];
+		let match;
+
+		COUNT_UP_NUMBER_REGEX.lastIndex = 0;
+		while ((match = COUNT_UP_NUMBER_REGEX.exec(text)) !== null) {
+			const raw = match[0];
+			const [intPart, decPart] = raw.split('.');
+			numbers.push({
+				index: match.index,
+				raw: raw,
+				value: parseFloat(raw.replace(/,/g, '')),
+				decimals: decPart ? decPart.length : 0,
+				grouping: raw.includes(','),
+				zeroPadded: intPart.length > 1 && intPart[0] == '0',
+				intDigits: intPart.length
+			});
+		}
+
+		if (numbers.length > 0) {
+			parts.push({ node: node, text: text, numbers: numbers });
+		}
+	}
+
+	const finalValues = parts.flatMap(p => p.numbers.map(n => n.value));
+	const previousValues = $el.data('countUpValues');
+	$el.data('countUpValues', finalValues);
+
+	if (finalValues.length == 0 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+		return;
+	}
+
+	let fromValues = finalValues.map(() => 0);
+	if (previousValues != undefined && previousValues.length == finalValues.length) {
+		fromValues = previousValues;
+	}
+
+	const startTime = performance.now();
+
+	function render(progress) {
+		let valueIndex = 0;
+
+		for (const part of parts) {
+			let text = '';
+			let cursor = 0;
+
+			for (const number of part.numbers) {
+				const from = fromValues[valueIndex++];
+				const current = from + (number.value - from) * progress;
+				let formatted = progress >= 1 ? number.raw : current.toLocaleString('en-US', {
+					minimumFractionDigits: number.decimals,
+					maximumFractionDigits: number.decimals,
+					useGrouping: number.grouping
+				});
+
+				//Keeps the zero padding of values like "02 sec"
+				if (number.zeroPadded) {
+					formatted = formatted.padStart(number.intDigits, '0');
+				}
+
+				text += part.text.slice(cursor, number.index) + formatted;
+				cursor = number.index + number.raw.length;
+			}
+
+			part.node.nodeValue = text + part.text.slice(cursor);
+		}
+	}
+
+	function step(now) {
+		const t = Math.min((now - startTime) / COUNT_UP_DURATION, 1);
+		render(1 - Math.pow(1 - t, 3));
+
+		if (t < 1) {
+			$el.data('countUpFrame', requestAnimationFrame(step));
+		}
+	}
+
+	render(0);
+	$el.data('countUpFrame', requestAnimationFrame(step));
+
+	//Animation frames pause in background tabs; never leave a half-counted value
+	$el.data('countUpTimeout', setTimeout(function() {
+		cancelAnimationFrame($el.data('countUpFrame'));
+		render(1);
+	}, COUNT_UP_DURATION + 100));
+}
+
+function formatStatsErgHtml(value, maxDecimals = 4) {
+	return '<p class="text-white">' + formatErgValueString(value, maxDecimals) + ' <span class="text-light">' + formatAssetDollarPriceString(value, ERG_DECIMALS, 'ERG') + '</span></p>';
+}
+
+//Small percentages come back with 7+ decimals; keep 3 significant digits
+function formatStatsPercent(value) {
+	return parseFloat(Number(value).toPrecision(3)) + '%';
+}
+
 function getStats() {
 	let statsUrl = 'https://api.ergoplatform.com/stats';
 
@@ -336,47 +460,26 @@ function getStats() {
 	}
 
 	var jqxhr = $.get(statsUrl, function(data) {
-		
 		//Blocks summary
-		//Blocks mined
-		$('#statsBlocksMined').html('<p>' + data.blockSummary.total + '</p>');
-
-		//Average mining time
-		$('#statsAverageMiningTime').html('<p>' + millisToMinutesAndSeconds(data.blockSummary.averageMiningTime) + '</p>');
-
-		//Coins mined
-		$('#statsCoinsMined').html('<p class="text-white">' + formatErgValueString(data.blockSummary.totalCoins, 0) + ' <span class="text-light">' + formatAssetDollarPriceString(data.blockSummary.totalCoins, ERG_DECIMALS, 'ERG') + '</span></p>');
+		setCountUpHtml('#statsBlocksMined', '<p>' + data.blockSummary.total.toLocaleString('en-US') + '</p>');
+		setCountUpHtml('#statsAverageMiningTime', '<p>' + millisToMinutesAndSeconds(data.blockSummary.averageMiningTime) + '</p>');
+		setCountUpHtml('#statsCoinsMined', formatStatsErgHtml(data.blockSummary.totalCoins, 0));
 
 		//Transactions summary
-		//Number of transactions
 		const transactionCount = data.transactionsSummary.total.toLocaleString('en-US', { maximumFractionDigits: 0, minimumFractionDigits: 0 });
-		$('#totalTransactions').html(transactionCount);
-		$('#statsNumberOfTransactions').html('<p>' + transactionCount + '</p>');
-
-		//Total transaction fees
-		$('#statsTotalTransactionFees').html('<p class="text-white">' + formatErgValueString(data.transactionsSummary.totalFee) + ' <span class="text-light">' + formatAssetDollarPriceString(data.transactionsSummary.totalFee, ERG_DECIMALS, 'ERG') + '</span></p>');
-
-		//Total output volume
-//		$('#statsTotalOutputVolume').html('<p class="text-white">' + formatErgValueString(data.transactionsSummary.totalOutput) + ' <span class="text-light">' + formatAssetDollarPriceString(data.transactionsSummary.totalOutput, ERG_DECIMALS, 'ERG') + '</span></p>');
+		setCountUpHtml('#totalTransactions', transactionCount);
+		setCountUpHtml('#statsNumberOfTransactions', '<p>' + transactionCount + '</p>');
+		setCountUpHtml('#statsTotalTransactionFees', formatStatsErgHtml(data.transactionsSummary.totalFee));
 
 		//Mining cost
-		//Blocks mined
-		$('#statsTotalMinersRevenue').html('<p class="text-white">' + formatErgValueString(data.miningCost.totalMinersRevenue) + ' <span class="text-light">' + formatAssetDollarPriceString(data.miningCost.totalMinersRevenue, ERG_DECIMALS, 'ERG') + '</span></p>');
-
-		//Average mining time
-		$('#statsEarnedFromTransactionFees').html('<p>' + data.miningCost.percentEarnedTransactionsFees + '%</p>');
-
-		//Coins mined
-		$('#statsOfTransactionVolume').html('<p>' + data.miningCost.percentTransactionVolume + '%</p>');
-
-		//Number of transactions
-		$('#statsCostPerTransaction').html('<p class="text-white">' + formatErgValueString(data.miningCost.costPerTransaction) + ' <span class="text-light">' + formatAssetDollarPriceString(data.miningCost.costPerTransaction, ERG_DECIMALS, 'ERG') + '</span></p>');
-
-		//Total transaction fees
-		$('#statsDifficulty').html('<p>' + data.miningCost.difficulty + '</p>');
-
-		//Total output volume
-		$('#statsHashRate').html('<p>' + formatHashRateString(data.miningCost.hashRate) + '</p>');
+		setCountUpHtml('#statsTotalMinersRevenue', formatStatsErgHtml(data.miningCost.totalMinersRevenue));
+		setCountUpHtml('#statsEarnedFromTransactionFees', '<p title="' + data.miningCost.percentEarnedTransactionsFees + '%">' + formatStatsPercent(data.miningCost.percentEarnedTransactionsFees) + '</p>');
+		setCountUpHtml('#statsOfTransactionVolume', '<p title="' + data.miningCost.percentTransactionVolume + '%">' + formatStatsPercent(data.miningCost.percentTransactionVolume) + '</p>');
+		setCountUpHtml('#statsCostPerTransaction', formatStatsErgHtml(data.miningCost.costPerTransaction));
+		//Difficulty = average hashes needed to find a block, so show it in trillions like the hash rate
+		const difficulty = data.miningCost.difficulty;
+		setCountUpHtml('#statsDifficulty', '<p title="Average hashes needed to find a block: ' + difficulty.toLocaleString('en-US') + '">' + (difficulty / 1e12).toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 }) + ' T</p>');
+		setCountUpHtml('#statsHashRate', '<p>' + formatHashRateString(data.miningCost.hashRate) + '</p>');
 
 		$('#statsHolder').show();
     });
