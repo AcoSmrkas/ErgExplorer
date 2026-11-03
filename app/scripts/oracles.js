@@ -1,4 +1,4 @@
-import { ORACLE_POOLS, fetchPoolState, fetchOperators, fetchRefreshHistory, fetchRateHistory } from './oracles/stub-data.js?v=1';
+import { ORACLE_POOLS, fetchPoolState, fetchOperators, fetchRefreshHistory, fetchRateHistory } from './oracles/oracle-data.js?v=1';
 
 // Oracle pools: oracles lists them, oracles#pool=<slug> shows one. The pool goes in the hash, which
 // params.js reads on every host, so the page needs no server rewrite.
@@ -189,6 +189,8 @@ function printPoolStats() {
 	$('#stat-height').html(`Block <a href="${getBlockUrl(poolState.height)}">${formatHeight(poolState.height)}</a>`);
 	$('#stat-schedule').text('Every ' + pool.epochLength + ' blocks');
 	$('#stat-schedule-minutes').text('≈ ' + (minutes >= 60 && minutes % 60 == 0 ? (minutes / 60) + (minutes == 60 ? ' hour' : ' hours') : minutes + ' minutes') + ' at ' + BLOCK_MINUTES + ' min/block');
+	$('#stat-epoch-label').text(epochLabel(pool));
+	$('th.oracle-epoch').text(epochLabel(pool));
 	$('#stat-epoch').text(formatHeight(poolState.epoch));
 	$('#stat-box').html(`<a href="${getBoxUrl(poolState.boxId)}">Pool box</a> &middot; <a href="${getTransactionsUrl(poolState.txId)}">Transaction</a>`);
 	$('#stat-oracles').text('- / ' + pool.oracleCount);
@@ -249,7 +251,7 @@ function formatOperatorRow(operator, hasWins) {
 		<tr>
 			<td><span class="d-lg-none"><strong>Address: </strong></span>${formatAddressLink(operator.address)}</td>
 			<td><span class="d-lg-none"><strong>Last rate: </strong></span>${formatRate(operator.rate, pool)}</td>
-			<td><span class="d-lg-none"><strong>Epoch: </strong></span>${formatHeight(operator.epoch)}</td>
+			<td><span class="d-lg-none"><strong>${epochLabel(pool)}: </strong></span>${formatHeight(operator.epoch)}</td>
 			<td><span class="d-lg-none"><strong>Posted: </strong></span>${posted}</td>
 			<td class="text-end"><span class="d-lg-none"><strong>ERG: </strong></span>${balance}</td>
 			${hasWins ? `<td class="text-end"><span class="d-lg-none"><strong>Wins: </strong></span>${operator.wins == null ? '&ndash;' : formatHeight(operator.wins)}</td>` : ''}
@@ -313,7 +315,7 @@ function formatHistoryRow(refresh) {
 			<td><span class="d-lg-none"><strong>Height: </strong></span><a href="${getBlockUrl(refresh.height)}">${formatHeight(refresh.height)}</a></td>
 			<td><span class="d-lg-none"><strong>Time: </strong></span>${formatShortDateString(refresh.timestamp)}</td>
 			<td><span class="d-lg-none"><strong>Rate: </strong></span>${formatRate(refresh.rate, pool)}</td>
-			<td><span class="d-lg-none"><strong>Epoch: </strong></span>${formatHeight(refresh.epoch)}</td>
+			<td><span class="d-lg-none"><strong>${epochLabel(pool)}: </strong></span>${formatHeight(refresh.epoch)}</td>
 			<td><span class="d-lg-none"><strong>Collector: </strong></span>${refresh.collector ? formatAddressLink(refresh.collector) : '&ndash;'}</td>
 			<td><span class="d-lg-none"><strong>Transaction: </strong></span><a href="${getTransactionsUrl(refresh.txId)}">${formatAddressString(refresh.txId, 8)}</a></td>
 		</tr>
@@ -487,6 +489,11 @@ function printTechnical() {
 
 function isUsdPool(item) {
 	return item.unit == 'USD';
+}
+
+// v1 names an epoch by the height it ends at, v2 counts them
+function epochLabel(item) {
+	return item.version == 1 ? 'Epoch end' : 'Epoch';
 }
 
 function formatRate(rate, item) {
