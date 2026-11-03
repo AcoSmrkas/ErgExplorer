@@ -585,11 +585,10 @@ function timeAtHeight(anchors, height) {
  * off on a 30-day span (block times vary within a day), fine for a chart, not for a table.
  */
 export async function fetchRateHistory(pool, days = 7) {
-	const tip = await tipHeader();
+	const [tip, first] = await Promise.all([tipHeader(), boxesByToken(pool.poolNft, 0, RATE_PAGE)]);
 	const since = Date.now() - days * 86400000;
 	const sinceHeight = tip.height - Math.ceil(days * 86400000 / BLOCK_MS);
 
-	const first = await boxesByToken(pool.poolNft, 0, RATE_PAGE);
 	let boxes = first.items;
 
 	if (boxes.length && boxes[boxes.length - 1].inclusionHeight > sinceHeight && boxes.length < first.total) {
