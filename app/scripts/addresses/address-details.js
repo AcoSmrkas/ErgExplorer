@@ -1,6 +1,6 @@
 import { AddressState } from './state.js';
 import { ApiClient } from './api-client.js?v=59';
-import { detectContractFromErgotree } from './transaction-analyzer.js?v=5';
+import { detectContractFromErgotree } from './transaction-analyzer.js?v=6';
 
 // The rich list page's ranking: ergo.watch's top holders plus the two emission contracts it leaves out
 const RICH_LIST_URL = 'https://api.ergo.watch/lists/addresses/by/balance?limit=1000';
