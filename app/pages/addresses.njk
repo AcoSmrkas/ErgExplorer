@@ -10,7 +10,7 @@
 	<link rel="preconnect" href="https://api.ergoplatform.com" crossorigin>
 
 	<!-- build:css styles/addresses.css -->
-	<link rel="stylesheet" href="styles/addresses.css?v=1">
+	<link rel="stylesheet" href="styles/addresses.css?v=2">
 	<!-- endbuild -->
 
 	<!-- Tempus Dominus Styles -->
@@ -23,16 +23,10 @@
 {% endblock %}
 
 {% block content %}
-	<div id="addressPage" class="col-md-12">
+	<div class="col-md-12">
 		<div class="row w-100">
-			<div class="col-md-12 mb-3 mb-md-4 d-flex justify-content-between align-items-end">
+			<div class="col-md-12 mb-3 mb-md-4">
 				<h2 class="m-0">Address</h2>
-				<div id="simpleModeToggle" class="form-check form-check-reverse checkbox-xl p-0 m-0">
-					<input style="margin-right:0px;" class="form-check-input" onchange="onToggleSimpleMode()" type="checkbox" id="toggleSimpleMode">
-					<label style="padding:0;margin-right:15px;" class="form-check-label" for="toggleSimpleMode" title="Only the transactions: no balance, tokens, NFTs or boxes">
-						Simple mode:
-					</label>
-				</div>
 			</div>
 		</div>
 		<div id="summaryLoading" class="mb-3 address-summary-loading" style="display: none;">
@@ -53,9 +47,8 @@
 						</div>
 					</div>
 				</div>
-				<div id="addressTxStats" class="col-12 col-md-auto ps-0 ps-md-3 pe-0 mt-1 mt-md-0"></div>
 			</div>
-			<div id="addressSummaryRow" class="row w-100 div-cell-dark border-top-flat p-2 p-lg-3">
+			<div class="row w-100 div-cell-dark border-top-flat p-2 p-lg-3">
 				<div class="col-md p-0" id="addressSummaryMain">
 					<div id="addressSummaryContent">
 							<div class="row w-100">
@@ -332,6 +325,6 @@
 	<script src="./scripts/common/pagination.js?v=41"></script>
 	<script src="./scripts/common/nft.js?v=41"></script>
 	<script src="./scripts/common/lithos.js?v=1"></script>
-	<script type="module" src="./scripts/addresses/index.js?v=82"></script>
+	<script type="module" src="./scripts/addresses/index.js?v=83"></script>
 	<script src="./scripts/3rd-party/qrcode.min.js?v=41"></script>
 {% endblock %}

@@ -4,12 +4,12 @@
  */
 
 import { AddressState } from './state.js';
-import { ApiClient } from './api-client.js?v=58';
-import { BalanceSummary } from './balance-summary.js?v=71';
-import { AddressDetails } from './address-details.js?v=58';
-import { TransactionFormatter } from './transaction-formatter.js?v=77';
+import { ApiClient } from './api-client.js?v=59';
+import { BalanceSummary } from './balance-summary.js?v=72';
+import { AddressDetails } from './address-details.js?v=59';
+import { TransactionFormatter } from './transaction-formatter.js?v=78';
 import { UIControllers } from './ui-controllers.js?v=65';
-import { PendingTracker } from './pending-tracker.js?v=8';
+import { PendingTracker } from './pending-tracker.js?v=9';
 import { NftManager } from './nft-manager.js';
 import { MiningPanel } from './mining.js?v=1';
 import { getTxType, isWalletAddress, getTxInOutType, analyzeTransfers } from './transaction-analyzer.js?v=4';
@@ -86,18 +86,8 @@ const ADDRESS_SECTION_TABS = {
 };
 let activeAddressSectionTab = null;
 
-// Simple mode loads only the txs: none of the balance, tokens, NFTs, boxes or mining above them,
-// which are most of the page's requests. Remembered in this browser only.
-const SIMPLE_MODE_KEY = 'addressSimpleMode';
-let simpleMode = false;
-// The scam list, icons and prices have answered, so the panel's balance and boxes can print
-let initRequestsDone = false;
-let addressPanelStarted = false;
-
 // Initialize on document ready
 $(async function() {
-	initSimpleMode();
-
 	const addressFromUrl = getWalletAddressFromUrl();
 	BalanceSummary.showLoading();
 
@@ -114,7 +104,6 @@ $(async function() {
 
 	AddressState.walletAddress = walletAddress;
 	setDocumentTitle(AddressState.walletAddress);
-	BalanceSummary.renderAddressHeader();
 	PendingTracker.init({
 		refresh: (confirmed) => {
 			// The balance indexers can lag the confirmation: keep re-reading it until it changes.
@@ -125,30 +114,6 @@ $(async function() {
 	watchScrollingLists();
 	initializeAddressPage();
 });
-
-function initSimpleMode() {
-	try {
-		simpleMode = localStorage.getItem(SIMPLE_MODE_KEY) === 'true';
-	} catch {}
-
-	$('#toggleSimpleMode').prop('checked', simpleMode);
-	$('#addressPage').toggleClass('simple-mode', simpleMode);
-}
-
-function onToggleSimpleMode() {
-	simpleMode = $('#toggleSimpleMode').prop('checked');
-
-	$('#addressPage').toggleClass('simple-mode', simpleMode);
-
-	try {
-		localStorage.setItem(SIMPLE_MODE_KEY, simpleMode);
-	} catch {}
-
-	// Until the address is known, initializeAddressPage starts the panel itself
-	if (!simpleMode && AddressState.walletAddress) {
-		loadAddressPanel();
-	}
-}
 
 // Token lists, NFT grids and many-token Value cells scroll inside a fixed height: fade their edges while they overflow
 function watchScrollingLists() {
@@ -162,12 +127,7 @@ function watchScrollingLists() {
  * Initialize the address page
  */
 async function initializeAddressPage() {
-	if (simpleMode && !isErgoAddress(AddressState.walletAddress)) {
-		showAddressNotFound();
-		return;
-	}
-
-	ApiClient.prefetch({ mempool: isFirstPage(), panel: !simpleMode });
+	ApiClient.prefetch({ mempool: isFirstPage() });
 
 	// The scam list, token icons and prices are only needed to render, so they load in
 	// parallel and the page renders once all three have answered or failed.
@@ -195,36 +155,16 @@ async function initializeAddressPage() {
 		onInitRequestDone();
 	}
 
-	if (!simpleMode) {
-		loadAddressPanel();
-	}
-}
-
-/**
- * The panel above the txs, at load or on leaving simple mode. Its issued assets and mining tab
- * load once. The balance and boxes print with the txs (onInitRequestsFinished), so here only
- * once the init requests are in; the 60s refreshes skip them in simple mode, so this catches them up.
- */
-function loadAddressPanel() {
-	if (!addressPanelStarted) {
-		addressPanelStarted = true;
-
-		if (typeof getIssuedNfts === 'function') {
-			getIssuedNfts(AddressState.walletAddress, onGotIssuedNftInfo, false);
-		} else {
-			console.warn('getIssuedNfts function not found');
-		}
-
-		// Rewards unlock a day after their block, so the tab loads once and the 60s refresh leaves it alone.
-		MiningPanel.load(AddressState.walletAddress)
-			.then(count => setAddressSectionTabAvailable('mining', count))
-			.catch(error => console.warn('Mining tab unavailable:', error));
+	if (typeof getIssuedNfts === 'function') {
+		getIssuedNfts(AddressState.walletAddress, onGotIssuedNftInfo, false);
+	} else {
+		console.warn('getIssuedNfts function not found');
 	}
 
-	if (initRequestsDone) {
-		printAddressSummary();
-		printUnspentBoxes();
-	}
+	// Rewards unlock a day after their block, so the tab loads once and the 60s refresh leaves it alone.
+	MiningPanel.load(AddressState.walletAddress)
+		.then(count => setAddressSectionTabAvailable('mining', count))
+		.catch(error => console.warn('Mining tab unavailable:', error));
 }
 
 /**
@@ -232,11 +172,9 @@ function loadAddressPanel() {
  * A failed icon lookup no longer stops the page: it renders with the built-in icons.
  */
 function onInitRequestsFinished() {
-	initRequestsDone = true;
-
-	if (!simpleMode) printAddressSummary();
+	printAddressSummary();
 	printTransactions();
-	if (!simpleMode) printUnspentBoxes();
+	printUnspentBoxes();
 
 	if (AddressState.rfT) {
 		clearTimeout(AddressState.rfT);
@@ -286,17 +224,7 @@ async function printTransactions() {
 		onMempoolAndTransactionsDataFetched();
 	} catch (error) {
 		console.error('Failed to fetch transactions:', error);
-		if (simpleMode && !AddressState.formattedResult) {
-			showAddressNotFound();
-		}
 	}
-}
-
-// Normal mode finds a bad address by its balance failing (BalanceSummary); simple mode asks for no balance
-function showAddressNotFound() {
-	$('#txLoading').hide();
-	$('#addressPage').addClass('address-not-found');
-	showLoadError('No results matching your query.');
 }
 
 /**
@@ -530,8 +458,7 @@ function onMempoolAndTransactionsDataFetched() {
 	// Calculate total from API response totals
 	const totalTxCount = (AddressState.mempoolData?.total || 0) + (AddressState.transactionsData?.total || 0);
 	AddressState.totalTransactions = totalTxCount;
-	$('#addressTxStats').html('<strong>Transactions:</strong> ' + nFormatter(AddressState.totalTransactions, 0, true, true) +
-		(mempoolCount > 0 ? ' (' + mempoolCount + ' pending)' : ''));
+	$('#totalTransactions').html('<strong>Total transactions:</strong> ' + AddressState.totalTransactions);
 
 	if (AddressState.totalTransactions > 0) {
 		// The 60s refresh mostly finds nothing new: leave the rows (and any open token popup or
@@ -581,7 +508,6 @@ function refreshData() {
 // Expose functions to global scope for HTML onclick handlers
 
 // Main orchestration
-window.onToggleSimpleMode = onToggleSimpleMode;
 window.printAddressSummary = printAddressSummary;
 window.printTransactions = printTransactions;
 window.printUnspentBoxes = printUnspentBoxes;

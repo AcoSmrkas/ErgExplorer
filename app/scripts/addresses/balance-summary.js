@@ -1,4 +1,4 @@
-import { ApiClient } from './api-client.js?v=58';
+import { ApiClient } from './api-client.js?v=59';
 import { AddressState } from './state.js';
 import { isLpTokenData } from '../common/lp-tokens.js?v=4';
 
@@ -150,15 +150,14 @@ export const BalanceSummary = {
 			}
 		}
 
-		this.renderAddressHeader();
+		this._renderAddressHeader();
 		this._isLoading = false;
 		$('#summaryLoading').hide();
 		$('#summaryOk').show();
 		this._syncTokenHolderHeight();
 	},
 
-	// Also shown on its own, before the balance: simple mode (index.js) keeps only this line of the panel
-	renderAddressHeader() {
+	_renderAddressHeader() {
 		const addressString = this._formatAddressDisplay(AddressState.walletAddress);
 		const compactAddressString = this._formatCompactAddressDisplay(AddressState.walletAddress);
 		$('#address')

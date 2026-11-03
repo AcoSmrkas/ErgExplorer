@@ -133,18 +133,14 @@ export const ApiClient = {
 	/**
 	 * Start the first load's chain requests now. They need none of the scam list, token icons
 	 * or prices, only the rendering does, and used to wait 1.2-1.6 s behind those.
-	 * `panel`: the balance and unspent boxes too, for the panel above the txs. Simple mode has none.
 	 */
-	prefetch({ mempool, panel }) {
-		const requests = [];
-		if (panel) {
-			requests.push(['summary', this._fetchAddressSummary()]);
-		}
-		requests.push(['transactions', this._fetchTransactionsData()]);
-		if (panel) {
-			requests.push([this._unspentBoxesKey(AddressState.unspentBoxesOffset, AddressState.unspentBoxesPageSize),
-				this._fetchUnspentBoxes(AddressState.unspentBoxesOffset, AddressState.unspentBoxesPageSize)]);
-		}
+	prefetch({ mempool }) {
+		const requests = [
+			['summary', this._fetchAddressSummary()],
+			['transactions', this._fetchTransactionsData()],
+			[this._unspentBoxesKey(AddressState.unspentBoxesOffset, AddressState.unspentBoxesPageSize),
+				this._fetchUnspentBoxes(AddressState.unspentBoxesOffset, AddressState.unspentBoxesPageSize)]
+		];
 		if (mempool) {
 			requests.push(['mempool', this._fetchMempoolData()]);
 		}
