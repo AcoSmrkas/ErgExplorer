@@ -113,7 +113,8 @@ function printRichList() {
             <tr>
                 <td><span class="d-lg-none"><strong>Rank: </strong></span>${rank}</td>
                 <td><span class="d-lg-none"><strong>Address: </strong></span>${addressHtml}</td>
-                <td class="text-end"><span class="d-lg-none"><strong>Balance: </strong></span>${nFormatter(balanceErg, 2, true)} <strong class="erg-span">ERG</strong> <span class="text-light">${formatAssetDollarPriceString(item.balance, ERG_DECIMALS, 'ERG')}</span></td>
+                <td class="text-end"><span class="d-lg-none"><strong>Balance: </strong></span>${nFormatter(balanceErg, 2, true)} <strong class="erg-span">ERG</strong></td>
+                <td class="text-end text-light"><span class="d-lg-none"><strong>Value: </strong></span>${formatDollars(item.balance, ERG_DECIMALS)}</td>
                 <td class="text-end"><span class="d-lg-none"><strong>% of Supply: </strong></span>${percentHtml}</td>
             </tr>
         `;
@@ -192,6 +193,12 @@ function calculateAndDisplayStats() {
 // An amount in whole ERG, for the start of a card's small line: beside the ERG figure it wrapped below
 // ~1200px and made the cards taller. Nothing until prices are in.
 function formatStatDollars(ergAmount) {
-    const dollars = formatAssetDollarPriceString(ergAmount, 0, 'ERG');
-    return dollars ? dollars.replace(/^\(|\)$/g, '') + ' \u00b7 ' : '';
+    const dollars = formatDollars(ergAmount, 0);
+    return dollars ? dollars + ' \u00b7 ' : '';
+}
+
+// An ERG amount in dollars, without the parens prices.js puts around it. Nothing until prices are in.
+function formatDollars(ergAmount, decimals) {
+    const dollars = formatAssetDollarPriceString(ergAmount, decimals, 'ERG');
+    return dollars ? dollars.replace(/^\(|\)$/g, '') : '';
 }
