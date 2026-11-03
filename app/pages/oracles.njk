@@ -1,0 +1,191 @@
+{% extends "layout.njk" %}
+
+{% block styles %}
+	<!-- build:css styles/oracles.css -->
+	<link rel="stylesheet" href="styles/oracles.css">
+	<!-- endbuild -->
+{% endblock %}
+
+{% block navigation %}
+		{% import 'macros/nav-macro.njk' as nav %}
+		{{nav.active('oracles')}}
+{% endblock %}
+
+{% block content %}
+	<div class="row w-100">
+		<div class="col-md-12 mb-3 mb-md-4">
+			<h2 id="oraclesTitle" class="m-0">Oracles</h2>
+		</div>
+	</div>
+
+	<!-- No pool picked: every pool, one row each -->
+	<div id="poolsHolder" style="display: none;" class="col-md-12">
+		<table class="table table-dark table-striped table-mobile rounded-data-table">
+			<thead>
+				<tr>
+					<th scope="col">Pool</th>
+					<th scope="col">Rate</th>
+					<th scope="col">Last update</th>
+					<th scope="col">Oracles</th>
+					<th scope="col">Status</th>
+				</tr>
+			</thead>
+			<tbody id="poolsTableBody">
+			</tbody>
+		</table>
+	</div>
+
+	<!-- One pool -->
+	<div id="poolStatsHolder" style="display: none;" class="row w-100 mb-4 p-0">
+		<div class="col-6 col-lg-4 mb-3 ps-lg-0">
+			<div class="div-cell-dark h-100">
+				<div class="card-body">
+					<h6 class="card-subtitle mb-2 text-muted">Pair</h6>
+					<h4 class="card-title mb-1" id="stat-pair">-</h4>
+					<p class="card-text text-muted mb-0" id="stat-version">-</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-6 col-lg-4 mb-3">
+			<div class="div-cell-dark h-100">
+				<div class="card-body">
+					<h6 class="card-subtitle mb-2 text-muted">Rate</h6>
+					<h4 class="card-title mb-1" id="stat-rate">-</h4>
+					<p class="card-text text-muted mb-0" id="stat-market">-</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-6 col-lg-4 mb-3 pe-lg-0">
+			<div class="div-cell-dark h-100">
+				<div class="card-body">
+					<h6 class="card-subtitle mb-2 text-muted">Last update</h6>
+					<h4 class="card-title mb-1" id="stat-updated">-</h4>
+					<p class="card-text text-muted mb-0" id="stat-height">-</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-6 col-lg-4 mb-3 ps-lg-0">
+			<div class="div-cell-dark h-100">
+				<div class="card-body">
+					<h6 class="card-subtitle mb-2 text-muted">Posting schedule</h6>
+					<h4 class="card-title mb-1" id="stat-schedule">-</h4>
+					<p class="card-text text-muted mb-0" id="stat-schedule-minutes">-</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-6 col-lg-4 mb-3">
+			<div class="div-cell-dark h-100">
+				<div class="card-body">
+					<h6 class="card-subtitle mb-2 text-muted" id="stat-epoch-label">Epoch</h6>
+					<h4 class="card-title mb-1" id="stat-epoch">-</h4>
+					<p class="card-text text-muted mb-0" id="stat-box">-</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-6 col-lg-4 mb-3 pe-lg-0">
+			<div class="div-cell-dark h-100">
+				<div class="card-body">
+					<h6 class="card-subtitle mb-2 text-muted">Oracles</h6>
+					<h4 class="card-title mb-1" id="stat-oracles">-</h4>
+					<p class="card-text text-muted mb-0" id="stat-consensus">-</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="poolDataHolder" style="display: none;" class="col-md-12">
+		<h3 class="p-2">Rate</h3>
+		<div class="div-cell-dark row w-100 p-0">
+			<div id="chartColumn" class="col pt-2 pb-0 pb-md-3">
+				<div class="row w-100 p-0 p-md-2 ps-md-0 pe-md-0">
+					<div class="col-6 p-0 pb-1">
+						<h4 id="chartTitle">Rate chart</h4>
+					</div>
+					<div class="col-6 p-0 token-chart-controls">
+						<input data-days="7" class="btn btn-info token-chart-range-btn oracle-chart-range" type="button" value="7d">
+						<input data-days="30" class="btn btn-primary token-chart-range-btn oracle-chart-range" type="button" value="30d">
+					</div>
+				</div>
+				<div class="token-chart-frame">
+					<canvas id="chart"></canvas>
+					<div id="chartLoading" class="oracle-chart-loading"><img src="./images/logo.png" alt="Loading" class="loadingImg"></div>
+					<p id="chartError" style="display: none;" class="text-center pt-5">No rate history.</p>
+				</div>
+			</div>
+		</div>
+
+		<br>
+
+		<h3 class="p-2">Oracles <span id="operatorsCount" class="text-light"></span></h3>
+		<div id="operatorsScroll" class="oracle-table-scroll">
+			<table class="table table-dark table-striped table-mobile rounded-data-table m-0">
+				<thead>
+					<tr>
+						<th scope="col">Address</th>
+						<th scope="col">Last rate</th>
+						<th scope="col" class="oracle-epoch">Epoch</th>
+						<th scope="col">Posted</th>
+						<th scope="col" class="text-end">ERG</th>
+						<th scope="col" class="text-end oracle-wins">Wins</th>
+					</tr>
+				</thead>
+				<tbody id="operatorsTableBody">
+				</tbody>
+			</table>
+		</div>
+		<p id="operatorsError" style="display: none;" class="div-cell"></p>
+
+		<br>
+
+		<h3 class="p-2">Refresh history <span id="historyCount" class="text-light"></span></h3>
+		<div id="historyHolder">
+			{% include "partials/pagination.njk" %}
+
+			<table class="table table-dark table-striped table-mobile rounded-data-table">
+				<thead>
+					<tr>
+						<th scope="col">Height</th>
+						<th scope="col">Time</th>
+						<th scope="col">Rate</th>
+						<th scope="col" class="oracle-epoch">Epoch</th>
+						<th scope="col">Collector</th>
+						<th scope="col">Transaction</th>
+					</tr>
+				</thead>
+				<tbody id="historyTableBody">
+				</tbody>
+			</table>
+
+			{% include "partials/pagination.njk" %}
+		</div>
+		<p id="historyError" style="display: none;" class="div-cell"></p>
+
+		<br>
+
+		<h3 class="p-2">Technical</h3>
+		<!-- Two key/value columns, as the transaction page's info -->
+		<div id="oracleTechnical" class="row w-100 two-column-holder-md">
+			<div class="col-md-6 div-cell-dark p-0">
+				<table class="table-dark table-striped div-table oracle-technical-table">
+					<tbody id="technicalTokens"></tbody>
+				</table>
+			</div>
+			<div class="col-md-6 div-cell-dark p-0">
+				<table class="table-dark table-striped div-table oracle-technical-table">
+					<tbody id="technicalContract"></tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	{% include "partials/error-message.njk" %}
+
+	<br>
+{% endblock %}
+
+{% block scripts %}
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.3.1/chart.umd.min.js" integrity="sha512-UcCmTcAm3IkzrswF+WqvwWSjsnv8nsJpDL09KHCETWS0g0WjoIZDRUYXCeHeow1cEij0kqL9OwRwirv/xCQ6GA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+		<script src="./scripts/common/prices.js?v=44"></script>
+		<script src="./scripts/common/pagination.js?v=42"></script>
+		<script type="module" src="./scripts/oracles.js?v=2"></script>
+{% endblock %}
