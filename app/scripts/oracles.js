@@ -1,12 +1,16 @@
-import { ORACLE_POOLS, fetchPoolState, fetchOperators, fetchRefreshHistory, fetchRateHistory } from './oracles/oracle-data.js?v=1';
+import { ORACLE_POOLS, fetchPoolState, fetchOracleCounts, fetchOperators, fetchErgBalances, fetchRefreshHistory, fetchRateHistory } from './oracles/oracle-data.js?v=2';
 
 // Oracle pools: oracles lists them, oracles#pool=<slug> shows one. The pool goes in the hash, which
 // params.js reads on every host, so the page needs no server rewrite.
 
 const BLOCK_MINUTES = 2;
-const HISTORY_PAGE_SIZE = 30;
+const HISTORY_PAGE_SIZE = 10;
 // The token page's chart has about 30 points a range; denser series are thinned to this
 const CHART_POINTS = 42;
+// A value still loading: the pulsing bar (main.scss .skeleton)
+const SKELETON = '<span class="skeleton"></span>';
+// Placeholder rows while a table loads
+const SKELETON_ROWS = 5;
 
 // 'list', or the slug of the pool shown (or asked for)
 let view = null;
@@ -30,10 +34,6 @@ $(function() {
 		$(this).removeClass('btn-primary').addClass('btn-info');
 		showChart();
 	});
-
-	$('#oracleTechnical')
-		.on('show.bs.collapse', () => $('#technicalToggle').text('(hide)'))
-		.on('hide.bs.collapse', () => $('#technicalToggle').text('(show)'));
 
 	watchScrollFade(document.getElementById('operatorsScroll'));
 
@@ -89,48 +89,45 @@ function showPools() {
 	setDocumentTitle('Oracles');
 	$('#oraclesTitle').text('Oracles');
 	$('#poolStatsHolder, #poolDataHolder, #loadError').hide();
-	$('#txLoading').show();
 
-	Promise.all(ORACLE_POOLS.map((item) =>
-		Promise.all([fetchPoolState(item), fetchOperators(item)])
-			.then(([state, operators]) => ({ pool: item, state, operators }))
-			.catch((error) => {
-				console.warn('No state for the ' + item.name + ' pool:', error);
-				return { pool: item, state: null, operators: null };
-			})
-	)).then((rows) => {
-		// Off to a pool before the list came in
-		if (view != 'list') return;
+	// Every row is there at once; each cell fills in as its own request comes back
+	$('#poolsTableBody').html(ORACLE_POOLS.map(formatPoolRow).join(''));
+	$('#poolsHolder').show();
 
-		$('#poolsTableBody').html(rows.map(formatPoolRow).join(''));
-		$('#poolsHolder').show();
-		$('#txLoading').hide();
+	ORACLE_POOLS.forEach((item) => {
+		const cell = (name) => $(`#poolsTableBody tr[data-pool="${item.slug}"] .${name}`);
+
+		fetchPoolState(item).then((state) => {
+			if (view != 'list') return;
+
+			cell('pool-rate').html(formatRate(state.rate, item));
+			cell('pool-updated').html(`<a href="${getBlockUrl(state.height)}">${formatHeight(state.height)}</a> <span class="text-light">&middot; ${timeAgo(state.timestamp)}</span>`);
+		}).catch((error) => {
+			console.warn('No state for the ' + item.name + ' pool:', error);
+			if (view != 'list') return;
+
+			cell('pool-rate').html('&ndash;');
+			cell('pool-updated').html('&ndash;');
+			cell('pool-status').text('No data');
+		});
+
+		fetchOracleCounts(item).then((counts) => {
+			if (view == 'list') cell('pool-oracles').text(counts.live + ' / ' + counts.total);
+		}).catch((error) => {
+			console.warn('No oracle count for the ' + item.name + ' pool:', error);
+			if (view == 'list') cell('pool-oracles').html('&ndash;');
+		});
 	});
 }
 
-function formatPoolRow(row) {
-	const item = row.pool;
-	const state = row.state;
-	let rate = '&ndash;';
-	let updated = '&ndash;';
-	let oracles = '&ndash;';
-
-	if (state) {
-		rate = formatRate(state.rate, item);
-		updated = `<a href="${getBlockUrl(state.height)}">${formatHeight(state.height)}</a> <span class="text-light">&middot; ${timeAgo(state.timestamp)}</span>`;
-	}
-
-	if (row.operators) {
-		oracles = `${countLive(row.operators)} / ${row.operators.length}`;
-	}
-
+function formatPoolRow(item) {
 	return `
-		<tr>
+		<tr data-pool="${item.slug}">
 			<td><span class="d-lg-none"><strong>Pool: </strong></span><a href="${poolUrl(item.slug)}">${item.name}</a></td>
-			<td><span class="d-lg-none"><strong>Rate: </strong></span>${rate}</td>
-			<td><span class="d-lg-none"><strong>Last update: </strong></span>${updated}</td>
-			<td><span class="d-lg-none"><strong>Oracles: </strong></span>${oracles}</td>
-			<td><span class="d-lg-none"><strong>Status: </strong></span>${state ? item.status : 'No data'}</td>
+			<td><span class="d-lg-none"><strong>Rate: </strong></span><span class="pool-rate">${SKELETON}</span></td>
+			<td><span class="d-lg-none"><strong>Last update: </strong></span><span class="pool-updated">${SKELETON}</span></td>
+			<td><span class="d-lg-none"><strong>Oracles: </strong></span><span class="pool-oracles">${SKELETON}</span></td>
+			<td><span class="d-lg-none"><strong>Status: </strong></span><span class="pool-status">${item.status}</span></td>
 		</tr>
 	`;
 }
@@ -149,52 +146,58 @@ function showPool(slug, pageOffset) {
 	if (!item) {
 		setDocumentTitle('Oracles');
 		$('#oraclesTitle').text('Oracles');
-		$('#txLoading').hide();
 		showLoadError('No oracle pool called "' + escapeHtmlString(slug) + '". <a href="' + oraclesUrl() + '">All oracle pools</a>');
 		return;
 	}
 
 	setDocumentTitle(item.name + ' oracle pool');
 	$('#oraclesTitle').text(item.name + ' oracle pool');
-	$('#txLoading').show();
+
+	// The page is up at once with what the pool's settings say; every section asks for its own data
+	// in parallel and fills in when it comes back
+	printPoolStats();
+	printTechnical();
+	$('#poolStatsHolder, #poolDataHolder').show();
 
 	fetchPoolState(item).then((state) => {
 		if (pool !== item) return;
 
 		poolState = state;
-		printPoolStats();
+		printPoolState();
 		printTechnical();
-		$('#poolStatsHolder, #poolDataHolder').show();
-		$('#txLoading').hide();
-
-		loadOperators();
-		showHistoryPage(pageOffset, false, true);
-		showChart();
 	}).catch((error) => {
 		if (pool !== item) return;
 
 		console.error('Error fetching the oracle pool:', error);
-		$('#txLoading').hide();
+		$('#poolStatsHolder, #poolDataHolder').hide();
 		showLoadError('Error fetching the ' + item.name + ' oracle pool.');
 	});
+
+	loadOperators();
+	showHistoryPage(pageOffset, false, true);
+	showChart();
 }
 
+// The cards from the pool's settings; the rest waits for its state (printPoolState)
 function printPoolStats() {
 	const minutes = pool.epochLength * BLOCK_MINUTES;
 
 	$('#stat-pair').text(pool.pair);
 	$('#stat-version').text('Version ' + pool.version + ' · ' + pool.status);
-	$('#stat-rate').html(formatRate(poolState.rate, pool));
-	$('#stat-updated').text(timeAgo(poolState.timestamp));
-	$('#stat-height').html(`Block <a href="${getBlockUrl(poolState.height)}">${formatHeight(poolState.height)}</a>`);
 	$('#stat-schedule').text('Every ' + pool.epochLength + ' blocks');
 	$('#stat-schedule-minutes').text('≈ ' + (minutes >= 60 && minutes % 60 == 0 ? (minutes / 60) + (minutes == 60 ? ' hour' : ' hours') : minutes + ' minutes') + ' at ' + BLOCK_MINUTES + ' min/block');
 	$('#stat-epoch-label').text(epochLabel(pool));
 	$('th.oracle-epoch').text(epochLabel(pool));
+	$('#stat-consensus').text(pool.consensus + ' needed to refresh');
+	$('#stat-rate, #stat-market, #stat-updated, #stat-height, #stat-epoch, #stat-box, #stat-oracles').html(SKELETON);
+}
+
+function printPoolState() {
+	$('#stat-rate').html(formatRate(poolState.rate, pool));
+	$('#stat-updated').text(timeAgo(poolState.timestamp));
+	$('#stat-height').html(`Block <a href="${getBlockUrl(poolState.height)}">${formatHeight(poolState.height)}</a>`);
 	$('#stat-epoch').text(formatHeight(poolState.epoch));
 	$('#stat-box').html(`<a href="${getBoxUrl(poolState.boxId)}">Pool box</a> &middot; <a href="${getTransactionsUrl(poolState.txId)}">Transaction</a>`);
-	$('#stat-oracles').text('- / ' + pool.oracleCount);
-	$('#stat-consensus').text(pool.consensus + ' needed to refresh');
 
 	printMarket();
 }
@@ -220,6 +223,10 @@ function printMarket() {
 function loadOperators() {
 	const item = pool;
 	$('#operatorsError').hide();
+	$('#operatorsCount').text('');
+	$('#operatorsScroll th.oracle-wins').hide();
+	$('#operatorsTableBody').html(skeletonRows(5));
+	$('#operatorsScroll').show();
 
 	fetchOperators(item).then((operators) => {
 		if (pool !== item) return;
@@ -231,20 +238,26 @@ function loadOperators() {
 		$('#operatorsTableBody').html(operators.map((o) => formatOperatorRow(o, hasWins)).join(''));
 		$('#operatorsCount').text('(' + operators.length + ')');
 		$('#stat-oracles').text(countLive(operators) + ' / ' + operators.length + ' live');
-		$('#operatorsScroll').show();
 
 		getAddressesInfo();
+
+		// The ERG column fills in one balance at a time
+		fetchErgBalances(operators.map((o) => o.address), (address, nanoErg) => {
+			if (pool !== item) return;
+			$(`#operatorsTableBody .operator-balance[data-address="${address}"]`).html(nanoErg == null ? '&ndash;' : formatErgValueString(nanoErg, 2, false, true));
+		});
 	}).catch((error) => {
 		if (pool !== item) return;
 
 		console.error('Error fetching the oracles:', error);
+		$('#stat-oracles').html('&ndash;');
 		$('#operatorsScroll').hide();
 		$('#operatorsError').text('Error fetching the oracles.').show();
 	});
 }
 
 function formatOperatorRow(operator, hasWins) {
-	const balance = operator.ergBalance == null ? '&ndash;' : formatErgValueString(operator.ergBalance, 2, false, true);
+	const balance = `<span class="operator-balance" data-address="${operator.address}">${SKELETON}</span>`;
 	const posted = `<a href="${getTransactionsUrl(operator.txId)}">${timeAgo(operator.timestamp)}</a>` + (operator.live ? '' : ' <span class="text-light">&middot; not live</span>');
 
 	return `
@@ -272,6 +285,14 @@ function showHistoryPage(pageOffset, addToHistory = true, force = false) {
 	offset = pageOffset;
 	params['offset'] = pageOffset;
 	$('#historyError').hide();
+	$('#historyTableBody').html(skeletonRows(6));
+	$('#historyHolder').show();
+
+	// The page links wait for the total
+	if (force) {
+		$('#historyCount').text('');
+		$('#historyHolder .pagination').css('visibility', 'hidden');
+	}
 
 	if (addToHistory) {
 		history.pushState(null, '', oraclesUrl('pool=' + item.slug + (pageOffset ? '&offset=' + pageOffset : '')));
@@ -284,7 +305,7 @@ function showHistoryPage(pageOffset, addToHistory = true, force = false) {
 		$('#historyCount').text('(' + nFormatter(result.total, 0, true, true) + ')');
 		setupPagination(result.total);
 		setHistoryPageLinks();
-		$('#historyHolder').show();
+		$('#historyHolder .pagination').css('visibility', '');
 
 		getAddressesInfo();
 
@@ -327,6 +348,11 @@ function formatHistoryRow(refresh) {
 function showChart() {
 	const item = pool;
 	const days = chartDays;
+
+	if (!rateHistory[days]) {
+		$('#chartError').hide();
+		$('#chartLoading').show();
+	}
 
 	Promise.all([
 		rateHistory[days] || fetchRateHistory(item, days),
@@ -373,6 +399,7 @@ function drawChart(points, market) {
 		chart = null;
 	}
 
+	$('#chartLoading').hide();
 	$('#chartError').toggle(points.length == 0);
 	$('#chart').toggle(points.length > 0);
 	$('#chartTitle').text(market ? 'Rate vs market' : 'Rate chart');
@@ -458,31 +485,41 @@ function marketPriceAt(marketPoints, time) {
 
 /* Technical */
 
+// The tokens on the left, the contract and its settings on the right; the pool box's values wait for its state
 function printTechnical() {
-	const rows = [
+	const state = poolState;
+	const tokens = [
 		['Pool NFT', formatTokenLink(pool.poolNft)],
 		['Oracle token', formatTokenLink(pool.oracleToken)],
 		['Refresh NFT', pool.refreshNft ? formatTokenLink(pool.refreshNft) : null],
 		['Buyback NFT', pool.buybackNft ? formatTokenLink(pool.buybackNft) : null],
-		['Buyback token', pool.buybackToken ? formatTokenLink(pool.buybackToken) : null],
-		['Pool contract', poolState.address ? `<a href="${getWalletAddressUrl(poolState.address)}">${formatAddressString(poolState.address, 10)}</a>` : null],
-		['Pool box', `<a href="${getBoxUrl(poolState.boxId)}">${formatAddressString(poolState.boxId, 10)}</a>`],
+		['Buyback token', pool.buybackToken ? formatTokenLink(pool.buybackToken) : null]
+	];
+	const contract = [
+		['Pool contract', !state ? SKELETON : state.address ? `<a href="${getWalletAddressUrl(state.address)}">${formatAddressString(state.address, 10)}</a>` : null],
+		['Pool box', state ? `<a href="${getBoxUrl(state.boxId)}">${formatAddressString(state.boxId, 10)}</a>` : SKELETON],
+		['Raw datapoint', state ? state.rawDatapoint : SKELETON],
 		['Payout', pool.payoutNanoErg == null ? '&ndash;' : formatErgValueString(pool.payoutNanoErg, 4, false, true) + ' per datapoint'],
 		['Deviation', pool.deviation == null ? '&ndash;' : pool.deviation + '%'],
-		['Consensus', pool.consensus == null ? '&ndash;' : pool.consensus + ' of ' + pool.oracleCount + ' oracles'],
-		['Raw datapoint', poolState.rawDatapoint]
+		['Consensus', pool.consensus == null ? '&ndash;' : pool.consensus + ' of ' + pool.oracleCount + ' oracles']
 	];
 
-	$('#technicalRows').html(rows.filter((row) => row[1] != null).map((row) => `
-		<div class="row w-100 p-1">
-			<div class="col-5 col-md-3">
-				<p><strong class="text-white">${row[0]}</strong></p>
-			</div>
-			<div class="col-7 col-md-9">
-				<p>${row[1]}</p>
-			</div>
-		</div>
-	`).join(''));
+	$('#technicalTokens').html(formatTechnicalRows(tokens));
+	$('#technicalContract').html(formatTechnicalRows(contract));
+}
+
+function formatTechnicalRows(rows) {
+	return rows.filter((row) => row[1] != null).map((row) => `
+		<tr>
+			<td><strong>${row[0]}</strong></td>
+			<td>${row[1]}</td>
+		</tr>
+	`).join('');
+}
+
+function skeletonRows(columns) {
+	const row = '<tr>' + `<td>${SKELETON}</td>`.repeat(columns) + '</tr>';
+	return row.repeat(SKELETON_ROWS);
 }
 
 /* Formatting */

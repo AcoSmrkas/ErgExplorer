@@ -320,6 +320,28 @@ select, option {
 	}
 }
 
+//Placeholder bar while a value is still loading; gone as soon as it has content
+.skeleton:empty::before {
+	animation: skeleton-pulse 1.8s ease-in-out infinite;
+	background-color: var(--borders);
+	border-radius: 3px;
+	content: '';
+	display: inline-block;
+	height: 0.55em;
+	opacity: 0.35;
+	vertical-align: middle;
+	width: 6em;
+}
+
+span.skeleton:empty::before {
+	width: 4em;
+}
+
+@keyframes skeleton-pulse {
+	0%, 100% { opacity: 0.2; }
+	50% { opacity: 0.45; }
+}
+
 //Loading
 .loadingImg {
 	width:150px;

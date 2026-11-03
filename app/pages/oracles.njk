@@ -108,6 +108,7 @@
 				</div>
 				<div class="token-chart-frame">
 					<canvas id="chart"></canvas>
+					<div id="chartLoading" class="oracle-chart-loading"><img src="./images/logo.png" alt="Loading" class="loadingImg"></div>
 					<p id="chartError" style="display: none;" class="text-center pt-5">No rate history.</p>
 				</div>
 			</div>
@@ -161,15 +162,23 @@
 
 		<br>
 
-		<h3 class="p-2">Technical <a id="technicalToggle" class="oracle-technical-toggle" href="#" role="button" data-bs-toggle="collapse" data-bs-target="#oracleTechnical" aria-expanded="false" aria-controls="oracleTechnical">(show)</a></h3>
-		<div id="oracleTechnical" class="collapse">
-			<div id="technicalRows" class="div-cell-dark p-0"></div>
+		<h3 class="p-2">Technical</h3>
+		<!-- Two key/value columns, as the transaction page's info -->
+		<div id="oracleTechnical" class="row w-100 two-column-holder-md">
+			<div class="col-md-6 div-cell-dark p-0">
+				<table class="table-dark table-striped div-table oracle-technical-table">
+					<tbody id="technicalTokens"></tbody>
+				</table>
+			</div>
+			<div class="col-md-6 div-cell-dark p-0">
+				<table class="table-dark table-striped div-table oracle-technical-table">
+					<tbody id="technicalContract"></tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 
 	{% include "partials/error-message.njk" %}
-
-	{% include "partials/loading.njk" %}
 
 	<br>
 {% endblock %}
@@ -178,5 +187,5 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.3.1/chart.umd.min.js" integrity="sha512-UcCmTcAm3IkzrswF+WqvwWSjsnv8nsJpDL09KHCETWS0g0WjoIZDRUYXCeHeow1cEij0kqL9OwRwirv/xCQ6GA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 		<script src="./scripts/common/prices.js?v=44"></script>
 		<script src="./scripts/common/pagination.js?v=42"></script>
-		<script type="module" src="./scripts/oracles.js?v=1"></script>
+		<script type="module" src="./scripts/oracles.js?v=2"></script>
 {% endblock %}

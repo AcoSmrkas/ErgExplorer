@@ -15,6 +15,10 @@ const RETRY_DELAY_MS = 700;
 // Answers reused for this long, so the page's parallel calls share the pool box and refresh txs
 const CACHE_MS = 30000;
 const PARALLEL_REQUESTS = 6;
+// The gateway answers over HTTP/2 and asks two nodes per balance, so balances go wider
+const BALANCE_REQUESTS = 10;
+// Datapoints posted within this many blocks of the newest get exact times (see datapointTimes)
+const EXACT_TIME_BLOCKS = 720;
 
 const BOX_PAGE = MAX_PAGE;
 const MAX_DATAPOINT_PAGES = 5;
@@ -91,8 +95,8 @@ function post(path, text) {
 	return cached('POST ' + path + ' ' + text, () => request(path, { method: 'POST', body: text, headers: { 'Content-Type': 'text/plain' } }));
 }
 
-/** Run `work` over `items`, PARALLEL_REQUESTS at a time, keeping the order */
-async function mapLimited(items, work) {
+/** Run `work` over `items`, `limit` at a time, keeping the order */
+async function mapLimited(items, work, limit = PARALLEL_REQUESTS) {
 	const results = new Array(items.length);
 	let next = 0;
 
@@ -103,7 +107,7 @@ async function mapLimited(items, work) {
 		}
 	}
 
-	await Promise.all(Array.from({ length: Math.min(PARALLEL_REQUESTS, items.length) }, worker));
+	await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
 	return results;
 }
 
@@ -292,14 +296,40 @@ async function ergBalance(address) {
 	}
 }
 
+/** v1: the current live epoch box and the one the latest collection spent, by box id */
+async function v1RecentEpochs(pool) {
+	const recent = await boxesByToken(pool.poolNft, 0, 3);
+	return new Map(recent.items.filter(isV1LiveEpoch).slice(0, 2).map(box => [box.boxId, box]));
+}
+
+/** A datapoint box test for "live", reading only the pool's own boxes (see v1Operators / v2Operators) */
+async function liveTest(pool) {
+	if (pool.version === 1) {
+		const recentEpochs = await v1RecentEpochs(pool);
+		return box => recentEpochs.has(decodeBytes(box.additionalRegisters.R5));
+	}
+
+	const poolBox = await currentPoolBox(pool);
+	const poolEpoch = decodeNumber(poolBox.additionalRegisters.R5);
+	return box => (box.additionalRegisters.R5 && decodeNumber(box.additionalRegisters.R5) === poolEpoch) || box.transactionId === poolBox.transactionId;
+}
+
+/**
+ * { live, total } datapoint boxes, for the pools list: two parallel requests, none of the per-operator
+ * lookups fetchOperators makes.
+ */
+export async function fetchOracleCounts(pool) {
+	const [boxes, isLive] = await Promise.all([datapointBoxes(pool), liveTest(pool)]);
+	return { live: boxes.filter(isLive).length, total: boxes.length };
+}
+
 /**
  * v1 datapoints: R4 the oracle's key, R5 the id of the live epoch box posted to, R6 the datapoint.
  * Live: posted to the current live epoch box or to the one the latest collection spent (the pool NFT's
  * last three boxes hold both: live, prep, live or prep, live, prep). epoch: that live epoch's end height.
  */
 async function v1Operators(pool, boxes) {
-	const recent = await boxesByToken(pool.poolNft, 0, 3);
-	const recentEpochs = new Map(recent.items.filter(isV1LiveEpoch).slice(0, 2).map(box => [box.boxId, box]));
+	const recentEpochs = await v1RecentEpochs(pool);
 
 	const epochBoxIds = [...new Set(boxes.map(box => decodeBytes(box.additionalRegisters.R5)).filter(Boolean))];
 	const epochEnds = new Map();
@@ -330,8 +360,7 @@ async function v1Operators(pool, boxes) {
  * by the latest refresh.
  */
 async function v2Operators(pool, boxes) {
-	const poolBox = await currentPoolBox(pool);
-	const poolEpoch = decodeNumber(poolBox.additionalRegisters.R5);
+	const isLive = await liveTest(pool);
 
 	const reset = boxes.filter(box => !box.additionalRegisters.R6);
 	const txIds = [...new Set(reset.map(box => box.transactionId))];
@@ -356,28 +385,48 @@ async function v2Operators(pool, boxes) {
 			box,
 			rate: displayRate(pool, decodeNumber(posted.R6)),
 			epoch: epoch == null ? null : Number(epoch),
-			live: (registers.R5 && decodeNumber(registers.R5) === poolEpoch) || box.transactionId === poolBox.transactionId,
+			live: isLive(box),
 			wins: null
 		};
 	});
 }
 
 /**
+ * Times for datapoint heights. Heights within EXACT_TIME_BLOCKS of the newest get their block headers;
+ * older ones (operators gone quiet for days or months) are counted back from the oldest exact header
+ * at 2 minutes a block, which saves a header request per stale operator and is close enough for
+ * "N days ago".
+ */
+async function datapointTimes(heights) {
+	const newest = Math.max(...heights);
+	const recent = heights.filter(height => newest - height <= EXACT_TIME_BLOCKS);
+	const times = await blockTimes(recent);
+	const anchor = Math.min(...recent);
+
+	heights.forEach(height => {
+		if (!times.has(height)) times.set(height, times.get(anchor) - (anchor - height) * BLOCK_MS);
+	});
+
+	return times;
+}
+
+/**
  * Every datapoint box of the pool, one per operator. height/timestamp/boxId/txId are of the box as
- * it is now. ergBalance is the operator's address balance in nanoErg (null when unknown). wins is the
- * number of refreshes the operator collected among `history` (items from fetchRefreshHistory), or null
- * when no history is given: an all-time count would need every refresh tx.
+ * it is now. wins is the number of refreshes the operator collected among `history` (items from
+ * fetchRefreshHistory), or null when no history is given: an all-time count would need every refresh
+ * tx. Balances are not read here (a request per operator, the slowest part): see fetchErgBalances.
  */
 export async function fetchOperators(pool, history = null) {
 	// Started now, read by v1Operators / v2Operators from the cache
 	currentPoolBox(pool).catch(() => {});
 
 	const boxes = await datapointBoxes(pool);
+	if (!boxes.length) return [];
+
 	const addresses = boxes.map(box => addressOfKey(decodeGroupElement(box.additionalRegisters.R4)));
-	const [operators, times, balances] = await Promise.all([
+	const [operators, times] = await Promise.all([
 		pool.version === 1 ? v1Operators(pool, boxes) : v2Operators(pool, boxes),
-		blockTimes(boxes.map(box => box.inclusionHeight)),
-		mapLimited(addresses, ergBalance)
+		datapointTimes(boxes.map(box => box.inclusionHeight))
 	]);
 
 	return operators.map((operator, index) => ({
@@ -389,9 +438,26 @@ export async function fetchOperators(pool, history = null) {
 		boxId: operator.box.boxId,
 		txId: operator.box.transactionId,
 		live: !!operator.live,
-		ergBalance: balances[index],
 		wins: history ? history.filter(item => item.collector === addresses[index]).length : null
 	}));
+}
+
+/**
+ * ERG balances of `addresses`, BALANCE_REQUESTS at a time. onBalance(address, nanoErg) runs as each
+ * one comes in; nanoErg is null when the indexed nodes disagree or the request fails.
+ */
+export async function fetchErgBalances(addresses, onBalance) {
+	await mapLimited(addresses, async address => {
+		let nanoErg = null;
+
+		try {
+			nanoErg = await ergBalance(address);
+		} catch (error) {
+			console.warn('No balance for ' + address + ':', error);
+		}
+
+		onBalance(address, nanoErg);
+	}, BALANCE_REQUESTS);
 }
 
 // ---- Refresh history ----

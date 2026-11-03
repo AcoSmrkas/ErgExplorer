@@ -71,6 +71,20 @@ html[data-theme="mew"] {
 	width: 100% !important;
 }
 
+// The site's pulsing logo (main.scss .loadingImg) over the chart while its points load
+.oracle-chart-loading {
+	align-items: center;
+	display: flex;
+	inset: 0;
+	justify-content: center;
+	position: absolute;
+
+	.loadingImg {
+		height: 90px;
+		width: 90px;
+	}
+}
+
 @media (max-width: 1199.98px) {
 	.token-chart-frame {
 		height: 360px;
@@ -96,9 +110,33 @@ html[data-theme="mew"] {
 	overflow-wrap: anywhere;
 }
 
-.oracle-technical-toggle {
-	font-size: 1rem;
-	text-decoration: none;
+// Technical: the transaction page's info rows (transactions.scss .div-table), with a fixed label
+// column so the values line up and long ids wrap
+.oracle-technical-table {
+	border: 0 !important;
+	width: 100%;
+
+	> tbody {
+		border-top: 0 !important;
+	}
+
+	> tbody > tr > td {
+		padding: 8px 12px;
+		vertical-align: top;
+	}
+
+	> tbody > tr:nth-child(odd) {
+		background-color: var(--striped-1);
+	}
+
+	td:first-child {
+		white-space: nowrap;
+		width: 40%;
+	}
+
+	td:last-child {
+		overflow-wrap: anywhere;
+	}
 }
 
 // Stacked on phones and tablets: right-aligned cells line up with the rest
