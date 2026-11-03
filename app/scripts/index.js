@@ -3,9 +3,11 @@ var from24h = nowTime - (24 * 60 * 60 * 1000);
 var from7d = nowTime - (7 * 24 * 60 * 60 * 1000);
 var from30d = nowTime - (30 * 24 * 60 * 60 * 1000);
 var priceData = undefined;
+// The token tables wait for the icon list: drawn before it, their DB-only icons (rsBTC, LIT...) stay blank
+var tokenIconsLoaded;
 
 $(function() {
-	getTokenIcons();
+	tokenIconsLoaded = new Promise(resolve => getTokenIcons(resolve));
 	updatePrices();
 	getNetworkState();
 });
@@ -52,7 +54,7 @@ function getNetworkState() {
 
 function getPoolStats() {
 	$.get('https://api2.mewfinance.com/dex/getTop10Volume',
-	function (data) {
+	function (data) { tokenIconsLoaded.then(() => {
 		let poolStatsData = data.items;
 
 		//Volume
@@ -73,7 +75,7 @@ function getPoolStats() {
 		}
 
 		$('#tokensVolumeTableBody').html(formattedResult);
-	});
+	}); });
 }
 
 function getPriceHistory() {
@@ -88,7 +90,7 @@ function getPriceHistory() {
 
 		handleCachedTimeframes(data);
 
-		printGainersLosers(from24h);
+		tokenIconsLoaded.then(() => printGainersLosers(from24h));
 	}).fail(function (data) {
 		$('#tokenLoading').hide();
 	});
