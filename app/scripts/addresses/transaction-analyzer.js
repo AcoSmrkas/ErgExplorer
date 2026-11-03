@@ -1,5 +1,5 @@
-import { LITHOS_TEMPLATES, TxInOut, TxType } from './constants.js?v=5';
-import { CONTRACT_TEMPLATES } from './contract-names.js?v=4';
+import { LITHOS_TEMPLATES, TxInOut, TxType } from './constants.js?v=6';
+import { CONTRACT_TEMPLATES } from './contract-names.js?v=5';
 
 /**
  * Determine transaction type based on input/output address types
