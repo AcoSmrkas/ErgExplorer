@@ -1,4 +1,4 @@
-import { ORACLE_POOLS, fetchPoolState, fetchOracleCounts, fetchOperators, fetchErgBalances, fetchRefreshHistory, fetchRateHistory } from './oracles/oracle-data.js?v=2';
+import { ORACLE_POOLS, fetchPoolState, fetchOracleCounts, fetchOperators, fetchErgBalances, fetchRefreshHistory, fetchRateHistory } from './oracles/oracle-data.js?v=3';
 
 // Oracle pools: oracles lists them, oracles#pool=<slug> shows one. The pool goes in the hash, which
 // params.js reads on every host, so the page needs no server rewrite.
