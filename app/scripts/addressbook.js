@@ -274,7 +274,7 @@ var addressBookAddresses = null;
 
 function loadContractNames() {
     if (contractNamesImport == null) {
-        contractNamesImport = import('./addresses/contract-names.js?v=3').catch(function(e) {
+        contractNamesImport = import('./addresses/contract-names.js?v=4').catch(function(e) {
             contractNamesImport = null;
             throw e;
         });
