@@ -548,8 +548,9 @@ function formatAddressLink(address) {
 	return `<a class="address-string" addr="${address}" href="${getWalletAddressUrl(address)}">${formatAddressString(address, 8)}</a>`;
 }
 
+// data-token-id opens the token hover popup (common/token-popup.js), as token links do elsewhere
 function formatTokenLink(tokenId) {
-	return `<a href="${getTokenUrl(tokenId)}">${formatAddressString(tokenId, 10)}</a>`;
+	return `<a class="token-link" href="${getTokenUrl(tokenId)}" data-token-id="${tokenId}">${formatAddressString(tokenId, 10)}</a>`;
 }
 
 function countLive(operators) {
