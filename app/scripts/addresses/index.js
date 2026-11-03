@@ -6,7 +6,7 @@
 import { AddressState } from './state.js';
 import { ApiClient } from './api-client.js?v=59';
 import { BalanceSummary } from './balance-summary.js?v=72';
-import { AddressDetails } from './address-details.js?v=59';
+import { AddressDetails } from './address-details.js?v=60';
 import { TransactionFormatter } from './transaction-formatter.js?v=78';
 import { UIControllers } from './ui-controllers.js?v=65';
 import { PendingTracker } from './pending-tracker.js?v=9';

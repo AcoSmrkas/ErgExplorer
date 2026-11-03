@@ -10,7 +10,7 @@
 	<link rel="preconnect" href="https://api.ergoplatform.com" crossorigin>
 
 	<!-- build:css styles/addresses.css -->
-	<link rel="stylesheet" href="styles/addresses.css?v=3">
+	<link rel="stylesheet" href="styles/addresses.css?v=4">
 	<!-- endbuild -->
 
 	<!-- Tempus Dominus Styles -->
@@ -44,6 +44,9 @@
 								<span id="addressNameHolder" class="address-detail-chip" style="display: none;">
 									<span id="addressName"></span>
 								</span>
+								<a id="richListHolder" class="address-detail-chip address-detail-rank" style="display: none;">
+									<i class="fas fa-crown"></i><span id="richListRank"></span>
+								</a>
 						</div>
 					</div>
 				</div>
@@ -325,6 +328,6 @@
 	<script src="./scripts/common/pagination.js?v=42"></script>
 	<script src="./scripts/common/nft.js?v=41"></script>
 	<script src="./scripts/common/lithos.js?v=1"></script>
-	<script type="module" src="./scripts/addresses/index.js?v=84"></script>
+	<script type="module" src="./scripts/addresses/index.js?v=85"></script>
 	<script src="./scripts/3rd-party/qrcode.min.js?v=41"></script>
 {% endblock %}

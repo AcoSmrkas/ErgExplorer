@@ -289,6 +289,20 @@ select:hover {
 	text-overflow: ellipsis;
 }
 
+a.address-detail-rank {
+	color: inherit;
+	text-decoration: none;
+
+	i {
+		color: var(--bs-warning);
+		font-size: 0.8em;
+	}
+
+	&:hover {
+		border-color: var(--bs-warning);
+	}
+}
+
 .address-detail-name.address-detail-success {
 	color: var(--bs-success);
 }
