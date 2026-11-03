@@ -264,43 +264,171 @@ function getWhaleTxs() {
 
         let data = JSONbig.parse(stringFromBuffer);
         let formattedResult = '';
-		let items = data.items;
+		let transfers = groupWhaleTxs(data.items);
+		let lookups = [];
 
-		for (var i = 0; i < items.length; i++) {
-			let item = items[i];
+		for (var i = 0; i < transfers.length; i++) {
+			let transfer = transfers[i];
+			let item = transfer.item;
+			let value = getWhaleTransferValue(transfer);
 
 			formattedResult += '<tr>';
 
 			//Tx
 			formattedResult += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + getTransactionsUrl(item.txid) + '"><i class="fas fa-link text-info"></i></a><span class="d-inline d-lg-none text-white float-end">' + formatDateString(parseInt(item.time)) + '</span></td>';
-			
+
 			//Time
 			formattedResult += '<td class="d-none d-lg-table-cell"><span class="d-lg-none"><strong>Time: </strong></span>' + formatDateString(parseInt(item.time)) + '</td>';
 
 			//From
-			let fromAddress = item.fromaddress;
-			addAddress(fromAddress);
-			formattedResult += '<td><span class="d-lg-none"><strong>From: </strong></span>' + (fromAddress == 'N/A' ? 'N/A' : '<a class="address-string" addr="' + fromAddress + '" href="' + getWalletAddressUrl(fromAddress) + '" >' + (getOwner(fromAddress) == undefined ? formatAddressString(fromAddress, 10) : getOwner(fromAddress)) + '</a>') + '</td>';
-		
+			formattedResult += '<td><span class="d-lg-none"><strong>From: </strong></span>' + formatWhaleParties(transfer.from, 'sending', i) + '</td>';
+
 			//To
-			let toAddress = item.toaddress;
-			addAddress(toAddress);
-			formattedResult += '<td><span class="d-lg-none"><strong>To: </strong></span>' + (toAddress == 'N/A' ? 'N/A' : '<a class="address-string" addr="' + toAddress + '" href="' + getWalletAddressUrl(toAddress) + '" >' + (getOwner(toAddress) == undefined ? formatAddressString(toAddress, 10) : getOwner(toAddress)) + '</a>') + '</td>';
+			formattedResult += '<td><span class="d-lg-none"><strong>To: </strong></span>' + formatWhaleParties(transfer.to, 'receiving', i) + '</td>';
 
 			//Value
-			formattedResult += '<td><span class="d-lg-none"><strong>Value: </strong></span>' + formatAssetValueString(item.value, item.decimals) + ' ' + getAssetTitleParams(item, item.tokenid, item.ticker, false) + ' <span class="text-light">' + formatDollarPriceString(item.value / Math.pow(10, item.decimals) * prices[item.tokenid]) + '</span></td></tr>';
+			formattedResult += '<td><span class="d-lg-none"><strong>Value: </strong></span>' + formatAssetValueString(value, item.decimals) + ' ' + getAssetTitleParams(item, item.tokenid, item.ticker, false) + ' <span class="text-light">' + formatDollarPriceString(value / Math.pow(10, item.decimals) * prices[item.tokenid]) + '</span></td></tr>';
 
 			formattedResult += '</tr>';
+
+			if (transfer.from.length == 0 || transfer.to.length == 0) {
+				lookups.push(fillWhaleCounterparty(transfer, i));
+			}
 		}
 
 		$('#transactionsTableBody').html(formattedResult);
-		$('#txView').show();	
+		$('#txView').show();
 
 		getAddressesInfo();
+
+		//Label the counterparties the lookups found too
+		if (lookups.length > 0) {
+			Promise.all(lookups).then(getAddressesInfo);
+		}
     })
     .catch(error => {
         console.error('Fetch error:', error); // Handle errors here
     });
+}
+
+//The API stores a transfer between several parties as one row per party: the
+//senders' rows carry 'N/A' as toaddress, the receivers' rows 'N/A' as fromaddress.
+//This joins the rows of each tx and token back into one transfer.
+function groupWhaleTxs(items) {
+	let transfers = [];
+	let splitTransfers = {};
+
+	for (let i = 0; i < items.length; i++) {
+		let item = items[i];
+		let from = { address: item.fromaddress, value: item.value };
+		let to = { address: item.toaddress, value: item.value };
+
+		if (from.address != AddressType.NA && to.address != AddressType.NA) {
+			transfers.push({ item: item, from: [from], to: [to] });
+			continue;
+		}
+
+		let key = item.txid + '-' + item.tokenid;
+		let transfer = splitTransfers[key];
+
+		if (transfer == undefined) {
+			transfer = splitTransfers[key] = { item: item, from: [], to: [] };
+			transfers.push(transfer);
+		}
+
+		if (to.address == AddressType.NA) {
+			transfer.from.push(from);
+		} else {
+			transfer.to.push(to);
+		}
+	}
+
+	return transfers;
+}
+
+//The larger side, as the whale alert counts it: what the senders put in or what the receivers got
+function getWhaleTransferValue(transfer) {
+	let sum = function(parties) {
+		return parties.reduce((total, party) => total.plus(party.value.toString()), new BigNumber(0));
+	};
+
+	return BigNumber.max(sum(transfer.from), sum(transfer.to)).toFixed();
+}
+
+function formatWhaleParties(parties, side, index) {
+	//Filled in by fillWhaleCounterparty
+	if (parties.length == 0) {
+		return '<span id="whaleCounterparty' + index + '" class="skeleton"></span>';
+	}
+
+	if (parties.length > 1) {
+		return '<span class="text-light" title="This transaction has multiple ' + side + ' addresses. Check transaction link for more details.">' + AddressType.Multiple + '</span>';
+	}
+
+	return formatWhaleAddress(parties[0].address);
+}
+
+function formatWhaleAddress(address) {
+	addAddress(address);
+
+	return '<a class="address-string" addr="' + address + '" href="' + getWalletAddressUrl(address) + '" >' + (getOwner(address) == undefined ? formatAddressString(address, 10) : getOwner(address)) + '</a>';
+}
+
+//A transfer with no row for one side: the API returns only the latest rows, which
+//can cut a transfer in half, and it leaves out receivers the sender owns too. The
+//tx itself names the counterparty: the address that gained (or gave) the most of the token.
+function fillWhaleCounterparty(transfer, index) {
+	let receiving = transfer.to.length == 0;
+
+	return fetch(API_HOST + 'transactions/' + transfer.item.txid, { signal: AbortSignal.timeout(10000) })
+	.then(response => {
+		if (!response.ok) {
+			throw new Error('Network response was not ok');
+		}
+
+		return response.arrayBuffer();
+	})
+	.then(arrayBuffer => {
+		let tx = JSONbig.parse(new TextDecoder('utf-8').decode(arrayBuffer));
+
+		return getLargestCounterparty(tx, transfer.item.tokenid, receiving);
+	})
+	.catch(() => null)
+	.then(address => {
+		let html = '<span class="text-light" title="Check transaction link for more details.">Unknown</span>';
+
+		if (address != null) {
+			html = formatWhaleAddress(address);
+		}
+
+		$('#whaleCounterparty' + index).replaceWith(html);
+	});
+}
+
+function getLargestCounterparty(tx, tokenId, receiving) {
+	let net = {};
+
+	let count = function(boxes, sign) {
+		for (let i = 0; i < boxes.length; i++) {
+			let box = boxes[i];
+			let amount = tokenId == 'ERG' ? box.value : (box.assets || []).filter(asset => asset.tokenId == tokenId).reduce((total, asset) => total.plus(asset.amount.toString()), new BigNumber(0));
+
+			net[box.address] = (net[box.address] || new BigNumber(0)).plus(new BigNumber(amount.toString()).times(sign));
+		}
+	};
+
+	count(tx.outputs, receiving ? 1 : -1);
+	count(tx.inputs, receiving ? -1 : 1);
+	delete net[FEE_ADDRESS];
+
+	let largest = null;
+	for (let address in net) {
+		if (net[address].isGreaterThan(0) && (largest == null || net[address].isGreaterThan(net[largest]))) {
+			largest = address;
+		}
+	}
+
+	return largest;
 }
 
 function getProtocolInfo() {
