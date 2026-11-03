@@ -1,0 +1,109 @@
+// The rate chart: the token page's price chart (token.scss), same frame and range buttons
+.token-chart-controls {
+	align-items: center;
+	display: flex;
+	gap: 5px;
+	justify-content: flex-end;
+}
+
+#chartColumn .token-chart-range-btn {
+	background: var(--borders) !important;
+	border: 1px solid var(--borders) !important;
+	box-shadow: none !important;
+	color: var(--text-color) !important;
+	font-size: 0.95rem;
+	font-weight: 700;
+	line-height: 1.1;
+	min-height: 34px;
+	min-width: 42px;
+	padding: 5px 9px !important;
+}
+
+#chartColumn .token-chart-range-btn.btn-primary:hover,
+#chartColumn .token-chart-range-btn.btn-primary:focus {
+	background: var(--main-color) !important;
+	border-color: var(--main-color) !important;
+	color: #fff !important;
+}
+
+#chartColumn .token-chart-range-btn.btn-info {
+	background: var(--main-color) !important;
+	border-color: var(--main-color) !important;
+	color: #fff !important;
+}
+
+#chartColumn .token-chart-range-btn.btn-info:hover,
+#chartColumn .token-chart-range-btn.btn-info:focus {
+	background: var(--main-color-hover) !important;
+	border-color: var(--main-color-hover) !important;
+	color: #fff !important;
+}
+
+html[data-theme="mew"] {
+	#chartColumn .token-chart-range-btn {
+		background: var(--footer) !important;
+		border: none !important;
+		color: #eee !important;
+	}
+
+	#chartColumn .token-chart-range-btn.btn-info {
+		background: var(--main-color) !important;
+		color: var(--footer) !important;
+	}
+
+	#chartColumn .token-chart-range-btn.btn-info:hover,
+	#chartColumn .token-chart-range-btn.btn-primary:hover,
+	#chartColumn .token-chart-range-btn.btn-primary:focus {
+		background: var(--main-color-hover) !important;
+		color: var(--footer) !important;
+	}
+}
+
+.token-chart-frame {
+	height: 315px;
+	position: relative;
+	width: 100%;
+}
+
+#chart {
+	display: block;
+	height: 100% !important;
+	width: 100% !important;
+}
+
+@media (max-width: 1199.98px) {
+	.token-chart-frame {
+		height: 360px;
+	}
+}
+
+@media (max-width: 575.98px) {
+	.token-chart-frame {
+		height: 300px;
+	}
+}
+
+// The oracles list scrolls inside a fixed height rather than running down the page (main.js fades it)
+.oracle-table-scroll {
+	max-height: 560px;
+	overflow-y: auto;
+	border-radius: 5px;
+}
+
+// The stat cards sit two to a row on phones: long values wrap instead of widening the card
+#poolStatsHolder .card-title,
+#poolStatsHolder .card-text {
+	overflow-wrap: anywhere;
+}
+
+.oracle-technical-toggle {
+	font-size: 1rem;
+	text-decoration: none;
+}
+
+// Stacked on phones and tablets: right-aligned cells line up with the rest
+@media (max-width: 991.98px) {
+	#operatorsScroll table tbody tr td {
+		text-align: left !important;
+	}
+}
