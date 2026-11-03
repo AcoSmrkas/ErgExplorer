@@ -111,13 +111,22 @@ async function mapLimited(items, work, limit = PARALLEL_REQUESTS) {
 	return results;
 }
 
+// The node's token index lists some boxes more than once (SigUSD: ~193 unique boxes in 250 rows),
+// on every node, so box lists are deduplicated by box id before use
+function uniqueBoxes(boxes) {
+	const seen = new Set();
+	return boxes.filter(box => !seen.has(box.boxId) && seen.add(box.boxId));
+}
+
+/** Rows as the index lists them (a box may repeat; page by the row count) */
 function unspentByToken(tokenId, offset = 0, limit = BOX_PAGE) {
 	return get('blockchain/box/unspent/byTokenId/' + tokenId + '?offset=' + offset + '&limit=' + limit);
 }
 
-/** Every box that held the token, newest first: { items, total } */
-function boxesByToken(tokenId, offset, limit) {
-	return get('blockchain/box/byTokenId/' + tokenId + '?offset=' + offset + '&limit=' + limit);
+/** Every box that held the token, newest first: { items, total } (total counts the index's rows) */
+async function boxesByToken(tokenId, offset, limit) {
+	const page = await get('blockchain/box/byTokenId/' + tokenId + '?offset=' + offset + '&limit=' + limit);
+	return { items: uniqueBoxes(page.items), total: page.total };
 }
 
 /** Transactions touching the address, newest first, with full input and output boxes: { items, total } */
@@ -282,7 +291,7 @@ async function datapointBoxes(pool) {
 	}
 
 	// Wallets holding spare oracle tokens are not operators
-	return boxes.filter(box => hasTemplate(box.ergoTree, templates));
+	return uniqueBoxes(boxes).filter(box => hasTemplate(box.ergoTree, templates));
 }
 
 /** nanoErg, or null when the indexed nodes disagree on it (the gateway answers 502 then) */
@@ -298,8 +307,9 @@ async function ergBalance(address) {
 
 /** v1: the current live epoch box and the one the latest collection spent, by box id */
 async function v1RecentEpochs(pool) {
-	const recent = await boxesByToken(pool.poolNft, 0, 3);
-	return new Map(recent.items.filter(isV1LiveEpoch).slice(0, 2).map(box => [box.boxId, box]));
+	// Six rows: the index may repeat a box
+	const recent = await boxesByToken(pool.poolNft, 0, 6);
+	return new Map(recent.items.slice(0, 3).filter(isV1LiveEpoch).map(box => [box.boxId, box]));
 }
 
 /** A datapoint box test for "live", reading only the pool's own boxes (see v1Operators / v2Operators) */
@@ -467,7 +477,7 @@ async function v1PrepAddress(pool) {
 	const poolBox = await currentPoolBox(pool);
 	if (!isV1LiveEpoch(poolBox)) return poolBox.address;
 
-	const recent = await boxesByToken(pool.poolNft, 0, 2);
+	const recent = await boxesByToken(pool.poolNft, 0, 4);
 	const prep = recent.items.find(box => hasTemplate(box.ergoTree, ORACLE_POOL_V1_TEMPLATES.EPOCH_PREP));
 	if (!prep) throw new Error('No epoch preparation box found for ' + pool.name);
 	return prep.address;
