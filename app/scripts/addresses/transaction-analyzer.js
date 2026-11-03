@@ -1,5 +1,5 @@
-import { LITHOS_TEMPLATES, TxInOut, TxType } from './constants.js?v=3';
-import { CONTRACT_TEMPLATES } from './contract-names.js?v=1';
+import { LITHOS_TEMPLATES, TxInOut, TxType } from './constants.js?v=4';
+import { CONTRACT_TEMPLATES } from './contract-names.js?v=3';
 
 /**
  * Determine transaction type based on input/output address types
@@ -100,18 +100,27 @@ export function detectContractFromErgotree(ergoTree, addressType = 'label') {
 	return null;
 }
 
+const LITHOS_POOLS = [LITHOS_TEMPLATES.POOL, LITHOS_TEMPLATES.T2T_POOL];
+const LITHOS_ORDERS = [
+	LITHOS_TEMPLATES.SWAP_SELL, LITHOS_TEMPLATES.SWAP_BUY, LITHOS_TEMPLATES.LP_DEPOSIT, LITHOS_TEMPLATES.LP_REDEEM,
+	LITHOS_TEMPLATES.T2T_SWAP, LITHOS_TEMPLATES.T2T_DEPOSIT, LITHOS_TEMPLATES.T2T_REDEEM
+];
+
+const endsWithAny = (ergoTree, templates) => templates.some(template => ergoTree.endsWith(template));
+
 /**
  * Name a Lithos pool box after the order the batcher filled with it. The pool is
  * input 0 of the fill, so it is what shows as the sender of the swapped assets;
- * the order box spent beside it says what the fill was.
+ * the order box spent beside it says what the fill was. A flush spends the vault
+ * beside the pool instead, and keeps the pool's own name.
  */
 export function detectLithosFill(inputs, ergoTree) {
-	if (!ergoTree.endsWith(LITHOS_TEMPLATES.POOL)) {
+	if (!endsWithAny(ergoTree, LITHOS_POOLS)) {
 		return null;
 	}
 
 	for (const box of inputs) {
-		const contractName = box.ergoTree && !box.ergoTree.endsWith(LITHOS_TEMPLATES.POOL)
+		const contractName = box.ergoTree && endsWithAny(box.ergoTree, LITHOS_ORDERS)
 			? detectContractFromErgotree(box.ergoTree)
 			: null;
 

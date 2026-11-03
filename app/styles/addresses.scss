@@ -225,6 +225,60 @@ select:hover {
 	align-items: center;
 }
 
+// Sits a little below the title's baseline, as on the tx page
+#simpleModeToggle {
+	position: relative;
+	top: 4px;
+
+	@media (min-width: 768px) {
+		top: 10px;
+	}
+
+	// The tx page's size: this page's own label rule above made it bigger and taller than its box
+	.form-check-label {
+		font-size: 1rem;
+		line-height: 1.5;
+		min-width: 0;
+	}
+}
+
+// Total transactions to the right of the address, in simple mode only: the panel says enough otherwise
+#addressTxStats {
+	display: none;
+	white-space: nowrap;
+}
+
+// Simple mode (addresses/index.js) loads only the txs: of the panel above them it keeps the address
+// line. BalanceSummary shows and hides #summaryOk and #summaryLoading inline as the balance loads, so
+// these override it, and leaving simple mode finds both as BalanceSummary left them.
+#addressPage.simple-mode {
+	#summaryLoading {
+		display: none !important;
+	}
+
+	#summaryOk {
+		display: block !important;
+	}
+
+	// The error says so, as in normal mode, without the address line
+	&.address-not-found #summaryOk {
+		display: none !important;
+	}
+
+	#addressSummaryRow {
+		display: none;
+	}
+
+	.address-identity-row {
+		border-radius: 5px;
+		border-bottom: 1px solid var(--borders);
+	}
+
+	#addressTxStats {
+		display: block;
+	}
+}
+
 .address-identity-line {
 	align-items: center;
 	display: flex;
