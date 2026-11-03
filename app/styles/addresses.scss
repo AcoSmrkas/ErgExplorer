@@ -505,6 +505,16 @@ select:hover {
 	}
 }
 
+// The rows of the page being left, while the next loads in place (showTxPage in addresses/index.js)
+#transactionsTableBody {
+	transition: opacity 0.15s;
+}
+
+#txView.tx-page-loading #transactionsTableBody {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
 // Transaction list: phone / tablet-portrait card layout (< 992px).
 // Rule of thumb: never set `display` with !important on an element that also carries a Bootstrap d-* class.
 // Bootstrap's `.d-none{display:none!important}` is (0,1,0); the old `... > td{display:flex!important}` was (0,1,3)

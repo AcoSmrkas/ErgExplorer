@@ -1,6 +1,19 @@
 var ITEMS_PER_PAGE = 30;
 var offset = 0;
 var numPages = 1;
+// A page that loads its pages in place (addresses/index.js) sets this, and the page links and
+// page number call it with the new offset. Elsewhere they load the page at that offset.
+var loadPageAtOffset = null;
+
+// A modified click (new tab or window) still follows the link
+$(document).on('click', '.firstPage, .previousPage, .nextPage, .lastPage', function(e) {
+	if (loadPageAtOffset == null || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+
+	e.preventDefault();
+	if ($(this).closest('.page-item').hasClass('disabled')) return;
+
+	loadPageAtOffset($(this).data('offset'));
+});
 
 $(function() {
 	offset = params['offset'];
@@ -25,20 +38,20 @@ function setupPagination(totalItems) {
 	}
 
 	$('.pageNum').html(nFormatter(currentPageNum, 0, true, true) + ' of ' + nFormatter(numPages, 0, true, true));
-	$('.firstPage').attr('href', getUrlWithOffset(0));
-	$('.previousPage').attr('href', getUrlWithOffset((currentPageNum - 2) * ITEMS_PER_PAGE));
-	$('.nextPage').attr('href', getUrlWithOffset(currentPageNum * ITEMS_PER_PAGE));
-	$('.lastPage').attr('href', getUrlWithOffset((numPages - 1) * ITEMS_PER_PAGE));
+	setPageLink('.firstPage', 0);
+	setPageLink('.previousPage', (currentPageNum - 2) * ITEMS_PER_PAGE);
+	setPageLink('.nextPage', currentPageNum * ITEMS_PER_PAGE);
+	setPageLink('.lastPage', (numPages - 1) * ITEMS_PER_PAGE);
 
-	if (currentPageNum <= 1) {
-		$('.firstPageHolder').addClass('disabled');
-		$('.previousPageHolder').addClass('disabled');
-	}
+	// Toggled, not only added: a page loaded in place can come back to the first or last page and leave it
+	$('.firstPageHolder, .previousPageHolder').toggleClass('disabled', currentPageNum <= 1);
+	$('.nextPageHolder, .lastPageHolder').toggleClass('disabled', currentPageNum >= numPages);
+}
 
-	if (currentPageNum >= numPages) {
-		$('.nextPageHolder').addClass('disabled');
-		$('.lastPageHolder').addClass('disabled');
-	}
+function setPageLink(selector, linkOffset) {
+	$(selector)
+		.attr('href', getUrlWithOffset(linkOffset))
+		.data('offset', linkOffset);
 }
 
 function getUrlWithOffset(setOffset) {
@@ -66,8 +79,12 @@ function enterPageNum(e) {
 	}
 
 	num = clamp(num, 1, numPages);
+	e.preventDefault();
+
+	if (loadPageAtOffset != null) {
+		loadPageAtOffset((num - 1) * ITEMS_PER_PAGE);
+		return;
+	}
 
 	window.location.assign(getUrlWithOffset((num - 1) * ITEMS_PER_PAGE));
-
-	e.preventDefault();
 }

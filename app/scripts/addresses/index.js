@@ -112,6 +112,7 @@ $(async function() {
 		}
 	});
 	watchScrollingLists();
+	window.loadPageAtOffset = showTxPage;
 	initializeAddressPage();
 });
 
@@ -204,28 +205,76 @@ function isFirstPage() {
 }
 
 /**
- * Print transactions
+ * Print transactions. False if they couldn't be fetched.
  */
 async function printTransactions() {
-	if (AddressState.getTxData) return;
+	if (AddressState.getTxData) return true;
 	AddressState.getTxData = true;
 
-	if (!isFirstPage()) {
-		AddressState.mempoolData = { items: [], total: 0 };
-	}
+	// showTxPage can move to another page before this one answers, which then isn't shown
+	const pageOffset = offset;
 
 	try {
-		await Promise.all([
-			isFirstPage() ? ApiClient.getMempoolData() : null,
+		const [mempoolData, transactionsData] = await Promise.all([
+			isFirstPage() ? ApiClient.getMempoolData() : { items: [], total: 0 },
 			ApiClient.getTransactionsData()
 		]);
+		if (offset !== pageOffset) return true;
+
+		AddressState.mempoolData = mempoolData;
+		AddressState.transactionsData = transactionsData;
 		AddressState.mempoolRequestDone = true;
 		AddressState.transactionsRequestDone = true;
 		onMempoolAndTransactionsDataFetched();
+		return true;
 	} catch (error) {
 		console.error('Failed to fetch transactions:', error);
+		return false;
 	}
 }
+
+/**
+ * Another page of the tx list in place of this one, without reloading the page: the balance,
+ * tokens and tabs above stay as they are. The page links (pagination.js) and Back/Forward call this.
+ */
+async function showTxPage(pageOffset, addToHistory = true) {
+	const lastOffset = Math.max(0, (numPages - 1) * ITEMS_PER_PAGE);
+	pageOffset = Math.max(0, Math.min(Number(pageOffset) || 0, lastOffset));
+	if (pageOffset === Number(offset)) return;
+
+	const url = getUrlWithOffset(pageOffset);
+	offset = pageOffset;
+	params['offset'] = pageOffset;
+	if (addToHistory) {
+		history.pushState(null, '', url);
+	}
+
+	$('#txView').addClass('tx-page-loading');
+	AddressState.getTxData = false;
+	AddressState.printed = false;
+
+	const shown = await printTransactions();
+	if (offset !== pageOffset) return;
+
+	$('#txView').removeClass('tx-page-loading');
+
+	if (!shown) {
+		// Load it as the link always did
+		window.location.assign(url);
+		return;
+	}
+
+	// Paged from the links below the table: back to its top. The page scrolls in <html> (main.scss), not the window.
+	if (document.documentElement.scrollTop > $('#txView').offset().top) {
+		scrollToElement($('#txView'));
+	}
+}
+
+window.addEventListener('popstate', () => {
+	delete params['offset'];
+	readParams();
+	showTxPage(params['offset'], false);
+});
 
 /**
  * Fetch unspent boxes
