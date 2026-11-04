@@ -1,6 +1,7 @@
-// Makes the 64px token icon thumbnails in app/images/tokens/thumbs, named <tokenId>.webp. Lists show
-// icons at 18px, and the originals are up to 3 MB. A token without one falls back to its full icon, so
-// run this again after icons are added or changed, commit the result, and deploy.
+// Makes the token icon thumbnails in app/images/tokens/thumbs: <tokenId>.webp at 64px for lists, which
+// show icons at 18px, and <tokenId>-176.webp for the token page, which shows them at 88px. The originals
+// are up to 3 MB. A token without one falls back to its full icon, so run this again after icons are
+// added or changed, commit the result, and deploy.
 //
 // sharp stays out of package.json, because the deploy installs those on the VPS and only this needs it:
 //   npm install --prefix /tmp/token-thumbs sharp
@@ -12,7 +13,7 @@ const sharp = require('sharp');
 const ICONS_API = 'https://api2.ergexplorer.com/tokens/getTokenIcons';
 const ICONS_FILE = path.join(__dirname, '../app/scripts/common/token-icons.js');
 const OUT_DIR = path.join(__dirname, '../app/images/tokens/thumbs');
-const SIZE = 64;
+const SIZES = [{size: 64, suffix: ''}, {size: 176, suffix: '-176'}];
 const MAX_DOWNLOAD = 16 * 1024 * 1024;
 const PARALLEL = 8;
 
@@ -57,27 +58,34 @@ async function download(url) {
 	return data;
 }
 
-// An SVG is drawn at its own size, so a 24px one has to be drawn larger to stay sharp at 64px
-async function open(data) {
+// An SVG is drawn at its own size, so a 24px one has to be drawn larger to stay sharp
+async function open(data, size) {
 	const {format, width, height} = await sharp(data).metadata();
 
 	if (format != 'svg') {
 		return sharp(data);
 	}
 
-	return sharp(data, {density: Math.min(2400, 72 * SIZE / Math.max(width, height))});
+	return sharp(data, {density: Math.min(2400, 72 * size / Math.max(width, height))});
 }
 
-async function makeThumb(tokenId, url) {
-	const image = await open(await download(url));
-	const file = path.join(OUT_DIR, tokenId + '.webp');
+async function makeThumbs(tokenId, url) {
+	const data = await download(url);
+	let bytes = 0;
 
-	await image
-		.resize(SIZE, SIZE, {fit: 'inside', withoutEnlargement: true})
-		.webp({quality: 82, effort: 6})
-		.toFile(file);
+	for (const {size, suffix} of SIZES) {
+		const image = await open(data, size);
+		const file = path.join(OUT_DIR, tokenId + suffix + '.webp');
 
-	return fs.statSync(file).size;
+		await image
+			.resize(size, size, {fit: 'inside', withoutEnlargement: true})
+			.webp({quality: 82, effort: 6})
+			.toFile(file);
+
+		bytes += fs.statSync(file).size;
+	}
+
+	return bytes;
 }
 
 async function main() {
@@ -94,7 +102,7 @@ async function main() {
 			const [tokenId, url] = queue.shift();
 
 			try {
-				const size = await makeThumb(tokenId, url);
+				const size = await makeThumbs(tokenId, url);
 
 				bytes += size;
 				made++;
