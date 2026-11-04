@@ -92,10 +92,10 @@
 		</div>
 		<div class="col-lg-6 p-0 ps-lg-3">
 			<div class="row w-100 p-0 ps-1 ps-sm-0">
-				<div class="col-6 p-0">
-					<h2 class="subtitle">Top gainers &amp; losers</h2>
+				<div class="col p-0">
+					<h2 class="subtitle text-nowrap"><span class="d-none d-sm-inline">Top gainers</span><span class="d-sm-none">Gainers</span> &amp; losers</h2>
 				</div>
-				<div class="col-6 p-0 token-chart-controls">
+				<div class="col-auto p-0 token-chart-controls">
 					<input id="showGainersLosers24h" onclick="printGainersLosers24h()" class="btn btn-info token-chart-range-btn" type="button" value="24h">
 					<input id="showGainersLosers7d" onclick="printGainersLosers7d()" class="btn btn-primary token-chart-range-btn" type="button" value="7d">
 					<input id="showGainersLosers30d" onclick="printGainersLosers30d()" class="btn btn-primary token-chart-range-btn" type="button" value="30d">
@@ -135,82 +135,69 @@
 		</table>
 	</div>
 	<h2 class="subtitle ps-1 ps-sm-0">24h Stats</h2>
-	<div class="row w-100 p-0">		
-		<div class="col-md-12 m-0 div-cell-dark p-2">
-			<div class="row w-100 p-0">	
-				<div id="statsHolderLeft" class="col-md-6 p-0">
-					<h3 class="p-1 p-sm-3 erg-span">Block summary</h3>
-					<div class="col-12 p-0 p-sm-1">
-					<div class="row w-100 p-0 p-sm-1">
-						<div class="col-6 ps-1 ps-sm-2"><strong>Blocks mined</strong></div>
-						<div id="statsBlocksMined" class="col stats-value skeleton"></div>
-					</div>
-					<hr class="my-1">
-					<div class="row w-100 p-0 p-sm-1">
-						<div class="col-6 ps-1 ps-sm-2"><strong>Average mining time</strong></div>
-						<div id="statsAverageMiningTime" class="col stats-value skeleton"></div>
-					</div>
-					<hr class="my-1">
-					<div class="row w-100 p-0 p-sm-1">
-						<div class="col-6 ps-1 ps-sm-2"><strong>Coins mined</strong></div>
-						<div id="statsCoinsMined" class="col stats-value skeleton"></div>
-					</div>
-					<hr class="d-block d-sm-none my-2" style="border:0;">
-					<h3 class="p-1 p-sm-3 erg-span">Transactions summary</h3>
-					<div class="row w-100 p-0 p-sm-1">
-						<div class="col-6 ps-1 ps-sm-2"><strong>Number of Transactions</strong></div>
-						<div id="statsNumberOfTransactions" class="col stats-value skeleton"></div>
-					</div>
-					<hr class="my-1">
-					<div class="row w-100 p-0 p-sm-1">
-						<div class="col-6 ps-1 ps-sm-2"><strong>Total Transaction Fees</strong></div>
-						<div id="statsTotalTransactionFees" class="col stats-value skeleton"></div>
-					</div>
-					<!--
-					<hr class="my-1">
-					<div class="row w-100 p-1">
-						<div class="col-6 ps-1 ps-sm-2"><strong>Total Output Volume</strong></div>
-						<div id="statsTotalOutputVolume" class="col stats-value skeleton"></div>
-					</div>
-					-->					
-					<hr class="d-block d-sm-none my-2" style="border:0;">
-					</div>
-				</div>
-				<div id="statsHolderRight" class="col-md-6 p-0">
-					<h3 class="p-1 p-sm-3 erg-span">Mining cost</h3>
-					<div class="col-12 p-0 p-sm-1">
-					<div class="row w-100 p-0 p-sm-1">
-						<div class="col-6 ps-1 ps-sm-2"><strong>Total Miners Revenue</strong></div>
-						<div id="statsTotalMinersRevenue" class="col stats-value skeleton"></div>
-					</div>
-					<hr class="my-1">
-					<div class="row w-100 p-0 p-sm-1">
-						<div class="col-6 ps-1 ps-sm-2"><strong>% Earned From Transaction Fees</strong></div>
-						<div id="statsEarnedFromTransactionFees" class="col stats-value skeleton"></div>
-					</div>
-					<hr class="my-1">
-					<div class="row w-100 p-0 p-sm-1">
-						<div class="col-6 ps-1 ps-sm-2"><strong>% Of Transaction Volume</strong></div>
-						<div id="statsOfTransactionVolume" class="col stats-value skeleton"></div>
-					</div>
-					<hr class="my-1">
-					<div class="row w-100 p-0 p-sm-1">
-						<div class="col-6 ps-1 ps-sm-2"><strong>Cost per Transaction</strong></div>
-						<div id="statsCostPerTransaction" class="col stats-value skeleton"></div>
-					</div>
-					<hr class="my-1">
-					<div class="row w-100 p-0 p-sm-1">
-						<div class="col-6 ps-1 ps-sm-2"><strong>Difficulty</strong></div>
-						<div id="statsDifficulty" class="col stats-value skeleton"></div>
-					</div>
-					<hr class="my-1">
-					<div class="row w-100 p-0 p-sm-1">
-						<div class="col-6 ps-1 ps-sm-2"><strong>Hash Rate</strong></div>
-						<div id="statsHashRate" class="col stats-value skeleton"></div>
-					</div>
-					</div>
-				</div>
-			</div>
+	<div class="row w-100 two-column-holder-lg">
+		<div id="statsHolderLeft" class="col-lg-6 div-cell-dark p-0">
+			<h3 class="stats-heading erg-span">Block summary</h3>
+					<table class="table-dark key-value-table">
+						<tbody>
+							<tr>
+								<td><strong>Blocks mined</strong></td>
+								<td id="statsBlocksMined" class="stats-value skeleton"></td>
+							</tr>
+							<tr>
+								<td><strong><span class="d-none d-xl-inline">Average mining time</span><span class="d-xl-none">Avg mine time</span></strong></td>
+								<td id="statsAverageMiningTime" class="stats-value skeleton"></td>
+							</tr>
+							<tr>
+								<td><strong>Coins mined</strong></td>
+								<td id="statsCoinsMined" class="stats-value skeleton"></td>
+							</tr>
+						</tbody>
+					</table>
+			<h3 class="stats-heading erg-span">Transactions summary</h3>
+					<table class="table-dark key-value-table">
+						<tbody>
+							<tr>
+								<td><strong><span class="d-none d-xl-inline">Number of Transactions</span><span class="d-xl-none">Transactions</span></strong></td>
+								<td id="statsNumberOfTransactions" class="stats-value skeleton"></td>
+							</tr>
+							<tr>
+								<td><strong><span class="d-none d-xl-inline">Total Transaction Fees</span><span class="d-xl-none">Transaction fees</span></strong></td>
+								<td id="statsTotalTransactionFees" class="stats-value skeleton"></td>
+							</tr>
+						</tbody>
+					</table>
+		</div>
+		<div id="statsHolderRight" class="col-lg-6 div-cell-dark p-0">
+			<h3 class="stats-heading erg-span">Mining cost</h3>
+					<table class="table-dark key-value-table">
+						<tbody>
+							<tr>
+								<td><strong><span class="d-none d-xl-inline">Total Miners Revenue</span><span class="d-xl-none">Miners revenue</span></strong></td>
+								<td id="statsTotalMinersRevenue" class="stats-value skeleton"></td>
+							</tr>
+							<tr>
+								<td><strong><span class="d-none d-xl-inline">% Earned From Transaction Fees</span><span class="d-xl-none">% From fees</span></strong></td>
+								<td id="statsEarnedFromTransactionFees" class="stats-value skeleton"></td>
+							</tr>
+							<tr>
+								<td><strong><span class="d-none d-xl-inline">% Of Transaction Volume</span><span class="d-xl-none">% Of volume</span></strong></td>
+								<td id="statsOfTransactionVolume" class="stats-value skeleton"></td>
+							</tr>
+							<tr>
+								<td><strong><span class="d-none d-xl-inline">Cost per Transaction</span><span class="d-xl-none">Cost per tx</span></strong></td>
+								<td id="statsCostPerTransaction" class="stats-value skeleton"></td>
+							</tr>
+							<tr>
+								<td><strong>Difficulty</strong></td>
+								<td id="statsDifficulty" class="stats-value skeleton"></td>
+							</tr>
+							<tr>
+								<td><strong>Hash Rate</strong></td>
+								<td id="statsHashRate" class="stats-value skeleton"></td>
+							</tr>
+						</tbody>
+					</table>
 		</div>
 	</div>
 
@@ -220,5 +207,5 @@
 {% block scripts %}
 	<script src="https://unpkg.com/@sjaakp/telex/dist/telex.js"></script>
 	<script src="./scripts/common/prices.js?v=44"></script>
-	<script src="./scripts/index.js?v=44"></script>
+	<script src="./scripts/index.js?v=45"></script>
 {% endblock %}

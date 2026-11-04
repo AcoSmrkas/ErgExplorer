@@ -99,10 +99,6 @@ html[data-theme="mew"] {
     color: var(--footer) !important;
   }
 }
-.stats-value.skeleton:empty::before {
-  margin-bottom: 1rem;
-}
-
 .count-up-in {
   animation: count-up-fade 0.4s ease-out;
 }
@@ -126,14 +122,19 @@ html[data-theme="mew"] {
   font-variant-numeric: tabular-nums;
 }
 
-#statsHolderLeft .col-12 > h3 {
-  margin-left: -0.25rem;
+//The ERG values are the long ones
+#statsHolderLeft .key-value-table td:first-child,
+#statsHolderRight .key-value-table td:first-child {
+  width: 35%;
 }
 
-@media (max-width: 575.98px) {
-  #statsHolderLeft .col-12 > h3 {
-    margin-left: 0;
-  }
+//As tall as a row, so both columns line up with 2 headings on the left and 1 on the right
+.stats-heading {
+  font-size: 1.3rem;
+  line-height: 24px;
+  margin: 0;
+  padding: 8px 12px;
+  white-space: nowrap;
 }
 
 //Fixed-width digits so counting values do not jitter

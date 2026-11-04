@@ -1,4 +1,4 @@
-import { ORACLE_POOLS, fetchPoolBoxId, fetchPoolState, fetchOracleCounts, fetchOperators, fetchErgBalances, fetchRefreshHistory, fetchRateHistory } from './oracles/oracle-data.js?v=5';
+import { ORACLE_POOLS, fetchPoolBoxId, fetchPoolState, fetchOracleCounts, fetchOperators, fetchErgBalances, fetchRefreshHistory, fetchRateHistory } from './oracles/oracle-data.js?v=6';
 
 // Oracle pools: oracles lists them, oracles#pool=<slug> shows one. The pool goes in the hash, which
 // params.js reads on every host, so the page needs no server rewrite.
@@ -572,31 +572,31 @@ function marketPriceAt(marketPoints, time) {
 
 /* Technical */
 
-// The tokens on the left, the contract and its settings on the right; the pool box's values wait for its state
+// The tokens, then the contract and its settings, split evenly over the two columns. The pool box's
+// values wait for its state.
 function printTechnical() {
 	const state = poolState;
-	const tokens = [
+	const rows = [
 		['Pool NFT', formatTokenLink(pool.poolNft)],
 		['Oracle token', formatTokenLink(pool.oracleToken)],
 		['Refresh NFT', pool.refreshNft ? formatTokenLink(pool.refreshNft) : null],
 		['Buyback NFT', pool.buybackNft ? formatTokenLink(pool.buybackNft) : null],
-		['Buyback token', pool.buybackToken ? formatTokenLink(pool.buybackToken) : null]
-	];
-	const contract = [
+		['Buyback token', pool.buybackToken ? formatTokenLink(pool.buybackToken) : null],
 		['Pool contract', !state ? SKELETON : state.address ? `<a href="${getWalletAddressUrl(state.address)}">${formatAddressString(state.address, 10)}</a>` : null],
 		['Pool box', state ? `<a href="${getBoxUrl(state.boxId)}">${formatAddressString(state.boxId, 10)}</a>` : SKELETON],
-		['Raw datapoint', state ? state.rawDatapoint : SKELETON],
-		['Payout', pool.payoutNanoErg == null ? '&ndash;' : formatErgValueString(pool.payoutNanoErg, 4, false, true) + ' per datapoint'],
-		['Deviation', pool.deviation == null ? '&ndash;' : pool.deviation + '%'],
-		['Consensus', pool.consensus == null ? '&ndash;' : pool.consensus + ' of ' + pool.oracleCount + ' oracles']
-	];
+		['Raw datapoint', state ? `${state.rawDatapoint} <span class="text-light d-none d-lg-inline">${pool.rawUnit}</span>` : SKELETON],
+		['Payout', pool.payoutNanoErg == null ? null : formatErgValueString(pool.payoutNanoErg, 4, false, true) + ' per datapoint'],
+		['Deviation', pool.deviation == null ? null : pool.deviation + '%'],
+		['Consensus', pool.consensus == null ? null : pool.consensus + ' of ' + pool.oracleCount + ' oracles']
+	].filter((row) => row[1] != null);
+	const half = Math.ceil(rows.length / 2);
 
-	$('#technicalTokens').html(formatTechnicalRows(tokens));
-	$('#technicalContract').html(formatTechnicalRows(contract));
+	$('#technicalLeft').html(formatTechnicalRows(rows.slice(0, half)));
+	$('#technicalRight').html(formatTechnicalRows(rows.slice(half)));
 }
 
 function formatTechnicalRows(rows) {
-	return rows.filter((row) => row[1] != null).map((row) => `
+	return rows.map((row) => `
 		<tr>
 			<td><strong>${row[0]}</strong></td>
 			<td>${row[1]}</td>
