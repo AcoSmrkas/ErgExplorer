@@ -320,9 +320,12 @@ select, option {
 	}
 }
 
-//Label and value rows, striped: every row one line of the same height, so two columns line up
+//Label and value rows, striped and lined like .table: every row one line of the same height, so two columns line up
 .key-value-table {
 	border: 0 !important;
+	border-collapse: separate;
+	border-spacing: 0;
+	padding: 0;
 	width: 100%;
 
 	> tbody {
@@ -330,8 +333,14 @@ select, option {
 	}
 
 	> tbody > tr > td {
+		border-bottom: 1px solid var(--borders);
 		padding: 8px 12px;
 		vertical-align: top;
+	}
+
+	//The holder's border closes the last row
+	&:last-child > tbody > tr:last-child > td {
+		border-bottom: 0;
 	}
 
 	> tbody > tr:nth-child(odd) {
