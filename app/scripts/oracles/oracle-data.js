@@ -1,6 +1,6 @@
 import { ORACLE_POOL_V1_TEMPLATES, ORACLE_POOL_V2_TEMPLATES } from '../addresses/constants.js?v=7';
 
-export { ORACLE_POOLS } from './pools.js?v=1';
+export { ORACLE_POOLS } from './pools.js?v=2';
 
 // Everything here is read from indexed nodes through our gateway (see api-client.js): pool, refresh,
 // datapoint and buyback boxes by token id, refresh txs by the pool's address, balances, and block

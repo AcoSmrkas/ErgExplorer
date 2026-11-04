@@ -1,4 +1,4 @@
-import { ORACLE_POOLS, fetchPoolBoxId, fetchPoolState, fetchOracleCounts, fetchOperators, fetchErgBalances, fetchRefreshHistory, fetchRateHistory } from './oracles/oracle-data.js?v=5';
+import { ORACLE_POOLS, fetchPoolBoxId, fetchPoolState, fetchOracleCounts, fetchOperators, fetchErgBalances, fetchRefreshHistory, fetchRateHistory } from './oracles/oracle-data.js?v=6';
 
 // Oracle pools: oracles lists them, oracles#pool=<slug> shows one. The pool goes in the hash, which
 // params.js reads on every host, so the page needs no server rewrite.
@@ -585,7 +585,7 @@ function printTechnical() {
 	const contract = [
 		['Pool contract', !state ? SKELETON : state.address ? `<a href="${getWalletAddressUrl(state.address)}">${formatAddressString(state.address, 10)}</a>` : null],
 		['Pool box', state ? `<a href="${getBoxUrl(state.boxId)}">${formatAddressString(state.boxId, 10)}</a>` : SKELETON],
-		['Raw datapoint', state ? state.rawDatapoint : SKELETON],
+		['Raw datapoint (' + pool.rawUnit + ')', state ? state.rawDatapoint : SKELETON],
 		['Payout', pool.payoutNanoErg == null ? '&ndash;' : formatErgValueString(pool.payoutNanoErg, 4, false, true) + ' per datapoint'],
 		['Deviation', pool.deviation == null ? '&ndash;' : pool.deviation + '%'],
 		['Consensus', pool.consensus == null ? '&ndash;' : pool.consensus + ' of ' + pool.oracleCount + ' oracles']

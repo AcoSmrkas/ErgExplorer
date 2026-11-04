@@ -4,6 +4,7 @@
 // epoch preparation boxes), the counts from the datapoint boxes alive then.
 //
 // unit is what the rate is shown in ('USD' also turns on the market line), unitLabel the long form,
+// rawUnit what the raw datapoint on the chain counts,
 // decimals the unit's own decimals (the page shows two more). payoutNanoErg is per oracle per epoch
 // (v1 pays ERG; v2 pays reward tokens instead, see buybackToken). deviation is the most a datapoint
 // may differ from the others, in percent; consensus the fewest datapoints a refresh takes.
@@ -19,6 +20,7 @@ export const ORACLE_POOLS = [
 		version: 1,
 		unit: 'USD',
 		unitLabel: 'USD per ERG',
+		rawUnit: 'nanoERG per USD',
 		decimals: 2,
 		poolNft: '011d3364de07e5a26f0c4eef0852cddb387039a921b7154ef3cab22c6eda887f',
 		oracleToken: '8c27dd9d8a35aac1e3167d58858c0a8b4059b277da790552e37eba22df9b9035',
@@ -40,6 +42,7 @@ export const ORACLE_POOLS = [
 		version: 2,
 		unit: 'USD',
 		unitLabel: 'USD per ERG',
+		rawUnit: 'nanoERG per USD',
 		decimals: 2,
 		poolNft: '6a2b821b5727e85beb5e78b4efb9f0250d59cd48481d2ded2c23e91ba1d07c66',
 		oracleToken: '74fa4aee3607ceb7bdefd51a856861b5dbfa434a8f6c93bfe967de8ed1a30a78',
@@ -62,6 +65,7 @@ export const ORACLE_POOLS = [
 		version: 2,
 		unit: 'ERG/kg',
 		unitLabel: 'ERG per kg of gold',
+		rawUnit: 'nanoERG per kg',
 		decimals: 0,
 		poolNft: '3c45f29a5165b030fdb5eaf5d81f8108f9d8f507b31487dd51f4ae08fe07cf4a',
 		// "Gold Pool oracle token v3": the token the refresh contract counts. Older v1/v2 gold tokens
