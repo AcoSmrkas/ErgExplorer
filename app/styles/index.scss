@@ -130,6 +130,7 @@ html[data-theme="mew"] {
 
 //As tall as a row, so both columns line up with 2 headings on the left and 1 on the right
 .stats-heading {
+  border-bottom: 1px solid var(--borders);
   font-size: 1.3rem;
   line-height: 24px;
   margin: 0;
