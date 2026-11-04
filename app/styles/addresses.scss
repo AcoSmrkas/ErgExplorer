@@ -355,9 +355,42 @@ a.address-detail-rank {
 	white-space: nowrap;
 }
 
+// One line that cuts the middle of a long name and keeps its end (getTokenNameSplitHtml in main.js).
+// The head gives up its width first; the tail only shrinks once the head has none left.
+@mixin token-name-one-line {
+	align-items: center;
+	display: flex;
+	flex: 1 1 auto;
+	min-width: 0;
+
+	> .token-icon {
+		flex: none;
+	}
+
+	.token-name-head,
+	.token-name-tail {
+		min-width: 0;
+		overflow: hidden;
+		white-space: pre;
+	}
+
+	.token-name-head {
+		flex: 0 1000 auto;
+		text-overflow: ellipsis;
+	}
+
+	.token-name-tail {
+		flex: 0 1 auto;
+	}
+}
+
+.tx-value-token {
+	display: block;
+}
+
 // One line per token. An amount too wide to share it drops below the name, rather than scrolling the list sideways.
 .tokensContainer p {
-	align-items: baseline;
+	align-items: center;
 	column-gap: 0.6rem;
 	display: flex;
 	flex-wrap: wrap;
@@ -366,11 +399,19 @@ a.address-detail-rank {
 }
 
 .tokensContainer p > strong {
+	align-items: center;
+	display: flex;
 	flex: 1 1 0;
 	min-width: 3.5rem;
 	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+}
+
+.tokensContainer .token-link-split {
+	@include token-name-one-line;
+
+	> .token-icon {
+		margin-right: 0.25rem;
+	}
 }
 
 .tokensContainer p > span {
@@ -752,6 +793,41 @@ a.address-detail-rank {
 	.address-tx-table > tbody > tr > td:nth-child(5) > .address-string,
 	.address-tx-table > tbody > tr > td:nth-child(6) > .address-string {
 		white-space: normal;
+	}
+}
+
+// Long token names on one line. width: 0 keeps a name from widening the column and pushing the table off the
+// page, so the column gets a share of the table instead, and takes less when the others need it. That's some
+// 125px below 1400px, so a name that doesn't fit beside its amount drops below it. Narrower screens wrap the
+// whole name: phones can't hover for it, and under 100px a cut leaves too little of it.
+@media only screen and (min-width: 1200px) {
+	.address-tx-table > tbody > tr > td:nth-child(9) {
+		width: 20%;
+	}
+
+	.tx-value-token {
+		align-items: center;
+		column-gap: 0.25rem;
+		display: flex;
+		flex-wrap: wrap;
+		min-width: 100%;
+		width: 0;
+
+		@media (min-width: 1400px) {
+			flex-wrap: nowrap;
+		}
+
+		> strong {
+			flex: none;
+		}
+
+		> .token-link-split {
+			@include token-name-one-line;
+
+			> .token-icon {
+				margin-left: 0.25rem;
+			}
+		}
 	}
 }
 

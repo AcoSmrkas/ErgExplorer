@@ -767,11 +767,23 @@ function formatNftDescriptonJson(key, value, indent) {
 	return tab + '<strong>' + key + '</strong>: ' + value;
 }
 
-function getAssetTitle(asset, iconIsToTheLeft, scam = false) {
-	return getAssetTitleParams(asset, asset.tokenId, asset.name, iconIsToTheLeft, scam);
+function getAssetTitle(asset, iconIsToTheLeft, scam = false, splitName = false) {
+	return getAssetTitleParams(asset, asset.tokenId, asset.name, iconIsToTheLeft, scam, splitName);
 }
 
-function getAssetTitleParams(token, tokenId, name, iconIsToTheLeft, scam = false) {
+//A long name in two parts, so CSS can cut its middle on one line and keep the end that tells a series' tokens apart
+function getTokenNameSplitHtml(name) {
+	const chars = typeof Intl.Segmenter === 'function'
+		? Array.from(new Intl.Segmenter().segment(name), part => part.segment)
+		: Array.from(name);
+	const tailLength = chars.length > 14 ? 10 : 0;
+	const partHtml = (className, part) => '<span class="' + className + '">' + part.join('').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span>';
+
+	return partHtml('token-name-head', chars.slice(0, chars.length - tailLength)) +
+		(tailLength > 0 ? partHtml('token-name-tail', chars.slice(-tailLength)) : '');
+}
+
+function getAssetTitleParams(token, tokenId, name, iconIsToTheLeft, scam = false, splitName = false) {
 	let imgSrc = '';
 	if (hasIcon(tokenId)) {
 		imgSrc = getIcon(tokenId);
@@ -798,7 +810,7 @@ function getAssetTitleParams(token, tokenId, name, iconIsToTheLeft, scam = false
 	let displayName = (name == '' || name == null) ? formatAddressString(tokenId, 15) : name;
 	let dataName = ('' + displayName).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-	return '<a title="' + (scam ? 'Reported as suspicious by users.' : '') + '" class="token-link' + (scam ? ' text-danger' : '') + '" href="' + getTokenUrl(tokenId) + '" data-token-id="' + tokenId + '" data-token-name="' + dataName + '"' + (scam ? ' data-token-scam="1"' : '') + '>' + (iconIsToTheLeft ? iconHtml + ' ' : '') + displayName + (iconIsToTheLeft ? '' : ' ' + iconHtml) + '</a>';
+	return '<a title="' + (scam ? 'Reported as suspicious by users.' : '') + '" class="token-link' + (splitName ? ' token-link-split' : '') + (scam ? ' text-danger' : '') + '" href="' + getTokenUrl(tokenId) + '" data-token-id="' + tokenId + '" data-token-name="' + dataName + '"' + (scam ? ' data-token-scam="1"' : '') + '>' + (iconIsToTheLeft ? iconHtml + ' ' : '') + (splitName ? getTokenNameSplitHtml('' + displayName) : displayName) + (iconIsToTheLeft ? '' : ' ' + iconHtml) + '</a>';
 }
 
 //A raw amount past 2^53 (10M of a 9-decimal token) is divided exactly. What it comes to is a number
