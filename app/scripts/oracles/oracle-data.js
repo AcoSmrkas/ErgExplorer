@@ -249,6 +249,12 @@ async function currentPoolBox(pool) {
 	return boxes[0];
 }
 
+/** The pool box's id, which changes with every refresh: one request, for noticing one */
+export async function fetchPoolBoxId(pool) {
+	const box = await currentPoolBox(pool);
+	return box.boxId;
+}
+
 /** v1 only: the epoch preparation box carries no R6; the live epoch box keeps the preparation script's hash there */
 function isV1LiveEpoch(box) {
 	return hasTemplate(box.ergoTree, ORACLE_POOL_V1_TEMPLATES.LIVE_EPOCH);
