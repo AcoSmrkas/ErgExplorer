@@ -944,7 +944,7 @@ function showQRcode(text) {
 }
 
 //Pass a tx's inputs with its outputs to tag the outputs that return change to a spending wallet
-function formatInputsOutputs(data, inputs = null) {
+function formatInputsOutputs(data, inputs = null, tokenMarks = {}) {
 	let formattedData = '';
 	const changeAddresses = new Set();
 
@@ -957,7 +957,7 @@ function formatInputsOutputs(data, inputs = null) {
 	for (let i = 0; i < data.length; i++) {
 		const change = isWalletBox(data[i]) && changeAddresses.has(getBoxAddress(data[i]));
 
-		formattedData += formatBox(data[i], false, false, change);
+		formattedData += formatBox(data[i], false, false, change, tokenMarks);
 	}
 
 	return formattedData;
@@ -1012,7 +1012,7 @@ function getFleetNetwork() {
 		: qfleetSDKcore.Network.Mainnet;
 }
 
-function formatBox(box, trueBox = false, unspent = false, change = false) {
+function formatBox(box, trueBox = false, unspent = false, change = false, tokenMarks = {}) {
 	if (box.id) {
 		box.boxId = box.id;
 	}
@@ -1086,7 +1086,7 @@ function formatBox(box, trueBox = false, unspent = false, change = false) {
 	}
 
 	//Assets
-	html += formatBoxTokens(box.assets, !trueBox);
+	html += formatBoxTokens(box.assets, !trueBox, tokenMarks);
 
 	//Registers
 	html += formatBoxRegisters(box.additionalRegisters);
@@ -1100,8 +1100,43 @@ function formatBox(box, trueBox = false, unspent = false, change = false) {
 
 const BOX_TOKENS_SHOWN = 6;
 
+//Icons rather than emoji, which many token names here are made of. Font Awesome's free set has no sparkles
+const TOKEN_MARK_MINTED = '<span class="token-mark token-mark-minted" title="Minted in this transaction"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M6.5 1.5c.7 3.6 2.1 5 5.7 5.7-3.6.7-5 2.1-5.7 5.7-.7-3.6-2.1-5-5.7-5.7 3.6-.7 5-2.1 5.7-5.7Z"/><path d="M12.6 9.8c.3 1.7.9 2.3 2.6 2.6-1.7.3-2.3.9-2.6 2.6-.3-1.7-.9-2.3-2.6-2.6 1.7-.3 2.3-.9 2.6-2.6Z"/></svg></span>';
+const TOKEN_MARK_BURNED = '<span class="token-mark token-mark-burned" title="Burned in this transaction"><i class="fas fa-fire-flame-curved"></i></span>';
+
+//The marks for a tx's tokens, by token id: on the side giving a token up if the tx burned it, and on the side
+//receiving it if the tx minted it. A new token takes the id of the tx's first input. A burned one is in the
+//inputs in a larger amount than in the outputs, which only falls short if a pending tx's input has no assets
+function getTokenMarks(tx) {
+	const burned = new Map();
+	const add = (boxes, sign) => {
+		for (const box of boxes) {
+			for (const asset of box.assets || []) {
+				burned.set(asset.tokenId, (burned.get(asset.tokenId) || new BigNumber(0)).plus(new BigNumber(String(asset.amount)).times(sign)));
+			}
+		}
+	};
+
+	add(tx.inputs, 1);
+	add(tx.outputs, -1);
+
+	const marks = { sent: {}, received: {} };
+
+	for (const [tokenId, amount] of burned) {
+		if (amount.isGreaterThan(0)) {
+			marks.sent[tokenId] = TOKEN_MARK_BURNED;
+		}
+	}
+
+	if (tx.inputs.length > 0) {
+		marks.received[tx.inputs[0].boxId || tx.inputs[0].id] = TOKEN_MARK_MINTED;
+	}
+
+	return marks;
+}
+
 //A box card's token list. Amounts are shortened (1.2M) unless noshort
-function formatBoxTokens(assets, noshort) {
+function formatBoxTokens(assets, noshort, tokenMarks = {}) {
 	if (assets == undefined || assets.length == 0) {
 		return '';
 	}
@@ -1115,7 +1150,7 @@ function formatBoxTokens(assets, noshort) {
 		let assetPrice = formatAssetDollarPrice(asset.amount, asset.decimals, asset.tokenId);
 
 		html += '<div class="box-token"><span class="box-token-name">' + getAssetTitle(asset, true) + '</span>'
-			+ '<span class="box-token-amount">' + formatAssetValueString(asset.amount, asset.decimals, 4, noshort)
+			+ '<span class="box-token-amount">' + (tokenMarks[asset.tokenId] || '') + formatAssetValueString(asset.amount, asset.decimals, 4, noshort)
 			+ (assetPrice == -1 ? '' : ' <span class="text-light">' + formatDollarPriceString(assetPrice) + '</span>') + '</span></div>';
 	}
 
