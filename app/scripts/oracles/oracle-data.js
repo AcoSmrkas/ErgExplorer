@@ -1,6 +1,6 @@
 import { ORACLE_POOL_V1_TEMPLATES, ORACLE_POOL_V2_TEMPLATES } from '../addresses/constants.js?v=7';
 
-export { ORACLE_POOLS } from './pools.js?v=2';
+export { ORACLE_POOLS } from './pools.js?v=3';
 
 // Everything here is read from indexed nodes through our gateway (see api-client.js): pool, refresh,
 // datapoint and buyback boxes by token id, refresh txs by the pool's address, balances, and block
@@ -33,6 +33,7 @@ const RATE_DENSE_BOXES = RATE_PAGE * (RATE_SAMPLES + 1);
 // Block headers read to place the box heights in time
 const RATE_ANCHORS = 8;
 const BLOCK_MS = 120000;
+const KG_PER_TROY_OUNCE = 0.0311034768;
 
 const cache = new Map();
 
@@ -228,12 +229,12 @@ function addressOfKey(publicKey) {
  * A datapoint (raw Long) in the pool's display unit:
  * - ERG/USD v1 and v2: nanoErg per 1 USD (3591497761 = 3.59 ERG per USD), so USD per ERG = 1e9 / raw.
  *   SigUSD divides the same value by 100 for its cent.
- * - XAU: nanoErg per kg of gold (454612676018062 = 454,612.68 ERG per kg), so ERG per kg = raw / 1e9.
- *   DexyGold divides it by 1e6 for its milligram.
+ * - XAU: nanoErg per kg of gold (454612676018062 = 454,612.68 ERG per kg = 14,140.03 ERG per troy ounce),
+ *   so ERG per troy ounce = raw / 1e9 * KG_PER_TROY_OUNCE. DexyGold divides raw by 1e6 for its milligram.
  */
 function displayRate(pool, raw) {
 	if (raw == null || raw <= 0n) return null;
-	return pool.slug === 'xau' ? Number(raw) / 1e9 : 1e9 / Number(raw);
+	return pool.slug === 'xau' ? Number(raw) / 1e9 * KG_PER_TROY_OUNCE : 1e9 / Number(raw);
 }
 
 function tokenAmount(box, tokenId) {
