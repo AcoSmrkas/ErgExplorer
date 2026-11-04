@@ -1,6 +1,6 @@
 import { AddressState } from './state.js';
-import { TxType, TxInOut, AddressType } from './constants.js?v=6';
-import { detectContractFromErgotree, detectLithosFill, getTxType, getTxInOutType, analyzeTransfers } from './transaction-analyzer.js?v=6';
+import { TxType, TxInOut, AddressType } from './constants.js?v=7';
+import { detectContractFromErgotree, detectLithosFill, getTxType, getTxInOutType, analyzeTransfers } from './transaction-analyzer.js?v=7';
 import { PendingTracker } from './pending-tracker.js?v=9';
 
 function formatContractAddress(boxes, address, fallback, walletAddress) {
