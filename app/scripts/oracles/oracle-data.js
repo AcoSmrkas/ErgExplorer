@@ -19,6 +19,8 @@ const PARALLEL_REQUESTS = 6;
 const BALANCE_REQUESTS = 10;
 // Datapoints posted within this many blocks of the newest get exact times (see datapointTimes)
 const EXACT_TIME_BLOCKS = 720;
+// An oracle counts as live while its datapoint box is at most this many epochs behind the pool box
+const LIVE_EPOCHS = 2;
 
 const BOX_PAGE = MAX_PAGE;
 const MAX_DATAPOINT_PAGES = 5;
@@ -312,16 +314,16 @@ async function v1RecentEpochs(pool) {
 	return new Map(recent.items.slice(0, 3).filter(isV1LiveEpoch).map(box => [box.boxId, box]));
 }
 
-/** A datapoint box test for "live", reading only the pool's own boxes (see v1Operators / v2Operators) */
+/**
+ * A datapoint box test for "live": the box was made within LIVE_EPOCHS epochs of blocks before the
+ * current pool box. Heights rather than an exact epoch match, because an oracle can miss one refresh
+ * (posted a block late, or collected by the last refresh and not yet posted again) and still be
+ * running, and because the gateway may read the pool box and the datapoints from nodes a block apart.
+ */
 async function liveTest(pool) {
-	if (pool.version === 1) {
-		const recentEpochs = await v1RecentEpochs(pool);
-		return box => recentEpochs.has(decodeBytes(box.additionalRegisters.R5));
-	}
-
 	const poolBox = await currentPoolBox(pool);
-	const poolEpoch = decodeNumber(poolBox.additionalRegisters.R5);
-	return box => (box.additionalRegisters.R5 && decodeNumber(box.additionalRegisters.R5) === poolEpoch) || box.transactionId === poolBox.transactionId;
+	const cutoff = poolBox.inclusionHeight - LIVE_EPOCHS * pool.epochLength;
+	return box => box.inclusionHeight >= cutoff;
 }
 
 /**
@@ -335,11 +337,10 @@ export async function fetchOracleCounts(pool) {
 
 /**
  * v1 datapoints: R4 the oracle's key, R5 the id of the live epoch box posted to, R6 the datapoint.
- * Live: posted to the current live epoch box or to the one the latest collection spent (the pool NFT's
- * last three boxes hold both: live, prep, live or prep, live, prep). epoch: that live epoch's end height.
+ * epoch: that live epoch's end height, read from the pool NFT's last boxes when it is one of those.
  */
 async function v1Operators(pool, boxes) {
-	const recentEpochs = await v1RecentEpochs(pool);
+	const [recentEpochs, isLive] = await Promise.all([v1RecentEpochs(pool), liveTest(pool)]);
 
 	const epochBoxIds = [...new Set(boxes.map(box => decodeBytes(box.additionalRegisters.R5)).filter(Boolean))];
 	const epochEnds = new Map();
@@ -357,7 +358,7 @@ async function v1Operators(pool, boxes) {
 			box,
 			rate: displayRate(pool, decodeNumber(registers.R6)),
 			epoch: epochEnds.has(epochBoxId) ? epochEnds.get(epochBoxId) : null,
-			live: recentEpochs.has(epochBoxId),
+			live: isLive(box),
 			wins: null
 		};
 	});
@@ -366,8 +367,7 @@ async function v1Operators(pool, boxes) {
 /**
  * v2 datapoints: R4 the oracle's key, R5 the pool epoch posted for, R6 the datapoint. A refresh
  * spends the datapoints it collects and gives them back holding only R4; their last datapoint and
- * epoch are then read from that refresh's inputs. Live: posted for the current epoch, or collected
- * by the latest refresh.
+ * epoch are then read from that refresh's inputs.
  */
 async function v2Operators(pool, boxes) {
 	const isLive = await liveTest(pool);
