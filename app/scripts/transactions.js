@@ -468,12 +468,15 @@ function printTransaction(data, mempool) {
 	for (let i = 0; i < burnedAssetKeys.length; i++) {
 		let asset = burnedAssets[burnedAssetKeys[i]];
 
-		if (asset.amount == 0) {
-			delete burnedAssets[burnedAssetKeys[i]];
-		} else if (asset.amount > 0) {
+		// Less in the inputs than the outputs means it was minted, not burned
+		if (asset.amount > 0) {
 			hasBurnedAssets = true;
+		} else {
+			delete burnedAssets[burnedAssetKeys[i]];
 		}
 	}
+
+	const tokenMarks = getTokenMarks(data);
 
 	//Id
 	$('#txHeader').html('<p><a href="Copy to clipboard!" onclick="copyTransactionAddress(event)">' + data.id + ' &#128203;</a></p>');
@@ -489,15 +492,15 @@ function printTransaction(data, mempool) {
 	}
 	
 	//Inputs
-	$('#txInputs').html(formatInputsOutputs(data.inputs));
+	$('#txInputs').html(formatInputsOutputs(data.inputs, null, tokenMarks.sent));
 	$('#txInputsCount').text('(' + data.inputs.length + ')');
 
 	//Outputs
-	$('#txOutputs').html(formatInputsOutputs(data.outputs, data.inputs));
+	$('#txOutputs').html(formatInputsOutputs(data.outputs, data.inputs, tokenMarks.received));
 	$('#txOutputsCount').text('(' + data.outputs.length + ')');
 
 	//Simple mode's net view
-	printNetFlows(data);
+	printNetFlows(data, tokenMarks);
 
 	//Burned
 	if (hasBurnedAssets) {
@@ -860,7 +863,7 @@ function restoreTitle() {
  * A sender who puts in a 1B LIT box and gets 950M back is shown sending 50M. An address that
  * both gives and gets, as either side of a swap does, is in both columns.
  */
-function printNetFlows(data) {
+function printNetFlows(data, tokenMarks) {
 	let shown = false;
 
 	try {
@@ -870,10 +873,10 @@ function printNetFlows(data) {
 			const sent = flows.map(flow => getFlowSide(flow, -1)).filter(Boolean);
 			const received = flows.map(flow => getFlowSide(flow, 1)).filter(Boolean);
 
-			$('#txSent').html(sent.length > 0 ? sent.map(formatNetFlow).join('') : formatNoFlow());
+			$('#txSent').html(sent.length > 0 ? sent.map(side => formatNetFlow(side, tokenMarks.sent)).join('') : formatNoFlow());
 			$('#txSentCount').text('(' + sent.length + ')');
 
-			$('#txReceived').html(received.length > 0 ? received.map(formatNetFlow).join('') : formatNoFlow());
+			$('#txReceived').html(received.length > 0 ? received.map(side => formatNetFlow(side, tokenMarks.received)).join('') : formatNoFlow());
 			$('#txReceivedCount').text('(' + received.length + ')');
 
 			shown = true;
@@ -942,7 +945,7 @@ function toPlainAmount(amount) {
 }
 
 // One address's side, in the box card's style
-function formatNetFlow(side) {
+function formatNetFlow(side, tokenMarks) {
 	if (side.address == FEE_ADDRESS) {
 		return formatFeeBox({ value: side.erg });
 	}
@@ -958,7 +961,7 @@ function formatNetFlow(side) {
 		html += '<div class="box-value">' + formatErgValueString(side.erg, 9, true, true) + ' <span class="text-light">' + formatAssetDollarPriceString(side.erg, ERG_DECIMALS, 'ERG') + '</span></div>';
 	}
 
-	html += formatBoxTokens(side.tokens, true);
+	html += formatBoxTokens(side.tokens, true, tokenMarks);
 
 	return html + '</div></div>';
 }

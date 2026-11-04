@@ -1348,6 +1348,35 @@ html[data-bs-theme="light"] .genesis-chip {
 	font-variant-numeric: tabular-nums;
 }
 
+// A token a tx minted or burned (getTokenMarks in main.js), beside its amount
+.token-mark {
+	cursor: help;
+	margin-right: 0.3em;
+
+	svg {
+		height: 1.05em;
+		vertical-align: -0.15em;
+		width: 1.05em;
+	}
+}
+
+.token-mark-minted {
+	color: #e6b422;
+}
+
+.token-mark-burned {
+	color: #f0541e;
+}
+
+// Past the light theme's rule that colors every span, and darker to show on white
+html[data-bs-theme="light"] .token-mark-minted {
+	color: #b8860b;
+}
+
+html[data-bs-theme="light"] .token-mark-burned {
+	color: #d9480f;
+}
+
 .box-grid {
 	display: grid;
 	grid-template-columns: max-content minmax(0, 1fr);

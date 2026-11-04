@@ -329,6 +329,12 @@ export const TransactionFormatter = {
 		// Fee
 		html += '<td class="d-none d-lg-table-cell">' + feeHtml + '</td>';
 
+		// Marks go by which way the token moved, so before the amounts lose their sign below
+		const tokenMarks = getTokenMarks(item);
+		for (const asset of Object.values(totalTransferedAssets.assets)) {
+			asset.mark = (asset.amount.isNegative() ? tokenMarks.sent : tokenMarks.received)[asset.tokenId] || '';
+		}
+
 		// Value
 		if (txInOut !== TxInOut.Mixed) {
 			if (totalTransferedAssets.value.isNegative()) {
@@ -356,7 +362,7 @@ export const TransactionFormatter = {
 
 				const sign = txInOut === TxInOut.Out ? '<span class="tx-sign">-</span>' : '';
 				const isScan = AddressState.scamList.includes(asset.tokenId);
-				valueStr += '<span class="tx-value-token"><strong>' + sign + formatAssetValueString(asset.amount, asset.decimals, 4) + '</strong> ' +
+				valueStr += '<span class="tx-value-token"><strong>' + asset.mark + sign + formatAssetValueString(asset.amount, asset.decimals, 4) + '</strong> ' +
 					getAssetTitle(asset, false, isScan, true) + '</span>';
 			}
 		}
