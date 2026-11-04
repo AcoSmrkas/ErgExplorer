@@ -182,7 +182,7 @@ export const NftManager = {
 			const assetTypeConfig = assetTypeTabs.find(config => config.type === nft.type);
 			if (!assetTypeConfig || !nftHolderId || !nftContentHolderId) return;
 
-			html[nft.type] += '<a href="' + getTokenUrl(nft.data.id) + '"><div class="card m-1" style="width: 100px;"><div class="cardImgHolder"><img onload="onNftImageLoaded(this, \'nft-img-owned\')" onerror="onNftImageLoaded(this, \'nft-img-owned\')" csrc="' + cSrc + '" src="' + imgSrc + '" class="nft-img-owned card-img-top p-4"></div><div class="card-body p-2"><p class="card-text">' + nft.data.name + '</p></div></div></a>';
+			html[nft.type] += '<a href="' + getTokenUrl(nft.data.id) + '" data-token-id="' + nft.data.id + '"><div class="card m-1" style="width: 100px;"><div class="cardImgHolder"><img onload="onNftImageLoaded(this, \'nft-img-owned\')" onerror="onNftImageLoaded(this, \'nft-img-owned\')" csrc="' + cSrc + '" src="' + imgSrc + '" class="nft-img-owned card-img-top p-4"></div><div class="card-body p-2"><p class="card-text">' + nft.data.name + '</p></div></div></a>';
 
 			assetTypeCounts[assetTypeConfig.key]++;
 			AddressState.nftsCount++;
@@ -333,11 +333,11 @@ export const NftManager = {
 				if (!assetTypeConfig || !nftHolderId) return;
 
 				const isBurned = nft.data.isBurned === 't';
-				html[nft.type] += '<a href="' + getTokenUrl(nft.data.id) + '"><div class="card m-1" style="width: 100px;' + (isBurned ? 'border:1.5px solid red;' : '') + '"><div class="cardImgHolder"><img onload="onNftImageLoaded(this, \'nft-img-issued\')" onerror="onNftImageLoaded(this, \'nft-img-issued\')" csrc="' + cSrc + '" ' + (isBurned ? 'style="opacity: 0.4;"' : '') + 'src="' + imgSrc + '" class="nft-img-issued card-img-top p-4"></div><div class="card-body p-2"><p class="card-text">' + nft.data.name + '</p></div></div></a>';
+				html[nft.type] += '<a href="' + getTokenUrl(nft.data.id) + '" data-token-id="' + nft.data.id + '"><div class="card m-1" style="width: 100px;' + (isBurned ? 'border:1.5px solid red;' : '') + '"><div class="cardImgHolder"><img onload="onNftImageLoaded(this, \'nft-img-issued\')" onerror="onNftImageLoaded(this, \'nft-img-issued\')" csrc="' + cSrc + '" ' + (isBurned ? 'style="opacity: 0.4;"' : '') + 'src="' + imgSrc + '" class="nft-img-issued card-img-top p-4"></div><div class="card-body p-2"><p class="card-text">' + nft.data.name + '</p></div></div></a>';
 				assetTypeCounts[assetTypeConfig.key]++;
 			} else {
 				nftHolderId = '#issuedTokenHolder';
-				html['token'] += '<p><a href="' + getTokenUrl(nft.data.id) + '">' + nft.data.name + ' - ' + formatAddressString(nft.data.id) + '</a>' + (nft.data.isBurned === 't' ? ' (<span class="text-danger">Burned</span>)' : '') + '</p>';
+				html['token'] += '<p><a href="' + getTokenUrl(nft.data.id) + '" data-token-id="' + nft.data.id + '">' + nft.data.name + ' - ' + formatAddressString(nft.data.id) + '</a>' + (nft.data.isBurned === 't' ? ' (<span class="text-danger">Burned</span>)' : '') + '</p>';
 				assetTypeCounts.token++;
 			}
 

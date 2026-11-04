@@ -5,12 +5,12 @@
 
 import { AddressState } from './state.js';
 import { ApiClient } from './api-client.js?v=59';
-import { BalanceSummary } from './balance-summary.js?v=72';
+import { BalanceSummary } from './balance-summary.js?v=73';
 import { AddressDetails } from './address-details.js?v=63';
 import { TransactionFormatter } from './transaction-formatter.js?v=81';
 import { UIControllers } from './ui-controllers.js?v=65';
 import { PendingTracker } from './pending-tracker.js?v=9';
-import { NftManager } from './nft-manager.js';
+import { NftManager } from './nft-manager.js?v=1';
 import { MiningPanel } from './mining.js?v=1';
 import { getTxType, isWalletAddress, getTxInOutType, analyzeTransfers } from './transaction-analyzer.js?v=7';
 
@@ -507,7 +507,9 @@ function onMempoolAndTransactionsDataFetched() {
 	// Calculate total from API response totals
 	const totalTxCount = (AddressState.mempoolData?.total || 0) + (AddressState.transactionsData?.total || 0);
 	AddressState.totalTransactions = totalTxCount;
-	$('#totalTransactions').html('<strong>Total transactions:</strong> ' + AddressState.totalTransactions);
+	$('#totalTransactions')
+		.html('<strong>' + totalTxCount.toLocaleString('en-US') + '</strong> ' + (totalTxCount === 1 ? 'tx' : 'txs'))
+		.toggle(totalTxCount > 0);
 
 	if (AddressState.totalTransactions > 0) {
 		// The 60s refresh mostly finds nothing new: leave the rows (and any open token popup or
