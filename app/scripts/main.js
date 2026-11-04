@@ -785,23 +785,28 @@ function getTokenNameSplitHtml(name) {
 
 function getAssetTitleParams(token, tokenId, name, iconIsToTheLeft, scam = false, splitName = false) {
 	let imgSrc = '';
+	let hasThumb = false;
 	if (hasIcon(tokenId)) {
 		imgSrc = getIcon(tokenId);
+		hasThumb = true;
 	}
 
 	if (name == 'Crooks Finance Stake Key') {
 		imgSrc = 'https://crooks-fi.com/images/logo.png';
+		hasThumb = false;
 	}
 
 	if (name == 'Mew Fun Lottery Ticket') {
 		imgSrc = 'https://api.ergexplorer.com/nftcache/bafybeie6z4zm7ahjvlawjfq4idojdrahklksygpfmb4zvlrx3id3h5dyty.png';
+		hasThumb = false;
 	}
 
 	if (token && token.iconurl) {
 		imgSrc = token.iconurl;
+		hasThumb = true;
 	}
 
-	let iconHtml = '<img style="display: none;" onload="onTokenIconLoad(this)"  class="token-icon" src="' + imgSrc + '"/>';
+	let iconHtml = '<img style="display: none;" onload="onTokenIconLoad(this)"  class="token-icon" ' + (hasThumb ? getTokenThumbAttrs(tokenId, imgSrc) : 'src="' + imgSrc + '"') + '/>';
 
 	if (tokenId == 'ERG') {
 		return name;

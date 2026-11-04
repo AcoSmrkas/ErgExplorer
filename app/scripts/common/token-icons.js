@@ -136,6 +136,29 @@ function getIcon(tokenId) {
 	return tokenIcons[tokenId];
 }
 
+//Lists show icons at 18px, so they load a 64px thumbnail made by tools/token-thumbs.js. The originals
+//are up to 3 MB. A token that has no thumbnail yet falls back to its full icon.
+function getTokenThumbAttrs(tokenId, fullSrc) {
+	if (!/^[0-9a-f]{64}$/.test(tokenId)) {
+		return 'src="' + fullSrc + '"';
+	}
+
+	const escapedSrc = fullSrc.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+	return 'src="/images/tokens/thumbs/' + tokenId + '.webp" data-full-src="' + escapedSrc + '" onerror="onTokenThumbError(this)"';
+}
+
+function onTokenThumbError(element) {
+	const fullSrc = element.dataset.fullSrc;
+
+	if (fullSrc) {
+		delete element.dataset.fullSrc;
+		element.src = fullSrc;
+	} else {
+		element.remove();
+	}
+}
+
 function addIcon(tokenId) {
 	if (hasIcon(tokenId)) {
 		return;

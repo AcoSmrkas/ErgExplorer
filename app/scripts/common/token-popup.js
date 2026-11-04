@@ -153,7 +153,7 @@
 		var scam = (token && token.scam === true) || triggerScam;
 
 		var iconHtml = iconUrl
-			? '<img class="thp-icon" src="' + escapeHtml(iconUrl) + '" alt="" onerror="this.remove()" />'
+			? '<img class="thp-icon" ' + getTokenThumbAttrs(id, iconUrl) + ' alt="" />'
 			: '<i class="fas fa-coins thp-fa-icon"></i>';
 
 		var rows = '';
