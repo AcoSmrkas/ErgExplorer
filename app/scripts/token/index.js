@@ -114,19 +114,26 @@ window.onGetNftInfoDone = function(nftInfo, message) {
 
 	// Set token icon
 	let tImg = typeof getIcon === 'function' ? getIcon(TokenState.tokenData.id) : undefined;
+	let hasThumb = tImg != undefined;
 	if (tImg == undefined) {
 		tImg = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/' + TokenState.tokenData.id + '.svg';
 	}
 
 	if (TokenState.tokenData.name == 'Crooks Finance Stake Key') {
 		tImg = 'https://crooks-fi.com/images/logo.png';
+		hasThumb = false;
 	}
 
 	if (TokenState.tokenData.iconurl) {
 		tImg = TokenState.tokenData.iconurl;
+		hasThumb = true;
 	}
 
-	$('#tokenIconImg').attr('src', tImg);
+	if (hasThumb) {
+		setLargeTokenThumb($('#tokenIconImg')[0], TokenState.tokenData.id, tImg);
+	} else {
+		$('#tokenIconImg').attr('src', tImg);
+	}
 	$('#tokenDataHolder').show();
 
 	// Handle NFTs (special tokens with media)

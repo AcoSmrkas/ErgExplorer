@@ -147,6 +147,18 @@ function getTokenThumbAttrs(tokenId, fullSrc) {
 	return 'src="/images/tokens/thumbs/' + tokenId + '.webp" data-full-src="' + escapedSrc + '" onerror="onTokenThumbError(this)"';
 }
 
+//The token page shows its icon at 88px, so it loads the larger thumbnail, with the same fallback
+function setLargeTokenThumb(element, tokenId, fullSrc) {
+	if (!/^[0-9a-f]{64}$/.test(tokenId)) {
+		element.src = fullSrc;
+		return;
+	}
+
+	element.dataset.fullSrc = fullSrc;
+	element.onerror = () => onTokenThumbError(element);
+	element.src = '/images/tokens/thumbs/' + tokenId + '-176.webp';
+}
+
 function onTokenThumbError(element) {
 	const fullSrc = element.dataset.fullSrc;
 
