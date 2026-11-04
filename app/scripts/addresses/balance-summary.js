@@ -93,16 +93,11 @@ export const BalanceSummary = {
 	 */
 	async _displayBalance(data) {
 		// ERG balance
-		const ergBalance = formatErgValueString(data.confirmed.nanoErgs, 4, true);
-		let balanceHtml = ergBalance;
-
+		const ergBalance = formatErgValueString(data.confirmed.nanoErgs, 4, true, true);
 		const ergDollarValue = formatAssetDollarPrice(data.confirmed.nanoErgs, ERG_DECIMALS, 'ERG');
-		if (gotPrices) {
-			balanceHtml += '<span class="address-balance-fiat">' + formatDollarPriceString(ergDollarValue, 2) + '</span>';
-		}
 
 		$('#finalErgBalance')
-			.html(this._formatBalanceRow('<span class="erg-span">ERG</span>', balanceHtml))
+			.html(this._formatBalanceRow('ERG', ergBalance, formatDollarPriceString(ergDollarValue, 2)))
 			.css('display', 'grid');
 
 		// Tokens. A refresh can find fewer than before (a tx spent them), so a group left empty is hidden.
@@ -137,6 +132,7 @@ export const BalanceSummary = {
 				$('#financialAssetsHolder').show();
 			} else {
 				$('#financialAssetsHolder').hide();
+				this._hideTokenValueRows();
 			}
 
 			if (otherTokens.length > 0) {
@@ -148,6 +144,8 @@ export const BalanceSummary = {
 			} else {
 				$('#otherTokensHolder').hide();
 			}
+		} else {
+			this._hideTokenValueRows();
 		}
 
 		this._renderAddressHeader();
@@ -226,7 +224,7 @@ export const BalanceSummary = {
 
 		if (totalBalanceAssetsValue > 0) {
 			$('#finalAssetsBalance')
-				.html(this._formatBalanceRow('Tokens', this._formatTokensBalanceValue(totalBalanceAssetsValue)))
+				.html(this._formatUsdBalanceRow('Tokens', totalBalanceAssetsValue))
 				.css('display', 'grid');
 		} else {
 			$('#finalAssetsBalance').hide();
@@ -234,7 +232,7 @@ export const BalanceSummary = {
 
 		if (totalLiquidityValue > 0) {
 			$('#finalLiquidityBalance')
-				.html(this._formatBalanceRow('Liquidity', this._formatTokensBalanceValue(totalLiquidityValue)))
+				.html(this._formatUsdBalanceRow('Liquidity', totalLiquidityValue))
 				.css('display', 'grid');
 		} else {
 			$('#finalLiquidityBalance').hide();
@@ -242,7 +240,7 @@ export const BalanceSummary = {
 
 		if (totalBalanceAssetsValue > 0 || totalLiquidityValue > 0) {
 			$('#finalBalance')
-				.html(this._formatBalanceRow('Total', '$' + formatValue(totalPortfolioValue, 2)))
+				.html(this._formatUsdBalanceRow('Total', totalPortfolioValue))
 				.css('display', 'grid');
 		} else {
 			$('#finalBalance').hide();
@@ -251,17 +249,21 @@ export const BalanceSummary = {
 		return html;
 	},
 
-	_formatTokensBalanceValue(totalAssetsValue) {
+	// Only financial tokens fill these rows, so a refresh that finds none must clear them.
+	_hideTokenValueRows() {
+		$('#finalAssetsBalance, #finalLiquidityBalance, #finalBalance').hide();
+	},
+
+	_formatUsdBalanceRow(labelHtml, usdValue) {
 		if (!prices || !prices.ERG || prices.ERG <= 0) {
-			return '$' + formatValue(totalAssetsValue, 2);
+			return this._formatBalanceRow(labelHtml, '$' + formatValue(usdValue, 2));
 		}
 
-		const tokenErgValue = new BigNumber(totalAssetsValue)
+		const ergValue = new BigNumber(usdValue)
 			.dividedBy(prices.ERG)
 			.times(Math.pow(10, ERG_DECIMALS))
 			.toString();
-		return formatErgValueString(tokenErgValue, 4, true) +
-			'<span class="address-balance-fiat">' + formatDollarPriceString(totalAssetsValue, 2) + '</span>';
+		return this._formatBalanceRow(labelHtml, formatErgValueString(ergValue, 4, true, true), formatDollarPriceString(usdValue, 2));
 	},
 
 	async _loadLpTokenValues(lpTokens) {
@@ -337,8 +339,8 @@ export const BalanceSummary = {
 		}
 	},
 
-	_formatBalanceRow(labelHtml, valueHtml) {
-		return '<span class="address-balance-label">' + labelHtml + '</span><span class="address-balance-value">' + valueHtml + '</span>';
+	_formatBalanceRow(labelHtml, valueHtml, fiatHtml = '') {
+		return '<span class="address-balance-label">' + labelHtml + '</span><span class="address-balance-value">' + valueHtml + '</span><span class="address-balance-fiat">' + fiatHtml + '</span>';
 	},
 
 	/**
@@ -346,7 +348,7 @@ export const BalanceSummary = {
 	 */
 	_formatOtherTokensHtmlString(tokensArray, nftInfos = []) {
 		const nftInfoByTokenId = this._getNftInfoByTokenId(nftInfos);
-		const sortedTokens = this._sortOtherTokensByNftType(tokensArray, nftInfoByTokenId);
+		const sortedTokens = this._sortOtherTokens(tokensArray, nftInfoByTokenId);
 		let html = '';
 
 		sortedTokens.forEach(token => {
@@ -392,21 +394,26 @@ export const BalanceSummary = {
 		return nftInfoByTokenId;
 	},
 
-	_sortOtherTokensByNftType(tokensArray, nftInfoByTokenId) {
+	// These tokens have no price, and amounts mean nothing across tokens: a million of a joke token isn't worth
+	// more than a few of a real one. So recognised tokens lead, then the rest, A-Z within each group (#2 before #10).
+	_sortOtherTokens(tokensArray, nftInfoByTokenId) {
 		const nftTypeOrder = this._getNftTypeOrder();
+		const collator = new Intl.Collator('en', { numeric: true, sensitivity: 'base' });
 
-		return tokensArray
-			.map((token, index) => ({ token, index }))
-			.sort((a, b) => {
-				const aType = nftInfoByTokenId[a.token.tokenId] ? nftInfoByTokenId[a.token.tokenId].type : null;
-				const bType = nftInfoByTokenId[b.token.tokenId] ? nftInfoByTokenId[b.token.tokenId].type : null;
-				const aOrder = this._getNftTypeSortOrder(aType, nftTypeOrder);
-				const bOrder = this._getNftTypeSortOrder(bType, nftTypeOrder);
+		const group = token => {
+			if (AddressState.scamList.includes(token.tokenId)) return 300;
 
-				if (aOrder !== bOrder) return aOrder - bOrder;
-				return a.index - b.index;
-			})
-			.map(item => item.token);
+			const nftInfo = nftInfoByTokenId[token.tokenId];
+			if (nftInfo) return 200 + this._getNftTypeSortOrder(nftInfo.type, nftTypeOrder);
+
+			if (this._isLpToken(token)) return 100;
+			if (token.iconurl || hasIcon(token.tokenId)) return 0;
+
+			// Named in words first, then emoji-only or nameless
+			return /^[\p{L}\p{N}]/u.test(token.name || '') ? 1 : 2;
+		};
+
+		return [...tokensArray].sort((a, b) => group(a) - group(b) || collator.compare(a.name || '', b.name || ''));
 	},
 
 	_getNftTypeOrder() {

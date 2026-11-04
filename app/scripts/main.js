@@ -678,7 +678,7 @@ function formatAssetValueString(value, decimals, digits = 2, noshort = false) {
 }
 
 function formatAssetNameAndValueString(name, valueString, tokenId) {
-	return '<p><strong>' + name + '</strong>: <span class="text-white">' + valueString + '</span></p>';
+	return '<p><strong>' + name + '</strong><span class="text-white">' + valueString + '</span></p>';
 }
 
 function formatAssetDollarPriceString(tokenAmount, tokenDecimals, tokenId) {

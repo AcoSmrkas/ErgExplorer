@@ -154,18 +154,18 @@ select:hover {
 }
 
 .address-balance-rows {
-	display: flex;
-	flex-direction: column;
-	gap: 0.28rem;
+	column-gap: 0.4rem;
+	display: grid;
+	grid-template-columns: 5.35rem auto auto minmax(0, 1fr);
+	row-gap: 0.28rem;
 }
 
 .address-balance-row {
 	align-items: baseline;
-	column-gap: 0.75rem;
 	display: grid;
-	grid-template-columns: 5rem minmax(0, 1fr);
+	grid-column: 1 / -1;
+	grid-template-columns: subgrid;
 	line-height: 1.25;
-	max-width: 32rem;
 }
 
 .address-summary-loading {
@@ -185,22 +185,23 @@ select:hover {
 }
 
 .address-balance-value {
+	font-variant-numeric: tabular-nums;
 	min-width: 0;
 	overflow-wrap: anywhere;
+	text-align: right;
 }
 
 .address-balance-fiat {
 	color: var(--text-light);
 	font-size: 0.95em;
+	font-variant-numeric: tabular-nums;
 	font-weight: 600;
-	margin-left: 0.3rem;
 	white-space: nowrap;
 }
 
 .address-balance-total {
 	font-size: 1.16rem;
 	margin-top: 0.25rem;
-	max-width: none;
 	position: relative;
 	padding-top: 0.55rem;
 }
@@ -232,6 +233,17 @@ select:hover {
 	gap: 0.45rem;
 	min-width: 0;
 	overflow-wrap: anywhere;
+}
+
+.address-tx-count {
+	color: var(--text-light);
+	margin-left: auto;
+	white-space: nowrap;
+
+	strong {
+		color: var(--text-strong);
+		font-variant-numeric: tabular-nums;
+	}
 }
 
 #address {
@@ -339,9 +351,31 @@ a.address-detail-rank {
 	margin-top: 1rem;
 }
 
+.address-token-group h4 {
+	white-space: nowrap;
+}
+
+// One line per token. An amount too wide to share it drops below the name, rather than scrolling the list sideways.
 .tokensContainer p {
-	line-height: 1.22;
+	align-items: baseline;
+	column-gap: 0.6rem;
+	display: flex;
+	flex-wrap: wrap;
+	line-height: 1.3;
 	margin-bottom: 0.3rem;
+}
+
+.tokensContainer p > strong {
+	flex: 1 1 0;
+	min-width: 3.5rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.tokensContainer p > span {
+	font-variant-numeric: tabular-nums;
+	margin-left: auto;
 }
 
 .tokensContainer p:last-child {
@@ -468,7 +502,10 @@ a.address-detail-rank {
 		max-width: 100%;
 	}
 
+	// The list's scrollbar and its 0.25rem gap sit in the panel's padding, so amounts end as far from the
+	// panel's edge as the left side starts.
 	#tokensHolder {
+		margin-right: -0.625rem;
 		overflow: hidden;
 	}
 
@@ -506,10 +543,15 @@ a.address-detail-rank {
 		flex: 1 1 auto;
 		max-height: none;
 		min-height: 0;
+		scrollbar-gutter: stable;
 	}
 }
 
 @media only screen and (max-width: 480px) {
+	.address-balance-total {
+		font-size: 1rem;
+	}
+
 	.address-text-full {
 		display: none;
 	}
@@ -534,6 +576,10 @@ a.address-detail-rank {
 // Bootstrap's `.d-none{display:none!important}` is (0,1,0); the old `... > td{display:flex!important}` was (0,1,3)
 // and therefore un-hid the three desktop-only cells (Time / Type / Fee) -> duplicate labels on mobile.
 @media only screen and (max-width: 991.98px) {
+	.tokensContainer {
+		padding-right: 0;
+	}
+
 	#txView {
 		overflow-x: hidden;
 	}
@@ -712,6 +758,18 @@ a.address-detail-rank {
 // Landscape tablets / small laptops: the desktop table is wider than the 960px container, so it scrolls
 // inside the .table-responsive-xl wrapper (addresses.njk). Tighten it so that rarely happens.
 @media only screen and (min-width: 992px) and (max-width: 1199.98px) {
+	.address-token-group h4 {
+		font-size: 1.25rem;
+	}
+
+	.tokensContainer {
+		font-size: 0.85rem;
+	}
+
+	.tokensContainer p {
+		column-gap: 0.4rem;
+	}
+
 	.address-tx-table {
 		font-size: 0.9rem;
 	}
