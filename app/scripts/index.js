@@ -574,7 +574,7 @@ function setCountUpHtml(selector, html) {
 }
 
 function formatStatsErgHtml(value, maxDecimals = 4) {
-	return '<p class="text-white">' + formatErgValueString(value, maxDecimals) + ' <span class="text-light">' + formatAssetDollarPriceString(value, ERG_DECIMALS, 'ERG') + '</span></p>';
+	return '<p class="text-white">' + formatErgValueString(value, maxDecimals, false, true) + ' <span class="text-light">' + formatAssetDollarPriceString(value, ERG_DECIMALS, 'ERG') + '</span></p>';
 }
 
 //Small percentages come back with 7+ decimals; keep 3 significant digits
