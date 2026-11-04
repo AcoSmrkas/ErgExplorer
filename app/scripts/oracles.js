@@ -1,4 +1,4 @@
-import { ORACLE_POOLS, fetchPoolState, fetchOracleCounts, fetchOperators, fetchErgBalances, fetchRefreshHistory, fetchRateHistory } from './oracles/oracle-data.js?v=4';
+import { ORACLE_POOLS, fetchPoolBoxId, fetchPoolState, fetchOracleCounts, fetchOperators, fetchErgBalances, fetchRefreshHistory, fetchRateHistory } from './oracles/oracle-data.js?v=5';
 
 // Oracle pools: oracles lists them, oracles#pool=<slug> shows one. The pool goes in the hash, which
 // params.js reads on every host, so the page needs no server rewrite.
@@ -11,11 +11,19 @@ const CHART_POINTS = 42;
 const SKELETON = '<span class="skeleton"></span>';
 // Placeholder rows while a table loads
 const SKELETON_ROWS = 5;
+// How often to look for a new pool box (about a block); only a new one reloads anything
+const POLL_MS = 2 * 60 * 1000;
+// "N min ago" keeps counting between refreshes
+const TIME_TICK_MS = 30 * 1000;
 
 // 'list', or the slug of the pool shown (or asked for)
 let view = null;
 let pool = null;
 let poolState = null;
+// The pool box each pool was last shown from, by slug
+let poolBoxIds = {};
+// Operators' balances by address (null: unknown), kept across refreshes of the table
+let operatorBalances = {};
 let chart = null;
 let chartDays = 7;
 let rateHistory = {};
@@ -40,6 +48,17 @@ $(function() {
 	// The market price and the rate card's comparison wait for prices; the page doesn't
 	getPrices(() => {
 		if (pool && poolState) printMarket();
+	});
+
+	setInterval(updateTimes, TIME_TICK_MS);
+	setInterval(checkForRefresh, POLL_MS);
+
+	// A hidden tab doesn't ask; back on it, catch up at once
+	document.addEventListener('visibilitychange', () => {
+		if (document.hidden) return;
+
+		updateTimes();
+		checkForRefresh();
 	});
 
 	route();
@@ -72,6 +91,36 @@ function route() {
 	showPool(slug, pageOffset);
 }
 
+/* Staying current */
+
+function checkForRefresh() {
+	if (document.hidden) return;
+
+	if (view == 'list') {
+		ORACLE_POOLS.forEach((item) => checkPool(item, () => loadPoolRow(item, true)));
+	} else if (pool) {
+		const item = pool;
+		checkPool(item, () => {
+			if (pool === item) reloadPool(item);
+		});
+	}
+}
+
+function checkPool(item, onNewBox) {
+	fetchPoolBoxId(item).then((boxId) => {
+		// Nothing shown yet: the first load is still on its way
+		if (poolBoxIds[item.slug] && boxId != poolBoxIds[item.slug]) onNewBox();
+	}).catch((error) => {
+		console.warn('Could not check the ' + item.name + ' pool:', error);
+	});
+}
+
+function updateTimes() {
+	$('.oracle-time-ago').each(function() {
+		$(this).text(timeAgo(Number($(this).attr('data-time'))));
+	});
+}
+
 function oraclesUrl(query) {
 	return '/oracles' + (query ? '#' + query : '');
 }
@@ -94,29 +143,33 @@ function showPools() {
 	$('#poolsTableBody').html(ORACLE_POOLS.map(formatPoolRow).join(''));
 	$('#poolsHolder').show();
 
-	ORACLE_POOLS.forEach((item) => {
-		const cell = (name) => $(`#poolsTableBody tr[data-pool="${item.slug}"] .${name}`);
+	ORACLE_POOLS.forEach((item) => loadPoolRow(item));
+}
 
-		fetchPoolState(item).then((state) => {
-			if (view != 'list') return;
+// quiet: a refresh of a row already showing; if it fails the row keeps what it has
+function loadPoolRow(item, quiet = false) {
+	const cell = (name) => $(`#poolsTableBody tr[data-pool="${item.slug}"] .${name}`);
 
-			cell('pool-rate').html(formatRate(state.rate, item));
-			cell('pool-updated').html(`<a href="${getBlockUrl(state.height)}">${formatHeight(state.height)}</a> <span class="text-light">&middot; ${timeAgo(state.timestamp)}</span>`);
-		}).catch((error) => {
-			console.warn('No state for the ' + item.name + ' pool:', error);
-			if (view != 'list') return;
+	fetchPoolState(item).then((state) => {
+		if (view != 'list') return;
 
-			cell('pool-rate').html('&ndash;');
-			cell('pool-updated').html('&ndash;');
-			cell('pool-status').text('No data');
-		});
+		poolBoxIds[item.slug] = state.boxId;
+		cell('pool-rate').html(formatRate(state.rate, item));
+		cell('pool-updated').html(`<a href="${getBlockUrl(state.height)}">${formatHeight(state.height)}</a> <span class="text-light">&middot; ${formatTimeAgo(state.timestamp)}</span>`);
+	}).catch((error) => {
+		console.warn('No state for the ' + item.name + ' pool:', error);
+		if (view != 'list' || quiet) return;
 
-		fetchOracleCounts(item).then((counts) => {
-			if (view == 'list') cell('pool-oracles').text(counts.live + ' / ' + counts.total);
-		}).catch((error) => {
-			console.warn('No oracle count for the ' + item.name + ' pool:', error);
-			if (view == 'list') cell('pool-oracles').html('&ndash;');
-		});
+		cell('pool-rate').html('&ndash;');
+		cell('pool-updated').html('&ndash;');
+		cell('pool-status').text('No data');
+	});
+
+	fetchOracleCounts(item).then((counts) => {
+		if (view == 'list') cell('pool-oracles').text(counts.live + ' / ' + counts.total);
+	}).catch((error) => {
+		console.warn('No oracle count for the ' + item.name + ' pool:', error);
+		if (view == 'list' && !quiet) cell('pool-oracles').html('&ndash;');
 	});
 }
 
@@ -140,6 +193,7 @@ function showPool(slug, pageOffset) {
 	view = slug;
 	pool = item || null;
 	poolState = null;
+	operatorBalances = {};
 	rateHistory = {};
 	$('#poolsHolder, #poolStatsHolder, #poolDataHolder, #loadError').hide();
 
@@ -163,6 +217,7 @@ function showPool(slug, pageOffset) {
 		if (pool !== item) return;
 
 		poolState = state;
+		poolBoxIds[item.slug] = state.boxId;
 		printPoolState();
 		printTechnical();
 	}).catch((error) => {
@@ -176,6 +231,25 @@ function showPool(slug, pageOffset) {
 	loadOperators();
 	showHistoryPage(pageOffset, false, true);
 	showChart();
+}
+
+// A new pool box: the cards, oracles and first history page update in place. The chart waits for a reload.
+function reloadPool(item) {
+	fetchPoolState(item).then((state) => {
+		if (pool !== item) return;
+
+		poolState = state;
+		poolBoxIds[item.slug] = state.boxId;
+		printPoolState();
+		printTechnical();
+	}).catch((error) => {
+		console.warn('Could not refresh the ' + item.name + ' pool:', error);
+	});
+
+	loadOperators(true);
+
+	// A later page stays as it is: its rows would shift under the reader
+	if (Number(offset) === 0) showHistoryPage(0, false, true, true);
 }
 
 // The cards from the pool's settings; the rest waits for its state (printPoolState)
@@ -194,7 +268,7 @@ function printPoolStats() {
 
 function printPoolState() {
 	$('#stat-rate').html(formatRate(poolState.rate, pool));
-	$('#stat-updated').text(timeAgo(poolState.timestamp));
+	$('#stat-updated').html(formatTimeAgo(poolState.timestamp));
 	$('#stat-height').html(`Block <a href="${getBlockUrl(poolState.height)}">${formatHeight(poolState.height)}</a>`);
 	$('#stat-epoch').text(formatHeight(poolState.epoch));
 	$('#stat-box').html(`<a href="${getBoxUrl(poolState.boxId)}">Pool box</a> &middot; <a href="${getTransactionsUrl(poolState.txId)}">Transaction</a>`);
@@ -220,13 +294,17 @@ function printMarket() {
 	$('#stat-market').text('Market $' + nFormatter(market, 4) + ' · ' + (difference > 0 ? '+' : '') + difference.toFixed(2) + '%');
 }
 
-function loadOperators() {
+// quiet: a refresh of a table already showing; if it fails the table keeps what it has
+function loadOperators(quiet = false) {
 	const item = pool;
-	$('#operatorsError').hide();
-	$('#operatorsCount').text('');
-	$('#operatorsScroll th.oracle-wins').hide();
-	$('#operatorsTableBody').html(skeletonRows(5));
-	$('#operatorsScroll').show();
+
+	if (!quiet) {
+		$('#operatorsError').hide();
+		$('#operatorsCount').text('');
+		$('#operatorsScroll th.oracle-wins').hide();
+		$('#operatorsTableBody').html(skeletonRows(5));
+		$('#operatorsScroll').show();
+	}
 
 	fetchOperators(item).then((operators) => {
 		if (pool !== item) return;
@@ -241,15 +319,19 @@ function loadOperators() {
 
 		getAddressesInfo();
 
-		// The ERG column fills in one balance at a time
-		fetchErgBalances(operators.map((o) => o.address), (address, nanoErg) => {
+		// The ERG column fills in one balance at a time; a refresh only asks for ones it doesn't have
+		fetchErgBalances(operators.map((o) => o.address).filter((address) => !(address in operatorBalances)), (address, nanoErg) => {
 			if (pool !== item) return;
-			$(`#operatorsTableBody .operator-balance[data-address="${address}"]`).html(nanoErg == null ? '&ndash;' : formatErgValueString(nanoErg, 2, false, true));
+
+			operatorBalances[address] = nanoErg;
+			$(`#operatorsTableBody .operator-balance[data-address="${address}"]`).html(formatBalance(nanoErg));
 		});
 	}).catch((error) => {
 		if (pool !== item) return;
 
 		console.error('Error fetching the oracles:', error);
+		if (quiet) return;
+
 		$('#stat-oracles').html('&ndash;');
 		$('#operatorsScroll').hide();
 		$('#operatorsError').text('Error fetching the oracles.').show();
@@ -257,8 +339,8 @@ function loadOperators() {
 }
 
 function formatOperatorRow(operator, hasWins) {
-	const balance = `<span class="operator-balance" data-address="${operator.address}">${SKELETON}</span>`;
-	const posted = `<a href="${getTransactionsUrl(operator.txId)}">${timeAgo(operator.timestamp)}</a>` + (operator.live ? '' : ' <span class="text-light">&middot; not live</span>');
+	const balance = `<span class="operator-balance" data-address="${operator.address}">${operator.address in operatorBalances ? formatBalance(operatorBalances[operator.address]) : SKELETON}</span>`;
+	const posted = `<a href="${getTransactionsUrl(operator.txId)}">${formatTimeAgo(operator.timestamp)}</a>` + (operator.live ? '' : ' <span class="text-light">&middot; not live</span>');
 
 	return `
 		<tr>
@@ -274,9 +356,9 @@ function formatOperatorRow(operator, hasWins) {
 
 /**
  * A page of the pool's refreshes. The page links (pagination.js) and Back/Forward call this; the
- * first call comes from showPool.
+ * first call comes from showPool. quiet: a refresh of the page showing; if it fails the page stays.
  */
-function showHistoryPage(pageOffset, addToHistory = true, force = false) {
+function showHistoryPage(pageOffset, addToHistory = true, force = false, quiet = false) {
 	const item = pool;
 	pageOffset = Math.max(0, Number(pageOffset) || 0);
 
@@ -284,14 +366,17 @@ function showHistoryPage(pageOffset, addToHistory = true, force = false) {
 
 	offset = pageOffset;
 	params['offset'] = pageOffset;
-	$('#historyError').hide();
-	$('#historyTableBody').html(skeletonRows(6));
-	$('#historyHolder').show();
 
-	// The page links wait for the total
-	if (force) {
-		$('#historyCount').text('');
-		$('#historyHolder .pagination').css('visibility', 'hidden');
+	if (!quiet) {
+		$('#historyError').hide();
+		$('#historyTableBody').html(skeletonRows(6));
+		$('#historyHolder').show();
+
+		// The page links wait for the total
+		if (force) {
+			$('#historyCount').text('');
+			$('#historyHolder .pagination').css('visibility', 'hidden');
+		}
 	}
 
 	if (addToHistory) {
@@ -317,6 +402,8 @@ function showHistoryPage(pageOffset, addToHistory = true, force = false) {
 		if (pool !== item) return;
 
 		console.error('Error fetching the refresh history:', error);
+		if (quiet) return;
+
 		$('#historyHolder').hide();
 		$('#historyError').text('Error fetching the refresh history.').show();
 	});
@@ -555,6 +642,15 @@ function formatTokenLink(tokenId) {
 
 function countLive(operators) {
 	return operators.filter((o) => o.live).length;
+}
+
+function formatBalance(nanoErg) {
+	return nanoErg == null ? '&ndash;' : formatErgValueString(nanoErg, 2, false, true);
+}
+
+// updateTimes keeps these counting
+function formatTimeAgo(timestamp) {
+	return `<span class="oracle-time-ago" data-time="${timestamp}">${timeAgo(timestamp)}</span>`;
 }
 
 function timeAgo(timestamp) {
