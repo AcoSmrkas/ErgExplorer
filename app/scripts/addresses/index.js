@@ -5,9 +5,9 @@
 
 import { AddressState } from './state.js';
 import { ApiClient } from './api-client.js?v=59';
-import { BalanceSummary } from './balance-summary.js?v=73';
+import { BalanceSummary } from './balance-summary.js?v=74';
 import { AddressDetails } from './address-details.js?v=63';
-import { TransactionFormatter } from './transaction-formatter.js?v=81';
+import { TransactionFormatter } from './transaction-formatter.js?v=82';
 import { UIControllers } from './ui-controllers.js?v=65';
 import { PendingTracker } from './pending-tracker.js?v=9';
 import { NftManager } from './nft-manager.js?v=1';

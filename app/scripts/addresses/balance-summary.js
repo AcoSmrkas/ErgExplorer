@@ -212,7 +212,7 @@ export const BalanceSummary = {
 			const priceTitle = token.lpEstimated ? ' title="Estimated LP locked value"' : '';
 			const priceStr = token.usdPrice > 0 ? '<span class="text-light"' + priceTitle + '> ' + formatDollarPriceString(token.usdPrice) + '</span>' : '';
 			const tokenStr = formatAssetNameAndValueString(
-				getAssetTitle(token, true, isScan),
+				getAssetTitle(token, true, isScan, true),
 				formatAssetValueString(token.amount, token.decimals, 4) + priceStr,
 				token.tokenId
 			);
@@ -354,7 +354,7 @@ export const BalanceSummary = {
 		sortedTokens.forEach(token => {
 			const isScan = AddressState.scamList.includes(token.tokenId);
 			const tokenStr = formatAssetNameAndValueString(
-				this._formatNftTypeIcon(nftInfoByTokenId[token.tokenId]) + getAssetTitle(token, true, isScan),
+				this._formatNftTypeIcon(nftInfoByTokenId[token.tokenId]) + getAssetTitle(token, true, isScan, true),
 				formatAssetValueString(token.amount, token.decimals, 4),
 				token.tokenId
 			);

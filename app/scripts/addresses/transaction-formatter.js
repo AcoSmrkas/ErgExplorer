@@ -356,8 +356,8 @@ export const TransactionFormatter = {
 
 				const sign = txInOut === TxInOut.Out ? '<span class="tx-sign">-</span>' : '';
 				const isScan = AddressState.scamList.includes(asset.tokenId);
-				valueStr += '<br><strong>' + sign + formatAssetValueString(asset.amount, asset.decimals, 4) + '</strong> ' +
-					getAssetTitle(asset, false, isScan);
+				valueStr += '<span class="tx-value-token"><strong>' + sign + formatAssetValueString(asset.amount, asset.decimals, 4) + '</strong> ' +
+					getAssetTitle(asset, false, isScan, true) + '</span>';
 			}
 		}
 
