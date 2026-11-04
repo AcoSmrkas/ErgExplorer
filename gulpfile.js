@@ -129,6 +129,17 @@ function extras() {
 	}).pipe(gulp.dest('dist'));
 }
 
+//Last-Modified is all that tells browsers a file changed, as .htaccess turns ETags off. Gulp keeps each
+//source file's time, so a page whose layout changed would look unchanged if dist were copied with times kept.
+async function stamp() {
+	const now = new Date();
+	const entries = await fs.readdir('dist', {recursive: true, withFileTypes: true});
+
+	await Promise.all(entries
+		.filter(entry => entry.isFile())
+		.map(entry => fs.utimes(entry.parentPath + '/' + entry.name, now, now)));
+}
+
 exports.clean = clean;
 exports.scripts = scripts;
 exports.images = images;
@@ -142,4 +153,4 @@ exports.extras = extras;
 exports.scriptsbuild = scriptsbuild;
 
 exports.serve = gulp.series(clean, nunjucks, styles, stylescss, scripts, fonts, doserve);
-exports.build = gulp.series(clean, nunjucks, styles, stylescss, scripts, html, images, fonts, stylescss, scriptsbuild, scriptsmove, extras);
+exports.build = gulp.series(clean, nunjucks, styles, stylescss, scripts, html, images, fonts, stylescss, scriptsbuild, scriptsmove, extras, stamp);
