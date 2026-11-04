@@ -1,7 +1,7 @@
 {% extends "layout.njk" %}
 
 {% block styles %}
-	<link rel="stylesheet" href="styles/mempool.css?v=1">
+	<link rel="stylesheet" href="styles/mempool.css?v=2">
 {% endblock %}
 
 {% block navigation %}
@@ -20,7 +20,6 @@
 		<!-- The same pool, streamed: a way into live.ergexplorer.com (mainnet only, hidden on testnet by mempool.js) -->
 		<div id="liveCta" class="row w-100">
 			<a class="live-cta div-cell-dark" href="https://live.ergexplorer.com">
-				<span class="live-cta-badge"><span class="live-cta-dot"></span>LIVE</span>
 				<span class="live-cta-text">
 					<strong>Watch the mempool in real time</strong>
 					<span>New transactions appear the moment they reach the network, labelled by what they do.</span>
@@ -40,10 +39,11 @@
 					<thead>
 						<tr>
 							<th scope="col">Id</th>
-							<th scope="col">Time</th>
+							<th scope="col">Age</th>
 							<th scope="col">Inputs</th>
 							<th scope="col">Outputs</th>
 							<th scope="col">Size</th>
+							<th scope="col">Fee</th>
 						</tr>
 					</thead>
 				 
@@ -64,5 +64,5 @@
 
 {% block scripts %}
 	<script src="./scripts/common/pagination.js?v=41"></script>
-	<script src="./scripts/mempool.js?v=43"></script>
+	<script src="./scripts/mempool.js?v=44"></script>
 {% endblock %}
