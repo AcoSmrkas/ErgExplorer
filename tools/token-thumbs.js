@@ -11,20 +11,14 @@ const path = require('path');
 const sharp = require('sharp');
 
 const ICONS_API = 'https://api2.ergexplorer.com/tokens/getTokenIcons';
-const ICONS_FILE = path.join(__dirname, '../app/scripts/common/token-icons.js');
 const OUT_DIR = path.join(__dirname, '../app/images/tokens/thumbs');
 const SIZES = [{size: 64, suffix: ''}, {size: 176, suffix: '-176'}];
 const MAX_DOWNLOAD = 16 * 1024 * 1024;
 const PARALLEL = 8;
 
-// Same order as getIcon() in token-icons.js: the database wins over the hardcoded list
+// The icons come from the database (tokens.iconurl), the same list the site loads with getTokenIcons()
 async function getIconUrls() {
 	const icons = new Map();
-	const hardcoded = /^tokenIcons\['([0-9a-f]{64})'\]\s*=\s*'([^']+)'/gm;
-
-	for (const match of fs.readFileSync(ICONS_FILE, 'utf8').matchAll(hardcoded)) {
-		icons.set(match[1], match[2]);
-	}
 
 	const response = await fetch(ICONS_API);
 	if (!response.ok) {

@@ -471,12 +471,6 @@ window.onTokenIconLoaded = function() {
 	$('#tokenIcon').addClass('col-lg-2');
 	$('#tokenIcon').addClass('d-flex');
 	$('#tokenIcon').show();
-
-	if (typeof hasIcon === 'function' && !hasIcon(TokenState.tokenId)) {
-		if (typeof addIcon === 'function') {
-			addIcon(TokenState.tokenId);
-		}
-	}
 };
 
 // NFT image loaded callback
