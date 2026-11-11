@@ -98,6 +98,7 @@ tokenIcons['91289d5cefb9d78e3ea248d4e9c5b0e3c3de54f64bfae85c0070580961995262'] =
 tokenIcons['00b1e236b60b95c2c6f8007a9d89bc460fc9e78f98b09faec9449007b40bccf3'] = 'https://i.ibb.co/rM43NVy/EGIO.png';
 tokenIcons['59ee24951ce668f0ed32bdb2e2e5731b6c36128748a3b23c28407c5f8ccbf0f6'] = 'https://ergexplorer.com/images/tokens/walrus.png';
 tokenIcons['e8b20745ee9d18817305f32eb21015831a48f02d40980de6e849f886dca7f807'] = 'https://raw.githubusercontent.com/RunOnFlux/press/master/Flux_Asset_SVG/Flux%20Logo/Symbol/Round%20Symbol/SVG/Flux_symbol_blue-white.svg';
+tokenIcons['edaa0362f492cbb7c284a76d1bab12ff3468061e00b73db4a3f2cebc5aec77b3'] = 'https://ergexplorer.com/images/tokens/hns.svg';
 //TokenIconsArrayStop
 
 var tokenIconsDb = [];
