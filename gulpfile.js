@@ -85,14 +85,9 @@ function scripts() {
 }
 
 function scriptsbuild() {
- 	return gulp.src(['app/scripts/**/*.js', '!app/scripts/common/token-icons.js'])
+ 	return gulp.src('app/scripts/**/*.js')
     	.pipe($.terser({compress: {drop_console: true}}))
     	.pipe(gulp.dest('dist/scripts'));
-}
-
-function scriptsmove() {
-	return gulp.src('app/scripts/common/token-icons.js')
-    	.pipe(gulp.dest('dist/scripts/common'));
 }
 
 function images() {
@@ -153,4 +148,4 @@ exports.extras = extras;
 exports.scriptsbuild = scriptsbuild;
 
 exports.serve = gulp.series(clean, nunjucks, styles, stylescss, scripts, fonts, doserve);
-exports.build = gulp.series(clean, nunjucks, styles, stylescss, scripts, html, images, fonts, stylescss, scriptsbuild, scriptsmove, extras, stamp);
+exports.build = gulp.series(clean, nunjucks, styles, stylescss, scripts, html, images, fonts, stylescss, scriptsbuild, extras, stamp);
