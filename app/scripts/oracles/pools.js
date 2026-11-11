@@ -55,8 +55,7 @@ export const ORACLE_POOLS = [
 		deviation: 5,
 		consensus: 8,
 		payoutNanoErg: null,
-		// USE's mint actions read this pool; its LP box holds 0.002 ERG and 1 USE since height 1868204
-		status: 'USE LP drained'
+		status: 'live'
 	},
 	{
 		slug: 'xau',
@@ -81,8 +80,6 @@ export const ORACLE_POOLS = [
 		deviation: 5,
 		consensus: 8,
 		payoutNanoErg: null,
-		// DexyGold's free and arbitrage mints read this pool; its LP box holds 0.002 ERG and 1 DexyGold
-		// since height 1868221
-		status: 'DexyGold LP drained'
+		status: 'live'
 	}
 ];
