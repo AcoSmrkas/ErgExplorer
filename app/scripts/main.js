@@ -1690,7 +1690,7 @@ var contractAnalyzerImport = null;
 
 function loadContractTemplates() {
 	if (contractAnalyzerImport == null) {
-		contractAnalyzerImport = import('./addresses/transaction-analyzer.js?v=7').catch(function() {
+		contractAnalyzerImport = import('./addresses/transaction-analyzer.js?v=8').catch(function() {
 			return null;
 		});
 	}

@@ -1,4 +1,4 @@
-import { ORACLE_POOL_V1_TEMPLATES, ORACLE_POOL_V2_TEMPLATES } from '../addresses/constants.js?v=7';
+import { ORACLE_POOL_V1_TEMPLATES, ORACLE_POOL_V2_TEMPLATES } from '../addresses/constants.js?v=8';
 
 export { ORACLE_POOLS } from './pools.js?v=4';
 
