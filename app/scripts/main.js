@@ -853,6 +853,7 @@ function setupMainnetTestnet() {
 		$('.networkType').removeClass('text-light');
 		$('.networkType').addClass('erg-span-important');
 		localStorage.setItem('network', 'testnet');
+		$('#testnetNotice').show();
 		API_HOST = API_HOST_2 = 'https://api-testnet.ergoplatform.com/';
 		MEMPOOL_API_HOST = null;
 		FEE_ADDRESS = 'Bf1X9JgQTUtgntaer91B24n6kP8L2kqEiQqNf1z97BKo9UbnW3WRP9VXu8BXd1LsYCiYbHJEdWKxkF5YNx5n7m31wsDjbEuB3B13ZMDVBWkepGmWfGa71otpFViHDCuvbw1uNicAQnfuWfnj8fbCa4';
@@ -869,6 +870,15 @@ function switchToMainnet(e) {
 	localStorage.setItem('network', 'mainnet');
 
 	window.location.assign('/');
+}
+
+// Switch to Mainnet and reload the same page.
+function viewOnMainnet(e) {
+	e.preventDefault();
+
+	localStorage.setItem('network', 'mainnet');
+
+	window.location.reload();
 }
 
 function switchToTestnet(e) {
@@ -1412,6 +1422,10 @@ function mempoolFeePerByte(tx) {
 }
 
 function showLoadError(message) {
+	if (networkType == 'testnet') {
+		message += '<br><a href="#" onclick="viewOnMainnet(event)">View on Mainnet</a>';
+	}
+
 	$('#loadErrorMessage').html(message);
 	$('#loadError').show();
 }
