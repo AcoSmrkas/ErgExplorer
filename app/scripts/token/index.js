@@ -40,7 +40,11 @@ window.onGetNftInfoDone = function(nftInfo, message) {
 
 	if (nftInfo == null) {
 		if (typeof showLoadError === 'function') {
-			showLoadError('No results matching your query.');
+			if (message) {
+				showLoadError('Couldn\'t load this token. <a href="#" onclick="location.reload(); return false;">Try again</a>');
+			} else {
+				showLoadError('No results matching your query.');
+			}
 		}
 		return;
 	}

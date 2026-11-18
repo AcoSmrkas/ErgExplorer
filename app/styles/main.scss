@@ -1410,3 +1410,16 @@ html[data-bs-theme="light"] .token-mark-burned {
 	background: var(--striped-1);
 	padding: 10px;
 }
+
+.testnet-notice {
+	border: 1px solid var(--main-color);
+	border-radius: 8px;
+	padding: 8px 12px;
+	text-align: center;
+	color: var(--text-color);
+}
+
+.testnet-notice a,
+#loadErrorMessage a {
+	color: var(--main-color);
+}

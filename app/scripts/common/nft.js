@@ -51,6 +51,11 @@ function getNftsInfo(tokenIds, callback, onlyNft = true) {
 		});
 }
 
+// A 404 means the token isn't there; anything else means the request failed.
+function nftLoadFailMessage(xhr) {
+	return xhr && xhr.status == 404 ? null : 'Failed to fetch NFT data.';
+}
+
 function getNftInfo(tokenId, callback) {
 	if (networkType != 'testnet') {
 		var jqxhr = $.post(ERGEXPLORER_API_HOST + 'tokens/byId',
@@ -66,8 +71,8 @@ function getNftInfo(tokenId, callback) {
 			
 			callback(nft, null);
 	    })
-	    .fail(function() {
-	    	callback(null, 'Failed to fetch NFT data.');
+	    .fail(function(xhr) {
+	    	callback(null, nftLoadFailMessage(xhr));
 	    });
 	} else {
 		$.get(API_HOST + 'api/v1/tokens/' + tokenId, function(data) {
@@ -83,12 +88,12 @@ function getNftInfo(tokenId, callback) {
 
 				callback(nft, null);
 		    })
-		    .fail(function() {
-		    	callback(null, 'Failed to fetch NFT data.');
+		    .fail(function(xhr) {
+		    	callback(null, nftLoadFailMessage(xhr));
 		    });	
 	    })
-	    .fail(function() {
-	    	callback(null, 'Failed to fetch NFT data.');
+	    .fail(function(xhr) {
+	    	callback(null, nftLoadFailMessage(xhr));
 	    });
 	}
 }
