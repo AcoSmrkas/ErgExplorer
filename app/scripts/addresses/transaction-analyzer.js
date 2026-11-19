@@ -90,7 +90,17 @@ export function checkAssetsSign(assets) {
 /**
  * Detect smart contract addresses by matching ergoTree to known templates
  */
+// Lithos makes one of these per user who turns arbitrage on: a plain `pk && true` script,
+// compiled as an ErgoTree v3 with size and segregated constants. The same 6-byte body is
+// also used as v0 trees by others (Duckpools' treasury), so the match takes the whole tree
+// shape, header included, and not just the body.
+const LITHOS_ARBITRAGE_TREE = /^1b2d0208cd0[23][0-9a-f]{64}0101ea027300d17301$/;
+
 export function detectContractFromErgotree(ergoTree, addressType = 'label') {
+	if (LITHOS_ARBITRAGE_TREE.test(ergoTree)) {
+		return 'Lithos Arbitrage';
+	}
+
 	for (const { name, template } of CONTRACT_TEMPLATES) {
 		if (ergoTree.endsWith(template)) {
 			return name;
