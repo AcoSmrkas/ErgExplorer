@@ -1001,3 +1001,42 @@ a.address-detail-rank {
 	color: var(--text-light);
 	font-size: 0.85rem;
 }
+
+// Boxes here that can be charged storage rent soon (scripts/addresses/storage-rent.js)
+.rent-notice {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px 12px;
+	flex-wrap: wrap;
+	border: 1px solid var(--main-color);
+	border-radius: 8px;
+	padding: 8px 12px;
+	color: var(--text-color);
+}
+
+.rent-notice-text {
+	flex: 1 1 260px;
+	min-width: 0;
+}
+
+.rent-notice-help {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 18px;
+	height: 18px;
+	margin-left: 4px;
+	border-radius: 50%;
+	border: 1px solid var(--main-color);
+	color: var(--main-color);
+	font-size: 0.7rem;
+	font-weight: 700;
+	vertical-align: 1px;
+	cursor: help;
+}
+
+.rent-notice-button {
+	flex: 0 0 auto;
+	white-space: nowrap;
+}

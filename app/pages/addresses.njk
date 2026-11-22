@@ -10,7 +10,7 @@
 	<link rel="preconnect" href="https://api.ergoplatform.com" crossorigin>
 
 	<!-- build:css styles/addresses.css -->
-	<link rel="stylesheet" href="styles/addresses.css?v=7">
+	<link rel="stylesheet" href="styles/addresses.css?v=8">
 	<!-- endbuild -->
 
 	<!-- Tempus Dominus Styles -->
@@ -33,6 +33,13 @@
 			<img src="./images/logo-300.png" alt="Loading" class="loadingImg address-summary-loading-img">
 		</div>
 		<div id="summaryOk" class="mb-3" style="display: none;">
+			<div id="rentNotice" class="rent-notice mb-2 mb-md-3" style="display: none;">
+				<span class="rent-notice-text">
+					<span id="rentNoticeText"></span>
+					<span id="rentNoticeHelp" class="rent-notice-help" tabindex="0" role="button" aria-label="About storage rent" data-bs-placement="bottom" title="A box left unmoved for 4 years can be charged rent: about 0.1 ERG, or the whole box if it holds less. Consolidating moves your boxes and resets the clock.">?</span>
+				</span>
+				<a id="rentNoticeLink" class="btn btn-sm btn-info rent-notice-button" target="_blank" rel="noopener" href="https://tools.mewfinance.com/consolidate">Consolidate</a>
+			</div>
 			<div class="row w-100 div-cell-dark border-bottom-flat p-2 p-lg-3 address-identity-row">
 				<div class="col pe-0 ps-0">
 					<div class="address-identity-line">
@@ -329,6 +336,6 @@
 	<script src="./scripts/common/pagination.js?v=42"></script>
 	<script src="./scripts/common/nft.js?v=42"></script>
 	<script src="./scripts/common/lithos.js?v=1"></script>
-	<script type="module" src="./scripts/addresses/index.js?v=93"></script>
+	<script type="module" src="./scripts/addresses/index.js?v=94"></script>
 	<script src="./scripts/3rd-party/qrcode.min.js?v=41"></script>
 {% endblock %}

@@ -576,6 +576,19 @@ span.skeleton:empty::before {
 	text-align: right;
 }
 
+// Just past the collapse width the links run into the network and theme controls, which are wider
+// than the logo: centre the links in the space between the two, a little tighter
+@media only screen and (min-width: 992px) and (max-width: 1199.98px) {
+	#navbarNav {
+		--bs-navbar-nav-link-padding-x: 0.375rem;
+	}
+
+	#navbarNav > .navbar-nav.w-100 {
+		padding-left: 60px;
+		padding-right: 140px;
+	}
+}
+
 @media only screen and (max-width: 991.98px) {
 	.baner {
 		width: 100%;
