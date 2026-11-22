@@ -12,6 +12,7 @@ import { UIControllers } from './ui-controllers.js?v=65';
 import { PendingTracker } from './pending-tracker.js?v=9';
 import { NftManager } from './nft-manager.js?v=1';
 import { MiningPanel } from './mining.js?v=1';
+import { StorageRentNotice } from './storage-rent.js?v=1';
 import { getTxType, isWalletAddress, getTxInOutType, analyzeTransfers } from './transaction-analyzer.js?v=9';
 
 /**
@@ -166,6 +167,10 @@ async function initializeAddressPage() {
 	MiningPanel.load(AddressState.walletAddress)
 		.then(count => setAddressSectionTabAvailable('mining', count))
 		.catch(error => console.warn('Mining tab unavailable:', error));
+
+	// Loads once, like the Mining tab: a consolidation shows up after a reload.
+	StorageRentNotice.load(AddressState.walletAddress)
+		.catch(error => console.warn('Storage rent notice unavailable:', error));
 }
 
 /**

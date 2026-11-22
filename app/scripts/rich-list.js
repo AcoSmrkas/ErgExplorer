@@ -173,21 +173,33 @@ function calculateAndDisplayStats() {
     const cexPercent = (cexTotal / supplyErg) * 100;
     const supplyPercent = (supplyErg / MAX_ERG_SUPPLY) * 100;
 
-    // Update the DOM
-    $('#stat-top100-erg').html(`${nFormatter(top100Total, 2, true)} <strong class="erg-span">ERG</strong>`);
+    // Update the DOM: the figures count up the first time, and the redraw once prices are in only adds the $ values
+    animateStat('stat-top100-erg', t => `${nFormatter(top100Total * t, 2, true)} <strong class="erg-span">ERG</strong>`);
     $('#stat-top100-usd').html(formatStatDollars(top100Total));
-    $('#stat-top100-percent').text(`${top100Percent.toFixed(2)}%`);
+    animateStat('stat-top100-percent', t => `${(top100Percent * t).toFixed(2)}%`);
 
-    $('#stat-cex-erg').html(`${nFormatter(cexTotal, 2, true)} <strong class="erg-span">ERG</strong>`);
+    animateStat('stat-cex-erg', t => `${nFormatter(cexTotal * t, 2, true)} <strong class="erg-span">ERG</strong>`);
     $('#stat-cex-usd').html(formatStatDollars(cexTotal));
-    $('#stat-cex-percent').text(`${cexPercent.toFixed(2)}%`);
+    animateStat('stat-cex-percent', t => `${(cexPercent * t).toFixed(2)}%`);
 
-    $('#stat-supply').html(`${nFormatter(supplyErg, 2, true, true)} <strong class="erg-span">ERG</strong>`);
+    animateStat('stat-supply', t => `${nFormatter(supplyErg * t, 2, true, true)} <strong class="erg-span">ERG</strong>`);
     $('#stat-supply-usd').html(formatStatDollars(supplyErg));
-    $('#stat-supply-percent').text(`${supplyPercent.toFixed(2)}%`);
+    animateStat('stat-supply-percent', t => `${(supplyPercent * t).toFixed(2)}%`);
 
     // Show the stats holder
     $('#richListStatsHolder').show();
+}
+
+// One card figure, drawn by html(t) at t of its value: common/count-up.js counts it up; without it, it shows at once
+function animateStat(id, html) {
+    const element = document.getElementById(id);
+    const render = t => { element.innerHTML = html(t); };
+
+    if (typeof countUp === 'function') {
+        countUp(element, render);
+    } else {
+        render(1);
+    }
 }
 
 // An amount in whole ERG, for the start of a card's small line: beside the ERG figure it wrapped below

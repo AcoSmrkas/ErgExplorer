@@ -1,0 +1,108 @@
+.rent-help {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	border: 1px solid var(--main-color);
+	color: var(--main-color);
+	font-size: 0.75rem;
+	font-weight: 700;
+	cursor: help;
+}
+
+// ($) after an ERG amount, as elsewhere on the site
+.rent-fiat {
+	color: var(--text-light);
+	font-size: 0.95em;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.rent-stats {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 1rem;
+}
+
+.rent-card {
+	font-variant-numeric: tabular-nums;
+}
+
+.rent-card-main {
+	display: flex;
+	align-items: baseline;
+	flex-wrap: wrap;
+	gap: 0 0.5rem;
+	margin-bottom: 0.6rem;
+}
+
+.rent-card-erg {
+	font-size: 1.5rem;
+	font-weight: 500;
+	white-space: nowrap;
+}
+
+.rent-card-main .rent-fiat {
+	font-size: 1rem;
+}
+
+.rent-card-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 0.75rem;
+	padding: 0.2rem 0;
+	border-top: 1px solid var(--borders);
+	font-size: 0.875rem;
+}
+
+.rent-card-label {
+	color: var(--text-light);
+}
+
+.rent-card-value {
+	text-align: right;
+	white-space: nowrap;
+}
+
+@media (max-width: 1199.98px) {
+	.rent-stats {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 575.98px) {
+	.rent-stats {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 0.75rem;
+	}
+}
+
+.rent-note {
+	font-size: 0.75rem;
+	white-space: nowrap;
+	cursor: help;
+}
+
+.rent-whole {
+	opacity: 0.7;
+}
+
+.rent-due {
+	white-space: nowrap;
+}
+
+.rent-due-now {
+	color: var(--main-color);
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+// Mobile view: the stacked cells read left to right
+@media (max-width: 991.98px) {
+	.rent-table tbody tr td.text-end {
+		text-align: left !important;
+	}
+}
