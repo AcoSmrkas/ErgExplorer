@@ -153,7 +153,7 @@ function formatRentRow(item, line, ergUsd) {
 			<td><span class="d-lg-none"><strong>Box: </strong></span><a href="${getBoxUrl(item.boxId)}">${formatAddressString(item.boxId, 6)}</a></td>
 			<td><span class="d-lg-none"><strong>Address: </strong></span><a class="address-string" addr="${item.address}" href="${getWalletAddressUrl(item.address)}">${formatAddressString(item.address, 8)}</a></td>
 			<td class="text-end"><span class="d-lg-none"><strong>Created: </strong></span>${item.creationHeight}</td>
-			<td class="text-end"><span class="d-lg-none"><strong>Rent: </strong></span>${formatErgValueString(item.rent, 4, true)}</td>
+			<td class="text-end"><span class="d-lg-none"><strong>Rent: </strong></span>${formatErgValueString(item.rent, 4, true, true)}</td>
 			<td class="text-end"><span class="d-lg-none"><strong>Tokens: </strong></span>${formatRentTokens(isWhole ? item.tokens : 0)}</td>
 			<td class="text-end"><span class="d-lg-none"><strong>Total: </strong></span>${formatRentTotal(totalErg, ergUsd)}</td>
 			<td class="text-end"><span class="d-lg-none"><strong>Due: </strong></span>${formatRentDue(item.creationHeight - line)}</td>
