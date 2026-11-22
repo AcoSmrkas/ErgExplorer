@@ -106,7 +106,6 @@ function renderRentRows() {
 	const html = rentPage.items.map(item => formatRentRow(item, rentPage.line, ergUsd)).join('');
 
 	$('#rentTableBody').html(html || '<tr><td colspan="7" class="text-center text-muted">No boxes</td></tr>');
-	$('#rentTableBody .rent-note').each(function() { new bootstrap.Tooltip(this); });
 
 	// Drawn again once prices are in: the address book names go back on
 	if (typeof labelAddressStrings === 'function') {
@@ -148,16 +147,13 @@ function formatRentRow(item, line, ergUsd) {
 	const isWhole = new BigNumber(item.rent).gte(item.value);
 	// What a collector takes: the rent, and the tokens too when the whole box goes
 	const totalErg = rentErg + (isWhole ? Number(item.tokensErg) || 0 : 0);
-	const whole = isWhole
-		? ' <span class="rent-note rent-whole" tabindex="0" title="Holds less than the rent, so the whole box goes, tokens included">whole box</span>'
-		: '';
 
 	return `
 		<tr>
 			<td><span class="d-lg-none"><strong>Box: </strong></span><a href="${getBoxUrl(item.boxId)}">${formatAddressString(item.boxId, 6)}</a></td>
 			<td><span class="d-lg-none"><strong>Address: </strong></span><a class="address-string" addr="${item.address}" href="${getWalletAddressUrl(item.address)}">${formatAddressString(item.address, 8)}</a></td>
 			<td class="text-end"><span class="d-lg-none"><strong>Created: </strong></span>${item.creationHeight}</td>
-			<td class="text-end"><span class="d-lg-none"><strong>Rent: </strong></span>${formatErgValueString(item.rent, 4, true)}${whole}</td>
+			<td class="text-end"><span class="d-lg-none"><strong>Rent: </strong></span>${formatErgValueString(item.rent, 4, true)}</td>
 			<td class="text-end"><span class="d-lg-none"><strong>Tokens: </strong></span>${formatRentTokens(isWhole ? item.tokens : 0)}</td>
 			<td class="text-end"><span class="d-lg-none"><strong>Total: </strong></span>${formatRentTotal(totalErg, ergUsd)}</td>
 			<td class="text-end"><span class="d-lg-none"><strong>Due: </strong></span>${formatRentDue(item.creationHeight - line)}</td>
