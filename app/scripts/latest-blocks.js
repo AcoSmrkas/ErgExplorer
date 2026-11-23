@@ -98,10 +98,10 @@ function renderBlocks(data, lithosHeights, pricesLoaded, newAbove = Infinity) {
     		formattedResult += '<td data-height="' + item.height + '"><span class="d-lg-none"><strong>Mined by: </strong></span><a class="address-string" addr="' + item.miner.address + '" href="' + getWalletAddressUrl(item.miner.address) + '">' + item.miner.name + '</a></td>';	
 
         //Reward. The dollar value fills in once the prices are in
-    		formattedResult += '<td><span class="d-lg-none"><strong>Reward: </strong></span>' + formatErgValueString(item.minerReward) + ' <span class="text-light reward-usd" data-reward="' + item.minerReward + '"></span></td>';
+    		formattedResult += '<td><span class="d-lg-none"><strong>Reward: </strong></span>' + formatErgValueString(item.minerReward, 4, false, true) + ' <span class="text-light reward-usd" data-reward="' + item.minerReward + '"></span></td>';
 
         //Fees. Only the GraphQL source has them
-    		formattedResult += '<td><span class="d-lg-none"><strong>Fees: </strong></span>' + (item.fees === undefined ? '<span class="block-meta">-</span>' : formatErgValueString(item.fees)) + '</td>';
+    		formattedResult += '<td><span class="d-lg-none"><strong>Fees: </strong></span>' + (item.fees === undefined ? '<span class="block-meta">-</span>' : formatErgValueString(item.fees, 4, false, true)) + '</td>';
 
         //Size
     		formattedResult += '<td><span class="d-lg-none"><strong>Size: </strong></span>' + formatKbSizeString(item.size) + '</td>';

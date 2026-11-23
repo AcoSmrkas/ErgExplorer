@@ -232,7 +232,7 @@ function formatMempoolValue(flow) {
 
     const dollars = formatAssetDollarPriceString(flow.value.toFixed(), ERG_DECIMALS, 'ERG');
 
-    return '<span class="mempool-value">' + formatErgValueString(flow.value.toFixed()) + (dollars ? ' <span class="text-light">' + dollars + '</span>' : '') + '</span>' + tokens;
+    return '<span class="mempool-value">' + formatErgValueString(flow.value.toFixed(), 4, false, true) + (dollars ? ' <span class="text-light">' + dollars + '</span>' : '') + '</span>' + tokens;
 }
 
 // updateAges keeps these counting. The gateway has no times, so its rows have no age.
@@ -264,5 +264,5 @@ function formatFeeHtml(item) {
         .filter(isFeeBox)
         .reduce((total, output) => total + output.value, 0);
 
-    return fee > 0 ? formatErgValueString(fee) : '<span class="text-light">&mdash;</span>';
+    return fee > 0 ? formatErgValueString(fee, 4, false, true) : '<span class="text-light">&mdash;</span>';
 }
