@@ -34,7 +34,7 @@ export const TokenApiClient = {
 						});
 
 						// Import and call chart display if price history is loaded
-						import('./ui-controllers.js').then(module => {
+						import('./ui-controllers.js?v=2').then(module => {
 							module.TokenUIControllers.setLinks();
 
 							if (TokenState.priceData && TokenState.priceData.length > 0) {
