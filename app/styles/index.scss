@@ -174,3 +174,65 @@ html[data-theme="mew"] {
     padding: 4px 8px !important;
   }
 }
+
+//Latest NFTs: under the top summary, side by side from sm, lined up with the two token tables
+#featuredNftView {
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 25px;
+}
+
+.featured-nft {
+  align-items: center;
+  display: flex;
+  gap: 15px;
+}
+
+.featured-nft-img {
+  aspect-ratio: 1;
+  background-color: var(--borders);
+  border-radius: 5px;
+  flex: 0 0 auto;
+  object-fit: cover;
+  width: 84px;
+}
+
+.featured-nft-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.featured-nft-name {
+  color: var(--text-strong);
+  font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.featured-nft:hover .featured-nft-name {
+  color: var(--main-color);
+}
+
+.featured-nft-meta {
+  color: var(--text-light);
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+
+@media (min-width: 576px) {
+  //The same gap as the two token tables, so the edges line up; one card alone keeps its half
+  #featuredNftView {
+    flex-direction: row;
+    gap: 2rem;
+  }
+
+  .featured-nft {
+    flex: 1 1 0;
+    max-width: calc(50% - 1rem);
+    min-width: 0;
+  }
+}
