@@ -1,4 +1,39 @@
 import { TokenState } from './state.js';
+import { TokenAnalyzer } from './token-analyzer.js?v=3';
+
+const TOKEN_TXS_GATEWAY = 'https://chain.mewfinance.com/';
+const TOKEN_TXS_LIMIT = 10;
+// Boxes to look through for that many transfers: one tx often makes several of them
+const TOKEN_TXS_BOXES = 50;
+// At most this many transactions are fetched, ten at a time, for a token whose boxes rarely move it
+const TOKEN_TXS_MAX_LOOKUPS = 30;
+
+function getJson(url) {
+	return $.ajax({ url: url, dataType: 'json', timeout: 10000 });
+}
+
+// A node transaction in the shape the transactions table reads: the token's boxes only, each with
+// its amount of the token as value
+function toTokenTx(tx) {
+	if (!tx) return null;
+
+	const tokenBoxes = boxes => (boxes || [])
+		.map(box => ({
+			box_id: box.boxId,
+			address: getBoxAddress(box),
+			value: (box.assets || []).filter(asset => asset.tokenId === TokenState.tokenId).reduce((sum, asset) => sum + Number(asset.amount), 0)
+		}))
+		.filter(box => box.value > 0);
+
+	return {
+		txId: tx.id,
+		blockHeight: tx.inclusionHeight,
+		blockId: tx.blockId,
+		timestamp: tx.timestamp,
+		inputs: tokenBoxes(tx.inputs),
+		outputs: tokenBoxes(tx.outputs)
+	};
+}
 
 export const TokenApiClient = {
 	// Fetch supply info from Crux Finance
@@ -48,27 +83,36 @@ export const TokenApiClient = {
 		});
 	},
 
-	// Fetch transactions for token
+	// The token's latest transfers. api.ergexplorer.com/tokens/getTransactions served these from an
+	// indexer database that is gone (the endpoint now answers empty), so they come from the indexed
+	// nodes instead: the newest boxes holding the token, then each transaction that made them. Only
+	// boxes holding the token count as its inputs and outputs, as before, and a transaction that moves
+	// none of it (a contract updating its own box) is left out.
 	async getTxsData() {
-		return new Promise((resolve) => {
-			if (!TokenState.tokenId) {
-				console.warn('Token ID not set for transactions');
-				resolve([]);
-				return;
+		if (!TokenState.tokenId) {
+			console.warn('Token ID not set for transactions');
+			return [];
+		}
+
+		try {
+			const boxes = await getJson(TOKEN_TXS_GATEWAY + 'blockchain/box/byTokenId/' + encodeURIComponent(TokenState.tokenId) + '?offset=0&limit=' + TOKEN_TXS_BOXES + '&sortDirection=desc');
+			// The node index lists some boxes twice: one id per transaction, newest first
+			const txIds = [...new Set((boxes.items || []).map(box => box.transactionId))];
+			const items = [];
+
+			for (let i = 0; i < Math.min(txIds.length, TOKEN_TXS_MAX_LOOKUPS) && items.length < TOKEN_TXS_LIMIT; i += TOKEN_TXS_LIMIT) {
+				const txs = await Promise.all(txIds.slice(i, i + TOKEN_TXS_LIMIT).map(id =>
+					getJson(TOKEN_TXS_GATEWAY + 'blockchain/transaction/byId/' + id).catch(() => null)));
+
+				txs.map(toTokenTx).filter(item => item && TokenAnalyzer.calculateTransferredAmount(item) != 0).forEach(item => items.push(item));
 			}
 
-			const url = 'https://api.ergexplorer.com/tokens/getTransactions?offset=0&limit=10&tokenId=' + encodeURIComponent(TokenState.tokenId);
-			console.log('Fetching TXs from:', url);
-
-			$.get(url, function (data) {
-				const items = (data && data.items) ? data.items : [];
-				TokenState.txs = items;
-				resolve(items);
-			}).fail(function (error) {
-				console.error('Error fetching transactions:', error);
-				resolve([]); // Resolve with empty instead of rejecting
-			});
-		});
+			TokenState.txs = items.slice(0, TOKEN_TXS_LIMIT);
+			return TokenState.txs;
+		} catch (error) {
+			console.error('Error fetching transactions:', error);
+			return [];
+		}
 	},
 
 	// Fetch swaps for token

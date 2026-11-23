@@ -1,5 +1,5 @@
 import { TokenState } from './state.js';
-import { TokenApiClient } from './api-client.js?v=7';
+import { TokenApiClient } from './api-client.js?v=8';
 import { TokenUIDisplay } from './ui-display.js?v=4';
 import { TokenUIControllers } from './ui-controllers.js?v=4';
 import { TokenAnalyzer } from './token-analyzer.js?v=3';
