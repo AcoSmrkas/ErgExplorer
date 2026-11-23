@@ -539,7 +539,7 @@ function printTransaction(data, mempool) {
 		$('#includedInBlocksLeft').remove();
 		$('#txIncludedInBlocks').html('N/A');
 	} else {
-		$('#txIncludedInBlocks').html('<a href="' + getBlockUrl(data.outputs[0].blockId) + '">' + data.inclusionHeight + '</a>');
+		$('#txIncludedInBlocks').html('<a href="' + getBlockUrl(data.outputs[0].blockId) + '">' + formatBlockHeight(data.inclusionHeight) + '</a>');
 	}
 
 	//Confirmations nr.
@@ -823,7 +823,7 @@ function onTrackedTransactionSettled(outcome) {
 	const shortId = formatAddressString(txId, 8);
 
 	if (outcome.confirmed) {
-		const height = outcome.confirmed.inclusionHeight;
+		const height = formatBlockHeight(outcome.confirmed.inclusionHeight);
 
 		showTrackingOutcome('Transaction confirmed in block ' + height + '.');
 		notifyTrackingOutcome('✓ Confirmed', 'Transaction confirmed', 'Transaction ' + shortId + ' was confirmed in block ' + height + '.');

@@ -1,7 +1,7 @@
 import { AddressState } from './state.js';
 import { TxType, TxInOut, AddressType } from './constants.js?v=8';
 import { detectContractFromErgotree, detectLithosFill, getTxType, getTxInOutType, analyzeTransfers } from './transaction-analyzer.js?v=9';
-import { PendingTracker } from './pending-tracker.js?v=10';
+import { PendingTracker } from './pending-tracker.js?v=11';
 
 function formatContractAddress(boxes, address, fallback, walletAddress) {
 	const box = boxes.find(item => item.address === address && item.ergoTree);
@@ -294,7 +294,7 @@ export const TransactionFormatter = {
 		// A mempool tx is in no block yet -- it used to print outputs[0].creationHeight here,
 		// which is not a block number and linked nowhere. Nor is the genesis state, whose block id is all zeros.
 		const blockHtml = isMempool || genesis ? '<span class="text-light"' + (genesis ? ' title="' + genesisTitle + '"' : '') + '>&mdash;</span>' :
-			(item.blockId ? '<a href="' + getBlockUrl(item.blockId) + '">' + blockNr + '</a>' : blockNr);
+			(item.blockId ? '<a href="' + getBlockUrl(item.blockId) + '">' + formatBlockHeight(blockNr) + '</a>' : formatBlockHeight(blockNr));
 		html += '<td><span class="d-inline d-lg-none"><strong>Type: </strong><span class="' + classString + '">' + inOutString + '</span></span><span class="d-lg-none float-end tx-block"><strong>Block: </strong>' + blockHtml + '</span><span class="d-none d-lg-inline">' + blockHtml + '</span></td>';
 
 		// Type for desktop

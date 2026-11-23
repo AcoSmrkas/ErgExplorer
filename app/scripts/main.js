@@ -558,6 +558,11 @@ function formatLongAddressString(address, length = 15) {
 	return (address.length > 64 ? address.substring(0, length) + '...' + address.substring(address.length - 4) : address);
 }
 
+// A block height with thousands separators: 1,999,222
+function formatBlockHeight(height) {
+	return Number(height).toLocaleString('en-US');
+}
+
 function formatAddressString(address, length = 15) {
 	if (address == 'Multiple') return 'Multiple';
 

@@ -141,7 +141,7 @@ export const TokenUIDisplay = {
 			html += '<td><span class="d-lg-none"><strong>Tx: </strong></span><a href="' + (typeof getTransactionsUrl === 'function' ? getTransactionsUrl(item.txId) : '#') + '"><i class="fas fa-link text-info"></i></a><span class="d-inline d-lg-none text-white float-end">' + (typeof formatDateString === 'function' ? formatDateString(item.timestamp) : item.timestamp) + '</span></td>';
 			html += '<td class="d-none d-lg-table-cell"><span class="d-lg-none"><strong>Time: </strong></span>' + (typeof formatDateString === 'function' ? formatDateString(item.timestamp) : item.timestamp) + '</td>';
 
-			let blockNr = item.blockHeight;
+			let blockNr = formatBlockHeight(item.blockHeight);
 			html += '<td><span class="d-inline d-lg-none float-end"><strong>Block: </strong><a href="' + (typeof getBlockUrl === 'function' ? getBlockUrl(item.blockId) : '#') + '">' + blockNr + '</a></span><span class="d-none d-lg-inline"><a href="' + (typeof getBlockUrl === 'function' ? getBlockUrl(item.blockId) : '#') + '">' + blockNr + '</a></span></td>';
 
 			const fromAddress = item.inputs && item.inputs.length == 1 ? item.inputs[0].address : 'Multiple';
