@@ -1,12 +1,15 @@
-import { ORACLE_POOLS, fetchPoolBoxId, fetchPoolState, fetchOracleCounts, fetchOperators, fetchErgBalances, fetchRefreshHistory, fetchRateHistory } from './oracles/oracle-data.js?v=9';
+import { ORACLE_POOLS, fetchPoolBoxId, fetchPoolState, fetchOracleCounts, fetchOperators, fetchErgBalances, fetchRefreshHistory, fetchRateHistory } from './oracles/oracle-data.js?v=10';
+import { chartTime, drawPriceChart } from './common/price-chart.js?v=1';
 
 // Oracle pools: oracles lists them, oracles#pool=<slug> shows one. The pool goes in the hash, which
 // params.js reads on every host, so the page needs no server rewrite.
 
 const BLOCK_MINUTES = 2;
 const HISTORY_PAGE_SIZE = 10;
-// The token page's chart has about 30 points a range; denser series are thinned to this
-const CHART_POINTS = 42;
+// Denser series (a week of refreshes is ~800) are thinned to this
+const CHART_POINTS = 400;
+// Range buttons' data-days → the market series in getPriceHistoryNew's full answer [24h, 7d, 30d, 1y, all]
+const MARKET_SERIES = { 1: 0, 7: 1, 30: 2, 365: 3, 0: 4 };
 // A value still loading: the pulsing bar (main.scss .skeleton)
 const SKELETON = '<span class="skeleton"></span>';
 // Placeholder rows while a table loads
@@ -27,7 +30,7 @@ let operatorBalances = {};
 let chart = null;
 let chartDays = 7;
 let rateHistory = {};
-// ERG's market price in USD, hourly over 7 days and daily over 30 (api2, as on the token page)
+// ERG's market price in USD for each range (api2, as on the token page)
 let marketHistory = null;
 let marketHistoryRequest = null;
 
@@ -448,12 +451,12 @@ function showChart() {
 		if (pool !== item) return;
 
 		rateHistory[days] = points;
-		if (days == chartDays) drawChart(points, market ? market[days == 7 ? 1 : 2] : null);
+		if (days == chartDays) drawChart(points, market ? market[MARKET_SERIES[days]] : null, days);
 	}).catch((error) => {
 		if (pool !== item) return;
 
 		console.error('Error fetching the rate history:', error);
-		drawChart([], null);
+		drawChart([], null, days);
 	});
 }
 
@@ -463,7 +466,7 @@ function getMarketHistory() {
 	if (marketHistoryRequest == null) {
 		marketHistoryRequest = new Promise((resolve) => {
 			$.post('https://api2.ergexplorer.com/tokens/getPriceHistoryNew',
-				{ from: Date.now() - 30 * 24 * 60 * 60 * 1000, ids: ['ERG'] },
+				{ tokenId: 'ERG', ids: ['ERG'], full: true },
 				(data) => {
 					marketHistory = Array.isArray(data) && data.length >= 3 ? data : null;
 					resolve(marketHistory);
@@ -480,68 +483,42 @@ function getMarketHistory() {
 	return marketHistoryRequest;
 }
 
-function drawChart(points, market) {
-	if (chart) {
-		chart.destroy();
-		chart = null;
-	}
-
+function drawChart(points, market, days) {
 	$('#chartLoading').hide();
 	$('#chartError').toggle(points.length == 0);
 	$('#chart').toggle(points.length > 0);
-	$('#chartTitle').text(market ? 'Rate vs market' : 'Rate chart');
 
-	if (points.length == 0 || typeof Chart === 'undefined') return;
+	const marketPoints = market && market.length ?
+		market.map((row) => ({ time: chartTime(row.timestamp), price: Number(row.price) })).filter((row) => Number.isFinite(row.time) && row.price > 0) :
+		null;
+	const withMarket = marketPoints && marketPoints.length > 0;
+
+	$('#chartTitle').text(withMarket ? 'Rate vs market' : 'Rate chart');
+
+	if (points.length == 0) {
+		const old = typeof Chart !== 'undefined' && Chart.getChart('chart');
+		if (old) old.destroy();
+		chart = null;
+		return;
+	}
 
 	points = thinPoints(points.slice().sort((a, b) => a.time - b.time));
 
-	const rootStyles = getComputedStyle(document.documentElement);
-	const primaryColor = rootStyles.getPropertyValue('--main-color').trim();
-	const mutedColor = rootStyles.getPropertyValue('--text-light').trim();
-	const marketPoints = market ? market.map((row) => ({ time: parseDate(row.timestamp).getTime(), price: Number(row.price) })) : null;
-
-	const datasets = [{
-		label: 'Oracle',
-		data: points.map((p) => p.rate),
-		borderColor: primaryColor,
-		backgroundColor: primaryColor
-	}];
-
-	if (marketPoints && marketPoints.length > 0) {
-		datasets.push({
-			label: 'Market',
-			data: points.map((p) => marketPriceAt(marketPoints, p.time)),
-			borderColor: mutedColor,
-			backgroundColor: mutedColor
-		});
+	const datasets = [{ label: 'Oracle', values: points.map((p) => p.rate) }];
+	if (withMarket) {
+		datasets.push({ label: 'Market', values: marketPricesAt(marketPoints, points.map((p) => p.time)) });
 	}
 
-	chart = new Chart(document.getElementById('chart'), {
-		type: 'line',
-		options: {
-			responsive: true,
-			maintainAspectRatio: false,
-			animation: {
-				duration: 1000
-			},
-			fill: false,
-			plugins: {
-				legend: {
-					display: datasets.length > 1
-				},
-				tooltip: {
-					enabled: true,
-					displayColors: false,
-					callbacks: {
-						label: (tooltip) => tooltip.dataset.label + ': ' + nFormatter(tooltip.parsed.y, pool.decimals + 2) + ' ' + pool.unit
-					}
-				}
-			}
-		},
-		data: {
-			labels: points.map((p) => new Date(p.time).toLocaleDateString()),
-			datasets: datasets
-		}
+	const usd = isUsdPool(pool);
+
+	chart = drawPriceChart(document.getElementById('chart'), {
+		times: points.map((p) => p.time),
+		datasets: datasets,
+		granularity: days == 1 ? 'hour' : (days && days <= 30 ? 'day' : 'month'),
+		prefix: usd ? '$' : '',
+		suffix: usd ? '' : ' ' + pool.unit,
+		// Up to 30 days each point's time is close; over a year it can be hours off
+		tooltipTime: Boolean(days) && days <= 30
 	});
 }
 
@@ -558,16 +535,18 @@ function thinPoints(points) {
 	return thinned;
 }
 
-// The last market price at or before the time, else the first one
-function marketPriceAt(marketPoints, time) {
-	let price = marketPoints[0].price;
+// For each time (ascending), the last market price at or before it, else the first one
+function marketPricesAt(marketPoints, times) {
+	const sorted = marketPoints.slice().sort((a, b) => a.time - b.time);
+	const prices = [];
+	let index = 0;
 
-	for (const point of marketPoints) {
-		if (point.time > time) break;
-		price = point.price;
+	for (const time of times) {
+		while (index + 1 < sorted.length && sorted[index + 1].time <= time) index++;
+		prices.push(sorted[index].price);
 	}
 
-	return price;
+	return prices;
 }
 
 /* Technical */
