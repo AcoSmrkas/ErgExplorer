@@ -240,10 +240,6 @@ export const TokenUIControllers = {
 
 		let tradeUrl = 'https://dex.mewfinance.com/ergo/swap?base=0000000000000000000000000000000000000000000000000000000000000000&quote=' + TokenState.tokenId;
 
-		if (TokenState.tokenData.isMeme == 't') {
-			tradeUrl = 'https://dex.crooks-fi.com/ergo/swap?base=0000000000000000000000000000000000000000000000000000000000000000&quote=' + TokenState.tokenId;
-		}
-
 		$('#tokenBuyLink').show().attr('href', tradeUrl);
 	}
 };
