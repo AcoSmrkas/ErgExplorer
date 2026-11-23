@@ -102,11 +102,32 @@ async function lithosSearch(path, query) {
 	return response.json();
 }
 
+//api.ergexplorer.com keeps every mainnet Lithos height (lithos/getBlockHeights, a cron updates it each minute)
+const LITHOS_CACHE_MAX_AGE = 600;
+const LITHOS_CACHE_TIMEOUT = 4000;
+
+async function getCachedLithosBlockHeights() {
+	const response = await fetch(ERGEXPLORER_API_HOST + 'lithos/getBlockHeights', { cache: 'no-store', signal: AbortSignal.timeout(LITHOS_CACHE_TIMEOUT) });
+
+	if (!response.ok) {
+		throw new Error('HTTP ' + response.status);
+	}
+
+	const data = await response.json();
+
+	if (!Array.isArray(data.heights) || !(data.ageSeconds <= LITHOS_CACHE_MAX_AGE)) {
+		throw new Error(data.missing ? 'no list yet' : 'list is stale');
+	}
+
+	return new Set(data.heights.map(Number));
+}
+
 /**
- * Heights of the Lithos blocks from minHeight up. Each Lithos block leaves one
- * proof-of-spend box at its own height: a queue-contract box holding one collateral
- * token and nothing but R4. The explorer's search lists them oldest first whatever
- * order is asked for, so this reads back from the end, a page at a time.
+ * Heights of the Lithos blocks from minHeight up (on mainnet, from the cached list, which
+ * holds them all). Each Lithos block leaves one proof-of-spend box at its own height: a
+ * queue-contract box holding one collateral token and nothing but R4. The explorer's search
+ * lists them oldest first whatever order is asked for, so this reads back from the end,
+ * a page at a time.
  */
 async function getLithosBlockHeights(minHeight, maxPages = 5) {
 	const lithos = getLithos();
@@ -114,6 +135,14 @@ async function getLithosBlockHeights(minHeight, maxPages = 5) {
 
 	if (!lithos) {
 		return heights;
+	}
+
+	if (networkType == 'mainnet') {
+		try {
+			return await getCachedLithosBlockHeights();
+		} catch (error) {
+			console.warn('Cached Lithos blocks unavailable, asking the explorer:', error);
+		}
 	}
 
 	const query = { ergoTreeTemplateHash: LITHOS_QUEUE_TEMPLATE_HASH, assets: [lithos.collateralToken] };
