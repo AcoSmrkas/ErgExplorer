@@ -25,11 +25,14 @@ const LIVE_EPOCHS = 2;
 const BOX_PAGE = MAX_PAGE;
 const MAX_DATAPOINT_PAGES = 5;
 // Rate history reads at most 1 + RATE_SAMPLES box pages: every box while that covers the span,
-// otherwise RATE_SAMPLES evenly spread runs of RATE_SAMPLE_SIZE boxes after the first page
+// otherwise RATE_SAMPLES evenly spread runs of boxes after the first page
 const RATE_PAGE = MAX_PAGE;
 const RATE_SAMPLES = 20;
 const RATE_SAMPLE_SIZE = 25;
 const RATE_DENSE_BOXES = RATE_PAGE * (RATE_SAMPLES + 1);
+// Ranges over 30 days (and all of it) read the same number of pages, with short runs: 20 even
+// points instead of 20 clumps
+const RATE_LONG_SAMPLE_SIZE = 3;
 // Block headers read to place the box heights in time
 const RATE_ANCHORS = 8;
 const BLOCK_MS = 120000;
@@ -585,16 +588,19 @@ function timeAtHeight(anchors, height) {
 }
 
 /**
- * [{ time, rate }] oldest first, one point per refresh over the last `days`. Read from the pool NFT's
- * box history: page by page up to RATE_DENSE_BOXES boxes (7 days of any pool), otherwise the first
- * page plus RATE_SAMPLES evenly spread runs of RATE_SAMPLE_SIZE boxes. Boxes carry
- * heights only, so times are interpolated between RATE_ANCHORS + 2 block headers: up to ~30 minutes
- * off on a 30-day span (block times vary within a day), fine for a chart, not for a table.
+ * [{ time, rate }] oldest first, one point per refresh over the last `days` (0: the pool's whole
+ * history). Read from the pool NFT's box history: page by page up to RATE_DENSE_BOXES boxes (7 days
+ * of any pool), otherwise the first page plus RATE_SAMPLES evenly spread runs of RATE_SAMPLE_SIZE
+ * boxes (runs of RATE_LONG_SAMPLE_SIZE past 30 days). Boxes carry heights only, so times are
+ * interpolated between RATE_ANCHORS + 2 block headers: up to ~30 minutes off on a 30-day span (block
+ * times vary within a day) and hours over a year, fine for a chart, not for a table.
  */
 export async function fetchRateHistory(pool, days = 7) {
 	const [tip, first] = await Promise.all([tipHeader(), boxesByToken(pool.poolNft, 0, RATE_PAGE)]);
-	const since = Date.now() - days * 86400000;
-	const sinceHeight = tip.height - Math.ceil(days * 86400000 / BLOCK_MS);
+	const all = !days;
+	const long = all || days > 30;
+	const since = all ? 0 : Date.now() - days * 86400000;
+	const sinceHeight = all ? 0 : tip.height - Math.ceil(days * 86400000 / BLOCK_MS);
 
 	let boxes = first.items;
 
@@ -609,7 +615,7 @@ export async function fetchRateHistory(pool, days = 7) {
 			offsets = [];
 			for (let offset = RATE_PAGE; offset < needed; offset += RATE_PAGE) offsets.push(offset);
 		} else {
-			size = RATE_SAMPLE_SIZE;
+			size = long ? RATE_LONG_SAMPLE_SIZE : RATE_SAMPLE_SIZE;
 			const step = (needed - RATE_PAGE) / RATE_SAMPLES;
 			offsets = Array.from({ length: RATE_SAMPLES }, (_, i) => Math.round(RATE_PAGE + (i + 1) * step - size));
 		}

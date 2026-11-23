@@ -1,4 +1,5 @@
 import { TokenState } from './state.js';
+import { chartTime, drawPriceChart } from '../common/price-chart.js?v=1';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -9,201 +10,6 @@ const RANGE_BUTTONS = [
 	'#showGainersLosers1y',
 	'#showGainersLosersAll'
 ];
-
-// The API sends UTC timestamps without a zone ("2026-11-23 02:00:00.000")
-function chartTime(timestamp) {
-	const text = String(timestamp).trim().replace(' ', 'T');
-	return Date.parse(/Z$|[+-]\d\d:?\d\d$/.test(text) ? text : text + 'Z');
-}
-
-const SUBSCRIPT_DIGITS = '₀₁₂₃₄₅₆₇₈₉';
-
-// 0.0000355 → 0.0₄355, so tiny prices stay short on the axis and in the tooltip
-function compactZeros(text) {
-	const match = /^(-?\$?)0\.(0{4,})(\d+)$/.exec(text);
-	if (!match) return text;
-	const count = String(match[2].length).split('').map(d => SUBSCRIPT_DIGITS[d]).join('');
-	return match[1] + '0.0' + count + match[3];
-}
-
-// Large values as 1.2K / 3.4M so the axis stays narrow
-function compactLarge(value) {
-	const abs = Math.abs(value);
-	const units = [[1e12, 'T'], [1e9, 'B'], [1e6, 'M'], [1e3, 'K']];
-	for (const [size, symbol] of units) {
-		if (abs >= size) {
-			return (value / size).toLocaleString('en-US', { maximumFractionDigits: abs / size >= 100 ? 0 : 2 }) + symbol;
-		}
-	}
-	return null;
-}
-
-// Small prices keep a few significant digits instead of turning into 3.5E-5
-function formatChartPrice(value, digits = 3) {
-	if (!Number.isFinite(value)) return '';
-	const abs = Math.abs(value);
-	if (abs === 0) return '0';
-	if (abs >= 100000) return compactLarge(value);
-	if (abs >= 1000) return value.toLocaleString('en-US', { maximumFractionDigits: 0 });
-	if (abs >= 1) return value.toLocaleString('en-US', { maximumFractionDigits: 2 });
-
-	const decimals = Math.min(20, Math.ceil(-Math.log10(abs)) + digits - 1);
-	return compactZeros(value.toFixed(decimals).replace(/0+$/, '').replace(/\.$/, ''));
-}
-
-// Axis labels share one number of decimals, taken from the tick step
-function formatTick(value, step) {
-	if (value === 0) return '0';
-	if (Math.abs(value) >= 10000) return compactLarge(value);
-	if (!Number.isFinite(step) || step <= 0) return formatChartPrice(value);
-	const decimals = Math.min(20, Math.max(0, Math.ceil(-Math.log10(step) - 1e-9)));
-	return compactZeros(value.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }));
-}
-
-function cssColor(name, fallback) {
-	const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-	return value || fallback;
-}
-
-// Any CSS colour as rgba() with the given alpha
-function withAlpha(color, alpha) {
-	const context = document.createElement('canvas').getContext('2d');
-	context.fillStyle = color;
-	const normalized = context.fillStyle;
-
-	if (normalized.startsWith('#')) {
-		const r = parseInt(normalized.slice(1, 3), 16);
-		const g = parseInt(normalized.slice(3, 5), 16);
-		const b = parseInt(normalized.slice(5, 7), 16);
-		return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-	}
-
-	const parts = normalized.match(/[\d.]+/g) || [0, 0, 0];
-	return `rgba(${parts[0]}, ${parts[1]}, ${parts[2]}, ${alpha})`;
-}
-
-function formatAxisDate(time, timeframe) {
-	const date = new Date(time);
-	if (timeframe === 0) {
-		return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-	}
-	if (timeframe <= 2) {
-		return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
-	}
-	return date.toLocaleDateString([], { month: 'short', year: 'numeric' });
-}
-
-function formatTooltipDate(time, timeframe) {
-	const date = new Date(time);
-	if (timeframe >= 3) {
-		return date.toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' });
-	}
-	return date.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
-}
-
-function drawPriceChart(points, timeframe, usd) {
-	const canvas = document.getElementById('chart');
-	if (!canvas || typeof Chart === 'undefined') return;
-
-	if (TokenState.chart) {
-		TokenState.chart.destroy();
-	}
-
-	const lineColor = cssColor('--main-color', '#e8692c');
-	const textColor = cssColor('--text-light', '#999');
-	const gridColor = withAlpha(cssColor('--borders', '#4f4f4f'), 0.45);
-	const narrow = window.matchMedia('(max-width: 575.98px)').matches;
-
-	TokenState.chart = new Chart(canvas, {
-		type: 'line',
-		data: {
-			labels: points.map(point => point.time),
-			datasets: [{
-				data: points.map(point => point.value),
-				borderColor: lineColor,
-				borderWidth: 2,
-				pointRadius: 0,
-				pointHoverRadius: 4,
-				pointHoverBackgroundColor: lineColor,
-				pointHoverBorderColor: '#fff',
-				pointHoverBorderWidth: 1.5,
-				tension: 0,
-				spanGaps: true,
-				fill: 'start',
-				backgroundColor: (context) => {
-					const { ctx, chartArea } = context.chart;
-					if (!chartArea) return withAlpha(lineColor, 0.15);
-					const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-					gradient.addColorStop(0, withAlpha(lineColor, 0.28));
-					gradient.addColorStop(1, withAlpha(lineColor, 0));
-					return gradient;
-				}
-			}]
-		},
-		options: {
-			responsive: true,
-			maintainAspectRatio: false,
-			animation: { duration: 300 },
-			interaction: { mode: 'index', intersect: false },
-			layout: { padding: { top: 6 } },
-			plugins: {
-				legend: { display: false },
-				tooltip: {
-					displayColors: false,
-					callbacks: {
-						title: (items) => items.length ? formatTooltipDate(points[items[0].dataIndex].time, timeframe) : '',
-						label: (item) => usd ? '$' + formatChartPrice(item.parsed.y, 4) : formatChartPrice(item.parsed.y, 4) + ' ERG'
-					}
-				}
-			},
-			scales: {
-				x: {
-					grid: { display: false },
-					border: { color: gridColor },
-					ticks: {
-						color: textColor,
-						font: { size: narrow ? 10 : 12 },
-						// First and last labels sit inside the plot, so no empty strip on the left
-						align: 'inner',
-						maxRotation: 0,
-						autoSkip: true,
-						autoSkipPadding: 24,
-						maxTicksLimit: narrow ? 4 : 7,
-						callback: (value) => points[value] ? formatAxisDate(points[value].time, timeframe) : ''
-					}
-				},
-				y: {
-					position: 'right',
-					bounds: 'data',
-					// 5% headroom without the axis going below zero
-					afterDataLimits: (scale) => {
-						const pad = (scale.max - scale.min) * 0.05 || Math.abs(scale.max) * 0.05;
-						scale.max += pad;
-						scale.min = Math.max(0, scale.min - pad);
-					},
-					grid: { color: gridColor },
-					border: { display: false },
-					ticks: {
-						color: textColor,
-						font: { size: narrow ? 10 : 12 },
-						padding: narrow ? 4 : 8,
-						maxTicksLimit: narrow ? 5 : 6,
-						callback: (value, index, ticks) => {
-							// With bounds: 'data' the first and last ticks sit on the data edges; only label round ones
-							const step = ticks.length > 2 ? Math.abs(ticks[2].value - ticks[1].value) :
-								ticks.length > 1 ? Math.abs(ticks[1].value - ticks[0].value) : NaN;
-							const edge = index === 0 || index === ticks.length - 1;
-							if (edge && Number.isFinite(step) && step > 0 && Math.abs(value / step - Math.round(value / step)) > 1e-6) {
-								return '';
-							}
-							return (usd ? '$' : '') + formatTick(value, step);
-						}
-					}
-				}
-			}
-		}
-	});
-}
 
 function hasTokenUsdPrice() {
 	if (typeof prices === 'undefined') return false;
@@ -336,10 +142,17 @@ export const TokenUIControllers = {
 			points.push({ time: Date.now(), value: currentPrice });
 		}
 
-		drawPriceChart(points, timeframe, usd);
-
+		// Shown first, so the chart is laid out at its real size
 		$('#priceInfo').show();
 		$('#priceLoading').hide();
+
+		drawPriceChart(document.getElementById('chart'), {
+			times: points.map(point => point.time),
+			datasets: [{ label: 'Price', values: points.map(point => point.value) }],
+			granularity: ['hour', 'day', 'day', 'month', 'month'][timeframe],
+			prefix: usd ? '$' : '',
+			suffix: usd ? '' : ' ERG'
+		});
 	},
 
 	// Set external links for the token

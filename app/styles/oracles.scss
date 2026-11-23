@@ -95,6 +95,27 @@ html[data-theme="mew"] {
 	.token-chart-frame {
 		height: 300px;
 	}
+
+	// Five range buttons don't fit beside the title on a phone: give them their own row (as on token)
+	#chartColumn .token-chart-title,
+	#chartColumn .token-chart-controls {
+		flex: 0 0 100%;
+		max-width: 100%;
+	}
+
+	#chartColumn .token-chart-controls {
+		padding-bottom: 8px !important;
+	}
+
+	#chartColumn {
+		padding-left: 8px;
+		padding-right: 8px;
+	}
+
+	#chartColumn .token-chart-controls .token-chart-range-btn {
+		flex: 1 1 0;
+		min-width: 0;
+	}
 }
 
 // The oracles list scrolls inside a fixed height rather than running down the page (main.js fades it)
