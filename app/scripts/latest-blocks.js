@@ -1,11 +1,11 @@
 //The block list comes from whichever source answers first, asked in order (see orderedSources): GraphQL
 //through our gateway (which moves on to another GraphQL server when one fails), api.ergoplatform,
-//gql.ergoplatform directly, then sigmaspace's GraphQL. Each next one is added after HEDGE_DELAY or as soon
+//then gql.ergoplatform directly. Each next one is added after HEDGE_DELAY or as soon
 //as the ones before have failed, so a dead source late in the list costs nothing. api.ergoplatform alone
 //is at times very slow. Blocks don't wait for prices; the dollar rewards fill in when they come
 const BLOCKS_GQL_GATEWAY = 'https://chain.mewfinance.com/graphql';
-//Asked directly, after the gateway and api.ergoplatform. sigmaspace is shutting down: last.
-const BLOCKS_GQL_DIRECT_HOSTS = ['https://gql.ergoplatform.com/', 'https://explore.sigmaspace.io/api/graphql'];
+//Asked directly, after the gateway and api.ergoplatform
+const BLOCKS_GQL_DIRECT_HOSTS = ['https://gql.ergoplatform.com/'];
 const BLOCKS_HEDGE_DELAY = 1500;
 const BLOCKS_SOURCE_TIMEOUT = 20000;
 const BLOCK_SUMMARY_FIELDS = 'headerId height timestamp txsCount blockSize blockMiningTime minerAddress minerReward blockFee';

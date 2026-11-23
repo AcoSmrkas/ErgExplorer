@@ -1,5 +1,5 @@
 import { AddressState } from './state.js';
-import { ApiClient } from './api-client.js?v=60';
+import { ApiClient } from './api-client.js?v=61';
 import { detectContractFromErgotree } from './transaction-analyzer.js?v=9';
 
 // The rich list page's ranking: ergo.watch's top holders plus the two emission contracts it leaves out
