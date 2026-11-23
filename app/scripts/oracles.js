@@ -602,7 +602,14 @@ function epochLabel(item) {
 function formatRate(rate, item) {
 	if (rate == null) return '&ndash;';
 
-	return nFormatter(rate, item.decimals + 2) + ' <strong class="erg-span">' + item.unit + '</strong>';
+	return nFormatter(rate, item.decimals + 2) + ' ' + formatUnit(item.unit);
+}
+
+// Only ERG is orange, as everywhere else: "USD" and the "/oz" of "ERG/oz" stay plain
+function formatUnit(unit) {
+	if (!unit.startsWith('ERG')) return '<strong>' + unit + '</strong>';
+
+	return '<strong class="erg-span">ERG</strong>' + (unit.length > 3 ? '<strong>' + unit.substring(3) + '</strong>' : '');
 }
 
 function formatHeight(value) {
