@@ -108,8 +108,9 @@ export const TokenApiClient = {
 				return;
 			}
 
+			// tokenId picks the token exactly (names collide); full asks for 24h, 7d, 30d, 1y and all
 			$.post('https://api2.ergexplorer.com/tokens/getPriceHistoryNew',
-				{ from: TokenState.from30d, ids: [TokenState.tokenData.name] },
+				{ tokenId: TokenState.tokenId, ids: [TokenState.tokenData.name], full: true },
 				function(data) {
 					if (data && data.length > 0 && data[0].length > 0) {
 						TokenState.priceData = data;

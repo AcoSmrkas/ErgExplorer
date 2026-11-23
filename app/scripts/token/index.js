@@ -572,4 +572,6 @@ window.toggleChart = () => TokenUIControllers.toggleChart();
 window.printGainersLosers24h = () => TokenUIControllers.printGainersLosers24h();
 window.printGainersLosers7d = () => TokenUIControllers.printGainersLosers7d();
 window.printGainersLosers30d = () => TokenUIControllers.printGainersLosers30d();
+window.printGainersLosers1y = () => TokenUIControllers.selectRange(3);
+window.printGainersLosersAll = () => TokenUIControllers.selectRange(4);
 window.calculateTransferredAmount = (tx) => TokenAnalyzer.calculateTransferredAmount(tx);
