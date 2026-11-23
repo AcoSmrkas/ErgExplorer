@@ -1,7 +1,7 @@
 import { TokenState } from './state.js';
-import { TokenApiClient } from './api-client.js?v=4';
+import { TokenApiClient } from './api-client.js?v=6';
 import { TokenUIDisplay } from './ui-display.js?v=3';
-import { TokenUIControllers } from './ui-controllers.js';
+import { TokenUIControllers } from './ui-controllers.js?v=4';
 import { TokenAnalyzer } from './token-analyzer.js?v=3';
 import { isLpTokenData } from '../common/lp-tokens.js?v=4';
 
@@ -572,4 +572,6 @@ window.toggleChart = () => TokenUIControllers.toggleChart();
 window.printGainersLosers24h = () => TokenUIControllers.printGainersLosers24h();
 window.printGainersLosers7d = () => TokenUIControllers.printGainersLosers7d();
 window.printGainersLosers30d = () => TokenUIControllers.printGainersLosers30d();
+window.printGainersLosers1y = () => TokenUIControllers.selectRange(3);
+window.printGainersLosersAll = () => TokenUIControllers.selectRange(4);
 window.calculateTransferredAmount = (tx) => TokenAnalyzer.calculateTransferredAmount(tx);

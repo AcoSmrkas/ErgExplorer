@@ -71,11 +71,23 @@ function getPoolStats() {
 			//Volume
 			formattedResult += '<td>$' + formatValue(poolStat.total_usd, 2) + '</td>';
 
+			formattedResult += getBuyCell(poolStat.asset);
+
 			formattedResult += '</tr>';
 		}
 
 		$('#tokensVolumeTableBody').html(formattedResult);
 	}); });
+}
+
+function getBuyCell(tokenId) {
+	if (!/^[0-9a-f]{64}$/i.test(tokenId)) {
+		return '<td></td>';
+	}
+
+	let buyUrl = 'https://dex.mewfinance.com/ergo/swap?base=0000000000000000000000000000000000000000000000000000000000000000&quote=' + tokenId;
+
+	return '<td class="index-buy-cell"><a target="_new" rel="noopener" class="btn btn-info index-buy-btn" href="' + buyUrl + '">Buy</a></td>';
 }
 
 function getPriceHistory() {
@@ -232,6 +244,8 @@ function printGainersLosers(timeframe) {
 
 		//Change
 		formattedResult += '<td><span class="' + classString + '">' + difference + '%</span></td>';
+
+		formattedResult += getBuyCell(item.tokenid);
 
 		formattedResult += '</tr>';
 

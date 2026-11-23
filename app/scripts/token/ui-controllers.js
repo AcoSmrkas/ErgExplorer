@@ -1,4 +1,15 @@
 import { TokenState } from './state.js';
+import { chartTime, drawPriceChart } from '../common/price-chart.js?v=1';
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+const RANGE_BUTTONS = [
+	'#showGainersLosers24h',
+	'#showGainersLosers7d',
+	'#showGainersLosers30d',
+	'#showGainersLosers1y',
+	'#showGainersLosersAll'
+];
 
 function hasTokenUsdPrice() {
 	if (typeof prices === 'undefined') return false;
@@ -49,186 +60,99 @@ export const TokenUIControllers = {
 		$('#chartToggleBtn').val(TokenState.chartUsd ? 'USD' : 'ERG');
 	},
 
-	// Display gainers/losers with timeframe buttons
+	// Range buttons: 0 = 24h, 1 = 7d, 2 = 30d, 3 = 1y, 4 = all
 	printGainersLosers24h() {
-		this.printGainersLosers(0);
-		$('#showGainersLosers24h').removeClass('btn-primary').addClass('btn-info');
-		$('#showGainersLosers7d').removeClass('btn-info').addClass('btn-primary');
-		$('#showGainersLosers30d').removeClass('btn-info').addClass('btn-primary');
+		this.selectRange(0);
 	},
 
 	printGainersLosers7d() {
-		this.printGainersLosers(1);
-		$('#showGainersLosers7d').removeClass('btn-primary').addClass('btn-info');
-		$('#showGainersLosers24h').removeClass('btn-info').addClass('btn-primary');
-		$('#showGainersLosers30d').removeClass('btn-info').addClass('btn-primary');
+		this.selectRange(1);
 	},
 
 	printGainersLosers30d() {
-		this.printGainersLosers(2);
-		$('#showGainersLosers30d').removeClass('btn-primary').addClass('btn-info');
-		$('#showGainersLosers24h').removeClass('btn-info').addClass('btn-primary');
-		$('#showGainersLosers7d').removeClass('btn-info').addClass('btn-primary');
+		this.selectRange(2);
 	},
 
-	// Core gainers/losers display logic
+	selectRange(timeframe) {
+		this.printGainersLosers(timeframe);
+	},
+
+	// Price changes in the header, the range buttons and the chart
 	printGainersLosers(timeframe) {
 		if (!TokenState.priceData || TokenState.priceData.length === 0) {
-			console.log('[printGainersLosers] No price data available');
 			return;
 		}
 
-		let data = JSON.parse(JSON.stringify(TokenState.priceData));
-		TokenState.chartType = timeframe;
+		const data = TokenState.priceData;
 
 		if (data.length == 0 || data[0].length == 0) {
-			console.log('[printGainersLosers] Empty data arrays');
 			return;
 		}
 
-		// Check if prices global is available
 		if (typeof prices === 'undefined' || !prices[TokenState.tokenId]) {
-			console.log('[printGainersLosers] Prices not available yet');
 			return;
 		}
 
-		// Calculate price changes for all timeframes
-		for (let i = 0; i < data.length; i++) {
-			if (data[i].length == 0) continue;
+		const usd = TokenState.chartUsd;
+		const currentPrice = usd ? prices[TokenState.tokenId] : prices[TokenState.tokenId] / prices['ERG'];
+		const valueOf = (row) => Number(usd ? row.price : row.price_in_erg);
 
-			let item = data[i][0];
-			let oldPrice = TokenState.chartUsd ? item.price : item.price_in_erg;
-			let newPrice = TokenState.chartUsd ? prices[TokenState.tokenId] : (prices[TokenState.tokenId] / prices['ERG']);
-			let difference = (newPrice * 100 / oldPrice) - 100;
+		// 1y shows only for tokens older than a year, all only for tokens older than 30 days
+		const all = data[4] || [];
+		const firstTime = all.length > 0 ? chartTime(all[0].timestamp) : Date.now();
+		const age = Date.now() - firstTime;
+		const available = [true, true, true, age > 365 * DAY_MS, age > 30 * DAY_MS];
+		$('#showGainersLosers1y').toggle(available[3]);
+		$('#showGainersLosersAll').toggle(available[4]);
 
-			if (!difference || isNaN(difference)) {
-				continue;
-			}
-
-			difference = typeof toFixed === 'function' ? toFixed(difference, 2) : difference.toFixed(2);
-
-			let classString = 'text-success';
-			if (difference > 0) {
-				difference = '+' + difference;
-			} else {
-				classString = 'text-danger';
-			}
-
-			if (i == 2) {
-				$('#usdChange30d').removeClass('text-success text-danger').html(difference + '%').addClass(classString);
-			}
-
-			if (i == 1) {
-				$('#usdChange7d').removeClass('text-success text-danger').html(difference + '%').addClass(classString);
-			}
-
-			if (i == 0) {
-				$('#usdChange24h').removeClass('text-success text-danger').html(difference + '%').addClass(classString);
-			}
+		if (!available[timeframe] || !data[timeframe] || data[timeframe].length === 0) {
+			timeframe = 0;
 		}
 
-		// Get data for selected timeframe
-		data = data[timeframe];
+		TokenState.chartType = timeframe;
 
-		// Display current price
-		if (typeof prices !== 'undefined' && prices[TokenState.tokenId]) {
-			let price = (TokenState.chartUsd ? '$' + (typeof formatValue === 'function' ? formatValue(prices[TokenState.tokenId], 2, true) : prices[TokenState.tokenId].toFixed(2)) :
-				(typeof formatValue === 'function' ? formatValue(prices[TokenState.tokenId] / prices['ERG'], 9, true) : (prices[TokenState.tokenId] / prices['ERG']).toFixed(9)) + ' <span class="erg-span">ERG</span>');
-			$('#usdPrice').html(price);
-		} else if (data.length > 0) {
-			let price = (TokenState.chartUsd ? '$' + (typeof formatValue === 'function' ? formatValue(parseFloat(data[0].price), 2, true) : parseFloat(data[0].price).toFixed(2)) :
-				(typeof formatValue === 'function' ? formatValue(data[0].price / prices['ERG'], 9, true) : (data[0].price / prices['ERG']).toFixed(9)) + ' <span class="erg-span">ERG</span>');
-			$('#usdPrice').html(price);
+		RANGE_BUTTONS.forEach((id, i) => {
+			$(id).toggleClass('btn-info', i === timeframe).toggleClass('btn-primary', i !== timeframe);
+		});
+
+		// Header: change since the first point of each range
+		const changeIds = ['#usdChange24h', '#usdChange7d', '#usdChange30d'];
+		changeIds.forEach((id, i) => {
+			const series = data[i] || [];
+			const first = series.find(row => Number.isFinite(valueOf(row)) && valueOf(row) > 0);
+			if (!first) return;
+
+			const difference = (currentPrice * 100 / valueOf(first)) - 100;
+			if (!Number.isFinite(difference)) return;
+
+			const text = (difference > 0 ? '+' : '') + difference.toFixed(2) + '%';
+			$(id).removeClass('text-success text-danger').html(text).addClass(difference >= 0 ? 'text-success' : 'text-danger');
+		});
+
+		const price = usd ?
+			'$' + (typeof formatValue === 'function' ? formatValue(prices[TokenState.tokenId], 2, true) : prices[TokenState.tokenId].toFixed(2)) :
+			(typeof formatValue === 'function' ? formatValue(currentPrice, 9, true) : currentPrice.toFixed(9)) + ' <span class="erg-span">ERG</span>';
+		$('#usdPrice').html(price);
+
+		const points = data[timeframe]
+			.map(row => ({ time: chartTime(row.timestamp), value: valueOf(row) }))
+			.filter(point => Number.isFinite(point.time) && Number.isFinite(point.value));
+
+		if (Number.isFinite(currentPrice)) {
+			points.push({ time: Date.now(), value: currentPrice });
 		}
 
-		// Add current price to chart data
-		if (typeof prices !== 'undefined' && prices[TokenState.tokenId]) {
-			data.push({
-				'price': prices[TokenState.tokenId],
-				'price_in_erg': prices[TokenState.tokenId] / prices['ERG'],
-				'timestamp': typeof unixTimestampToDateTimeUTCString === 'function' && typeof getCurrentUTCDate === 'function' ?
-					unixTimestampToDateTimeUTCString(getCurrentUTCDate().getTime()) : new Date().toISOString()
-			});
-		}
-
-		// Destroy old chart if exists
-		if (TokenState.chart) {
-			TokenState.chart.destroy();
-		}
-
-		TokenState.tempDateIndex = 0;
-
-		// Get primary color from CSS
-		const rootStyles = getComputedStyle(document.documentElement);
-		const primaryColor = rootStyles.getPropertyValue('--main-color').trim();
-
-		// Map function for labels
-		const mapLabel = (row, index) => {
-			if (TokenState.chartType == 0) {
-				return typeof formatTimeString === 'function' && typeof utcToLocal === 'function' ?
-					formatTimeString(utcToLocal(row.timestamp)) : row.timestamp;
-			} else {
-				let dateString = typeof parseDate === 'function' ?
-					parseDate(row.timestamp).toLocaleDateString() : new Date(row.timestamp).toLocaleDateString();
-				return dateString;
-			}
-		};
-
-		// Get auto digits helper
-		const getAutoDigits = (value) => {
-			if (value >= 1) return 2;
-			if (value >= 0.1) return 3;
-			if (value >= 0.01) return 4;
-			return 6;
-		};
-
-		// Create chart
-		if (document.getElementById('chart') && typeof Chart !== 'undefined') {
-			TokenState.chart = new Chart(
-				document.getElementById('chart'),
-				{
-					type: 'line',
-					options: {
-						responsive: true,
-						maintainAspectRatio: false,
-						animation: {
-							duration: 1000
-						},
-						fill: false,
-						borderColor: primaryColor,
-						plugins: {
-							legend: {
-								display: false
-							},
-							tooltip: {
-								enabled: true,
-								displayColors: false,
-								callbacks: {
-									label: function (tooltip) {
-										let formattedValue = (TokenState.chartUsd ? '$' : '') +
-											(typeof nFormatter === 'function' ? nFormatter(tooltip.parsed.y, getAutoDigits(tooltip.parsed.y)) : tooltip.parsed.y) +
-											(TokenState.chartUsd ? '' : ' ERG');
-										return formattedValue;
-									}
-								}
-							}
-						}
-					},
-					data: {
-						labels: data.map(mapLabel),
-						datasets: [
-							{
-								label: '$',
-								data: data.map(row => TokenState.chartUsd ? row.price : row.price_in_erg)
-							}
-						]
-					}
-				}
-			);
-		}
-
+		// Shown first, so the chart is laid out at its real size
 		$('#priceInfo').show();
 		$('#priceLoading').hide();
+
+		drawPriceChart(document.getElementById('chart'), {
+			times: points.map(point => point.time),
+			datasets: [{ label: 'Price', values: points.map(point => point.value) }],
+			granularity: ['hour', 'day', 'day', 'month', 'month'][timeframe],
+			prefix: usd ? '$' : '',
+			suffix: usd ? '' : ' ERG'
+		});
 	},
 
 	// Set external links for the token
@@ -239,10 +163,6 @@ export const TokenUIControllers = {
 		}
 
 		let tradeUrl = 'https://dex.mewfinance.com/ergo/swap?base=0000000000000000000000000000000000000000000000000000000000000000&quote=' + TokenState.tokenId;
-
-		if (TokenState.tokenData.isMeme == 't') {
-			tradeUrl = 'https://dex.crooks-fi.com/ergo/swap?base=0000000000000000000000000000000000000000000000000000000000000000&quote=' + TokenState.tokenId;
-		}
 
 		$('#tokenBuyLink').show().attr('href', tradeUrl);
 	}

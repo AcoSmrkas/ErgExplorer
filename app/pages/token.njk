@@ -2,7 +2,7 @@
 
 {% block styles %}
 	<!-- build:css styles/token.css -->
-		<link rel="stylesheet" href="styles/token.css">
+		<link rel="stylesheet" href="styles/token.css?v=1">
 	<!-- endbuild -->
 {% endblock %}
 
@@ -284,13 +284,15 @@
 					</div>
 					<hr class="mt-2 mb-2">
 					<div class="row w-100 p-0 p-md-2 ps-md-0 pe-md-0">
-						<div class="col-6 p-0 pb-1">
+						<div class="col-6 p-0 pb-1 token-chart-title">
 							<h4>Price chart <input id="chartToggleBtn" onclick="toggleChart()" type="button" class="btn btn-info ms-1" value="USD" /></h4>
 						</div>
 						<div class="col-6 p-0 token-chart-controls">
 							<input id="showGainersLosers24h" onclick="printGainersLosers24h()" class="btn btn-info token-chart-range-btn" type="button" value="24h">
 							<input id="showGainersLosers7d" onclick="printGainersLosers7d()" class="btn btn-primary token-chart-range-btn" type="button" value="7d">
 							<input id="showGainersLosers30d" onclick="printGainersLosers30d()" class="btn btn-primary token-chart-range-btn" type="button" value="30d">
+							<input id="showGainersLosers1y" onclick="printGainersLosers1y()" class="btn btn-primary token-chart-range-btn" type="button" value="1y" style="display: none;">
+							<input id="showGainersLosersAll" onclick="printGainersLosersAll()" class="btn btn-primary token-chart-range-btn" type="button" value="All" style="display: none;">
 						</div>
 					</div>
 					<div class="token-chart-frame">
@@ -406,5 +408,5 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.3.1/chart.umd.min.js" integrity="sha512-UcCmTcAm3IkzrswF+WqvwWSjsnv8nsJpDL09KHCETWS0g0WjoIZDRUYXCeHeow1cEij0kqL9OwRwirv/xCQ6GA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	<script src="./scripts/common/prices.js?v=44"></script>
 	<script src="./scripts/common/nft.js?v=42"></script>
-	<script type="module" src="./scripts/token/index.js?v=50"></script>
+	<script type="module" src="./scripts/token/index.js?v=53"></script>
 {% endblock %}
