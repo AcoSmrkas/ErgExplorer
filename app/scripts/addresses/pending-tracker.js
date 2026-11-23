@@ -1,5 +1,5 @@
 import { AddressState } from './state.js';
-import { ApiClient } from './api-client.js?v=60';
+import { ApiClient } from './api-client.js?v=61';
 
 /**
  * "Notify me when it confirms" for the address page's pending txs.

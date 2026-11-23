@@ -766,7 +766,7 @@ async function isListedInPool(url) {
  * The tx as an indexer has it once it is in a block, or null while none does (still pending, its
  * block not indexed yet, or dropped). The explorer's copies come first: the indexed nodes' lacks
  * the token types and decompiled scripts, but they are the only ones of ours with the txs that spend
- * genesis boxes. sigmaspace, which is shutting down, is asked only when none of ours has the tx.
+ * genesis boxes.
  */
 async function getConfirmedTransaction() {
 	const urls = [getTxUrl(false)];
@@ -776,13 +776,7 @@ async function getConfirmedTransaction() {
 		urls.push(NODE_FORMAT_GATEWAY + 'blockchain/transaction/byId/' + txId);
 	}
 
-	const found = await findConfirmedTransaction(urls);
-
-	if (found || networkType == 'testnet') {
-		return found;
-	}
-
-	return findConfirmedTransaction(['https://api.sigmaspace.io/api/v1/transactions/' + txId]);
+	return findConfirmedTransaction(urls);
 }
 
 // The first copy of the tx, in url order, or null
@@ -794,7 +788,7 @@ async function findConfirmedTransaction(urls) {
 			const buffer = new TextDecoder('utf-8').decode(await response.arrayBuffer());
 			const tx = JSONbig.parse(buffer);
 
-			// An error body can come with HTTP 200 (sigmaspace for an unknown id), hence the id check
+			// An error body can come with HTTP 200, hence the id check
 			if (!tx || tx.id !== txId || !tx.blockId) return null;
 
 			return url.includes('/blockchain/') ? (await nodeTxsToExplorer([tx]))[0] : tx;

@@ -1,7 +1,7 @@
 import { AddressState } from './state.js';
 import { TxType, TxInOut, AddressType } from './constants.js?v=8';
 import { detectContractFromErgotree, detectLithosFill, getTxType, getTxInOutType, analyzeTransfers } from './transaction-analyzer.js?v=9';
-import { PendingTracker } from './pending-tracker.js?v=10';
+import { PendingTracker } from './pending-tracker.js?v=11';
 
 function formatContractAddress(boxes, address, fallback, walletAddress) {
 	const box = boxes.find(item => item.address === address && item.ergoTree);
