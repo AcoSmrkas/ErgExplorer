@@ -1,7 +1,11 @@
-//The block list comes from whichever source answers first: sigmaspace's GraphQL explorer, then
-//api.ergoplatform, which is added after HEDGE_DELAY or as soon as sigmaspace fails. api.ergoplatform
-//alone is at times very slow. Blocks don't wait for prices; the dollar rewards fill in when they come
-const BLOCKS_GQL_HOST = 'https://explore.sigmaspace.io/api/graphql';
+//The block list comes from whichever source answers first, asked in order (see orderedSources): GraphQL
+//through our gateway (which moves on to another GraphQL server when one fails), api.ergoplatform,
+//gql.ergoplatform directly, then sigmaspace's GraphQL. Each next one is added after HEDGE_DELAY or as soon
+//as the ones before have failed, so a dead source late in the list costs nothing. api.ergoplatform alone
+//is at times very slow. Blocks don't wait for prices; the dollar rewards fill in when they come
+const BLOCKS_GQL_GATEWAY = 'https://chain.mewfinance.com/graphql';
+//Asked directly, after the gateway and api.ergoplatform. sigmaspace is shutting down: last.
+const BLOCKS_GQL_DIRECT_HOSTS = ['https://gql.ergoplatform.com/', 'https://explore.sigmaspace.io/api/graphql'];
 const BLOCKS_HEDGE_DELAY = 1500;
 const BLOCKS_SOURCE_TIMEOUT = 20000;
 const BLOCK_SUMMARY_FIELDS = 'headerId height timestamp txsCount blockSize blockMiningTime minerAddress minerReward blockFee';
@@ -168,17 +172,26 @@ function startAutoUpdate(data, pricesLoaded) {
 	document.addEventListener('visibilitychange', check);
 }
 
-function fetchTipHeight() {
-	const fromExplorer = () => fetchExplorerBlocks(0, 1).then(data => data.items[0].height);
-	const fromGql = () => queryGql('{ state { height } }').then(data => data.state.height);
+//The sources in the order they are asked: the gateway's GraphQL, the explorer, then the GraphQL servers
+//asked directly. The GraphQL servers are mainnet only. fromGql(host) and fromExplorer() return promises.
+function orderedSources(fromGql, fromExplorer) {
+	if (networkType == 'testnet') {
+		return [fromExplorer];
+	}
 
-	return raceSources(networkType == 'testnet' ? [fromExplorer] : [fromGql, fromExplorer]);
+	return [() => fromGql(BLOCKS_GQL_GATEWAY), fromExplorer].concat(BLOCKS_GQL_DIRECT_HOSTS.map(host => () => fromGql(host)));
+}
+
+function fetchTipHeight() {
+	return raceSources(orderedSources(
+		host => queryGql('{ state { height } }', {}, host).then(data => data.state.height),
+		() => fetchExplorerBlocks(0, 1).then(data => data.items[0].height)
+	));
 }
 
 //Resolves with the first source to answer, in api.ergoplatform's shape ({ total, items })
 function fetchLatestBlocks() {
-	//sigmaspace's GraphQL explorer is mainnet only
-	return raceSources(networkType == 'testnet' ? [fetchBlocksFromExplorer] : [fetchBlocksFromGql, fetchBlocksFromExplorer]);
+	return raceSources(orderedSources(fetchBlocksFromGql, fetchBlocksFromExplorer));
 }
 
 //Starts the sources in order, the next after BLOCKS_HEDGE_DELAY or as soon as one fails; the first to answer wins
@@ -224,13 +237,13 @@ function fetchBlocksFromExplorer() {
 	return fetchExplorerBlocks(offset, ITEMS_PER_PAGE);
 }
 
-function fetchBlocksFromGql() {
+function fetchBlocksFromGql(host) {
 	const query = 'query($skip: Int, $take: Int) { state { height } blocks(skip: $skip, take: $take) { ' + BLOCK_SUMMARY_FIELDS + ' } }';
 
-	return queryGql(query, { skip: Number(offset), take: Number(ITEMS_PER_PAGE) })
+	return queryGql(query, { skip: Number(offset), take: Number(ITEMS_PER_PAGE) }, host)
 	.then(data => {
 		if (!data.blocks || data.blocks.length == 0) {
-			throw new Error('sigmaspace GraphQL: no blocks');
+			throw new Error('GraphQL: no blocks');
 		}
 
 		return {
@@ -241,23 +254,25 @@ function fetchBlocksFromGql() {
 	});
 }
 
-function queryGql(query, variables = {}) {
-	return fetch(BLOCKS_GQL_HOST, {
+function queryGql(query, variables, host) {
+	return fetch(host, {
 		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
+		//To the gateway as text/plain, a simple request: no CORS preflight before the first paint. The
+		//GraphQL servers themselves refuse text/plain (CSRF protection) and need the preflight.
+		headers: { 'Content-Type': host == BLOCKS_GQL_GATEWAY ? 'text/plain' : 'application/json' },
 		body: JSON.stringify({ query: query, variables: variables }),
 		signal: AbortSignal.timeout(BLOCKS_SOURCE_TIMEOUT)
 	})
 	.then(response => {
 		if (!response.ok) {
-			throw new Error('sigmaspace GraphQL HTTP ' + response.status);
+			throw new Error('GraphQL HTTP ' + response.status);
 		}
 
 		return response.json();
 	})
 	.then(json => {
 		if (!json.data || json.errors) {
-			throw new Error('sigmaspace GraphQL: ' + JSON.stringify(json.errors || 'no data'));
+			throw new Error('GraphQL: ' + JSON.stringify(json.errors || 'no data'));
 		}
 
 		return json.data;
@@ -310,27 +325,24 @@ async function fetchLithosBlocks() {
 		return { total: heights.length, items: [] };
 	}
 
-	const sources = [() => fetchBlocksAtHeightsFromExplorer(pageHeights)];
-
-	if (networkType != 'testnet') {
-		sources.unshift(() => fetchBlocksAtHeightsFromGql(pageHeights));
-	}
-
-	const items = await raceSources(sources);
+	const items = await raceSources(orderedSources(
+		host => fetchBlocksAtHeightsFromGql(pageHeights, host),
+		() => fetchBlocksAtHeightsFromExplorer(pageHeights)
+	));
 
 	return { total: heights.length, items: items };
 }
 
 //All the heights in one query, one alias each
-function fetchBlocksAtHeightsFromGql(heights) {
+function fetchBlocksAtHeightsFromGql(heights, host) {
 	const query = '{ ' + heights.map((height, i) => 'b' + i + ': blocks(height: ' + Number(height) + ') { ' + BLOCK_SUMMARY_FIELDS + ' }').join(' ') + ' }';
 
-	return queryGql(query)
+	return queryGql(query, {}, host)
 	.then(data => heights.map((height, i) => {
 		const block = (data['b' + i] || [])[0];
 
 		if (!block) {
-			throw new Error('sigmaspace GraphQL: no block at height ' + height);
+			throw new Error('GraphQL: no block at height ' + height);
 		}
 
 		return gqlBlockToExplorer(block);

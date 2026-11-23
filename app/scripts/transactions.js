@@ -394,7 +394,7 @@ function getExplorerTransaction(mempool, retries = 0) {
 	    		showLoadError('No results matching your query.<br>Just submitted your transaction? Try reloading this page.');
 	    	}
     	} else if (spendsGenesisBox(txId)) {
-    		// api.ergoplatform has no tx that spends a genesis box (block 1's emission tx); sigmaspace has
+    		// api.ergoplatform has no tx that spends a genesis box (block 1's emission tx); the indexed nodes have it
     		getConfirmedTransaction().then(tx => tx ? printTransaction(tx, false) : getTransaction(true));
     	} else {
     		getTransaction(true);
@@ -764,28 +764,44 @@ async function isListedInPool(url) {
 
 /**
  * The tx as an indexer has it once it is in a block, or null while none does (still pending, its
- * block not indexed yet, or dropped). The explorer's copy comes first: sigmaspace's lacks
- * spentTransactionId (the Unspent badge) and the decompiled scripts.
+ * block not indexed yet, or dropped). The explorer's copies come first: the indexed nodes' lacks
+ * the token types and decompiled scripts, but they are the only ones of ours with the txs that spend
+ * genesis boxes. sigmaspace, which is shutting down, is asked only when none of ours has the tx.
  */
 async function getConfirmedTransaction() {
 	const urls = [getTxUrl(false)];
 
 	if (networkType != 'testnet') {
-		urls.push('https://api.sigmaspace.io/api/v1/transactions/' + txId);
+		urls.push(NODE_FORMAT_GATEWAY + 'explorer/api/v1/transactions/' + txId);
+		urls.push(NODE_FORMAT_GATEWAY + 'blockchain/transaction/byId/' + txId);
 	}
 
+	const found = await findConfirmedTransaction(urls);
+
+	if (found || networkType == 'testnet') {
+		return found;
+	}
+
+	return findConfirmedTransaction(['https://api.sigmaspace.io/api/v1/transactions/' + txId]);
+}
+
+// The first copy of the tx, in url order, or null
+async function findConfirmedTransaction(urls) {
 	const results = await Promise.allSettled(urls.map(url =>
 		fetchWithTimeout(url, TRACK_FETCH_TIMEOUT_MS, async (response) => {
 			if (!response.ok) return null;
 
 			const buffer = new TextDecoder('utf-8').decode(await response.arrayBuffer());
-			return JSONbig.parse(buffer);
+			const tx = JSONbig.parse(buffer);
+
+			// An error body can come with HTTP 200 (sigmaspace for an unknown id), hence the id check
+			if (!tx || tx.id !== txId || !tx.blockId) return null;
+
+			return url.includes('/blockchain/') ? (await nodeTxsToExplorer([tx]))[0] : tx;
 		})
 	));
 
-	// sigmaspace answers an unknown id with HTTP 200 and an error body, hence the id check
-	const found = results.find(result => result.status === 'fulfilled' && result.value &&
-		result.value.id === txId && result.value.blockId);
+	const found = results.find(result => result.status === 'fulfilled' && result.value);
 
 	return found ? found.value : null;
 }
