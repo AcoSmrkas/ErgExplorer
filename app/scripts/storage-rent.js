@@ -5,6 +5,9 @@ ITEMS_PER_PAGE = 50;
 
 const RENT_BLOCK_MINUTES = 2;
 const RENT_CARDS = { now: 'Now', day: 'Day', week: 'Week', month: 'Month' };
+// The list follows the API's updates (a cron every 10 minutes): a summary check every minute while
+// the tab is visible, and the cards and the page shown drawn again when it changed
+const RENT_UPDATE_INTERVAL = 60000;
 
 // The summary and page as loaded: drawn again with $ values once prices are in
 let rentSummary = null;
@@ -36,6 +39,7 @@ $(function() {
 
 			printRentSummary(summary);
 			printRentPage(page);
+			startRentUpdates();
 		})
 		.catch(error => {
 			console.error('Storage rent unavailable:', error);
@@ -49,6 +53,44 @@ window.addEventListener('popstate', () => {
 	readParams();
 	showRentPage(params['offset'], false);
 });
+
+function startRentUpdates() {
+	let checking = false;
+
+	const check = () => {
+		if (checking || document.hidden || !rentSummary) {
+			return;
+		}
+
+		checking = true;
+
+		fetchRentJson('storageRent/getSummary')
+			.then(summary => {
+				if (summary.missing || summary.updatedAt === rentSummary.updatedAt) {
+					return;
+				}
+
+				const pageOffset = Number(offset);
+
+				return fetchRentPage(pageOffset).then(page => {
+					// Paged meanwhile: that page came from the new list already
+					if (page.missing || pageOffset !== Number(offset)) {
+						return;
+					}
+
+					printRentSummary(summary);
+					printRentPage(page);
+				});
+			})
+			.catch(error => console.warn('Storage rent update failed:', error))
+			.finally(() => {
+				checking = false;
+			});
+	};
+
+	setInterval(check, RENT_UPDATE_INTERVAL);
+	document.addEventListener('visibilitychange', check);
+}
 
 function fetchRentJson(path) {
 	return fetch(ERGEXPLORER_API_HOST + path, { cache: 'no-store' }).then(response => {
