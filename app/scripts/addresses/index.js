@@ -4,12 +4,12 @@
  */
 
 import { AddressState } from './state.js';
-import { ApiClient } from './api-client.js?v=59';
-import { BalanceSummary } from './balance-summary.js?v=74';
-import { AddressDetails } from './address-details.js?v=65';
-import { TransactionFormatter } from './transaction-formatter.js?v=85';
+import { ApiClient } from './api-client.js?v=60';
+import { BalanceSummary } from './balance-summary.js?v=75';
+import { AddressDetails } from './address-details.js?v=66';
+import { TransactionFormatter } from './transaction-formatter.js?v=86';
 import { UIControllers } from './ui-controllers.js?v=65';
-import { PendingTracker } from './pending-tracker.js?v=9';
+import { PendingTracker } from './pending-tracker.js?v=10';
 import { NftManager } from './nft-manager.js?v=1';
 import { MiningPanel } from './mining.js?v=1';
 import { StorageRentNotice } from './storage-rent.js?v=1';

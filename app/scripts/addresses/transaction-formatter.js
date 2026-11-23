@@ -1,7 +1,7 @@
 import { AddressState } from './state.js';
 import { TxType, TxInOut, AddressType } from './constants.js?v=8';
 import { detectContractFromErgotree, detectLithosFill, getTxType, getTxInOutType, analyzeTransfers } from './transaction-analyzer.js?v=9';
-import { PendingTracker } from './pending-tracker.js?v=9';
+import { PendingTracker } from './pending-tracker.js?v=10';
 
 function formatContractAddress(boxes, address, fallback, walletAddress) {
 	const box = boxes.find(item => item.address === address && item.ergoTree);
@@ -248,7 +248,7 @@ export const TransactionFormatter = {
 		// Build HTML table cells
 		const timestamp = isMempool ? item.creationTimestamp : item.timestamp;
 		const blockNr = item.inclusionHeight || 0;
-		// The genesis boxes, listed by sigmaspace as a tx with no inputs, no block and timestamp 0.
+		// The genesis boxes, listed by some indexers as a tx with no inputs, no block and timestamp 0.
 		// isGenesisTx is new in main.js, which an older cached copy of the page may still load at its old version.
 		const genesis = typeof isGenesisTx == 'function' && isGenesisTx(item);
 		const genesisTitle = 'Genesis state: created by the protocol at mainnet launch, before block 1';

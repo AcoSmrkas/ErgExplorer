@@ -1,7 +1,8 @@
-//The block list comes from whichever source answers first: sigmaspace's GraphQL explorer, then
-//api.ergoplatform, which is added after HEDGE_DELAY or as soon as sigmaspace fails. api.ergoplatform
-//alone is at times very slow. Blocks don't wait for prices; the dollar rewards fill in when they come
-const BLOCKS_GQL_HOST = 'https://explore.sigmaspace.io/api/graphql';
+//The block list comes from whichever source answers first: GraphQL through our gateway (which moves on
+//to another GraphQL server when one fails), then api.ergoplatform, which is added after HEDGE_DELAY or
+//as soon as GraphQL fails. api.ergoplatform alone is at times very slow. Blocks don't wait for prices;
+//the dollar rewards fill in when they come
+const BLOCKS_GQL_HOST = 'https://chain.mewfinance.com/graphql';
 const BLOCKS_HEDGE_DELAY = 1500;
 const BLOCKS_SOURCE_TIMEOUT = 20000;
 const BLOCK_SUMMARY_FIELDS = 'headerId height timestamp txsCount blockSize blockMiningTime minerAddress minerReward blockFee';
@@ -177,7 +178,7 @@ function fetchTipHeight() {
 
 //Resolves with the first source to answer, in api.ergoplatform's shape ({ total, items })
 function fetchLatestBlocks() {
-	//sigmaspace's GraphQL explorer is mainnet only
+	//The gateway's GraphQL servers are mainnet only
 	return raceSources(networkType == 'testnet' ? [fetchBlocksFromExplorer] : [fetchBlocksFromGql, fetchBlocksFromExplorer]);
 }
 
@@ -230,7 +231,7 @@ function fetchBlocksFromGql() {
 	return queryGql(query, { skip: Number(offset), take: Number(ITEMS_PER_PAGE) })
 	.then(data => {
 		if (!data.blocks || data.blocks.length == 0) {
-			throw new Error('sigmaspace GraphQL: no blocks');
+			throw new Error('GraphQL: no blocks');
 		}
 
 		return {
@@ -244,20 +245,21 @@ function fetchBlocksFromGql() {
 function queryGql(query, variables = {}) {
 	return fetch(BLOCKS_GQL_HOST, {
 		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
+		// text/plain keeps it a simple request: no CORS preflight before the first paint
+		headers: { 'Content-Type': 'text/plain' },
 		body: JSON.stringify({ query: query, variables: variables }),
 		signal: AbortSignal.timeout(BLOCKS_SOURCE_TIMEOUT)
 	})
 	.then(response => {
 		if (!response.ok) {
-			throw new Error('sigmaspace GraphQL HTTP ' + response.status);
+			throw new Error('GraphQL HTTP ' + response.status);
 		}
 
 		return response.json();
 	})
 	.then(json => {
 		if (!json.data || json.errors) {
-			throw new Error('sigmaspace GraphQL: ' + JSON.stringify(json.errors || 'no data'));
+			throw new Error('GraphQL: ' + JSON.stringify(json.errors || 'no data'));
 		}
 
 		return json.data;
@@ -330,7 +332,7 @@ function fetchBlocksAtHeightsFromGql(heights) {
 		const block = (data['b' + i] || [])[0];
 
 		if (!block) {
-			throw new Error('sigmaspace GraphQL: no block at height ' + height);
+			throw new Error('GraphQL: no block at height ' + height);
 		}
 
 		return gqlBlockToExplorer(block);

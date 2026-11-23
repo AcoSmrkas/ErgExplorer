@@ -1,10 +1,10 @@
 import { AddressState } from './state.js';
 
-// How long a source gets before the next one is asked too. Warm, both explorers answer in
-// 0.1-1 s; cold, a busy address took sigmaspace 2-20 s and api.ergoplatform 1-9 s.
+// How long a source gets before the next one is asked too. Warm, the explorer answers in
+// 0.1-1 s; cold, a busy address took api.ergoplatform 1-9 s.
 const HEDGE_AFTER_MS = 1500;
-// Per tx-list source. A cold sigmaspace answered a 376k-tx address in 20.6 s and 29.9 s while
-// api.ergoplatform 503'd after 30 s, so a shorter cap turns slow into "no transactions".
+// Per tx-list source. On the ERG/SigUSD pool (306k txs) api.ergoplatform took 29 s or 503'd
+// after 30 s (2026-11-23), so a shorter cap turns slow into "no transactions".
 const TX_FETCH_TIMEOUT_MS = 45000;
 // Other address data fetches (mempool, balance, unspent boxes) abort after this to avoid hanging.
 const DATA_FETCH_TIMEOUT_MS = 15000;
@@ -17,6 +17,8 @@ const MEMPOOL_EXTRA_WAIT_MS = 1500;
 // (height 1883676) as unspent, +1,419.7 ERG on 88dhgz…DBY. The gateway answers a balance only
 // when two indexed nodes agree.
 const INDEXED_NODE_HOST = 'https://chain.mewfinance.com/';
+// The explorer API through our gateway, which moves on to another explorer when one fails
+const GATEWAY_EXPLORER_HOST = INDEXED_NODE_HOST + 'explorer/api/v1/';
 
 /**
  * Fetch with an abort-based timeout that also covers reading the response body, so a host
@@ -92,9 +94,15 @@ async function readItemsBigJson(response) {
 	if (!response.ok) throw new Error('HTTP ' + response.status);
 	const buffer = new TextDecoder('utf-8').decode(await response.arrayBuffer());
 	const data = JSONbig.parse(buffer);
-	// sigmaspace can answer HTTP 200 with an error body
+	// an explorer can answer HTTP 200 with an error body
 	if (!data || !Array.isArray(data.items)) throw new Error('No items in answer');
 	return data;
+}
+
+// An indexed node's page of txs ({ items, total }, newest first with sortDirection=desc)
+async function readNodeTxs(response) {
+	const data = await readItemsBigJson(response);
+	return { items: await nodeTxsToExplorer(data.items), total: Number(data.total) };
 }
 
 async function readBalance(response) {
@@ -192,37 +200,41 @@ export const ApiClient = {
 	},
 
 	/**
-	 * Unspent boxes page URLs, in the order they are asked (see fetchFirst). sigmaspace lists
-	 * newest first; api.ergoplatform orders by its own globalIndex, which put boxes from height
-	 * 886k ahead of 1.904M on one address (2026-10-28), and took 25-28 s cold where sigmaspace
-	 * took 0.7-1.2 s.
+	 * Unspent boxes page URLs, in the order they are asked (see fetchFirst): the explorer through
+	 * our gateway, then api.ergoplatform directly in case the gateway is down. The indexed nodes
+	 * are not asked: their list has no total to page by.
 	 */
 	getUnspentBoxesDataUrls(boxOffset = 0, limit = AddressState.unspentBoxesPageSize) {
-		const query = '?offset=' + boxOffset + '&limit=' + limit;
+		const path = 'boxes/unspent/byAddress/' + AddressState.walletAddress + '?offset=' + boxOffset + '&limit=' + limit;
 
 		if (networkType === 'testnet') {
-			return [API_HOST + 'api/v1/boxes/unspent/byAddress/' + AddressState.walletAddress + query];
+			return [API_HOST + 'api/v1/' + path];
 		}
 
-		return [
-			'https://api.sigmaspace.io/api/v1/boxes/unspent/byAddress/' + AddressState.walletAddress + query,
-			API_HOST_2 + 'boxes/unspent/byAddress/' + AddressState.walletAddress + query
-		];
+		return [GATEWAY_EXPLORER_HOST + path, API_HOST_2 + path];
 	},
 
 	/**
-	 * Transactions page URLs, in the order they are asked (see fetchFirst)
+	 * Transactions page sources, in the order they are asked (see fetchFirst): the explorer
+	 * through our gateway, the indexed nodes (2-3 s on the ERG/SigUSD pool, where the explorer
+	 * took 29 s or failed), then api.ergoplatform directly in case the gateway is down.
 	 */
-	getTxsDataUrls() {
-		const query = '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
+	_txsSources() {
+		const path = 'addresses/' + AddressState.walletAddress + '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
 
 		if (networkType === 'testnet') {
-			return [API_HOST + 'api/v1/addresses/' + AddressState.walletAddress + query];
+			return [{ url: API_HOST + 'api/v1/' + path, read: readItemsBigJson }];
 		}
 
 		return [
-			'https://api.sigmaspace.io/api/v1/addresses/' + AddressState.walletAddress + query,
-			API_HOST_2 + 'addresses/' + AddressState.walletAddress + query
+			{ url: GATEWAY_EXPLORER_HOST + path, read: readItemsBigJson },
+			{
+				url: INDEXED_NODE_HOST + 'blockchain/transaction/byAddress?offset=' + offset + '&limit=' + ITEMS_PER_PAGE + '&sortDirection=desc',
+				// text/plain keeps it a simple request: no CORS preflight
+				init: { method: 'POST', body: AddressState.walletAddress, headers: { 'Content-Type': 'text/plain' } },
+				read: readNodeTxs
+			},
+			{ url: API_HOST_2 + path, read: readItemsBigJson }
 		];
 	},
 
@@ -344,8 +356,8 @@ export const ApiClient = {
 	},
 
 	/**
-	 * Fetch a page of the address's transactions: sigmaspace first, the explorer too if
-	 * sigmaspace is slow or fails (fetchFirst).
+	 * Fetch a page of the address's transactions from whichever source answers first (see
+	 * _txsSources and fetchFirst).
 	 */
 	async getTransactionsData() {
 		return this._takePrefetched('transactions') || this._fetchTransactionsData();
@@ -353,8 +365,7 @@ export const ApiClient = {
 
 	async _fetchTransactionsData() {
 		try {
-			const sources = this.getTxsDataUrls().map(url => ({ url, read: readItemsBigJson }));
-			const data = await fetchFirst(sources, TX_FETCH_TIMEOUT_MS);
+			const data = await fetchFirst(this._txsSources(), TX_FETCH_TIMEOUT_MS);
 
 			AddressState.transactionsData = withRealAddresses(data);
 
@@ -475,7 +486,7 @@ export const ApiClient = {
 				read: async (response) => {
 					if (!response.ok) throw new Error('HTTP ' + response.status);
 					const data = await response.json();
-					// sigmaspace can answer HTTP 200 with an error body
+					// an explorer can answer HTTP 200 with an error body
 					if (!data || !Array.isArray(data.items)) throw new Error('No items in answer');
 					return { index, data };
 				}
