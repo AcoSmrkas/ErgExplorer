@@ -183,19 +183,21 @@ html[data-theme="mew"] {
   margin-top: 25px;
 }
 
+//The picture runs to the card's left, top and bottom edges; the card's rounded corners clip it
 .featured-nft {
   align-items: center;
   display: flex;
   gap: 15px;
+  overflow: hidden;
+  padding: 0 15px 0 0;
 }
 
 .featured-nft-img {
   aspect-ratio: 1;
   background-color: var(--borders);
-  border-radius: 5px;
   flex: 0 0 auto;
   object-fit: cover;
-  width: 84px;
+  width: 114px;
 }
 
 .featured-nft-info {
