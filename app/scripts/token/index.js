@@ -1,6 +1,6 @@
 import { TokenState } from './state.js';
-import { TokenApiClient } from './api-client.js?v=6';
-import { TokenUIDisplay } from './ui-display.js?v=3';
+import { TokenApiClient } from './api-client.js?v=7';
+import { TokenUIDisplay } from './ui-display.js?v=4';
 import { TokenUIControllers } from './ui-controllers.js?v=4';
 import { TokenAnalyzer } from './token-analyzer.js?v=3';
 import { isLpTokenData } from '../common/lp-tokens.js?v=4';

@@ -292,7 +292,7 @@ function notify(confirmed, dropped) {
 	const address = formatAddressString(AddressState.walletAddress, 6);
 
 	if (confirmed.length === 1) {
-		showSystemNotification('Transaction confirmed', 'A pending transaction on ' + address + ' was confirmed in block ' + confirmed[0].inclusionHeight + '.');
+		showSystemNotification('Transaction confirmed', 'A pending transaction on ' + address + ' was confirmed in block ' + formatBlockHeight(confirmed[0].inclusionHeight) + '.');
 	} else if (confirmed.length > 1) {
 		showSystemNotification(confirmed.length + ' transactions confirmed', confirmed.length + ' pending transactions on ' + address + ' were confirmed.');
 	}
@@ -378,7 +378,7 @@ function showDoneToast() {
 	let text;
 
 	if (droppedCount === 0 && confirmed === 1) {
-		text = 'Transaction confirmed in block ' + confirmedTxs[0].inclusionHeight + '.';
+		text = 'Transaction confirmed in block ' + formatBlockHeight(confirmedTxs[0].inclusionHeight) + '.';
 	} else if (droppedCount === 0) {
 		text = plural(confirmed, 'transaction') + ' confirmed.';
 	} else if (confirmed === 0) {
