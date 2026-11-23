@@ -8,13 +8,26 @@ var setup = true;
 
 updateUi();
 
-$(function() {  
+//Token rows show the token's icon, so entries wait for the icon list (fetched alongside them)
+var tokenIconsLoaded;
+
+$(function() {
+    tokenIconsLoaded = new Promise(resolve => getTokenIcons(resolve));
     printAddresses();
 });
 
 function printAddresses() {
    var jqxhr = $.get(ERGEXPLORER_API_HOST + 'addressbook/getAddresses?offset=' + offset + '&limit=' + ITEMS_PER_PAGE + '&type=' + addressType + '&order=' + orderBy + '&query=' + encodeURIComponent(query) + '&testnet=' + (networkType == 'testnet' ? '1' : '0'),
     function (data) {
+        tokenIconsLoaded.then(() => showAddresses(data));
+    })
+    .fail(function() {
+        showLoadError('Failed to fetch the address book entries.');
+        $('#txLoading').hide();
+    });
+}
+
+function showAddresses(data) {
 		let formattedResult = '';
 		let items = data.items;
 
@@ -73,13 +86,8 @@ function printAddresses() {
         setupPagination(data.total);
 
         printTemplateContracts();
-    })
-    .fail(function() {
-        showLoadError('Failed to fetch the address book entries.');
-    })
-    .always(function() {        
+
         $('#txLoading').hide();
-    });
 }
 
 function countUniqueNames(arr) {
@@ -152,10 +160,10 @@ function printAddress(item) {
 function printToken(token) {
     let tokenName = token.tokenname ? escapeHtml(token.tokenname) : '';
     let shortId = formatAddressString(token.id, 18);
-    let tokenLabel = tokenName || shortId;
     let idSuffix = tokenName && tokenName != token.id ? ' <span class="text-light">(' + shortId + ')</span>' : '';
 
-    return '<br><p class="addressbook-token"><strong>Token: </strong><a href="' + getTokenUrl(token.id) + '">' + tokenLabel + idSuffix + '</a></p>';
+    //Same link as token lists elsewhere: icon on the left and data-token-id for the hover popup
+    return '<br><p class="addressbook-token"><strong>Token: </strong>' + getAssetTitleParams(null, token.id, tokenName || shortId, true) + idSuffix + '</p>';
 }
 
 function updateUi() {
