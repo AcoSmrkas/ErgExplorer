@@ -19,6 +19,8 @@ const MEMPOOL_EXTRA_WAIT_MS = 1500;
 const INDEXED_NODE_HOST = 'https://chain.mewfinance.com/';
 // The explorer API through our gateway, which moves on to another explorer when one fails
 const GATEWAY_EXPLORER_HOST = INDEXED_NODE_HOST + 'explorer/api/v1/';
+// sigmaspace is shutting down: asked last, so once it is gone it costs nothing (see fetchFirst)
+const SIGMASPACE_EXPLORER_HOST = 'https://api.sigmaspace.io/api/v1/';
 
 /**
  * Fetch with an abort-based timeout that also covers reading the response body, so a host
@@ -201,8 +203,8 @@ export const ApiClient = {
 
 	/**
 	 * Unspent boxes page URLs, in the order they are asked (see fetchFirst): the explorer through
-	 * our gateway, then api.ergoplatform directly in case the gateway is down. The indexed nodes
-	 * are not asked: their list has no total to page by.
+	 * our gateway, api.ergoplatform directly in case the gateway is down, then sigmaspace. The
+	 * indexed nodes are not asked: their list has no total to page by.
 	 */
 	getUnspentBoxesDataUrls(boxOffset = 0, limit = AddressState.unspentBoxesPageSize) {
 		const path = 'boxes/unspent/byAddress/' + AddressState.walletAddress + '?offset=' + boxOffset + '&limit=' + limit;
@@ -211,13 +213,13 @@ export const ApiClient = {
 			return [API_HOST + 'api/v1/' + path];
 		}
 
-		return [GATEWAY_EXPLORER_HOST + path, API_HOST_2 + path];
+		return [GATEWAY_EXPLORER_HOST + path, API_HOST_2 + path, SIGMASPACE_EXPLORER_HOST + path];
 	},
 
 	/**
 	 * Transactions page sources, in the order they are asked (see fetchFirst): the explorer
 	 * through our gateway, the indexed nodes (2-3 s on the ERG/SigUSD pool, where the explorer
-	 * took 29 s or failed), then api.ergoplatform directly in case the gateway is down.
+	 * took 29 s or failed), api.ergoplatform directly in case the gateway is down, then sigmaspace.
 	 */
 	_txsSources() {
 		const path = 'addresses/' + AddressState.walletAddress + '/transactions?offset=' + offset + '&limit=' + ITEMS_PER_PAGE;
@@ -234,7 +236,8 @@ export const ApiClient = {
 				init: { method: 'POST', body: AddressState.walletAddress, headers: { 'Content-Type': 'text/plain' } },
 				read: readNodeTxs
 			},
-			{ url: API_HOST_2 + path, read: readItemsBigJson }
+			{ url: API_HOST_2 + path, read: readItemsBigJson },
+			{ url: SIGMASPACE_EXPLORER_HOST + path, read: readItemsBigJson }
 		];
 	},
 
