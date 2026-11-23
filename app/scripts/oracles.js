@@ -638,16 +638,3 @@ function formatBalance(nanoErg) {
 function formatTimeAgo(timestamp) {
 	return `<span class="oracle-time-ago" data-time="${timestamp}">${timeAgo(timestamp)}</span>`;
 }
-
-function timeAgo(timestamp) {
-	const minutes = Math.max(0, Math.floor((Date.now() - timestamp) / 60000));
-
-	if (minutes < 1) return 'just now';
-	if (minutes < 60) return minutes + ' min ago';
-
-	const hours = Math.floor(minutes / 60);
-	if (hours < 24) return hours + (hours == 1 ? ' hour ago' : ' hours ago');
-
-	const days = Math.floor(hours / 24);
-	return days + (days == 1 ? ' day ago' : ' days ago');
-}

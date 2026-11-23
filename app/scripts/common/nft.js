@@ -170,6 +170,27 @@ function processNftData(nftData) {
 	return nft;
 }
 
+// The picture to show for an NFT: the API's cached copy, else the image's own link or,
+// for audio, its artwork (the second link in R9). Null when there is none.
+function getNftArtworkUrl(nft) {
+	if (nft.cachedurl) {
+		return nft.cachedurl;
+	}
+
+	let link = undefined;
+	if (nft.type == NFT_TYPE.Image) {
+		link = nft.link;
+	} else if (nft.type == NFT_TYPE.Audio) {
+		link = nft.additionalLinks[0];
+	}
+
+	if (link == undefined || link.url == 'None') {
+		return null;
+	}
+
+	return link.ipfsCid ? IPFS_PROVIDER_HOSTS[0] + '/ipfs/' + link.url : link.url;
+}
+
 function getNftType(typeString) {
 	switch (typeString) {
 		case '0e020101':

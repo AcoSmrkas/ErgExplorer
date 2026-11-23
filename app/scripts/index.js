@@ -5,11 +5,18 @@ var from30d = nowTime - (30 * 24 * 60 * 60 * 1000);
 var priceData = undefined;
 // The token tables wait for the icon list: drawn before it, their DB-only icons (rsBTC, LIT...) stay blank
 var tokenIconsLoaded;
+const FEATURED_NFT_GATEWAY = 'https://chain.mewfinance.com/';
+// Mints the Latest NFTs cards pass over: ErgoNames name cards (~name) and their beta badge, and test mints
+const FEATURED_NFT_SKIP_NAMES = [/^~/, /^ErgoNames\b/i, /^test(ing)?\b/i];
+// Newest candidates tried per card before giving up: each can cost a byId call and an image load
+const FEATURED_NFT_MAX_TRIES = 5;
+const FEATURED_NFT_LOAD_MS = 15000;
 
 $(function() {
 	tokenIconsLoaded = new Promise(resolve => getTokenIcons(resolve));
 	updatePrices();
 	getNetworkState();
+	getFeaturedNfts();
 });
 
 function updatePrices() {
@@ -445,6 +452,95 @@ function getLargestCounterparty(tx, tokenId, receiving) {
 	}
 
 	return largest;
+}
+
+//Latest NFTs: the newest image NFT and the newest audio NFT with cover art whose picture loads
+//and that aren't flagged nsfw or scam, burned, test mints or ErgoNames name cards.
+//tokens/search lists the newest mints of a type first.
+function getFeaturedNfts() {
+	if (networkType == 'testnet') {
+		return;
+	}
+
+	getFeaturedNft('image', 20, $('#featuredNftImage'));
+	getFeaturedNft('audio', 10, $('#featuredNftAudio'));
+}
+
+function getFeaturedNft(type, limit, $card) {
+	$.get(ERGEXPLORER_API_HOST + 'tokens/search', { type: type, limit: limit }, function(data) {
+		let candidates = (data.items || [])
+			.filter(isFeaturedNftCandidate)
+			.slice(0, FEATURED_NFT_MAX_TRIES);
+
+		showFeaturedNft(candidates, $card);
+	});
+}
+
+function isFeaturedNftCandidate(item) {
+	let name = (item.name || '').trim();
+
+	return name != '' && !item.nsfw && !item.scam && item.isBurned != 't'
+		&& !FEATURED_NFT_SKIP_NAMES.some(skip => skip.test(name));
+}
+
+//Shows the first candidate whose picture (for audio, its cover) loads
+function showFeaturedNft(candidates, $card) {
+	if (candidates.length == 0) {
+		return;
+	}
+
+	let item = candidates[0];
+	let tryNext = () => showFeaturedNft(candidates.slice(1), $card);
+
+	//No cached picture yet: byId (the token page's call) caches it on the server and returns it
+	let nftLoaded = item.cachedurl === null
+		? new Promise(resolve => getNftInfo(item.id, nft => resolve(nft || processNftData(item))))
+		: Promise.resolve(processNftData(item));
+
+	nftLoaded.then(nft => {
+		let url = getNftArtworkUrl(nft);
+
+		if (!url) {
+			tryNext();
+			return;
+		}
+
+		let img = new Image();
+		let settled = false;
+		let settle = loaded => {
+			if (settled) {
+				return;
+			}
+
+			settled = true;
+			clearTimeout(timeout);
+			loaded ? renderFeaturedNft(nft, url, $card) : tryNext();
+		};
+		let timeout = setTimeout(() => settle(false), FEATURED_NFT_LOAD_MS);
+
+		img.onload = () => settle(true);
+		img.onerror = () => settle(false);
+		img.src = url;
+	});
+}
+
+function renderFeaturedNft(nft, url, $card) {
+	let data = nft.data;
+	let name = data.name.trim();
+	let $minted = $card.find('.featured-nft-minted');
+
+	$card.attr('href', getTokenUrl(data.id));
+	$card.find('.featured-nft-img').attr({ src: url, alt: name });
+	$card.find('.featured-nft-name').text(name).attr('title', name);
+	$minted.addClass('skeleton').empty();
+	$card.css('display', '');
+	$('#featuredNftView').css('display', 'flex');
+
+	let showMinted = text => $minted.removeClass('skeleton').text(text);
+
+	$.get(FEATURED_NFT_GATEWAY + 'blocks/' + data.blockId + '/header')
+		.done(header => showMinted('Minted ' + timeAgo(header.timestamp)))
+		.fail(() => showMinted('Minted in block ' + formatBlockHeight(data.creationHeight)));
 }
 
 function getProtocolInfo() {

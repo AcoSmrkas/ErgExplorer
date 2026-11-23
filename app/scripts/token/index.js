@@ -168,7 +168,6 @@ window.onGetNftInfoDone = function(nftInfo, message) {
 		if (!nftInfo.link.ipfsCid) {
 			fullUrl = nftInfo.link.url;
 		}
-		let additionalFullUrl = Array();
 
 		let linkString = fullUrl;
 		const nftLinkMaxLength = typeof NFT_LINK_MAX_LENGTH !== 'undefined' ? NFT_LINK_MAX_LENGTH : 40;
@@ -227,13 +226,10 @@ window.onGetNftInfoDone = function(nftInfo, message) {
 				
 				if (additionalLink.ipfsCid) {
 					fullAdditionalUrlString = typeof formatIpfsCidHtmlString === 'function' ? formatIpfsCidHtmlString(additionalLink.url) : additionalLink.url;
-					const ipfsHosts = typeof IPFS_PROVIDER_HOSTS !== 'undefined' ? IPFS_PROVIDER_HOSTS : ['https://nftstorage.link'];
-					additionalFullUrl.push(ipfsHosts[0] + '/ipfs/' + additionalLink.url);
 					cidHtml += `<p>CID ${i + 2}: ${additionalLink.url}</p>`;
 				} else {
 					let additionalLinkString = typeof formatAddressString === 'function' ? formatAddressString(additionalLink.url, nftLinkMaxLength) : additionalLink.url;
 					fullAdditionalUrlString = '<a  target="_new" href="' + additionalLink.url + '">' + additionalLinkString + '</a>';
-					additionalFullUrl.push(additionalLink.url);
 				}
 
 				formattedLinksHtml += '<br><p>URL ' + (i + 2) + ': </p>' + fullAdditionalUrlString;
@@ -248,10 +244,7 @@ window.onGetNftInfoDone = function(nftInfo, message) {
 			}
 		}
 
-		TokenState.imageUrl = fullUrl;
-		if (nftInfo.cachedurl) {
-			TokenState.imageUrl = nftInfo.cachedurl;
-		}
+		TokenState.imageUrl = getNftArtworkUrl(nftInfo) || fullUrl;
 
 		if (nftInfo.type == (typeof NFT_TYPE !== 'undefined' ? NFT_TYPE.Image : 'Image')) {
 			if (!nftInfo.data.nsfw) {
@@ -278,12 +271,10 @@ window.onGetNftInfoDone = function(nftInfo, message) {
 			$('#nftPreviewImgHolder').removeClass('col-lg-3');
 			$('#nftInfoHolder').removeClass('col-lg-9');
 			
-			if (nftInfo.cachedurl) {
-				$('#nftPreviewImg').attr('src', nftInfo.cachedurl);
-				$('#nftImageFull').attr('src', nftInfo.cachedurl);
-			} else if (additionalFullUrl.length > 0) {
-				$('#nftPreviewImg').attr('src', additionalFullUrl[0]);
-				$('#nftImageFull').attr('src', additionalFullUrl[0]);
+			let artworkUrl = getNftArtworkUrl(nftInfo);
+			if (artworkUrl) {
+				$('#nftPreviewImg').attr('src', artworkUrl);
+				$('#nftImageFull').attr('src', artworkUrl);
 			}
 		} else if (nftInfo.type == (typeof NFT_TYPE !== 'undefined' ? NFT_TYPE.Video : 'Video')) {
 			$('#nftPreviewVideoSource').attr('src', fullUrl);

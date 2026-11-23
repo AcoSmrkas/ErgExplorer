@@ -522,6 +522,20 @@ function formatShortDateString(dateString) {
 	return formatTimeString(dateString, false) + ' \u00b7 ' + date.toLocaleDateString(getLang(), sameYear ? { day: 'numeric', month: 'short' } : { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
+//"just now", "5 min ago", "3 hours ago", "4 days ago"
+function timeAgo(timestamp) {
+	const minutes = Math.max(0, Math.floor((Date.now() - timestamp) / 60000));
+
+	if (minutes < 1) return 'just now';
+	if (minutes < 60) return minutes + ' min ago';
+
+	const hours = Math.floor(minutes / 60);
+	if (hours < 24) return hours + (hours == 1 ? ' hour ago' : ' hours ago');
+
+	const days = Math.floor(hours / 24);
+	return days + (days == 1 ? ' day ago' : ' days ago');
+}
+
 //Ergo's genesis state: the boxes the protocol put in place at launch, before block 1. No transaction
 //created them, but sigmaspace lists them under a pseudo-transaction whose id, block id, height and
 //timestamp are all zero, which used to render as a transaction from 1 January 1970.
