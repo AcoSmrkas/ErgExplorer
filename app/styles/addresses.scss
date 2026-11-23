@@ -550,6 +550,16 @@ a.address-detail-rank {
 		overflow: hidden;
 	}
 
+	// The left column's right spacing is only there to clear the tokens column. Without tokens it would
+	// leave the right side twice as wide as the left.
+	#addressSummaryMain.address-summary-full .me-lg-3 {
+		margin-right: 0 !important;
+	}
+
+	#addressSummaryMain.address-summary-full .pe-lg-3 {
+		padding-right: 0 !important;
+	}
+
 	.address-token-groups {
 		display: flex;
 		flex-wrap: nowrap;

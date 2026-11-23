@@ -103,6 +103,7 @@ export const BalanceSummary = {
 		// Tokens. A refresh can find fewer than before (a tx spent them), so a group left empty is hidden.
 		const hasTokens = Boolean(data.confirmed.tokens && data.confirmed.tokens.length > 0);
 		$('#tokensHolder').toggle(hasTokens);
+		$('#addressSummaryMain').toggleClass('address-summary-full', !hasTokens);
 
 		if (hasTokens) {
 			AddressState.tokensArray = sortTokens(data.confirmed.tokens);
