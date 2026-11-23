@@ -142,3 +142,35 @@ html[data-theme="mew"] {
 .skeleton {
   font-variant-numeric: tabular-nums;
 }
+
+.index-buy-cell {
+  padding-bottom: 0 !important;
+  padding-top: 0 !important;
+  text-align: right;
+  vertical-align: middle;
+  white-space: nowrap;
+  width: 1%;
+}
+
+.index-buy-btn {
+  align-items: center;
+  display: inline-flex;
+  font-size: 0.85rem;
+  font-weight: 700;
+  justify-content: center;
+  line-height: 1;
+  min-height: 28px;
+  padding: 4px 12px !important;
+}
+
+@media (max-width: 575.98px) {
+  .index-buy-cell {
+    padding-left: 0 !important;
+  }
+
+  .index-buy-btn {
+    font-size: 0.8rem;
+    min-height: 26px;
+    padding: 4px 8px !important;
+  }
+}
