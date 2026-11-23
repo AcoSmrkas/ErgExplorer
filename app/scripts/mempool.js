@@ -1,10 +1,13 @@
 const GATEWAY_HOST = 'https://chain.mewfinance.com/';
 const MEMPOOL_REFRESH_MS = 20000;
+// The whole pool on one page, up to what the gateway returns in one call. Past that (a spam wave), the newest.
+const MEMPOOL_MAX_ROWS = 500;
 // The gateway serves node boxes, which have this tree where the other two sources have FEE_ADDRESS
 const FEE_ERGO_TREE = '1005040004000e36100204a00b08cd0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ea02d192a39a8cc7a701730073011001020402d19683030193a38cc7b2a57300000193c2b2a57301007473027303830108cdeeac93b1a57304';
 
 let shownMempoolRows = null;
 let lastMempoolItems = null;
+let lastMempoolTotal = 0;
 
 $(function() {
     // Erg Explorer Live streams mainnet only
@@ -31,7 +34,7 @@ $(function() {
 // pool but no times, and the explorer's list intermittently returns empty pages (items: [] with
 // total > 0) and misses txs that entered through other nodes. Each spells the sort its own way.
 function getMempoolSources() {
-    const query = '?limit=' + ITEMS_PER_PAGE + '&offset=' + offset + '&sortDirection=desc&sortBy=';
+    const query = '?limit=' + MEMPOOL_MAX_ROWS + '&offset=0&sortDirection=desc&sortBy=';
 
     if (!MEMPOOL_API_HOST) {
         return [() => $.get('https://api-testnet.ergoplatform.com/transactions/unconfirmed' + query + 'creationtimestamp')];
@@ -45,8 +48,8 @@ function getMempoolSources() {
 }
 
 async function getGatewayPage() {
-    const pool = await $.get(GATEWAY_HOST + 'transactions/unconfirmed?limit=500&offset=0');
-    return { total: pool.length, items: pool.slice(Number(offset), Number(offset) + ITEMS_PER_PAGE) };
+    const pool = await $.get(GATEWAY_HOST + 'transactions/unconfirmed?limit=' + MEMPOOL_MAX_ROWS + '&offset=0');
+    return { total: pool.length, items: pool };
 }
 
 async function printMempool(isRefresh = false) {
@@ -73,26 +76,16 @@ async function printMempool(isRefresh = false) {
 function printMempoolPage(data, isRefresh) {
     const items = data.items;
 
-    // The pool shrank past this page while it was open
-    if (offset > 0 && offset >= data.total) {
-        offset = Math.max(0, (Math.ceil(data.total / ITEMS_PER_PAGE) - 1) * ITEMS_PER_PAGE);
-        printMempool(isRefresh);
-        return;
-    }
-
     // An empty page of a pool that isn't empty is the glitch above: a refresh keeps what's on screen
     if (isRefresh && items.length == 0 && data.total > 0) return;
 
-    setupPagination(data.total);
-    $('#pagination').toggle(items.length > 0);
-    $('#mempoolCount').html('<strong>' + Number(data.total).toLocaleString('en-US') + '</strong> ' + (data.total == 1 ? 'transaction' : 'transactions')).show();
-
     // The refresh mostly finds nothing new: leave the rows, and any text selected in them, alone then.
     // Times count as new: rows from the gateway get their ages once our node's pool is back.
-    const shownRows = items.map(item => item.id + ':' + item.creationTimestamp).join();
+    const shownRows = items.map(item => item.id + ':' + item.creationTimestamp).join() + ':' + data.total;
     if (shownRows !== shownMempoolRows) {
         shownMempoolRows = shownRows;
         lastMempoolItems = items;
+        lastMempoolTotal = data.total;
         drawMempoolRows(items);
     }
 
@@ -104,9 +97,16 @@ function redrawMempoolRows() {
 }
 
 function drawMempoolRows(items) {
-    $('#transactionsTableBody').html(items.length > 0
+    let html = items.length > 0
         ? items.map(formatMempoolRow).join('')
-        : '<td colspan="12" class="p-2">No transactions currently in mempool.</td>');
+        : '<td colspan="12" class="p-2">No transactions currently in mempool.</td>';
+
+    if (lastMempoolTotal > items.length && items.length > 0) {
+        html += '<tr><td colspan="12" class="p-2">Showing the newest ' + items.length.toLocaleString('en-US') + ' of '
+            + Number(lastMempoolTotal).toLocaleString('en-US') + ' transactions.</td></tr>';
+    }
+
+    $('#transactionsTableBody').html(html);
 
     lookupAddressNames();
 }
