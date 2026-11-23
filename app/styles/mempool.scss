@@ -63,6 +63,22 @@
 	white-space: nowrap;
 }
 
+.mempool-count {
+	color: var(--text-light);
+	font-size: 1rem;
+	font-weight: normal;
+	white-space: nowrap;
+
+	strong {
+		color: var(--text-strong);
+		font-variant-numeric: tabular-nums;
+	}
+}
+
+.mempool-value {
+	white-space: nowrap;
+}
+
 @media (max-width: 991.98px) {
 	// A tx id is one unbroken word, wide enough to widen the page on a phone
 	#transactionsTableBody a {
