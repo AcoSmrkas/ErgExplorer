@@ -63,18 +63,6 @@
 	white-space: nowrap;
 }
 
-.mempool-count {
-	color: var(--text-light);
-	font-size: 1rem;
-	font-weight: normal;
-	white-space: nowrap;
-
-	strong {
-		color: var(--text-strong);
-		font-variant-numeric: tabular-nums;
-	}
-}
-
 .mempool-value {
 	white-space: nowrap;
 }

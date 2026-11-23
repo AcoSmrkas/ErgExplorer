@@ -1,7 +1,7 @@
 {% extends "layout.njk" %}
 
 {% block styles %}
-	<link rel="stylesheet" href="styles/mempool.css?v=3">
+	<link rel="stylesheet" href="styles/mempool.css?v=4">
 {% endblock %}
 
 {% block navigation %}
@@ -13,7 +13,7 @@
 	<div class="col-md-12">
 		<div class="row w-100">
 			<div class="col-md-12 mb-3 mb-md-4">
-				<h2 class="m-0">Mempool <span id="mempoolCount" class="mempool-count" style="display: none;"></span></h2>
+				<h2 class="m-0">Mempool</h2>
 			</div>
 		</div>
 
@@ -31,9 +31,6 @@
 		<br>
 
 		<div id="mempoolHolder" style="display: none;">
-		
-			{% include "partials/pagination.njk" %}
-
 			<div class="row w-100">
 				<table class="table table-dark table-striped table-mobile rounded-data-table">
 					<thead>
@@ -53,9 +50,6 @@
 					</tbody>
 				</table>
 			</div>
-
-			{% include "partials/pagination.njk" %}
-			
 		</div>
 		
 		{% include "partials/error-message.njk" %}
@@ -65,7 +59,6 @@
 {% endblock %}
 
 {% block scripts %}
-	<script src="./scripts/common/pagination.js?v=41"></script>
 	<script src="./scripts/common/prices.js?v=44"></script>
-	<script src="./scripts/mempool.js?v=46"></script>
+	<script src="./scripts/mempool.js?v=47"></script>
 {% endblock %}
