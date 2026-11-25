@@ -3,6 +3,7 @@ var txId = '';
 // genesis.js comes with this page's current HTML. A browser still holding an older copy of the page
 // can pair it with this script, so without genesis.js everything genesis is skipped.
 const genesisLoaded = typeof getGenesisTx == 'function';
+const boxScriptsLoaded = typeof appendBoxScript == 'function';
 
 const treasuryOriginTx = '{"id":"e179f12156061c04d375f599bd8aea7ea5e704fab2d95300efb2d87460d60b83","blockId":"307a42f9811f03514a6296113f0f3932ea418974a1de279b321f346fe806bf5f","inclusionHeight":3850,"timestamp":1562142058940,"index":2,"globalIndex":3888,"numConfirmations":1067072,"inputs":[],"dataInputs":[],"outputs":[{"boxId":"8e130114a671171e566382911404a67fc37ccbfe637212eaab90037e19c3336c","transactionId":"e179f12156061c04d375f599bd8aea7ea5e704fab2d95300efb2d87460d60b83","blockId":"307a42f9811f03514a6296113f0f3932ea418974a1de279b321f346fe806bf5f","value":4330776400000000,"index":0,"globalIndex":7778,"creationHeight":5,"settlementHeight":3850,"ergoTree":"100e040004c094400580809cde91e7b0010580acc7f03704be944004808948058080c7b7e4992c0580b4c4c32104fe884804c0fd4f0580bcc1960b04befd4f05000400ea03d192c1b2a5730000958fa373019a73029c73037e997304a305958fa373059a73069c73077e997308a305958fa373099c730a7e99730ba305730cd193c2a7c2b2a5730d00d5040800","address":"4L1ktFSzm3SH1UioDuUf5hyaraHird4D2dEACwQ1qHGjSKtA6KaNvSzRCZXZGf9jkfNAEC1SrYaZmCuvb2BKiXk5zW9xuvrXFT7FdNe2KqbymiZvo5UQLAm5jQY8ZBRhTZ4AFtZa1UF5nd4aofwPiL7YkJuyiL5hDHMZL1ZnyL746tHmRYMjAhCgE7d698dRhkdSeVy","assets":[],"additionalRegisters":{"R4":{"serializedValue":"0e6f98040483030808cd039bb5fe52359a64c99a60fd944fc5e388cbdc4d37ff091cc841c3ee79060b864708cd031fb52cf6e805f80d97cde289f4f757d49accf0c83fb864b27d2cf982c37f9a8b08cd0352ac2a471339b0d23b3d2c5ce0db0e81c969f77891b9edf0bda7fd39a78184e7","sigmaType":"Coll[SByte]","renderedValue":"98040483030808cd039bb5fe52359a64c99a60fd944fc5e388cbdc4d37ff091cc841c3ee79060b864708cd031fb52cf6e805f80d97cde289f4f757d49accf0c83fb864b27d2cf982c37f9a8b08cd0352ac2a471339b0d23b3d2c5ce0db0e81c969f77891b9edf0bda7fd39a78184e7"}},"spentTransactionId":"6be0b3878681e211afbc255584692c7720f8df5058ca86c818a1da6dd0b277cf","mainChain":true},{"boxId":"eb73a48270b490529ccf052e70c667c4836a2799e65ab974eceda82df30b5438","transactionId":"e179f12156061c04d375f599bd8aea7ea5e704fab2d95300efb2d87460d60b83","blockId":"307a42f9811f03514a6296113f0f3932ea418974a1de279b321f346fe806bf5f","value":5000000000,"index":1,"globalIndex":7779,"creationHeight":5,"settlementHeight":3850,"ergoTree":"0008cd039bb5fe52359a64c99a60fd944fc5e388cbdc4d37ff091cc841c3ee79060b8647","address":"9heP7nBJRtSD9nEgJ4LSexPMtsoweLX8Gtp92LNLMcu2xdUp1EH","assets":[],"additionalRegisters":{},"spentTransactionId":"d6b0908e01371f93042158be18249130afcf2b74d9b99298ac63c5d37797ffed","mainChain":true},{"boxId":"16c29667d28f7cacadd0bb02165575a25f06eb396f4fbe0e311523129061ff2a","transactionId":"e179f12156061c04d375f599bd8aea7ea5e704fab2d95300efb2d87460d60b83","blockId":"307a42f9811f03514a6296113f0f3932ea418974a1de279b321f346fe806bf5f","value":5000000000,"index":2,"globalIndex":7780,"creationHeight":5,"settlementHeight":3850,"ergoTree":"0008cd031fb52cf6e805f80d97cde289f4f757d49accf0c83fb864b27d2cf982c37f9a8b","address":"9ghmd4QqqMYVDsZ8t4bZFqDCGtM5dh5UQjakKGBPRWgsYzBN9CP","assets":[],"additionalRegisters":{},"spentTransactionId":"d6b0908e01371f93042158be18249130afcf2b74d9b99298ac63c5d37797ffed","mainChain":true},{"boxId":"b312a84766b397fa1c6e08e3e9a39a5c14ad43a8eb265e479dd93d928be17246","transactionId":"e179f12156061c04d375f599bd8aea7ea5e704fab2d95300efb2d87460d60b83","blockId":"307a42f9811f03514a6296113f0f3932ea418974a1de279b321f346fe806bf5f","value":5000000000,"index":3,"globalIndex":7781,"creationHeight":5,"settlementHeight":3850,"ergoTree":"0008cd0352ac2a471339b0d23b3d2c5ce0db0e81c969f77891b9edf0bda7fd39a78184e7","address":"9h6DT44xdB6C6nTosNZQVDZusMscGuEFqccQNocKrj165C7G6hf","assets":[],"additionalRegisters":{},"spentTransactionId":"d6b0908e01371f93042158be18249130afcf2b74d9b99298ac63c5d37797ffed","mainChain":true},{"boxId":"3777697d3e41c41e95b7ab475845f59053af02327ecf1b9f7990bf921b1a1783","transactionId":"e179f12156061c04d375f599bd8aea7ea5e704fab2d95300efb2d87460d60b83","blockId":"307a42f9811f03514a6296113f0f3932ea418974a1de279b321f346fe806bf5f","value":100000000,"index":4,"globalIndex":7782,"creationHeight":5,"settlementHeight":3850,"ergoTree":"1005040004000e36100204a00b08cd0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ea02d192a39a8cc7a701730073011001020402d19683030193a38cc7b2a57300000193c2b2a57301007473027303830108cdeeac93b1a57304","address":"2iHkR7CWvD1R4j1yZg5bkeDRQavjAaVPeTDFGGLZduHyfWMuYpmhHocX8GJoaieTx78FntzJbCBVL6rf96ocJoZdmWBL2fci7NqWgAirppPQmZ7fN9V6z13Ay6brPriBKYqLp1bT2Fk4FkFLCfdPpe","assets":[],"additionalRegisters":{},"spentTransactionId":"7eb2fbc86e8bfa7bfe431933a716e8d71f0bc71f11171881aa4b3f195bff9843","mainChain":true}],"size":692}';
 
@@ -582,10 +583,10 @@ function printTransaction(data, mempool) {
 	$('#txScripts').html('Scripts');
 
 	//Raw input
-	showRaw('#txRawInput', rawInputs);
+	printRaw('#txRawInput', rawInputs);
 
 	//Raw output
-	showRaw('#txRawOutput', rawOutputs);
+	printRaw('#txRawOutput', rawOutputs);
 
 	if (genesisLoaded && isGenesisTx(data)) {
 		showGenesisDetails(data);
@@ -604,290 +605,41 @@ function printTransaction(data, mempool) {
 	printContextVariables(data, mempool, rawInputs);
 }
 
-// JSONbig keeps amounts above 2^53 as the bare numbers they came as
-function showRaw(selector, boxes) {
-	$(selector).text(JSONbig.stringify(boxes, null, 4));
+function printRaw(selector, boxes) {
+	if (boxScriptsLoaded) {
+		showRaw(selector, boxes);
+	} else {
+		$(selector).text(JSON.stringify(boxes, null, 4));
+	}
 }
 
-function copyRaw(e, selector) {
-	copyToClipboard(e, $(selector).text());
-}
-
-// The decompiled script of each contract box, folded. The explorer API's hosts differ: some can't
-// decompile every script and give its syntax tree on one line instead. Only the readable form is
-// shown, asked for again when a section is opened without it.
-const SCRIPT_PLACEHOLDER = /placeholder\[.+?\]\((\d+)\)/g;
-// Longer constants stay placeholders in the script; the list below it has them in full
-const SCRIPT_INLINE_LENGTH = 100;
-const SCRIPT_TRIES = 6;
-const SCRIPT_RETRY_MS = 1000;
-// Decompiles every script we tried. For script text only: its index can be far behind, which a
-// script, fixed for the life of its box, doesn't mind. Don't read chain state from it.
-const SCRIPT_HOST = 'https://api-p2p.ergoplatform.com/api/v1/';
-const SCRIPT_HOST_TIMEOUT_MS = 5000;
-
-// ErgoTree -> { text, boxIds, request }, text null until a readable one is found
-const scripts = new Map();
-
-function isReadableScript(text) {
-	return typeof text == 'string' && text != '' && !/^(Right|Left)\(/.test(text);
-}
-
+// Shown with box-scripts.js, which an older cached copy of the page doesn't load
 function printScripts(data) {
-	const canAsk = networkType != 'testnet' && typeof NODE_FORMAT_GATEWAY != 'undefined';
+	if (!boxScriptsLoaded) return;
 
 	for (const [boxes, cards] of [[data.inputs, $('#txInputs > .row')], [data.outputs, $('#txOutputs > .row')]]) {
-		if (cards.length != boxes.length) continue;
-
-		boxes.forEach((box, i) => {
-			if (!box.ergoTree || isWalletBox(box) || getBoxAddress(box) == FEE_ADDRESS) return;
-
-			if (!scripts.has(box.ergoTree)) {
-				scripts.set(box.ergoTree, { text: null, boxIds: new Set(), request: null });
-			}
-
-			const script = scripts.get(box.ergoTree);
-
-			if (box.boxId) script.boxIds.add(box.boxId);
-			if (!script.text && isReadableScript(box.ergoTreeScript)) script.text = box.ergoTreeScript;
-
-			if (!script.text && !canAsk) return;
-
-			const details = $(formatBoxScript(box.ergoTree));
-
-			details.on('toggle', () => {
-				if (details[0].open) showScript(details, box.ergoTree);
-			});
-
-			details.find('.script-copy').on('click', e => copyScript(e, box.ergoTree));
-
-			cards.eq(i).find('.box-card').append(details);
-		});
-	}
-}
-
-function formatBoxScript(tree) {
-	const constants = parseTree(tree).constants;
-
-	let html = '<details class="box-script"><summary class="box-section">Script'
-		+ '<a class="script-copy" title="Copy script" aria-label="Copy script" href="Copy to clipboard!">&#128203;</a></summary>'
-		+ '<pre class="script-code"></pre>';
-
-	if (constants.length > 0) {
-		html += '<div class="box-section">Constants</div><div class="box-grid box-registers context-variables">';
-
-		constants.forEach((constant, index) => {
-			html += '<span title="' + escapeHtmlString(constant.type.toString()) + '">' + index + '</span><span>' + formatConstant(constant) + '</span>';
-		});
-
-		html += '</div>';
-	}
-
-	return html + '</details>';
-}
-
-async function showScript(details, tree) {
-	const code = details.find('.script-code');
-
-	if (!scripts.get(tree).text) code.text('Loading...');
-
-	const text = await getScript(tree);
-
-	if (text) {
-		code.html(formatScript(text, tree));
-	} else {
-		code.text('Script not available right now.');
-	}
-}
-
-// The readable script, or null. Boxes with the same script share one request, forgotten if it fails.
-function getScript(tree) {
-	const script = scripts.get(tree);
-
-	if (script.text) return Promise.resolve(script.text);
-
-	if (!script.request) {
-		script.request = requestScript([...script.boxIds]).then(text => {
-			script.text = text;
-			script.request = null;
-
-			return text;
-		});
-	}
-
-	return script.request;
-}
-
-// A box SCRIPT_HOST doesn't have is asked of the gateway and the API. Which form they give runs in
-// streaks on each, so every round asks both.
-async function requestScript(boxIds) {
-	const ask = async (url, timeoutMs = TRACK_FETCH_TIMEOUT_MS) => {
-		const box = await fetchWithTimeout(url, timeoutMs, async response => response.ok ? response.json() : null);
-
-		if (!box || !isReadableScript(box.ergoTreeScript)) throw new Error('No readable script');
-
-		return box.ergoTreeScript;
-	};
-
-	// Any box with the script will do: a few, as the newest may not be indexed there
-	try {
-		return await Promise.any(boxIds.slice(0, 3).map(boxId => ask(SCRIPT_HOST + 'boxes/' + boxId, SCRIPT_HOST_TIMEOUT_MS)));
-	} catch {}
-
-	for (let i = 0; i < SCRIPT_TRIES && boxIds.length > 0; i++) {
-		if (i > 0) await new Promise(resolve => setTimeout(resolve, SCRIPT_RETRY_MS));
-
-		// The query keeps the gateway from answering with its cached copy
-		const path = boxIds[i % boxIds.length] + '?t=' + Date.now();
-
-		try {
-			return await Promise.any([
-				ask(NODE_FORMAT_GATEWAY + 'explorer/api/v1/boxes/' + path),
-				ask(API_HOST_2 + 'boxes/' + path)
-			]);
-		} catch {}
-	}
-
-	return null;
-}
-
-// Escaped, with the constants in place of their placeholders
-function formatScript(scriptText, tree) {
-	const { constants, body } = parseTree(tree);
-	const text = fillExecuteFromVar(scriptText, body);
-	let html = '';
-	let end = 0;
-
-	for (const match of text.matchAll(SCRIPT_PLACEHOLDER)) {
-		const value = getInlineConstant(constants[match[1]]);
-
-		html += escapeHtmlString(text.substring(end, match.index));
-		html += value !== null
-			? '<span class="script-constant" title="Constant ' + match[1] + '">' + escapeHtmlString(value) + '</span>'
-			: escapeHtmlString(match[0]);
-		end = match.index + match[0].length;
-	}
-
-	return html + escapeHtmlString(text.substring(end));
-}
-
-// The decompiler prints an error where a contract runs a script from a context variable. Which
-// variable is in the tree: opcode d4, type 08 (SigmaProp), number. Left out if the counts differ.
-function fillExecuteFromVar(text, body) {
-	const error = 'DeserializeContext is currently not implemented';
-	const numbers = [];
-
-	for (let i = 0; i + 6 <= body.length; i += 2) {
-		if (body.startsWith('d408', i)) numbers.push(parseInt(body.substring(i + 4, i + 6), 16));
-	}
-
-	const parts = text.split(error);
-
-	return parts.length - 1 == numbers.length
-		? parts.map((part, i) => part + (i < numbers.length ? 'executeFromVar[SigmaProp](' + numbers[i] + ')' : '')).join('')
-		: parts.join('executeFromVar');
-}
-
-// In the summary, where preventDefault also keeps the click from folding it
-async function copyScript(e, tree) {
-	e.preventDefault();
-
-	const text = await getScript(tree);
-
-	if (text) {
-		copyToClipboard(e, $('<pre>').html(formatScript(text, tree)).text());
-	} else {
-		showCustomToast('Script not available right now.');
-	}
-}
-
-// The segregated constants at the head of an ErgoTree and, as hex, what follows them. No constants
-// and the whole tree if there's one Fleet can't read.
-function parseTree(tree) {
-	const unread = { constants: [], body: tree };
-	const constants = [];
-	let offset = 2;
-
-	try {
-		const header = parseInt(tree.substring(0, 2), 16);
-
-		const readVlq = () => {
-			let value = 0;
-			let shift = 0;
-			let byte;
-
-			do {
-				byte = parseInt(tree.substring(offset, offset + 2), 16);
-				if (isNaN(byte)) throw new Error('Unexpected end of tree');
-				value += (byte & 127) * 2 ** shift;
-				shift += 7;
-				offset += 2;
-			} while (byte & 128);
-
-			return value;
-		};
-
-		if (!(header & 16)) return unread;
-		if (header & 8) readVlq();
-
-		for (let left = readVlq(); left > 0; left--) {
-			const constant = qfleetSDK.SConstant.from(tree.substring(offset));
-			const bytes = constant.toHex();
-
-			// The only way to tell its length, so it has to read back the same
-			if (!tree.startsWith(bytes, offset)) return unread;
-
-			constants.push(constant);
-			offset += bytes.length;
+		if (cards.length == boxes.length) {
+			boxes.forEach((box, i) => appendBoxScript(box, cards.eq(i).find('.box-card')));
 		}
-	} catch {
-		return unread;
 	}
-
-	return { constants: constants, body: tree.substring(offset) };
-}
-
-// A constant as it reads in a script, or null to leave its placeholder
-function getInlineConstant(constant) {
-	if (!constant) return null;
-
-	let value = null;
-
-	if (constant.data instanceof Uint8Array) {
-		value = bytesToHex(constant.data);
-	} else if (['bigint', 'number', 'boolean'].includes(typeof constant.data)) {
-		value = constant.data.toString();
-	}
-
-	return value && value.length <= SCRIPT_INLINE_LENGTH ? value : null;
-}
-
-function formatConstant(constant) {
-	return constant.data instanceof Uint8Array && constant.data.length > CONTEXT_BYTES_SHOWN
-		? formatLongContextBytes(constant.data)
-		: formatRegisterValue(constant.data, constant.type, true);
 }
 
 // Context variables (an input's extension) are what the spender passes to the contract, such as the
 // script a contract only holds the hash of. The explorer API leaves them out, so they come from the
 // node, after the rest of the tx is shown. Mainnet only.
-const CONTEXT_BYTES_SHOWN = 100;
 let contextVariablesRun = 0;
 
 async function printContextVariables(data, mempool, rawInputs) {
 	const run = ++contextVariablesRun;
 
-	if (networkType == 'testnet' || typeof NODE_FORMAT_GATEWAY == 'undefined') return;
+	if (!boxScriptsLoaded || networkType == 'testnet') return;
 
 	try {
-		const path = mempool ? 'transactions/unconfirmed/byTransactionId/' : 'blockchain/transaction/byId/';
-		const tx = await fetchWithTimeout(NODE_FORMAT_GATEWAY + path + txId, TRACK_FETCH_TIMEOUT_MS,
-			async response => response.ok ? response.json() : null);
+		const extensions = await getContextExtensions(txId, mempool);
 
 		// Printed again meanwhile, e.g. the tx confirmed
-		if (run !== contextVariablesRun || !tx || tx.id !== txId) return;
+		if (run !== contextVariablesRun || !extensions) return;
 
-		const extensions = new Map(tx.inputs.map(input => [input.boxId, (input.spendingProof && input.spendingProof.extension) || input.extension || {}]));
 		const cards = $('#txInputs > .row');
 
 		if (cards.length != data.inputs.length) return;
@@ -919,43 +671,6 @@ async function printContextVariables(data, mempool, rawInputs) {
 	} catch (error) {
 		console.error('Context variables failed:', error);
 	}
-}
-
-function formatContextVariables(extension) {
-	let html = '<div class="box-section">Context variables</div><div class="box-grid box-registers context-variables">';
-
-	for (const key of Object.keys(extension).sort((a, b) => a - b)) {
-		const serialized = String(extension[key]);
-		let type = '';
-		let value;
-
-		try {
-			const constant = qfleetSDK.SConstant.from(serialized);
-			type = constant.type.toString();
-			value = formatConstant(constant);
-		} catch {
-			value = '<span class="box-hex">' + escapeHtmlString(serialized) + '</span>';
-		}
-
-		html += '<span title="' + escapeHtmlString(type) + '">' + escapeHtmlString(key) + '</span><span>' + value + '</span>';
-	}
-
-	return html + '</div>';
-}
-
-// Mostly scripts: the hash the contract knows them by, with the bytes folded away
-function formatLongContextBytes(bytes) {
-	const hex = bytesToHex(bytes);
-	const hash = typeof blake2b256Hex == 'function' ? blake2b256Hex(bytes) : null;
-
-	return (hash ? '<span class="text-light">Blake2b-256</span> <span class="box-hex">' + hash + '</span> ' + copyIcon(hash) : '')
-		+ '<details><summary>' + bytes.length.toLocaleString('en-US') + ' bytes</summary>'
-		+ '<div class="context-bytes box-hex">' + hex + '</div>'
-		+ '<a href="Copy to clipboard!" onclick="copyContextBytes(event, this)">Copy bytes &#128203;</a></details>';
-}
-
-function copyContextBytes(e, element) {
-	copyToClipboard(e, $(element).siblings('.context-bytes').text());
 }
 
 // The info table's confirmations cell, and its short form beside the tx's time (the cell's own
