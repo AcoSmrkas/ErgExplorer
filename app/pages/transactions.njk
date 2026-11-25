@@ -2,7 +2,7 @@
 
 {% block styles %}
 	<!-- build:css styles/transactions.css -->
-	<link rel="stylesheet" href="styles/transactions.css?v=10">
+	<link rel="stylesheet" href="styles/transactions.css?v=11">
 	<!-- endbuild -->
 {% endblock %}
 
@@ -142,7 +142,7 @@
 
 			<div class="row w-100">
 				<div class="col-12 div-cell-dark">
-					<h2>Raw inputs</h2>
+					<div class="raw-head"><h2>Raw inputs</h2><a title="Copy raw inputs" aria-label="Copy raw inputs" href="Copy to clipboard!" onclick="copyRaw(event, '#txRawInput')">&#128203;</a></div>
 					<br>
 					<pre id="txRawInput"></pre>
 				</div>
@@ -152,7 +152,7 @@
 
 			<div class="row w-100">
 				<div class="col-12 div-cell-dark">
-					<h2>Raw outputs</h2>
+					<div class="raw-head"><h2>Raw outputs</h2><a title="Copy raw outputs" aria-label="Copy raw outputs" href="Copy to clipboard!" onclick="copyRaw(event, '#txRawOutput')">&#128203;</a></div>
 					<br>
 					<pre id="txRawOutput"></pre>
 				</div>
@@ -172,5 +172,6 @@
 		<script src="./scripts/common/prices.js?v=44"></script>
 		<script src="./scripts/common/genesis.js?v=1"></script>
 		<script src="./scripts/common/node-format.js?v=1"></script>
-		<script src="./scripts/transactions.js?v=54"></script>
+		<script src="./scripts/common/blake2b.js?v=1"></script>
+		<script src="./scripts/transactions.js?v=55"></script>
 {% endblock %}
