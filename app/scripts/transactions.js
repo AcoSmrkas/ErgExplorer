@@ -655,7 +655,7 @@ function formatBoxScript(box) {
 	script += escapeHtmlString(text.substring(end));
 
 	let html = '<details class="box-script"><summary class="box-section">Script'
-		+ '<a class="script-copy" href="Copy to clipboard!" onclick="copyScript(event, this)">Copy &#128203;</a></summary>'
+		+ '<a class="script-copy" title="Copy script" aria-label="Copy script" href="Copy to clipboard!" onclick="copyScript(event, this)">&#128203;</a></summary>'
 		+ '<pre class="script-code' + (text.includes('\n') ? '' : ' script-wrap') + '">' + script + '</pre>';
 
 	if (constants.length > 0) {
