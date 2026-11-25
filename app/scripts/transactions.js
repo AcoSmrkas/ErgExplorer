@@ -594,6 +594,92 @@ function printTransaction(data, mempool) {
     $('#txLoading').hide();
    
 	$('#infoBottom').html($('#infoTop').html());
+
+	printContextVariables(data, mempool);
+}
+
+// Context variables (an input's extension) are what the spender passes to the contract, such as the
+// script a contract only holds the hash of. The explorer API leaves them out, so they come from the
+// node, after the rest of the tx is shown. Mainnet only.
+const CONTEXT_BYTES_SHOWN = 100;
+let contextVariablesRun = 0;
+
+async function printContextVariables(data, mempool) {
+	const run = ++contextVariablesRun;
+
+	if (networkType == 'testnet' || typeof NODE_FORMAT_GATEWAY == 'undefined') return;
+
+	try {
+		const path = mempool ? 'transactions/unconfirmed/byTransactionId/' : 'blockchain/transaction/byId/';
+		const tx = await fetchWithTimeout(NODE_FORMAT_GATEWAY + path + txId, TRACK_FETCH_TIMEOUT_MS,
+			async response => response.ok ? response.json() : null);
+
+		// Printed again meanwhile, e.g. the tx confirmed
+		if (run !== contextVariablesRun || !tx || tx.id !== txId) return;
+
+		const extensions = new Map(tx.inputs.map(input => [input.boxId, (input.spendingProof && input.spendingProof.extension) || input.extension || {}]));
+		const cards = $('#txInputs > .row');
+
+		if (cards.length != data.inputs.length) return;
+
+		let found = false;
+
+		data.inputs.forEach((input, i) => {
+			const extension = extensions.get(input.boxId || input.id);
+
+			if (!extension || Object.keys(extension).length == 0) return;
+
+			found = true;
+			input.extension = extension;
+			cards.eq(i).find('.box-card').append(formatContextVariables(extension));
+		});
+
+		if (found) {
+			$('#txRawInput').text(JSON.stringify(data.inputs, null, 4));
+			getAddressesInfo();
+		}
+	} catch (error) {
+		console.error('Context variables failed:', error);
+	}
+}
+
+function formatContextVariables(extension) {
+	let html = '<div class="box-section">Context variables</div><div class="box-grid box-registers context-variables">';
+
+	for (const key of Object.keys(extension).sort((a, b) => a - b)) {
+		const serialized = String(extension[key]);
+		let type = '';
+		let value;
+
+		try {
+			const constant = qfleetSDK.SConstant.from(serialized);
+			type = constant.type.toString();
+			value = constant.data instanceof Uint8Array && constant.data.length > CONTEXT_BYTES_SHOWN
+				? formatLongContextBytes(constant.data)
+				: formatRegisterValue(constant.data, constant.type, true);
+		} catch {
+			value = '<span class="box-hex">' + escapeHtmlString(serialized) + '</span>';
+		}
+
+		html += '<span title="' + escapeHtmlString(type) + '">' + escapeHtmlString(key) + '</span><span>' + value + '</span>';
+	}
+
+	return html + '</div>';
+}
+
+// Mostly scripts: the hash the contract knows them by, with the bytes folded away
+function formatLongContextBytes(bytes) {
+	const hex = bytesToHex(bytes);
+	const hash = typeof blake2b256Hex == 'function' ? blake2b256Hex(bytes) : null;
+
+	return (hash ? '<span class="text-light">Blake2b-256</span> <span class="box-hex">' + hash + '</span> ' + copyIcon(hash) : '')
+		+ '<details><summary>' + bytes.length.toLocaleString('en-US') + ' bytes</summary>'
+		+ '<div class="context-bytes box-hex">' + hex + '</div>'
+		+ '<a href="Copy to clipboard!" onclick="copyContextBytes(event, this)">Copy bytes &#128203;</a></details>';
+}
+
+function copyContextBytes(e, element) {
+	copyToClipboard(e, $(element).siblings('.context-bytes').text());
 }
 
 // The info table's confirmations cell, and its short form beside the tx's time (the cell's own
