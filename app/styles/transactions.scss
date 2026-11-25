@@ -1,3 +1,5 @@
+@use 'box-scripts';
+
 #txInputs > div:nth-child(odd), #txOutputs > div:nth-child(odd),
 #txSent > div:nth-child(odd), #txReceived > div:nth-child(odd) {
 	background-color: var(--striped-1);
@@ -95,58 +97,6 @@
 	margin: 0;
 	padding: 0.75rem 1rem;
 	border-top: 1px solid var(--borders);
-}
-
-.context-variables {
-	overflow-wrap: anywhere;
-
-	summary {
-		cursor: pointer;
-		color: var(--text-light);
-	}
-}
-
-.box-script > summary {
-	cursor: pointer;
-}
-
-.script-code {
-	max-height: 360px;
-	overflow: auto;
-	margin: 0;
-	padding: 8px;
-	font-size: 0.75rem;
-	white-space: pre;
-	background: var(--striped-1);
-}
-
-.script-constant {
-	color: var(--main-color);
-}
-
-.script-copy {
-	float: right;
-	font-size: 0.8rem;
-	font-weight: 400;
-	letter-spacing: normal;
-	text-transform: none;
-}
-
-.context-bytes {
-	max-height: 152px;
-	overflow-y: auto;
-	padding: 8px;
-	background: var(--striped-1);
-}
-
-.raw-head {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-
-	h2 {
-		margin: 0;
-	}
 }
 
 #txRawInput, #txRawOutput {

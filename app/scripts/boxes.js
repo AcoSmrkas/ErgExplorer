@@ -1,5 +1,7 @@
 var totalCoinsTransferred = 0;
 var boxId = '';
+// Missing when a browser pairs this script with an older cached copy of the page
+const boxScriptsLoaded = typeof appendBoxScript == 'function';
 
 $(function() {
 	boxId = getWalletAddressFromUrl();
@@ -120,16 +122,26 @@ function printBox(data, mempool) {
 	$('#boxHeader').html('<p><a href="Copy to clipboard!" onclick="copyTransactionAddress(event)">' + data.boxId + ' &#128203;</a></p>');
 	$('#boxHeaderMobile').html('<p><a href="Copy to clipboard!" onclick="copyTransactionAddress(event)">' + data.boxId.substr(0, 8) + '...' + data.boxId.substr(data.boxId.length - 4) + ' &#128203;</a></p>');
 
-	const rawData = JSON.stringify(data, null, 4);
+	// A copy from before formatBox adds fields of its own
+	const box = { ...data };
 
 	delete data.boxId;
 
 	let html = $('#boxHolder').html() + formatBox(data, true);
 
-	html += `<div class="row div-cell border-flat p-2"><p style="margin-bottom:5px;"><strong class="text-white">Raw:</strong></p><div style="word-wrap:break-word;background: var(--striped-1);" class="div-cell-dark"><pre style="overflow-wrap: anywhere;
-  white-space: break-spaces; margin: 0;">${rawData}</pre></div></div>`;
+	html += '<div class="row div-cell border-flat p-2"><div class="raw-head mb-1"><strong class="text-white">Raw:</strong>'
+		+ (boxScriptsLoaded ? '<a title="Copy raw box" aria-label="Copy raw box" href="Copy to clipboard!" onclick="copyRaw(event, \'#boxRaw\')">&#128203;</a>' : '')
+		+ '</div><div style="word-wrap:break-word;background: var(--striped-1);" class="div-cell-dark"><pre id="boxRaw"></pre></div></div>';
 
 	$('#boxHolder').html(html);
+
+	if (boxScriptsLoaded) {
+		showRaw('#boxRaw', box);
+		appendBoxScript(box, $('#boxHolder .box-card'));
+		printContextVariables(box);
+	} else {
+		$('#boxRaw').text(JSON.stringify(box, null, 4));
+	}
 
 	$('#boxDataHolder').show();
 
@@ -138,6 +150,23 @@ function printBox(data, mempool) {
     $('#txLoading').hide();
    
 	$('#infoBottom').html($('#infoTop').html());
+}
+
+// What the tx that spent the box passed to its contract, above its ErgoTree. Mainnet only.
+async function printContextVariables(box) {
+	if (!box.spentTransactionId || networkType == 'testnet') return;
+
+	try {
+		const extensions = await getContextExtensions(box.spentTransactionId, false);
+		const extension = extensions && extensions.get(box.boxId);
+
+		if (!extension || Object.keys(extension).length == 0) return;
+
+		$('#boxHolder .box-tree').prev().before(formatContextVariables(extension));
+		getAddressesInfo();
+	} catch (error) {
+		console.error('Context variables failed:', error);
+	}
 }
 
 function copyTransactionAddress(e) {
