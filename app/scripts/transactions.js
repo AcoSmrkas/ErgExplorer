@@ -425,6 +425,10 @@ function printTransaction(data, mempool) {
 		data = withGenesisInputs(data);
 	}
 
+	// Copies from before the cards below add fields of their own to the boxes
+	const rawInputs = data.inputs.map(box => ({ ...box }));
+	const rawOutputs = data.outputs.map(box => ({ ...box }));
+
 	if (mempool) {
 		showNotificationPermissionToast();
 	}
@@ -578,10 +582,10 @@ function printTransaction(data, mempool) {
 	$('#txScripts').html('Scripts');
 
 	//Raw input
-	$('#txRawInput').html(JSON.stringify(data.inputs, null, 4));
+	showRaw('#txRawInput', rawInputs);
 
 	//Raw output
-	$('#txRawOutput').html(JSON.stringify(data.outputs, null, 4));
+	showRaw('#txRawOutput', rawOutputs);
 
 	if (genesisLoaded && isGenesisTx(data)) {
 		showGenesisDetails(data);
@@ -595,7 +599,145 @@ function printTransaction(data, mempool) {
    
 	$('#infoBottom').html($('#infoTop').html());
 
-	printContextVariables(data, mempool);
+	printScripts(data.inputs, $('#txInputs > .row'));
+	printScripts(data.outputs, $('#txOutputs > .row'));
+
+	printContextVariables(data, mempool, rawInputs);
+}
+
+// JSONbig keeps amounts above 2^53 as the bare numbers they came as
+function showRaw(selector, boxes) {
+	$(selector).text(JSONbig.stringify(boxes, null, 4));
+}
+
+function copyRaw(e, selector) {
+	copyToClipboard(e, $(selector).text());
+}
+
+// The explorer API's decompiled script of each contract box, folded. Other sources don't have it.
+function printScripts(boxes, cards) {
+	if (cards.length != boxes.length) return;
+
+	boxes.forEach((box, i) => {
+		if (typeof box.ergoTreeScript != 'string' || !box.ergoTreeScript || isWalletBox(box) || getBoxAddress(box) == FEE_ADDRESS) return;
+
+		try {
+			cards.eq(i).find('.box-card').append(formatBoxScript(box));
+		} catch (error) {
+			console.error('Script failed:', error);
+		}
+	});
+}
+
+const SCRIPT_PLACEHOLDER = /placeholder\[.+?\]\((\d+)\)/g;
+// Longer constants stay placeholders in the script; the list below it has them in full
+const SCRIPT_INLINE_LENGTH = 100;
+
+// The API's hosts differ: some can't decompile every script and give its syntax tree on one line,
+// and each writes the constants its own way, so those are read from the ErgoTree.
+function formatBoxScript(box) {
+	const constants = parseTreeConstants(box.ergoTree);
+	const text = box.ergoTreeScript;
+	let script = '';
+	let end = 0;
+
+	for (const match of text.matchAll(SCRIPT_PLACEHOLDER)) {
+		const value = getInlineConstant(constants[match[1]]);
+
+		script += escapeHtmlString(text.substring(end, match.index));
+		script += value !== null
+			? '<span class="script-constant" title="Constant ' + match[1] + '">' + escapeHtmlString(value) + '</span>'
+			: escapeHtmlString(match[0]);
+		end = match.index + match[0].length;
+	}
+
+	script += escapeHtmlString(text.substring(end));
+
+	let html = '<details class="box-script"><summary class="box-section">Script'
+		+ '<a class="script-copy" href="Copy to clipboard!" onclick="copyScript(event, this)">Copy &#128203;</a></summary>'
+		+ '<pre class="script-code' + (text.includes('\n') ? '' : ' script-wrap') + '">' + script + '</pre>';
+
+	if (constants.length > 0) {
+		html += '<div class="box-section">Constants</div><div class="box-grid box-registers context-variables">';
+
+		constants.forEach((constant, index) => {
+			html += '<span title="' + escapeHtmlString(constant.type.toString()) + '">' + index + '</span><span>' + formatConstant(constant) + '</span>';
+		});
+
+		html += '</div>';
+	}
+
+	return html + '</details>';
+}
+
+// In the summary, where preventDefault (in copyToClipboard) also keeps the click from folding it
+function copyScript(e, element) {
+	copyToClipboard(e, $(element).closest('.box-script').find('.script-code').text());
+}
+
+// The segregated constants at the head of an ErgoTree. None if there's one Fleet can't read.
+function parseTreeConstants(tree) {
+	const constants = [];
+
+	try {
+		const header = parseInt(tree.substring(0, 2), 16);
+		let offset = 2;
+
+		const readVlq = () => {
+			let value = 0;
+			let shift = 0;
+			let byte;
+
+			do {
+				byte = parseInt(tree.substring(offset, offset + 2), 16);
+				if (isNaN(byte)) throw new Error('Unexpected end of tree');
+				value += (byte & 127) * 2 ** shift;
+				shift += 7;
+				offset += 2;
+			} while (byte & 128);
+
+			return value;
+		};
+
+		if (!(header & 16)) return [];
+		if (header & 8) readVlq();
+
+		for (let left = readVlq(); left > 0; left--) {
+			const constant = qfleetSDK.SConstant.from(tree.substring(offset));
+			const bytes = constant.toHex();
+
+			// The only way to tell its length, so it has to read back the same
+			if (!tree.startsWith(bytes, offset)) return [];
+
+			constants.push(constant);
+			offset += bytes.length;
+		}
+	} catch {
+		return [];
+	}
+
+	return constants;
+}
+
+// A constant as it reads in a script, or null to leave its placeholder
+function getInlineConstant(constant) {
+	if (!constant) return null;
+
+	let value = null;
+
+	if (constant.data instanceof Uint8Array) {
+		value = bytesToHex(constant.data);
+	} else if (['bigint', 'number', 'boolean'].includes(typeof constant.data)) {
+		value = constant.data.toString();
+	}
+
+	return value && value.length <= SCRIPT_INLINE_LENGTH ? value : null;
+}
+
+function formatConstant(constant) {
+	return constant.data instanceof Uint8Array && constant.data.length > CONTEXT_BYTES_SHOWN
+		? formatLongContextBytes(constant.data)
+		: formatRegisterValue(constant.data, constant.type, true);
 }
 
 // Context variables (an input's extension) are what the spender passes to the contract, such as the
@@ -604,7 +746,7 @@ function printTransaction(data, mempool) {
 const CONTEXT_BYTES_SHOWN = 100;
 let contextVariablesRun = 0;
 
-async function printContextVariables(data, mempool) {
+async function printContextVariables(data, mempool, rawInputs) {
 	const run = ++contextVariablesRun;
 
 	if (networkType == 'testnet' || typeof NODE_FORMAT_GATEWAY == 'undefined') return;
@@ -630,12 +772,20 @@ async function printContextVariables(data, mempool) {
 			if (!extension || Object.keys(extension).length == 0) return;
 
 			found = true;
-			input.extension = extension;
-			cards.eq(i).find('.box-card').append(formatContextVariables(extension));
+			rawInputs[i].extension = extension;
+
+			const card = cards.eq(i).find('.box-card');
+			const script = card.children('.box-script');
+
+			if (script.length > 0) {
+				script.before(formatContextVariables(extension));
+			} else {
+				card.append(formatContextVariables(extension));
+			}
 		});
 
 		if (found) {
-			$('#txRawInput').text(JSON.stringify(data.inputs, null, 4));
+			showRaw('#txRawInput', rawInputs);
 			getAddressesInfo();
 		}
 	} catch (error) {
@@ -654,9 +804,7 @@ function formatContextVariables(extension) {
 		try {
 			const constant = qfleetSDK.SConstant.from(serialized);
 			type = constant.type.toString();
-			value = constant.data instanceof Uint8Array && constant.data.length > CONTEXT_BYTES_SHOWN
-				? formatLongContextBytes(constant.data)
-				: formatRegisterValue(constant.data, constant.type, true);
+			value = formatConstant(constant);
 		} catch {
 			value = '<span class="box-hex">' + escapeHtmlString(serialized) + '</span>';
 		}
