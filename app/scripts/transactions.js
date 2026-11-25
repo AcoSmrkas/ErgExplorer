@@ -599,8 +599,7 @@ function printTransaction(data, mempool) {
    
 	$('#infoBottom').html($('#infoTop').html());
 
-	printScripts(data.inputs, $('#txInputs > .row'));
-	printScripts(data.outputs, $('#txOutputs > .row'));
+	printScripts(data);
 
 	printContextVariables(data, mempool, rawInputs);
 }
@@ -614,49 +613,61 @@ function copyRaw(e, selector) {
 	copyToClipboard(e, $(selector).text());
 }
 
-// The explorer API's decompiled script of each contract box, folded. Other sources don't have it.
-function printScripts(boxes, cards) {
-	if (cards.length != boxes.length) return;
-
-	boxes.forEach((box, i) => {
-		if (typeof box.ergoTreeScript != 'string' || !box.ergoTreeScript || isWalletBox(box) || getBoxAddress(box) == FEE_ADDRESS) return;
-
-		try {
-			cards.eq(i).find('.box-card').append(formatBoxScript(box));
-		} catch (error) {
-			console.error('Script failed:', error);
-		}
-	});
-}
-
+// The decompiled script of each contract box, folded. The explorer API's hosts differ: some can't
+// decompile every script and give its syntax tree on one line instead. Only the readable form is
+// shown, asked for again when a section is opened without it.
 const SCRIPT_PLACEHOLDER = /placeholder\[.+?\]\((\d+)\)/g;
 // Longer constants stay placeholders in the script; the list below it has them in full
 const SCRIPT_INLINE_LENGTH = 100;
+const SCRIPT_TRIES = 10;
+const SCRIPT_RETRY_MS = 1000;
 
-// The API's hosts differ: some can't decompile every script and give its syntax tree on one line,
-// and each writes the constants its own way, so those are read from the ErgoTree.
-function formatBoxScript(box) {
-	const constants = parseTreeConstants(box.ergoTree);
-	// The decompiler prints an error where a contract runs a script from a context variable, without its number
-	const text = box.ergoTreeScript.replaceAll('DeserializeContext is currently not implemented', 'executeFromVar(…)');
-	let script = '';
-	let end = 0;
+// ErgoTree -> { text, boxIds, request }, text null until a readable one is found
+const scripts = new Map();
 
-	for (const match of text.matchAll(SCRIPT_PLACEHOLDER)) {
-		const value = getInlineConstant(constants[match[1]]);
+function isReadableScript(text) {
+	return typeof text == 'string' && text != '' && !/^(Right|Left)\(/.test(text);
+}
 
-		script += escapeHtmlString(text.substring(end, match.index));
-		script += value !== null
-			? '<span class="script-constant" title="Constant ' + match[1] + '">' + escapeHtmlString(value) + '</span>'
-			: escapeHtmlString(match[0]);
-		end = match.index + match[0].length;
+function printScripts(data) {
+	const canAsk = networkType != 'testnet' && typeof NODE_FORMAT_GATEWAY != 'undefined';
+
+	for (const [boxes, cards] of [[data.inputs, $('#txInputs > .row')], [data.outputs, $('#txOutputs > .row')]]) {
+		if (cards.length != boxes.length) continue;
+
+		boxes.forEach((box, i) => {
+			if (!box.ergoTree || isWalletBox(box) || getBoxAddress(box) == FEE_ADDRESS) return;
+
+			if (!scripts.has(box.ergoTree)) {
+				scripts.set(box.ergoTree, { text: null, boxIds: new Set(), request: null });
+			}
+
+			const script = scripts.get(box.ergoTree);
+
+			if (box.boxId) script.boxIds.add(box.boxId);
+			if (!script.text && isReadableScript(box.ergoTreeScript)) script.text = box.ergoTreeScript;
+
+			if (!script.text && !canAsk) return;
+
+			const details = $(formatBoxScript(box.ergoTree));
+
+			details.on('toggle', () => {
+				if (details[0].open) showScript(details, box.ergoTree);
+			});
+
+			details.find('.script-copy').on('click', e => copyScript(e, box.ergoTree));
+
+			cards.eq(i).find('.box-card').append(details);
+		});
 	}
+}
 
-	script += escapeHtmlString(text.substring(end));
+function formatBoxScript(tree) {
+	const constants = parseTree(tree).constants;
 
 	let html = '<details class="box-script"><summary class="box-section">Script'
-		+ '<a class="script-copy" title="Copy script" aria-label="Copy script" href="Copy to clipboard!" onclick="copyScript(event, this)">&#128203;</a></summary>'
-		+ '<pre class="script-code' + (text.includes('\n') ? '' : ' script-wrap') + '">' + script + '</pre>';
+		+ '<a class="script-copy" title="Copy script" aria-label="Copy script" href="Copy to clipboard!">&#128203;</a></summary>'
+		+ '<pre class="script-code"></pre>';
 
 	if (constants.length > 0) {
 		html += '<div class="box-section">Constants</div><div class="box-grid box-registers context-variables">';
@@ -671,18 +682,124 @@ function formatBoxScript(box) {
 	return html + '</details>';
 }
 
-// In the summary, where preventDefault (in copyToClipboard) also keeps the click from folding it
-function copyScript(e, element) {
-	copyToClipboard(e, $(element).closest('.box-script').find('.script-code').text());
+async function showScript(details, tree) {
+	const code = details.find('.script-code');
+
+	if (!scripts.get(tree).text) code.text('Loading...');
+
+	const text = await getScript(tree);
+
+	if (text) {
+		code.html(formatScript(text, tree));
+	} else {
+		code.text('Script not available right now.');
+	}
 }
 
-// The segregated constants at the head of an ErgoTree. None if there's one Fleet can't read.
-function parseTreeConstants(tree) {
+// The readable script, or null. Boxes with the same script share one request, forgotten if it fails.
+function getScript(tree) {
+	const script = scripts.get(tree);
+
+	if (script.text) return Promise.resolve(script.text);
+
+	if (!script.request) {
+		script.request = requestScript([...script.boxIds]).then(text => {
+			script.text = text;
+			script.request = null;
+
+			return text;
+		});
+	}
+
+	return script.request;
+}
+
+// Which form comes back runs in streaks on each host, so every round asks both
+async function requestScript(boxIds) {
+	const ask = async url => {
+		const box = await fetchWithTimeout(url, TRACK_FETCH_TIMEOUT_MS, async response => response.ok ? response.json() : null);
+
+		if (!box || !isReadableScript(box.ergoTreeScript)) throw new Error('No readable script');
+
+		return box.ergoTreeScript;
+	};
+
+	for (let i = 0; i < SCRIPT_TRIES && boxIds.length > 0; i++) {
+		if (i > 0) await new Promise(resolve => setTimeout(resolve, SCRIPT_RETRY_MS));
+
+		// The query keeps the gateway from answering with its cached copy
+		const path = boxIds[i % boxIds.length] + '?t=' + Date.now();
+
+		try {
+			return await Promise.any([
+				ask(NODE_FORMAT_GATEWAY + 'explorer/api/v1/boxes/' + path),
+				ask(API_HOST_2 + 'boxes/' + path)
+			]);
+		} catch {}
+	}
+
+	return null;
+}
+
+// Escaped, with the constants in place of their placeholders
+function formatScript(scriptText, tree) {
+	const { constants, body } = parseTree(tree);
+	const text = fillExecuteFromVar(scriptText, body);
+	let html = '';
+	let end = 0;
+
+	for (const match of text.matchAll(SCRIPT_PLACEHOLDER)) {
+		const value = getInlineConstant(constants[match[1]]);
+
+		html += escapeHtmlString(text.substring(end, match.index));
+		html += value !== null
+			? '<span class="script-constant" title="Constant ' + match[1] + '">' + escapeHtmlString(value) + '</span>'
+			: escapeHtmlString(match[0]);
+		end = match.index + match[0].length;
+	}
+
+	return html + escapeHtmlString(text.substring(end));
+}
+
+// The decompiler prints an error where a contract runs a script from a context variable. Which
+// variable is in the tree: opcode d4, type 08 (SigmaProp), number. Left out if the counts differ.
+function fillExecuteFromVar(text, body) {
+	const error = 'DeserializeContext is currently not implemented';
+	const numbers = [];
+
+	for (let i = 0; i + 6 <= body.length; i += 2) {
+		if (body.startsWith('d408', i)) numbers.push(parseInt(body.substring(i + 4, i + 6), 16));
+	}
+
+	const parts = text.split(error);
+
+	return parts.length - 1 == numbers.length
+		? parts.map((part, i) => part + (i < numbers.length ? 'executeFromVar[SigmaProp](' + numbers[i] + ')' : '')).join('')
+		: parts.join('executeFromVar');
+}
+
+// In the summary, where preventDefault also keeps the click from folding it
+async function copyScript(e, tree) {
+	e.preventDefault();
+
+	const text = await getScript(tree);
+
+	if (text) {
+		copyToClipboard(e, $('<pre>').html(formatScript(text, tree)).text());
+	} else {
+		showCustomToast('Script not available right now.');
+	}
+}
+
+// The segregated constants at the head of an ErgoTree and, as hex, what follows them. No constants
+// and the whole tree if there's one Fleet can't read.
+function parseTree(tree) {
+	const unread = { constants: [], body: tree };
 	const constants = [];
+	let offset = 2;
 
 	try {
 		const header = parseInt(tree.substring(0, 2), 16);
-		let offset = 2;
 
 		const readVlq = () => {
 			let value = 0;
@@ -700,7 +817,7 @@ function parseTreeConstants(tree) {
 			return value;
 		};
 
-		if (!(header & 16)) return [];
+		if (!(header & 16)) return unread;
 		if (header & 8) readVlq();
 
 		for (let left = readVlq(); left > 0; left--) {
@@ -708,16 +825,16 @@ function parseTreeConstants(tree) {
 			const bytes = constant.toHex();
 
 			// The only way to tell its length, so it has to read back the same
-			if (!tree.startsWith(bytes, offset)) return [];
+			if (!tree.startsWith(bytes, offset)) return unread;
 
 			constants.push(constant);
 			offset += bytes.length;
 		}
 	} catch {
-		return [];
+		return unread;
 	}
 
-	return constants;
+	return { constants: constants, body: tree.substring(offset) };
 }
 
 // A constant as it reads in a script, or null to leave its placeholder
