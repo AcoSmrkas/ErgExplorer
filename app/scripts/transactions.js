@@ -637,7 +637,8 @@ const SCRIPT_INLINE_LENGTH = 100;
 // and each writes the constants its own way, so those are read from the ErgoTree.
 function formatBoxScript(box) {
 	const constants = parseTreeConstants(box.ergoTree);
-	const text = box.ergoTreeScript;
+	// The decompiler prints an error where a contract runs a script from a context variable, without its number
+	const text = box.ergoTreeScript.replaceAll('DeserializeContext is currently not implemented', 'executeFromVar(…)');
 	let script = '';
 	let end = 0;
 
