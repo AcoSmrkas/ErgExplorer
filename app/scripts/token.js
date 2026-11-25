@@ -494,9 +494,6 @@ function onGetNftInfoDone(nftInfo, message) {
 
 	//Icon
 	let tImg = getIcon(tokenData.id);
-	if (tImg == undefined) {
-		tImg = 'https://raw.githubusercontent.com/spectrum-finance/token-logos/master/logos/ergo/' + tokenData.id + '.svg';
-	}
 
 	if (tokenData.name == 'Crooks Finance Stake Key') {
 		tImg = 'https://crooks-fi.com/images/logo.png';
@@ -506,7 +503,9 @@ function onGetNftInfoDone(nftInfo, message) {
 		tImg = tokenData.iconurl;
 	}
 
-	$('#tokenIconImg').attr('src', tImg);
+	if (tImg) {
+		$('#tokenIconImg').attr('src', tImg);
+	}
 
 	$('#tokenDataHolder').show();
 
