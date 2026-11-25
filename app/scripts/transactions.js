@@ -619,8 +619,12 @@ function copyRaw(e, selector) {
 const SCRIPT_PLACEHOLDER = /placeholder\[.+?\]\((\d+)\)/g;
 // Longer constants stay placeholders in the script; the list below it has them in full
 const SCRIPT_INLINE_LENGTH = 100;
-const SCRIPT_TRIES = 10;
+const SCRIPT_TRIES = 6;
 const SCRIPT_RETRY_MS = 1000;
+// Decompiles every script we tried. For script text only: its index can be far behind, which a
+// script, fixed for the life of its box, doesn't mind. Don't read chain state from it.
+const SCRIPT_HOST = 'https://api-p2p.ergoplatform.com/api/v1/';
+const SCRIPT_HOST_TIMEOUT_MS = 5000;
 
 // ErgoTree -> { text, boxIds, request }, text null until a readable one is found
 const scripts = new Map();
@@ -714,15 +718,21 @@ function getScript(tree) {
 	return script.request;
 }
 
-// Which form comes back runs in streaks on each host, so every round asks both
+// A box SCRIPT_HOST doesn't have is asked of the gateway and the API. Which form they give runs in
+// streaks on each, so every round asks both.
 async function requestScript(boxIds) {
-	const ask = async url => {
-		const box = await fetchWithTimeout(url, TRACK_FETCH_TIMEOUT_MS, async response => response.ok ? response.json() : null);
+	const ask = async (url, timeoutMs = TRACK_FETCH_TIMEOUT_MS) => {
+		const box = await fetchWithTimeout(url, timeoutMs, async response => response.ok ? response.json() : null);
 
 		if (!box || !isReadableScript(box.ergoTreeScript)) throw new Error('No readable script');
 
 		return box.ergoTreeScript;
 	};
+
+	// Any box with the script will do: a few, as the newest may not be indexed there
+	try {
+		return await Promise.any(boxIds.slice(0, 3).map(boxId => ask(SCRIPT_HOST + 'boxes/' + boxId, SCRIPT_HOST_TIMEOUT_MS)));
+	} catch {}
 
 	for (let i = 0; i < SCRIPT_TRIES && boxIds.length > 0; i++) {
 		if (i > 0) await new Promise(resolve => setTimeout(resolve, SCRIPT_RETRY_MS));
